@@ -51,11 +51,29 @@ exit /b 0
 
 :undo_xml_changes
 rem Restore the original XML file from the backup file
+echo Restoring XML file from backup...
 copy "%XML_FILE%.bak" "%XML_FILE%" /Y > nul
+
+rem Check if the copy operation was successful
+if %errorlevel% neq 0 (
+    echo Failed to restore XML file from backup.
+)
+
+rem Revert "Normal" to "ReadOnly" in the XML file
+echo Reverting changes in XML file...
+powershell -Command "(Get-Content '%XML_FILE%') -replace 'type=\"Normal\"', 'type=\"ReadOnly\"' | Set-Content '%XML_FILE%'"
+
+rem Check if the PowerShell command executed successfully
+if %errorlevel% neq 0 (
+    echo Failed to revert changes in XML file.
+    pause
+    exit /b 1
+)
 
 echo XML changes undone successfully.
 pause
 exit /b 0
+
 
 :undo_conf_changes
 rem Restore the original bluestacks.conf file from the backup file
