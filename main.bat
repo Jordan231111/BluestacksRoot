@@ -6,7 +6,7 @@ set TEMP_FILE=%CONF_FILE%.tmp
 
 rem Display user options
 echo 1. Apply changes
-echo 2. Undo XML changes
+echo 2. Undo Writable Disk
 echo 3. Undo Root
 set /p OPTION=Enter option number: 
 
