@@ -20,6 +20,9 @@ if "%OPTION%" == "1" (
 )
 
 :apply_changes
+rem Create a backup of the original XML file
+copy "%XML_FILE%" "%XML_FILE%.bak" /Y > nul
+
 rem Make changes to the temporary file using PowerShell
 copy "%XML_FILE%" "%TEMP_FILE%" /Y > nul
 powershell -Command "(Get-Content '%TEMP_FILE%') -replace 'type=\"ReadOnly\"', 'type=\"Normal\"' | Set-Content '%TEMP_FILE%'"
@@ -28,13 +31,5 @@ rem Replace the original XML file with the modified temporary file
 move /Y "%TEMP_FILE%" "%XML_FILE%" > nul
 
 echo Changes applied successfully.
-pause
-exit /b 0
-
-:undo_changes
-rem Restore the original XML file from the backup file
-copy "%XML_FILE%.bak" "%XML_FILE%" /Y > nul
-
-echo Changes undone successfully.
 pause
 exit /b 0
