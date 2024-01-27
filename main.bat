@@ -61,6 +61,14 @@ exit /b 0
 rem Restore the original bluestacks.conf file from the backup file
 copy "%CONF_FILE%.bak" "%CONF_FILE%" /Y > nul
 
-echo bluestacks.conf changes undone successfully.
+rem Make changes to the temporary bluestacks.conf file using PowerShell
+copy "%CONF_FILE%" "%TEMP_FILE%" /Y > nul
+powershell -Command "(Get-Content '%TEMP_FILE%') -replace 'bst.instance.Rvc64.enable_root_access=\"1\"', 'bst.instance.Rvc64.enable_root_access=\"0\"' | Set-Content '%TEMP_FILE%'"
+powershell -Command "(Get-Content '%TEMP_FILE%') -replace 'bst.feature.rooting=\"1\"', 'bst.feature.rooting=\"0\"' | Set-Content '%TEMP_FILE%'"
+
+rem Replace the original bluestacks.conf file with the modified temporary bluestacks.conf file
+move /Y "%TEMP_FILE%" "%CONF_FILE%" > nul
+
+echo bluestacks.conf changes undone successfully and both 1's set to 0.
 pause
 exit /b 0
