@@ -3,13 +3,19 @@
 set XML_FILE=C:\ProgramData\BlueStacks_nxt\Engine\Rvc64\Rvc64.bstk
 set TEMP_FILE=%XML_FILE%.tmp
 
-rem Check if the action is specified
-if "%1" == "apply" (
+rem Display user options
+echo 1. Apply changes
+echo 2. Undo changes
+set /p OPTION=Enter option number: 
+
+rem Process user choice
+if "%OPTION%" == "1" (
     goto apply_changes
-) else if "%1" == "undo" (
+) else if "%OPTION%" == "2" (
     goto undo_changes
 ) else (
-    echo Usage: %0 [apply | undo]
+    echo Invalid option.
+    pause
     exit /b 1
 )
 
@@ -22,6 +28,7 @@ rem Replace the original XML file with the modified temporary file
 move /Y "%TEMP_FILE%" "%XML_FILE%" > nul
 
 echo Changes applied successfully.
+pause
 exit /b 0
 
 :undo_changes
@@ -29,4 +36,5 @@ rem Restore the original XML file from the backup file
 copy "%XML_FILE%.bak" "%XML_FILE%" /Y > nul
 
 echo Changes undone successfully.
+pause
 exit /b 0
