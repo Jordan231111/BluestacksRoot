@@ -5,11 +5,12 @@ set "CONF_FILE=%ProgramData%\BlueStacks_nxt\bluestacks.conf"
 set "TEMP_FILE=%CONF_FILE%.tmp"
 
 rem Define search and replace strings
-set "search_str1=location=\"fastboot.vdi\" format=\"VDI\" type=\"ReadOnly\"/>"
-set "replace_str1=location=\"fastboot.vdi\" format=\"VDI\" type=\"Normal\"/>"
+set "search_str1=format=\"VDI\" type=\"ReadOnly\""
+set "replace_str1=format=\"VDI\" type=\"Normal\""
 
-set "search_str2=location=\"Root.vhd\" format=\"VHD\" type=\"ReadOnly\"/>"
-set "replace_str2=location=\"Root.vhd\" format=\"VHD\" type=\"Normal\"/>"
+set "search_str2=format=\"VHD\" type=\"ReadOnly\""
+set "replace_str2=format=\"VHD\" type=\"Normal\""
+
 
 rem Display user options
 echo 1. Apply changes
