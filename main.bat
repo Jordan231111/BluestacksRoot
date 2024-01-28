@@ -1,8 +1,15 @@
 @echo off
 
-set XML_FILE=%ProgramData%\BlueStacks_nxt\Engine\Rvc64\Rvc64.bstk
-set CONF_FILE=%ProgramData%\BlueStacks_nxt\bluestacks.conf
-set TEMP_FILE=%CONF_FILE%.tmp
+set "XML_FILE=%ProgramData%\BlueStacks_nxt\Engine\Rvc64\Rvc64.bstk"
+set "CONF_FILE=%ProgramData%\BlueStacks_nxt\bluestacks.conf"
+set "TEMP_FILE=%CONF_FILE%.tmp"
+
+rem Define search and replace strings
+set "search_str1=location=\"fastboot.vdi\" format=\"VDI\" type=\"ReadOnly\"/>"
+set "replace_str1=location=\"fastboot.vdi\" format=\"VDI\" type=\"Normal\"/>"
+
+set "search_str2=location=\"Root.vhd\" format=\"VHD\" type=\"ReadOnly\"/>"
+set "replace_str2=location=\"Root.vhd\" format=\"VHD\" type=\"Normal\"/>"
 
 rem Display user options
 echo 1. Apply changes
@@ -27,11 +34,10 @@ if "%OPTION%" == "1" (
 rem Create a backup of the original XML file
 copy "%XML_FILE%" "%XML_FILE%.bak" /Y > nul
 
-rem Make changes to the temporary XML file using PowerShell
+rem Make changes to the XML file
 copy "%XML_FILE%" "%TEMP_FILE%" /Y > nul
-powershell -Command "(Get-Content '%TEMP_FILE%') -replace 'type=\"ReadOnly\"', 'type=\"Normal\"' | Set-Content '%TEMP_FILE%'"
-
-rem Replace the original XML file with the modified temporary XML file
+powershell -Command "(Get-Content '%TEMP_FILE%') -replace '%search_str1%', '%replace_str1%' | Set-Content '%TEMP_FILE%'"
+powershell -Command "(Get-Content '%TEMP_FILE%') -replace '%search_str2%', '%replace_str2%' | Set-Content '%TEMP_FILE%'"
 move /Y "%TEMP_FILE%" "%XML_FILE%" > nul
 
 rem Create a backup of the original bluestacks.conf file
@@ -59,9 +65,10 @@ if %errorlevel% neq 0 (
     echo Failed to restore XML file from backup.
 )
 
-rem Revert "Normal" to "ReadOnly" in the XML file
+rem Revert changes in the XML file
 echo Reverting changes in XML file...
-powershell -Command "(Get-Content '%XML_FILE%') -replace 'type=\"Normal\"', 'type=\"ReadOnly\"' | Set-Content '%XML_FILE%'"
+powershell -Command "(Get-Content '%XML_FILE%') -replace '%replace_str1%', '%search_str1%' | Set-Content '%XML_FILE%'"
+powershell -Command "(Get-Content '%XML_FILE%') -replace '%replace_str2%', '%search_str2%' | Set-Content '%XML_FILE%'"
 
 rem Check if the PowerShell command executed successfully
 if %errorlevel% neq 0 (
@@ -73,7 +80,6 @@ if %errorlevel% neq 0 (
 echo XML changes undone successfully.
 pause
 exit /b 0
-
 
 :undo_conf_changes
 rem Restore the original bluestacks.conf file from the backup file
@@ -87,6 +93,6 @@ powershell -Command "(Get-Content '%TEMP_FILE%') -replace 'bst.feature.rooting=\
 rem Replace the original bluestacks.conf file with the modified temporary bluestacks.conf file
 move /Y "%TEMP_FILE%" "%CONF_FILE%" > nul
 
-echo bluestacks.conf changes undone successfully and both 1's set to 0.
+echo bluestacks.conf root changes undone successfully
 pause
 exit /b 0
