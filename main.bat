@@ -1,8 +1,53 @@
 @echo off
+setlocal enabledelayedexpansion
+:: BatchGotAdmin
+:-------------------------------------
+REM  --> Check for permissions
+net session >nul 2>&1
+if '%errorlevel%' NEQ '0' (
+    echo Requesting administrative privileges...
+    goto UACPrompt
+) else ( goto gotAdmin )
+
+:UACPrompt
+    echo Set UAC = CreateObject^("Shell.Application"^) > "%temp%\getadmin.vbs"
+    echo UAC.ShellExecute "%~s0", "", "", "runas", 1 >> "%temp%\getadmin.vbs"
+
+    "%temp%\getadmin.vbs"
+    exit /B
+
+:gotAdmin
+    if exist "%temp%\getadmin.vbs" ( del "%temp%\getadmin.vbs" )
+    pushd "%CD%"
+    CD /D "%~dp0"
+:--------------------------------------
+:: Your batch script starts here
 
 set "XML_FILE=%ProgramData%\BlueStacks_nxt\Engine\Rvc64\Rvc64.bstk"
 set "CONF_FILE=%ProgramData%\BlueStacks_nxt\bluestacks.conf"
 set "TEMP_FILE=%CONF_FILE%.tmp"
+
+:check_file
+if not exist "!CONF_FILE!" (
+    echo Configuration file not found.
+    echo The default path is C:\ProgramData\BlueStacks_nxt
+    set /p "BLUESTACKS_PATH=Please enter the path to your BlueStacks_nxt directory choose a different directory if it include spaces, special characters or other unreasonable file paths: "
+    echo BLUESTACKS_PATH is set to: !BLUESTACKS_PATH!
+    set "XML_FILE=!BLUESTACKS_PATH!\Engine\Rvc64\Rvc64.bstk"
+    echo XML_FILE is set to: !XML_FILE!
+    set "CONF_FILE=!BLUESTACKS_PATH!\bluestacks.conf"
+    echo CONF_FILE is set to: !CONF_FILE!
+    set "TEMP_FILE=!CONF_FILE!.tmp"
+    goto check_file
+)
+
+if not exist "!XML_FILE!" (
+    echo Android 11 not installed or not run at least once and closed.
+    pause
+    exit /B
+)
+
+:: Rest of your script...
 
 rem Define search and replace strings
 set "search_str1=format=\"VDI\" type=\"ReadOnly\""
@@ -10,7 +55,6 @@ set "replace_str1=format=\"VDI\" type=\"Normal\""
 
 set "search_str2=format=\"VHD\" type=\"ReadOnly\""
 set "replace_str2=format=\"VHD\" type=\"Normal\""
-
 
 rem Display user options
 echo 1. Apply changes
@@ -60,11 +104,6 @@ exit /b 0
 rem Restore the original XML file from the backup file
 echo Restoring XML file from backup...
 copy "%XML_FILE%.bak" "%XML_FILE%" /Y > nul
-
-rem Check if the copy operation was successful
-if %errorlevel% neq 0 (
-    echo Failed to restore XML file from backup.
-)
 
 rem Revert changes in the XML file
 echo Reverting changes in XML file...
