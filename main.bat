@@ -6,6 +6,8 @@ REM  --> Check for permissions
 net session >nul 2>&1
 if '%errorlevel%' NEQ '0' (
     echo Requesting administrative privileges...
+    echo If the script does not work, please manually run it as an administrator.
+    pause
     goto UACPrompt
 ) else ( goto gotAdmin )
 
