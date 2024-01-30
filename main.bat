@@ -28,6 +28,9 @@ if '%errorlevel%' NEQ '0' (
 set "XML_FILE=%ProgramData%\BlueStacks_nxt\Engine\Rvc64\Rvc64.bstk"
 set "CONF_FILE=%ProgramData%\BlueStacks_nxt\bluestacks.conf"
 set "TEMP_FILE=%CONF_FILE%.tmp"
+attrib -R "!XML_FILE!"
+attrib -R "!CONF_FILE!"
+attrib -R "!TEMP_FILE!"
 
 :check_file
 if not exist "!CONF_FILE!" (
@@ -40,6 +43,9 @@ if not exist "!CONF_FILE!" (
     set "CONF_FILE=!BLUESTACKS_PATH!\bluestacks.conf"
     echo CONF_FILE is set to: !CONF_FILE!
     set "TEMP_FILE=!CONF_FILE!.tmp"
+    attrib -R "!XML_FILE!"
+    attrib -R "!CONF_FILE!"
+    attrib -R "!TEMP_FILE!"
     goto check_file
 )
 
@@ -79,6 +85,7 @@ if "%OPTION%" == "1" (
 
 :apply_changes
 rem Create a backup of the original XML file
+attrib -R "%XML_FILE%.bak"
 copy "%XML_FILE%" "%XML_FILE%.bak" /Y > nul
 
 rem Make changes to the XML file
@@ -88,6 +95,7 @@ powershell -Command "(Get-Content '%TEMP_FILE%') -replace '%search_str2%', '%rep
 move /Y "%TEMP_FILE%" "%XML_FILE%" > nul
 
 rem Create a backup of the original bluestacks.conf file
+attrib -R "%CONF_FILE%.bak"
 copy "%CONF_FILE%" "%CONF_FILE%.bak" /Y > nul
 
 rem Make changes to the temporary bluestacks.conf file using PowerShell
