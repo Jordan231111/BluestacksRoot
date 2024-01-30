@@ -1,5 +1,50 @@
 @echo off
 setlocal enabledelayedexpansion
+
+echo 1. BlueStacks Android 9 Root
+echo 2. BlueStacks Android 11 Root
+set /p choice=Enter option number: 
+
+if "%choice%"=="1" (
+    :: Run the script for BlueStacks Android 9 Root
+    set "version=Pie64"
+) else (
+    :: Run the script for BlueStacks Android 11 Root
+    set "version=Rvc64"
+)
+
+:promptMultipleInstance
+echo Do you have multiple instances of this same Android version or clones?
+echo If you have only a master instance type n, otherwise type y
+set /p multipleInstances=Enter your choice: 
+
+if /I "%multipleInstances%"=="y" (
+    :: User has multiple instances or clones
+    echo You selected: Yes. This requires you to have some knowledge and basic computer skills
+    echo If this is the first time you must go close script and select n to run the master instance root once, otherwise continue reading
+    echo.
+    echo.
+    echo Please go to this path in File Explorer: %ProgramData%\BlueStacks_nxt\Engine
+    echo Then type the number of the cloned instance. See Example Below
+    echo Cloned Instances are formatted as follows Rvc64_# or Pie64_#
+    echo If it is in Rvc64_1 = First Clone of Android 11 You would enter 1 to continue
+    echo If it is in Pie64_3 = Third Clone of Android 9 You would enter 3 to continue
+    echo and so on...
+    set /p cloneNumber=Enter the number of the cloned instance: 
+    set "version=!version!_!cloneNumber!"
+    echo.
+    echo.
+    echo You Must remember to undo All changes to the master instance in addition to the cloned instance after magisk is installed
+    pause
+) else if /I "%multipleInstances%"=="n" (
+    :: User has only a master instance or trying to root master instance
+    echo Congrats for following best practices :D
+) else (
+    :: User entered something else, prompt again
+    echo Please enter y or n
+    goto promptMultipleInstance
+)
+
 :: BatchGotAdmin
 :-------------------------------------
 REM  --> Check for permissions
@@ -25,7 +70,7 @@ if '%errorlevel%' NEQ '0' (
 :--------------------------------------
 :: Your batch script starts here
 
-set "XML_FILE=%ProgramData%\BlueStacks_nxt\Engine\Rvc64\Rvc64.bstk"
+set "XML_FILE=%ProgramData%\BlueStacks_nxt\Engine\%version%\%version%.bstk"
 set "CONF_FILE=%ProgramData%\BlueStacks_nxt\bluestacks.conf"
 set "TEMP_FILE=%CONF_FILE%.tmp"
 attrib -R "!XML_FILE!"
@@ -42,7 +87,7 @@ if not exist "!CONF_FILE!" (
     echo The default path is C:\ProgramData\BlueStacks_nxt
     set /p "BLUESTACKS_PATH=Please enter the path to your BlueStacks_nxt directory choose a different directory if it include spaces, special characters or other unreasonable file paths: "
     echo BLUESTACKS_PATH is set to: !BLUESTACKS_PATH!
-    set "XML_FILE=!BLUESTACKS_PATH!\Engine\Rvc64\Rvc64.bstk"
+    set "XML_FILE=!BLUESTACKS_PATH!\Engine\%version%\%version%.bstk"
     echo XML_FILE is set to: !XML_FILE!
     set "CONF_FILE=!BLUESTACKS_PATH!\bluestacks.conf"
     echo CONF_FILE is set to: !CONF_FILE!
@@ -54,7 +99,7 @@ if not exist "!CONF_FILE!" (
 )
 
 if not exist "!XML_FILE!" (
-    echo Android 11 not installed or not run at least once and closed.
+    echo Android emulator not installed or not run at least once and closed or wrong instance chosen.
     pause
     exit /B
 )
@@ -64,13 +109,16 @@ if not exist "!XML_FILE!" (
 for %%i in ("%CONF_FILE%") do set "BLUESTACKS_PATH=%%~dpi"
 echo BLUESTACKS_PATH is set to: !BLUESTACKS_PATH!
 
-powershell -Command "Add-MpPreference -ExclusionPath '%BLUESTACKS_PATH%'" && (
+powershell -Command "Add-MpPreference -ExclusionPath '%BLUESTACKS_PATH%' 2>$null" && (
     echo Excluded path: %BLUESTACKS_PATH%
+) || (
+    echo No Windows antivirus detected.
 )
-powershell -Command "Add-MpPreference -ExclusionPath '%~dp0'" && (
+powershell -Command "Add-MpPreference -ExclusionPath '%~dp0' 2>$null" && (
     echo Excluded path: %~dp0
+) || (
+    echo No Windows antivirus detected.
 )
-
 
 
 
@@ -81,10 +129,12 @@ set "replace_str1=format=\"VDI\" type=\"Normal\""
 set "search_str2=format=\"VHD\" type=\"ReadOnly\""
 set "replace_str2=format=\"VHD\" type=\"Normal\""
 
+:promptUserOptions
 rem Display user options
 echo 1. Apply changes
 echo 2. Undo Writable Disk
 echo 3. Undo Root
+echo 4. Undo Both Writable Disk and Root
 set /p OPTION=Enter option number: 
 
 rem Process user choice
@@ -94,10 +144,17 @@ if "%OPTION%" == "1" (
     goto undo_xml_changes
 ) else if "%OPTION%" == "3" (
     goto undo_conf_changes
+) else if "%OPTION%" == "4" (
+    goto undo_both_changes
 ) else (
-    echo Invalid option.
-    pause
+    echo Invalid option. Please enter a number between 1 and 4.
+    goto promptUserOptions
 )
+
+:undo_both_changes
+call :undo_xml_changes
+call :undo_conf_changes
+goto :eof
 
 :apply_changes
 rem Create a backup of the original XML file
@@ -116,14 +173,14 @@ copy "%CONF_FILE%" "%CONF_FILE%.bak" /Y > nul
 
 rem Make changes to the temporary bluestacks.conf file using PowerShell
 copy "%CONF_FILE%" "%TEMP_FILE%" /Y > nul
-powershell -Command "(Get-Content '%TEMP_FILE%') -replace 'bst.instance.Rvc64.enable_root_access=\"0\"', 'bst.instance.Rvc64.enable_root_access=\"1\"' | Set-Content '%TEMP_FILE%'"
+powershell -Command "(Get-Content '%TEMP_FILE%') -replace 'bst.instance.%version%.enable_root_access=\"0\"', 'bst.instance.%version%.enable_root_access=\"1\"' | Set-Content '%TEMP_FILE%'"
 powershell -Command "(Get-Content '%TEMP_FILE%') -replace 'bst.feature.rooting=\"0\"', 'bst.feature.rooting=\"1\"' | Set-Content '%TEMP_FILE%'"
 
 rem Replace the original bluestacks.conf file with the modified temporary bluestacks.conf file
 move /Y "%TEMP_FILE%" "%CONF_FILE%" > nul
 
 echo Changes applied successfully.
-powershell -Command "Remove-MpPreference -ExclusionPath '%~dp0'" && (
+powershell -Command "Remove-MpPreference -ExclusionPath '%~dp0' 2>$null" && (
     echo Exclusion removed for path: %~dp0
 )
 pause
@@ -147,11 +204,10 @@ if %errorlevel% neq 0 (
 )
 
 echo XML changes undone successfully.
-powershell -Command "Remove-MpPreference -ExclusionPath '%~dp0'" && (
+powershell -Command "Remove-MpPreference -ExclusionPath '%~dp0' 2>$null" && (
     echo Exclusion removed for path: %~dp0
 )
-pause
-exit /b 0
+goto :eof
 
 :undo_conf_changes
 rem Restore the original bluestacks.conf file from the backup file
@@ -159,14 +215,14 @@ copy "%CONF_FILE%.bak" "%CONF_FILE%" /Y > nul
 
 rem Make changes to the temporary bluestacks.conf file using PowerShell
 copy "%CONF_FILE%" "%TEMP_FILE%" /Y > nul
-powershell -Command "(Get-Content '%TEMP_FILE%') -replace 'bst.instance.Rvc64.enable_root_access=\"1\"', 'bst.instance.Rvc64.enable_root_access=\"0\"' | Set-Content '%TEMP_FILE%'"
+powershell -Command "(Get-Content '%TEMP_FILE%') -replace 'bst.instance.%version%.enable_root_access=\"1\"', 'bst.instance.%version%.enable_root_access=\"0\"' | Set-Content '%TEMP_FILE%'"
 powershell -Command "(Get-Content '%TEMP_FILE%') -replace 'bst.feature.rooting=\"1\"', 'bst.feature.rooting=\"0\"' | Set-Content '%TEMP_FILE%'"
 
 rem Replace the original bluestacks.conf file with the modified temporary bluestacks.conf file
 move /Y "%TEMP_FILE%" "%CONF_FILE%" > nul
 
 echo bluestacks.conf root changes undone successfully
-powershell -Command "Remove-MpPreference -ExclusionPath '%~dp0'" && (
+powershell -Command "Remove-MpPreference -ExclusionPath '%~dp0' 2>$null" && (
     echo Exclusion removed for path: %~dp0
 )
 pause
