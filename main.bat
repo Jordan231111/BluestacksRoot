@@ -32,6 +32,10 @@ attrib -R "!XML_FILE!"
 attrib -R "!CONF_FILE!"
 attrib -R "!TEMP_FILE!"
 
+
+
+
+
 :check_file
 if not exist "!CONF_FILE!" (
     echo Configuration file not found.
@@ -57,6 +61,19 @@ if not exist "!XML_FILE!" (
 
 :: Rest of your script...
 
+for %%i in ("%CONF_FILE%") do set "BLUESTACKS_PATH=%%~dpi"
+echo BLUESTACKS_PATH is set to: !BLUESTACKS_PATH!
+
+powershell -Command "Add-MpPreference -ExclusionPath '%BLUESTACKS_PATH%'" && (
+    echo Excluded path: %BLUESTACKS_PATH%
+)
+powershell -Command "Add-MpPreference -ExclusionPath '%~dp0'" && (
+    echo Excluded path: %~dp0
+)
+
+
+
+
 rem Define search and replace strings
 set "search_str1=format=\"VDI\" type=\"ReadOnly\""
 set "replace_str1=format=\"VDI\" type=\"Normal\""
@@ -80,7 +97,6 @@ if "%OPTION%" == "1" (
 ) else (
     echo Invalid option.
     pause
-    exit /b 1
 )
 
 :apply_changes
@@ -107,6 +123,9 @@ rem Replace the original bluestacks.conf file with the modified temporary bluest
 move /Y "%TEMP_FILE%" "%CONF_FILE%" > nul
 
 echo Changes applied successfully.
+powershell -Command "Remove-MpPreference -ExclusionPath '%~dp0'" && (
+    echo Exclusion removed for path: %~dp0
+)
 pause
 exit /b 0
 
@@ -128,6 +147,9 @@ if %errorlevel% neq 0 (
 )
 
 echo XML changes undone successfully.
+powershell -Command "Remove-MpPreference -ExclusionPath '%~dp0'" && (
+    echo Exclusion removed for path: %~dp0
+)
 pause
 exit /b 0
 
@@ -144,5 +166,8 @@ rem Replace the original bluestacks.conf file with the modified temporary bluest
 move /Y "%TEMP_FILE%" "%CONF_FILE%" > nul
 
 echo bluestacks.conf root changes undone successfully
+powershell -Command "Remove-MpPreference -ExclusionPath '%~dp0'" && (
+    echo Exclusion removed for path: %~dp0
+)
 pause
 exit /b 0
