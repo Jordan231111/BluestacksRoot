@@ -1,4 +1,4 @@
-# Roots Bluestacks instantly with bat file
+# Roots Bluestacks instantly with cmd script
 
 
 ## Information of this method
