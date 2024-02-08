@@ -77,7 +77,7 @@ if not exist "!XML_FILE!" (
 :: Ask the user whether they have multiple instances
 :promptMultipleInstance
 echo Do you have multiple instances of this android version and wish to root a cloned instace?
-echo To root master instance type and enter n, otherwise type y
+echo To root master instance type and enter n 'Most People', otherwise type y for rooting cloned instance
 set /p multipleInstances=Enter your choice: 
 
 if /I "%multipleInstances%"=="y" (
