@@ -76,8 +76,9 @@ if not exist "!XML_FILE!" (
 
 :: Ask the user whether they have multiple instances
 :promptMultipleInstance
+powershell -Command "Write-Host 'To root ' -NoNewline; Write-Host 'master instance' -NoNewline -ForegroundColor Green; Write-Host ' type and enter ' -NoNewline; Write-Host 'n' -NoNewline -ForegroundColor Green; Write-Host ', otherwise type y for rooting cloned instance'"
+
 echo Do you have multiple instances of this android version and wish to root a cloned instace?
-echo To root master instance type and enter n 'Most People', otherwise type y for rooting cloned instance
 set /p multipleInstances=Enter your choice: 
 
 if /I "%multipleInstances%"=="y" (
@@ -128,17 +129,21 @@ if /I "%multipleInstances%"=="y" (
     pause
     echo.
     echo.
-    echo The program has detected this to be the cloned instance you wish to root
+    echo Detecting the cloned instance to root...
     echo --------------------------------------------------------------------------
     :: Call PowerShell to check the file size and delete the file if it's too large
     powershell -Command "$enginePath = '!ENGINE_PATH!'; $enginePath = $enginePath -replace '\\Engine$'; $fileSize = (Get-Item $enginePath\Logs\Player.log).Length / 1MB; if ($fileSize -gt 10) { Remove-Item $enginePath\Logs\Player.log -Force; Write-Host 'The log file was too large and has been deleted. Please rerun your cloned instance you wish to root and close the script'; exit 1 } else { exit 0 }" || (pause && exit /b)
 
     :: Call PowerShell to read the log file in reverse order and search for the pattern to get cloned instance #
     if "%clonedVersion%"=="Rvc64" (
-        powershell -Command "$enginePath = '!ENGINE_PATH!'; $enginePath = $enginePath -replace '\\Engine$'; Get-Content $enginePath\Logs\Player.log -ReadCount 0 | Select-String 'Rvc64_\d+' -AllMatches | ForEach-Object { $_.Matches } | ForEach-Object { $_.Value } | Sort-Object -Descending | Select-Object -First 1"   
+        for /f "delims=" %%i in ('powershell -Command "$enginePath = '!ENGINE_PATH!'; $enginePath = $enginePath -replace '\\Engine$'; $instanceNumber = (Get-Content $enginePath\Logs\Player.log -ReadCount 0 | Select-String 'Rvc64_\d+' -AllMatches | ForEach-Object { $_.Matches } | ForEach-Object { $_.Value } | Sort-Object -Descending | Select-Object -First 1); $instanceNumber -replace 'Rvc64_', ''"') do (
+            powershell -Command "Write-Host 'The program detected you should enter %%i to continue' -ForegroundColor Green"
+        )
         echo.
     ) else if "%clonedVersion%"=="Pie64" (
-        powershell -Command "$enginePath = '!ENGINE_PATH!'; $enginePath = $enginePath -replace '\\Engine$'; Get-Content $enginePath\Logs\Player.log -ReadCount 0 | Select-String 'Pie64_\d+' -AllMatches | ForEach-Object { $_.Matches } | ForEach-Object { $_.Value } | Sort-Object -Descending | Select-Object -First 1"   
+        for /f "delims=" %%i in ('powershell -Command "$enginePath = '!ENGINE_PATH!'; $enginePath = $enginePath -replace '\\Engine$'; $instanceNumber = (Get-Content $enginePath\Logs\Player.log -ReadCount 0 | Select-String 'Pie64_\d+' -AllMatches | ForEach-Object { $_.Matches } | ForEach-Object { $_.Value } | Sort-Object -Descending | Select-Object -First 1); $instanceNumber -replace 'Pie64_', ''"') do (
+            powershell -Command "Write-Host 'The program detected you should enter %%i to continue' -ForegroundColor Green"
+        )
         echo.
     )
 
@@ -146,7 +151,7 @@ if /I "%multipleInstances%"=="y" (
     set "version=!version!_!cloneNumber!"
     echo.
     echo.
-    echo You Must remember this number and Undo Both Writable Disk and Root when magisk is installed and rooted
+    powershell -Command "Write-Host 'You Must remember this number and Undo Both Writable Disk and Root when magisk is installed and rooted' -ForegroundColor Red"
     pause
 ) else if /I "%multipleInstances%"=="n" (
     :: User has only a master instance or trying to root master instance
