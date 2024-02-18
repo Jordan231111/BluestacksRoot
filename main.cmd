@@ -237,7 +237,7 @@ powershell -Command "(Get-Content '%TEMP_FILE%') -replace 'bst.feature.rooting=\
 rem Replace the original bluestacks.conf file with the modified temporary bluestacks.conf file
 move /Y "%TEMP_FILE%" "%CONF_FILE%" > nul
 
-echo Changes applied successfully.
+powershell -Command "Write-Host 'Changes applied successfully.' -ForegroundColor Green"
 echo If you suspect bluestacks.conf file was corrupted, please run this program again with same options but *MUST* choose undo both writable and root
 powershell -Command "Remove-MpPreference -ExclusionPath '%~dp0' 2>$null" && (
     echo Exclusion removed for path: %~dp0
@@ -262,7 +262,7 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-echo XML changes undone successfully.
+powershell -Command "Write-Host 'XML changes undone successfully.' -ForegroundColor Green"
 powershell -Command "Remove-MpPreference -ExclusionPath '%~dp0' 2>$null" && (
     echo Exclusion removed for path: %~dp0
 )
@@ -280,7 +280,7 @@ powershell -Command "(Get-Content '%TEMP_FILE%') -replace 'bst.feature.rooting=\
 rem Replace the original bluestacks.conf file with the modified temporary bluestacks.conf file
 move /Y "%TEMP_FILE%" "%CONF_FILE%" > nul
 
-echo bluestacks.conf root changes undone successfully
+powershell -Command "Write-Host 'Root changes undone successfully.' -ForegroundColor Green"
 powershell -Command "Remove-MpPreference -ExclusionPath '%~dp0' 2>$null" && (
     echo Exclusion removed for path: %~dp0
 )
