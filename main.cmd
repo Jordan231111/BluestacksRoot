@@ -1,6 +1,8 @@
 @echo off
 setlocal enabledelayedexpansion
 
+
+:begin
 echo 1. BlueStacks Android 9 Root
 echo 2. BlueStacks Android 11 Root
 set /p choice=Enter option number: 
@@ -9,13 +11,15 @@ if "%choice%"=="1" (
     :: Run the script for BlueStacks Android 9 Root
     set "version=Pie64"
     set "clonedVersion=Pie64"
-) else (
+) else if "%choice%"=="2" (
     :: Run the script for BlueStacks Android 11 Root
     set "version=Rvc64"
     set "clonedVersion=Rvc64"
+) else (
+    echo Invalid option. Please enter 1 or 2.
+    echo.
+    goto begin
 )
-
-
 
 :: BatchGotAdmin
 :-------------------------------------
@@ -42,6 +46,23 @@ if '%errorlevel%' NEQ '0' (
 :--------------------------------------
 :: Your batch script starts here
 
+
+taskkill /IM "HD-MultiInstanceManager.exe" /F 2>NUL
+if "%ERRORLEVEL%"=="0" (
+    powershell -Command "Write-Host 'Failure to meet best practices' -ForegroundColor Red"
+)
+
+taskkill /IM "HD-Player.exe" /F 2>NUL
+if "%ERRORLEVEL%"=="0" (
+    powershell -Command "Write-Host 'Failure to meet best practices' -ForegroundColor Red"
+)
+
+taskkill /IM "BlueStacksHelper.exe" /F 2>NUL
+if "%ERRORLEVEL%"=="0" (
+    powershell -Command "Write-Host 'Failure to meet best practices' -ForegroundColor Red"
+)
+
+
 set "XML_FILE=%ProgramData%\BlueStacks_nxt\Engine\%clonedVersion%\%clonedVersion%.bstk"
 set "CONF_FILE=%ProgramData%\BlueStacks_nxt\bluestacks.conf"
 attrib -R "!XML_FILE!"
@@ -67,101 +88,56 @@ if not exist "!CONF_FILE!" (
     goto check_file
 )
 
+
 if not exist "!XML_FILE!" (
     echo Android emulator not installed or not run at least once and closed or wrong instance chosen.
     pause
     exit /B
 )
 
-
-:: Ask the user whether they have multiple instances
-:promptMultipleInstance
-powershell -Command "Write-Host 'To root ' -NoNewline; Write-Host 'master instance' -NoNewline -ForegroundColor Green; Write-Host ' type and enter ' -NoNewline; Write-Host 'n' -NoNewline -ForegroundColor Green; Write-Host ', otherwise type y for rooting cloned instance'"
-
-echo Do you have multiple instances of this android version and wish to root a cloned instace?
-set /p multipleInstances=Enter your choice: 
-
-if /I "%multipleInstances%"=="y" (
-    :: User has multiple instances or clones
-    echo You selected: Yes. This requires you to have some knowledge and basic computer skills
-    echo.
-    echo.
-    echo Cloned Instances are formatted as follows Rvc64_# or Pie64_#
-    echo There are 2 ways to find which instance to root
-    echo.
-    echo Step 1----------------------------------------------------------------
-
-    echo If you know it is in Rvc64_1 = First Clone of Android 11 You would enter 1 to continue
-    echo If you know it is in Pie64_3 = Third Clone of Android 9 You would enter 3 to continue
-    echo and so on...
-    echo.
-    echo Step 2----------------------------------------------------------------
-    echo Listing all your current cloned instances, if this is blank rerun script and select n to multiple instance
-
-    :: Set the ENGINE_PATH variable to the hardcoded path
-    set "ENGINE_PATH=%ProgramData%\BlueStacks_nxt\Engine"
+:: Set the ENGINE_PATH variable to the hardcoded path
+set "ENGINE_PATH=%ProgramData%\BlueStacks_nxt\Engine"
 
 
-    if exist "!BLUESTACKS_PATH!" (
-        echo alternate path discovered
-        set "ENGINE_PATH=!BLUESTACKS_PATH!\Engine"
-    )
-
-
-    if "%clonedVersion%"=="Pie64" (
-        echo Here are your android 9 instances
-        echo.
-    ) else if "%clonedVersion%"=="Rvc64" (
-        echo Here are your android 11 instances
-        echo.
-    )    
-    :: Iterate through directories inside ENGINE_PATH
-    for /D %%i in ("!ENGINE_PATH!\!clonedVersion!_*") do (
-        echo %%~nxi
-    )
-    echo.
-    echo.
-    echo Method 3-----------------------------------------------------------------
-    echo Automatically detecting... please run the cloned instance you wish to root and close it before proceeding
-    echo You may skip this step if you did not run any other instance but the cloned instance you want to root just now
-    echo Beware though as u may end up rooting the wrong instance if you ran your master instance most recently for example..
-    echo If you did not run the cloned instance you wish to root before pressing enter the following message may be invalid!!!
-    pause
-    echo.
-    echo.
-    echo Detecting the cloned instance to root...
-    echo --------------------------------------------------------------------------
-    :: Call PowerShell to check the file size and delete the file if it's too large
-    powershell -Command "$enginePath = '!ENGINE_PATH!'; $enginePath = $enginePath -replace '\\Engine$'; $fileSize = (Get-Item $enginePath\Logs\Player.log).Length / 1MB; if ($fileSize -gt 10) { Remove-Item $enginePath\Logs\Player.log -Force; Write-Host 'The log file was too large and has been deleted. Please rerun your cloned instance you wish to root and close the script'; exit 1 } else { exit 0 }" || (pause && exit /b)
-
-    :: Call PowerShell to read the log file in reverse order and search for the pattern to get cloned instance #
-    if "%clonedVersion%"=="Rvc64" (
-        for /f "delims=" %%i in ('powershell -Command "$enginePath = '!ENGINE_PATH!'; $enginePath = $enginePath -replace '\\Engine$'; $instanceNumber = (Get-Content $enginePath\Logs\Player.log -ReadCount 0 | Select-String 'Rvc64_\d+' -AllMatches | ForEach-Object { $_.Matches } | ForEach-Object { $_.Value } | Sort-Object -Descending | Select-Object -First 1); $instanceNumber -replace 'Rvc64_', ''"') do (
-            powershell -Command "Write-Host 'The program detected you should enter %%i to continue' -ForegroundColor Green"
-        )
-        echo.
-    ) else if "%clonedVersion%"=="Pie64" (
-        for /f "delims=" %%i in ('powershell -Command "$enginePath = '!ENGINE_PATH!'; $enginePath = $enginePath -replace '\\Engine$'; $instanceNumber = (Get-Content $enginePath\Logs\Player.log -ReadCount 0 | Select-String 'Pie64_\d+' -AllMatches | ForEach-Object { $_.Matches } | ForEach-Object { $_.Value } | Sort-Object -Descending | Select-Object -First 1); $instanceNumber -replace 'Pie64_', ''"') do (
-            powershell -Command "Write-Host 'The program detected you should enter %%i to continue' -ForegroundColor Green"
-        )
-        echo.
-    )
-
-    set /p cloneNumber=Enter the number of the cloned instance: 
-    set "version=!version!_!cloneNumber!"
-    echo.
-    echo.
-    powershell -Command "Write-Host 'You Must remember this number and Undo Both Writable Disk and Root when magisk is installed and rooted' -ForegroundColor Red"
-    pause
-) else if /I "%multipleInstances%"=="n" (
-    :: User has only a master instance or trying to root master instance
-    echo Congrats for following best practices :D
-) else (
-    :: User entered something else, prompt again
-    echo Please enter y or n
-    goto promptMultipleInstance
+if exist "!BLUESTACKS_PATH!" (
+    echo alternate path discovered
+    set "ENGINE_PATH=!BLUESTACKS_PATH!\Engine"
 )
 
+echo Automatically detecting... please run the cloned instance you wish to root and close it before proceeding
+echo.
+echo.
+echo Detecting the cloned instance to root...
+echo --------------------------------------------------------------------------
+:: Call PowerShell to check the file size and delete the file if it's too large
+
+powershell -Command "$enginePath = '!ENGINE_PATH!'; $enginePath = $enginePath -replace '\\Engine$'; $fileSize = (Get-Item $enginePath\Logs\Player.log).Length / 1MB; if ($fileSize -gt 10) { Remove-Item $enginePath\Logs\Player.log -Force; Write-Host 'The log file was too large and has been deleted. Please rerun your cloned instance you wish to root and close the script'; exit 1 } else { exit 0 }" || (pause && exit /b)
+
+
+:: Call PowerShell to read the log file in reverse order and search for the pattern to get cloned instance #
+if "%clonedVersion%"=="Rvc64" (
+    for /f "delims=" %%i in ('powershell -Command "$enginePath = '!ENGINE_PATH!'; $enginePath = $enginePath -replace '\\Engine$'; $instanceNumber = (Get-Content $enginePath\Logs\Player.log -ReadCount 0 | Select-String 'Rvc64(_\d+)?' -AllMatches | ForEach-Object { $_.Matches } | ForEach-Object { $_.Value } | Sort-Object -Descending | Select-Object -First 1); $instanceNumber -replace 'Rvc64_', ''"') do (
+        powershell -Command "Write-Host 'The program detected %%i ' -ForegroundColor Green"
+        set "tempVar=%%i"
+
+    )
+    if not "!tempVar!"=="Rvc64" (
+    set "version=Rvc64_!tempVar!"
+    
+    )
+    echo.
+) else if "%clonedVersion%"=="Pie64" (
+    for /f "delims=" %%i in ('powershell -Command "$enginePath = '!ENGINE_PATH!'; $enginePath = $enginePath -replace '\\Engine$'; $instanceNumber = (Get-Content $enginePath\Logs\Player.log -ReadCount 0 | Select-String 'Pie64(_\d+)?' -AllMatches | ForEach-Object { $_.Matches } | ForEach-Object { $_.Value } | Sort-Object -Descending | Select-Object -First 1); $instanceNumber -replace 'Pie64_', ''"') do (
+        powershell -Command "Write-Host 'The program detected %%i ' -ForegroundColor Green"
+        set "tempVar=%%i"
+    )
+    if not "!tempVar!"=="Pie64" (
+    set "version=Pie64_!tempVar!"
+    )
+    echo.
+)
+
+echo The program will root: !version!
 
 :: Rest of your script...
 for %%i in ("%CONF_FILE%") do set "BLUESTACKS_PATH=%%~dpi"
@@ -177,8 +153,6 @@ powershell -Command "Add-MpPreference -ExclusionPath '%~dp0' 2>$null" && (
 ) || (
     echo No Windows antivirus detected.
 )
-
-
 
 rem Define search and replace strings
 set "search_str1=format=\"VDI\" type=\"ReadOnly\""
@@ -208,6 +182,7 @@ if "%OPTION%" == "1" (
     echo Invalid option. Please enter a number between 1 and 4.
     goto promptUserOptions
 )
+
 
 :undo_both_changes
 call :undo_xml_changes
