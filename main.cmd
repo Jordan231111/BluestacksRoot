@@ -116,27 +116,20 @@ powershell -Command "$enginePath = '!ENGINE_PATH!'; $enginePath = $enginePath -r
 
 :: Call PowerShell to read the log file in reverse order and search for the pattern to get cloned instance #
 if "%clonedVersion%"=="Rvc64" (
-    for /f "delims=" %%i in ('powershell -Command "$enginePath = '!ENGINE_PATH!'; $enginePath = $enginePath -replace '\\Engine$'; $instanceNumber = (Get-Content $enginePath\Logs\Player.log -ReadCount 0 | Select-String 'Rvc64(_\d+)?' -AllMatches | ForEach-Object { $_.Matches } | ForEach-Object { $_.Value } | Sort-Object -Descending | Select-Object -First 1); $instanceNumber -replace 'Rvc64_', ''"') do (
+    for /f "delims=" %%i in ('powershell -Command "$enginePath = '!ENGINE_PATH!'; $enginePath = $enginePath -replace '\\Engine$'; $logContent = Get-Content $enginePath\Logs\Player.log -ReadCount 0; $instanceNumber = $logContent | Select-String 'Rvc64(_\d+)?' -AllMatches | ForEach-Object { $_.Matches } | ForEach-Object { $_.Value } | Select-Object -Last 1; $instanceNumber"') do (
         powershell -Command "Write-Host 'The program detected %%i ' -ForegroundColor Green"
         set "tempVar=%%i"
-
     )
-    if not "!tempVar!"=="Rvc64" (
-    set "version=Rvc64_!tempVar!"
-    
-    )
+    set "version=!tempVar!"
     echo.
 ) else if "%clonedVersion%"=="Pie64" (
-    for /f "delims=" %%i in ('powershell -Command "$enginePath = '!ENGINE_PATH!'; $enginePath = $enginePath -replace '\\Engine$'; $instanceNumber = (Get-Content $enginePath\Logs\Player.log -ReadCount 0 | Select-String 'Pie64(_\d+)?' -AllMatches | ForEach-Object { $_.Matches } | ForEach-Object { $_.Value } | Sort-Object -Descending | Select-Object -First 1); $instanceNumber -replace 'Pie64_', ''"') do (
+    for /f "delims=" %%i in ('powershell -Command "$enginePath = '!ENGINE_PATH!'; $enginePath = $enginePath -replace '\\Engine$'; $logContent = Get-Content $enginePath\Logs\Player.log -ReadCount 0; $instanceNumber = $logContent | Select-String 'Pie64(_\d+)?' -AllMatches | ForEach-Object { $_.Matches } | ForEach-Object { $_.Value } | Select-Object -Last 1; $instanceNumber"') do (
         powershell -Command "Write-Host 'The program detected %%i ' -ForegroundColor Green"
         set "tempVar=%%i"
     )
-    if not "!tempVar!"=="Pie64" (
-    set "version=Pie64_!tempVar!"
-    )
+    set "version=!tempVar!"
     echo.
 )
-
 echo The program will root: !version!
 
 :: Rest of your script...
@@ -221,10 +214,6 @@ pause
 exit /b 0
 
 :undo_xml_changes
-rem Restore the original XML file from the backup file
-echo Restoring XML file from backup...
-copy "%XML_FILE%.bak" "%XML_FILE%" /Y > nul
-
 rem Revert changes in the XML file
 echo Reverting changes in XML file...
 powershell -Command "(Get-Content '%XML_FILE%') -replace '%replace_str1%', '%search_str1%' | Set-Content '%XML_FILE%'"
@@ -232,7 +221,8 @@ powershell -Command "(Get-Content '%XML_FILE%') -replace '%replace_str2%', '%sea
 
 rem Check if the PowerShell command executed successfully
 if %errorlevel% neq 0 (
-    echo Failed to revert changes in XML file.
+    echo Failed to revert changes in XML file. Restoring from backup...
+    copy "%XML_FILE%.bak" "%XML_FILE%" /Y > nul
     pause
     exit /b 1
 )
@@ -244,13 +234,18 @@ powershell -Command "Remove-MpPreference -ExclusionPath '%~dp0' 2>$null" && (
 goto :eof
 
 :undo_conf_changes
-rem Restore the original bluestacks.conf file from the backup file
-copy "%CONF_FILE%.bak" "%CONF_FILE%" /Y > nul
-
 rem Make changes to the temporary bluestacks.conf file using PowerShell
 copy "%CONF_FILE%" "%TEMP_FILE%" /Y > nul
 powershell -Command "(Get-Content '%TEMP_FILE%') -replace 'bst.instance.%version%.enable_root_access=\"1\"', 'bst.instance.%version%.enable_root_access=\"0\"' | Set-Content '%TEMP_FILE%'"
 powershell -Command "(Get-Content '%TEMP_FILE%') -replace 'bst.feature.rooting=\"1\"', 'bst.feature.rooting=\"0\"' | Set-Content '%TEMP_FILE%'"
+
+rem Check if the PowerShell command executed successfully
+if %errorlevel% neq 0 (
+    echo Failed to revert changes in bluestacks.conf file. Restoring from backup...
+    copy "%CONF_FILE%.bak" "%CONF_FILE%" /Y > nul
+    pause
+    exit /b 1
+)
 
 rem Replace the original bluestacks.conf file with the modified temporary bluestacks.conf file
 move /Y "%TEMP_FILE%" "%CONF_FILE%" > nul
