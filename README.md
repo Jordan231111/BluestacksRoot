@@ -26,3 +26,4 @@ You must turn off and on the emulator after script has complete at least confirm
 
 - BlueStacks instances running Android 9 are only supported by Magisk version 25.2. Please note that using this outdated version is at your own risk, as it may contain unpatched vulnerabilities or compatibility issues. It is highly recommended to upgrade your BlueStacks instance to a newer version of Android for better stability and security.
    
+- Manual root method my code is mainly based off this method [here](https://xdaforums.com/t/bluestacks-tweaker-6-tool-for-modifing-bluestacks-2-3-3n-4-5.3622681/post-89306676)
