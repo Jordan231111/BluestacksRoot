@@ -22,7 +22,8 @@ if '%errorlevel%' NEQ '0' (
     CD /D "%~dp0"
 
 :: Presenting all options at the beginning
-powershell -Command "Write-Host ''; Write-Host ('{0,-30} | {1,-30}' -f 'Root Options:', 'Unroot Options:'); Write-Host ('{0,-30} | {1,-30}' -f '1. Apply BlueStacks Android 9', '3. Undo BlueStacks Android 9'); Write-Host ('{0,-30} | {1,-30}' -f '2. Apply BlueStacks Android 11', '4. Undo BlueStacks Android 11'); Write-Host ''; $choice = Read-Host 'Enter option number';"
+powershell -Command "Write-Host ''; Write-Host ('{0,-30} | {1,-30}' -f 'Root Options:', 'Unroot Options:'); Write-Host ('{0,-30} | {1,-30}' -f '1. Apply BlueStacks Android 9', '3. Undo BlueStacks Android 9'); Write-Host ('{0,-30} | {1,-30}' -f '2. Apply BlueStacks Android 11', '4. Undo BlueStacks Android 11'); Write-Host '';"
+set /p choice=Enter option number: 
 
 if "%choice%"=="1" (
     set "version=Pie64"
