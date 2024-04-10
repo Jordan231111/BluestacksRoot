@@ -205,6 +205,12 @@ powershell -Command "(Get-Content '%TEMP_FILE%') -replace 'bst.feature.rooting=\
 rem Replace the original bluestacks.conf file with the modified temporary bluestacks.conf file
 move /Y "%TEMP_FILE%" "%CONF_FILE%" > nul
 
+rem Make the files read-only
+icacls "%XML_FILE%" /deny Everyone:(W)
+icacls "%XML_FILE%" /deny Administrators:(W)
+icacls "%CONF_FILE%" /deny Everyone:(W)
+icacls "%CONF_FILE%" /deny Administrators:(W)
+
 powershell -Command "Write-Host 'Changes applied successfully.' -ForegroundColor Green"
 echo If you suspect bluestacks.conf file was corrupted, please run this program again with same options but *MUST* choose undo both writable and root
 powershell -Command "Remove-MpPreference -ExclusionPath '%~dp0' 2>$null" && (
@@ -216,6 +222,10 @@ exit /b 0
 :undo_xml_changes
 rem Revert changes in the XML file
 echo Reverting changes in XML file...
+
+rem Undo read-only permissions for the XML file
+icacls "%XML_FILE%" /remove:d Everyone
+icacls "%XML_FILE%" /remove:d Administrators
 powershell -Command "(Get-Content '%XML_FILE%') -replace '%replace_str1%', '%search_str1%' | Set-Content '%XML_FILE%'"
 powershell -Command "(Get-Content '%XML_FILE%') -replace '%replace_str2%', '%search_str2%' | Set-Content '%XML_FILE%'"
 
@@ -235,6 +245,10 @@ goto :eof
 
 :undo_conf_changes
 rem Make changes to the temporary bluestacks.conf file using PowerShell
+rem Undo read-only permissions for the configuration file
+icacls "%CONF_FILE%" /remove:d Everyone
+icacls "%CONF_FILE%" /remove:d Administrators
+
 copy "%CONF_FILE%" "%TEMP_FILE%" /Y > nul
 powershell -Command "(Get-Content '%TEMP_FILE%') -replace 'bst.instance.%version%.enable_root_access=\"1\"', 'bst.instance.%version%.enable_root_access=\"0\"' | Set-Content '%TEMP_FILE%'"
 powershell -Command "(Get-Content '%TEMP_FILE%') -replace 'bst.feature.rooting=\"1\"', 'bst.feature.rooting=\"0\"' | Set-Content '%TEMP_FILE%'"
