@@ -3,7 +3,7 @@
 
 ## How to Use
 
-1. Download `blueStackRoot.cmd`
+1. Download `blueStackRoot.cmd` in release https://github.com/Jordan231111/BluestacksRoot/releases
 
 2. Launch the BlueStacks instance that you want to root once beforehand.
 
