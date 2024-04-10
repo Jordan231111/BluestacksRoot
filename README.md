@@ -20,4 +20,9 @@ You must turn off and on the emulator after script has complete at least confirm
 
 7. For convenience, Magisk Kitsune is provided in this repository.
 
+
+## Other Important Information
+- For BlueStacks instances running Android 11, please use the Magisk version available at: [https://github.com/HuskyDG/magisk-files/releases/tag/1707294287](https://github.com/HuskyDG/magisk-files/releases/tag/1707294287)
+
+- BlueStacks instances running Android 9 are only supported by Magisk version 25.2. Please note that using this outdated version is at your own risk, as it may contain unpatched vulnerabilities or compatibility issues. It is highly recommended to upgrade your BlueStacks instance to a newer version of Android for better stability and security.
    
