@@ -32,3 +32,4 @@ You must turn off and on the emulator after script has complete at least confirm
 - You can find such old files [here](https://mega.nz/folder/SQBRHSZQ#pEgMXysWkkTm5Z8dxsNaNQ)
    
 - Manual root method my code is mainly based off this method [here](https://xdaforums.com/t/bluestacks-tweaker-6-tool-for-modifing-bluestacks-2-3-3n-4-5.3622681/post-89306676)
+- Due to changes that manual method may NOT even work due to hidden services unless manually killed as well so recommend to use this script instead.
