@@ -82,15 +82,11 @@ if "%choice%"=="1" (
     exit /b 1
 )
 
-
-
-
 :apply_changes
 taskkill /IM "HD-MultiInstanceManager.exe" /F 2>NUL
 taskkill /IM "HD-Player.exe" /F 2>NUL
 taskkill /IM "BlueStacksHelper.exe" /F 2>NUL
 taskkill /IM "BstkSVC.exe" /F 2>NUL
-
 
 
 set "XML_FILE=%customDirectory%\Engine\%clonedVersion%\%clonedVersion%.bstk"
@@ -201,6 +197,7 @@ powershell -Command "Remove-MpPreference -ExclusionPath '%~dp0' 2>$null" && (
     echo Exclusion removed for path: %~dp0
 )
 pause
+powershell -Command "Clear-Host"
 goto start_options
 
 :undo_both_changes
