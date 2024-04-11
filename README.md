@@ -18,13 +18,15 @@ Microsoft Defender SmartScreen prevented an unrecognized app from starting
 **Important:** DO NOT unroot until Magisk says it's installed and you get the SU conflict message in the Magisk app.
 You must turn off and on the emulator after script has complete at least confirm you got the SU conflict message
 
-7. For convenience, Magisk Kitsune is provided in this repository.
+7. Go back to script and undo the root for that version
+
+8. For convenience, Magisk Kitsune is provided in this repository.
 
 ## Video tutorial here
 [YoutubeLink](https://www.youtube.com/watch?v=cKIUSwz2Lx0)
 
 ## Other Important Information
-- For BlueStacks instances running Android 11, please use the Magisk version available at: [https://github.com/HuskyDG/magisk-files/releases/tag/1707294287](https://github.com/HuskyDG/magisk-files/releases/tag/1707294287)
+- For BlueStacks instances running Android 11, please use my uploaded Magisk or the Magisk version available at: [https://github.com/HuskyDG/magisk-files/releases/tag/1707294287](https://github.com/HuskyDG/magisk-files/releases/tag/1707294287)
 
 - BlueStacks instances running Android 9 are only supported by Magisk version 25.2. Please note that using this outdated version is at your own risk, as it may contain unpatched vulnerabilities or compatibility issues. It is highly recommended to upgrade your BlueStacks instance to a newer version of Android for better stability and security.
 - You can find such old files [here](https://mega.nz/folder/SQBRHSZQ#pEgMXysWkkTm5Z8dxsNaNQ)
