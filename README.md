@@ -14,7 +14,7 @@
 5. If the following popup appears, click "More info" and then "Run anyway" (Windows blocks ALL .cmd files by default):
 Microsoft Defender SmartScreen prevented an unrecognized app from starting
 
-6. Wait for the rooting process to complete in the command prompt window.
+6. Wait for the rooting process to complete in the command prompt window. Then install magisk delta to system partition
 **Important:** DO NOT unroot until Magisk says it's installed and you get the SU conflict message in the Magisk app.
 You must turn off and on the emulator after script has complete at least confirm you got the SU conflict message
 
