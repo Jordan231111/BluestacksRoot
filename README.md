@@ -21,7 +21,7 @@ You must turn off and on the emulator after script has complete at least confirm
 7. For convenience, Magisk Kitsune is provided in this repository.
 
 ## Video tutorial here
-[https://www.youtube.com/watch?v=cKIUSwz2Lx0]
+[YoutubeLink](https://www.youtube.com/watch?v=cKIUSwz2Lx0)
 
 ## Other Important Information
 - For BlueStacks instances running Android 11, please use the Magisk version available at: [https://github.com/HuskyDG/magisk-files/releases/tag/1707294287](https://github.com/HuskyDG/magisk-files/releases/tag/1707294287)
