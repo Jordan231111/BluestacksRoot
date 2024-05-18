@@ -21,8 +21,17 @@ if '%errorlevel%' NEQ '0' (
     pushd "%CD%"
     CD /D "%~dp0"
 
-rem define the path to the BlueStacks configuration file
-set "defaultDirectory=%ProgramData%\BlueStacks_nxt"
+:: Get the installation path of BlueStacks from the registry
+for /f "tokens=2*" %%a in ('reg query "HKEY_LOCAL_MACHINE\SOFTWARE\BlueStacks_nxt" /v "UserDefinedDir"') do set "defaultDirectory=%%b"
+
+:: Check if the BlueStacks path was found in the registry
+if not defined defaultDirectory (
+    echo BlueStacks installation path not found in registry. Using hardcoded path which could be wrong. 
+    powershell -Command "Write-Host 'Please use option 5 to set the correct path.' -ForegroundColor Red"
+    set "defaultDirectory=%ProgramData%\BlueStacks_nxt"
+)
+
+:: Rest of the script
 if exist "%~dp0bluestacksconfig.txt" (
     set /p customDirectory=<bluestacksconfig.txt
     if not defined customDirectory (
@@ -39,56 +48,63 @@ set "customDirectory=%customDirectory: =%"
 :: Ascii art for the program :D
 :: Presenting all options at the beginning
 :start_options
-powershell -Command "Write-Host '  ____  _                 _             _          ____             _     _____           _ ' -ForegroundColor Blue; Write-Host ' | __ )| |_   _  ___  ___| |_ __ _  ___| | _____  |  _ \ ___   ___ | |_  |_   _|__   ___ | |' -ForegroundColor Blue; Write-Host ' |  _ \| | | | |/ _ \/ __| __/ _` |/ __| |/ / __| | |_) / _ \ / _ \| __|   | |/ _ \ / _ \| |' -ForegroundColor Blue; Write-Host ' | |_) | | |_| |  __/\__ \ || (_| | (__|   <\__ \ |  _ < (_) | (_) | |_    | | (_) | (_) | |' -ForegroundColor Blue; Write-Host ' |____/|_|\__,_|\___||___/\__\__,_|\___|_|\_\___/ |_| \_\___/ \___/ \__|   |_|\___/ \___/|_|' -ForegroundColor Blue; Write-Host ''; Write-Host ('{0,-30} | {1,-30} | {2,-30}' -f 'Root Options:', 'Unroot Options:', 'Other Options:'); Write-Host ('{0,-30} | {1,-30} | {2,-30}' -f '1. Apply BlueStacks Android 9', '3. Undo BlueStacks Android 9', '5. Force Custom BlueStacks Path'); Write-Host ('{0,-30} | {1,-30} | {2,-30}' -f '2. Apply BlueStacks Android 11', '4. Undo BlueStacks Android 11', 'Current Path: %customDirectory%'); Write-Host ('{0,-30} | {1,-30} | {2,-30}' -f '', '6. FinalUndoRoot Android 9', ''); Write-Host ('{0,-30} | {1,-30} | {2,-30}' -f '', '7. FinalUndoRoot Android 11', ''); Write-Host '';"
+powershell -Command "Write-Host '  ____  _                 _             _          ____             _     _____           _ ' -ForegroundColor Blue; Write-Host ' | __ )| |_   _  ___  ___| |_ __ _  ___| | _____  |  _ \ ___   ___ | |_  |_   _|__   ___ | |' -ForegroundColor Blue; Write-Host ' |  _ \| | | | |/ _ \/ __| __/ _` |/ __| |/ / __| | |_) / _ \ / _ \| __|   | |/ _ \ / _ \| |' -ForegroundColor Blue; Write-Host ' | |_) | | |_| |  __/\__ \ || (_| | (__|   <\__ \ |  _ < (_) | (_) | |_    | | (_) | (_) | |' -ForegroundColor Blue; Write-Host ' |____/|_|\__,_|\___||___/\__\__,_|\___|_|\_\___/ |_| \_\___/ \___/ \__|   |_|\___/ \___/|_|' -ForegroundColor Blue; Write-Host ''; Write-Host ('{0,-30} | {1,-30} | {2,-30}' -f 'Root Options:', 'Unroot Options:', 'Other Options:'); Write-Host ('{0,-30} | {1,-30} | {2,-30}' -f '1. Apply BlueStacks Android 7', '4. Undo BlueStacks Android 7', '8. Force Custom BlueStacks Path'); Write-Host ('{0,-30} | {1,-30} | {2,-30}' -f '2. Apply BlueStacks Android 9', '5. Undo BlueStacks Android 9', 'Current Path: %customDirectory%'); Write-Host ('{0,-30} | {1,-30} | {2,-30}' -f '3. Apply BlueStacks Android 11', '6. Undo BlueStacks Android 11', ''); Write-Host ('{0,-30} | {1,-30} | {2,-30}' -f '', '7. FinalUndoRoot All Versions', ''); Write-Host '';"
 set /p choice=Enter option number: 
 
-if "%choice%"=="1" (
-    set "version=Pie64"
-    set "clonedVersion=Pie64" 
+
+if %choice%=="" (
+    echo Invalid option. Please enter a number between 1 and 8.
+    pause 
+    goto start_options
+) else if "%choice%"=="1" (
+    powershell -Command "Write-Host 'You chose to root Android 7 (Nougat32)' -ForegroundColor Red -NoNewline; Write-Host ' Please edit the bat file and replace Nougat32 with Nougat64 if you are using 64-bit version of BlueStacks Android 7' -ForegroundColor Red; Start-Sleep -Seconds 3"   
+    set "version=Nougat32"
+    set "clonedVersion=Nougat32"
     goto apply_changes
 ) else if "%choice%"=="2" (
+    set "version=Pie64" 
+    set "clonedVersion=Pie64"
+    goto apply_changes
+) else if "%choice%"=="3" (
     set "version=Rvc64"
     set "clonedVersion=Rvc64"
     goto apply_changes
-) else if "%choice%"=="3" (
-    set "version=Pie64"
-    set "clonedVersion=Pie64"
-    goto undo_both_changes  
 ) else if "%choice%"=="4" (
-    set "version=Rvc64"
-    set "clonedVersion=Rvc64"
+    set "version=Nougat32"
+    set "clonedVersion=Nougat32"
     goto undo_both_changes
 ) else if "%choice%"=="5" (
+    set "version=Pie64"
+    set "clonedVersion=Pie64"
+    goto undo_both_changes
+) else if "%choice%"=="6" (
+    set "version=Rvc64" 
+    set "clonedVersion=Rvc64"
+    goto undo_both_changes
+) else if "%choice%"=="7" (
+    goto undo_all_changes_final
+) else if "%choice%"=="8" (
     echo The default directory is C:\ProgramData\BlueStacks_nxt
     set /p "customDirectory=Please enter your Bluestacks_nxt directory: "
     if "!customDirectory:~-1!"=="\" (
         set "customDirectory=!customDirectory:~0,-1!"
     )
     if "!customDirectory:~-1!"=="/" (
-        set "customDirectory=!customDirectory:~0,-1!"
+        set "customDirectory=!customDirectory:~0,-1!" 
     )
-
+    
     echo You entered: !customDirectory!
     echo !customDirectory! > bluestacksconfig.txt
     powershell -Command "Write-Host 'The path you entered has been saved to bluestacksconfig.txt for future rooting if this script''s location does not change' -ForegroundColor Green"
     pause
     powershell -Command "Clear-Host"
     goto start_options
-) else if "%choice%"=="6" (
-    set "version=Pie64"
-    set "clonedVersion=Pie64"
-    goto undo_both_changes_final
-) else if "%choice%"=="7" (
-    set "version=Rvc64"
-    set "clonedVersion=Rvc64"
-    goto undo_both_changes_final
-) else if "%choice%"=="0" (
-    exit /b
 ) else (
-    echo Invalid option. Please enter a number between 1 and 7.
-    pause
-    exit /b 1
+    echo Invalid option. Please enter a number between 1 and 8.
+    pause 
+    goto start_options
 )
+
 
 :apply_changes
 taskkill /IM "HD-MultiInstanceManager.exe" /F 2>NUL
@@ -173,11 +189,11 @@ powershell -Command "Add-MpPreference -ExclusionPath '%BLUESTACKS_PATH%' 2>$null
 )
 
 rem Define search and replace strings
-set "search_str1=format=\"VDI\" type=\"ReadOnly\""
-set "replace_str1=format=\"VDI\" type=\"Normal\""
+set "search_str1=type=\"ReadOnly\""
+set "replace_str1=type=\"Normal\""
 
-set "search_str2=format=\"VHD\" type=\"ReadOnly\""
-set "replace_str2=format=\"VHD\" type=\"Normal\""
+set "search_str2=type=\"ReadOnly\""
+set "replace_str2=type=\"Normal\""
 
 rem Create a backup of the original XML file
 attrib -R "%XML_FILE%.bak"
@@ -185,7 +201,7 @@ copy "%XML_FILE%" "%XML_FILE%.bak" /Y > nul
 
 rem Make changes to the XML file
 copy "%XML_FILE%" "%TEMP_FILE%" /Y > nul
-powershell -Command "(Get-Content '%TEMP_FILE%') -replace '%search_str1%', '%replace_str1%' | Set-Content '%TEMP_FILE%'; (Get-Content '%TEMP_FILE%') -replace '%search_str2%', '%replace_str2%' | Set-Content '%TEMP_FILE%'"
+powershell -Command "(Get-Content '%TEMP_FILE%') | ForEach-Object { $_ -replace '%search_str1%', '%replace_str1%' } | Set-Content '%TEMP_FILE%'"
 move /Y "%TEMP_FILE%" "%XML_FILE%" > nul
 
 rem Create a backup of the original bluestacks.conf file
@@ -195,7 +211,6 @@ copy "%CONF_FILE%" "%CONF_FILE%.bak" /Y > nul
 rem Make changes to the temporary bluestacks.conf file using PowerShell
 copy "%CONF_FILE%" "%TEMP_FILE%" /Y > nul
 powershell -Command "Get-Content '%TEMP_FILE%' | ForEach-Object { $_ -replace 'enable_root_access=\"0\"', 'enable_root_access=\"1\"' -replace 'bst.feature.rooting=\"0\"', 'bst.feature.rooting=\"1\"' } | Set-Content '%TEMP_FILE%.tmp'; Remove-Item -Path '%TEMP_FILE%'; Rename-Item -Path '%TEMP_FILE%.tmp' -NewName '%TEMP_FILE%'"
-
 
 rem Replace the original bluestacks.conf file with the modified temporary bluestacks.conf file
 move /Y "%TEMP_FILE%" "%CONF_FILE%" > nul
@@ -290,15 +305,15 @@ powershell -Command "Add-MpPreference -ExclusionPath '%BLUESTACKS_PATH%' 2>$null
 )
 
 rem Define search and replace strings
-set "search_str1=format=\"VDI\" type=\"Normal\""
-set "replace_str1=format=\"VDI\" type=\"ReadOnly\""
+set "search_str1=type=\"Normal\""
+set "replace_str1=type=\"ReadOnly\""
 
-set "search_str2=format=\"VHD\" type=\"Normal\""
-set "replace_str2=format=\"VHD\" type=\"ReadOnly\""
+set "search_str2=type=\"Normal\""
+set "replace_str2=type=\"ReadOnly\""
 
 rem Revert changes in the XML file
 echo Reverting changes in XML file...
-powershell -Command "(Get-Content '%XML_FILE%') -replace '%search_str1%', '%replace_str1%' | Set-Content '%XML_FILE%'; (Get-Content '%XML_FILE%') -replace '%search_str2%', '%replace_str2%' | Set-Content '%XML_FILE%'"
+powershell -Command "$count = 0; (Get-Content '%XML_FILE%') | ForEach-Object { if ($count -lt 2 -and $_ -match '%search_str1%') { $count++; $_ -replace '%search_str1%', '%replace_str1%' } else { $_ } } | Set-Content '%XML_FILE%'"
 
 rem Check if the PowerShell command executed successfully
 if %errorlevel% neq 0 (
@@ -330,11 +345,34 @@ powershell -Command "Remove-MpPreference -ExclusionPath '%~dp0' 2>$null" && (
 pause
 exit /b 0
 
-:undo_both_changes_final
+:undo_all_changes_final
 taskkill /IM "HD-MultiInstanceManager.exe" /F 2>NUL
 taskkill /IM "HD-Player.exe" /F 2>NUL
 taskkill /IM "BlueStacksHelper.exe" /F 2>NUL
 taskkill /IM "BstkSVC.exe" /F 2>NUL
+
+echo Please choose the Android version:
+echo 1. Android 7 (Nougat32)
+echo 2. Android 9 (Pie)
+echo 3. Android 11
+set /p "version_choice=Enter option number: "
+
+:undo_all_changes_finalCheckVersion
+if "!version_choice!"=="1" (
+    set "version=Nougat32"
+    set "clonedVersion=Nougat32"
+) else if "!version_choice!"=="2" (
+    set "version=Pie64"
+    set "clonedVersion=Pie64"
+) else if "!version_choice!"=="3" (
+    set "version=Rvc64"
+    set "clonedVersion=Rvc64"
+) else (
+    echo Invalid option. Please enter a number between 1 and 3.
+    pause
+    goto undo_all_changes_finalCheckVersion
+)
+
 
 set "XML_FILE=%customDirectory%\Engine\%clonedVersion%\%clonedVersion%.bstk"
 set "CONF_FILE=%customDirectory%\bluestacks.conf"
@@ -411,15 +449,12 @@ powershell -Command "Add-MpPreference -ExclusionPath '%BLUESTACKS_PATH%' 2>$null
 )
 
 rem Define search and replace strings
-set "search_str1=format=\"VDI\" type=\"Normal\""
-set "replace_str1=format=\"VDI\" type=\"ReadOnly\""
-
-set "search_str2=format=\"VHD\" type=\"Normal\""
-set "replace_str2=format=\"VHD\" type=\"ReadOnly\""
+set "search_str1=type=\"Normal\""
+set "replace_str1=type=\"ReadOnly\""
 
 rem Revert changes in the XML file
 echo Reverting changes in XML file...
-powershell -Command "(Get-Content '%XML_FILE%') -replace '%search_str1%', '%replace_str1%' | Set-Content '%XML_FILE%'; (Get-Content '%XML_FILE%') -replace '%search_str2%', '%replace_str2%' | Set-Content '%XML_FILE%'"
+powershell -Command "$count = 0; (Get-Content '%XML_FILE%') | ForEach-Object { if ($count -lt 2 -and $_ -match '%search_str1%') { $count++; $_ -replace '%search_str1%', '%replace_str1%' } else { $_ } } | Set-Content '%XML_FILE%'"
 
 rem Check if the PowerShell command executed successfully
 if %errorlevel% neq 0 (
