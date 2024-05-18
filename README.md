@@ -34,12 +34,11 @@ You must turn off and on the emulator after script has complete at least confirm
 However, I cannot reproduce the issue and the latest magisk with zygisk is working though u may need to install to system in magisk app twice. Do not undo root until you are satisified it is working
 ![image](https://github.com/Jordan231111/BluestacksRoot/assets/79342877/7d8da465-2d0c-492d-920b-78bae89828ea)
 
-## License
-
-This work is licensed under the Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-nd/4.0/ or see the [LICENSE](./LICENSE) file.
-
-
 - You can find such old files [here](https://mega.nz/folder/SQBRHSZQ#pEgMXysWkkTm5Z8dxsNaNQ)
    
 - Manual root method my code is mainly based off this method [here](https://xdaforums.com/t/bluestacks-tweaker-6-tool-for-modifing-bluestacks-2-3-3n-4-5.3622681/post-89306676)
 - Due to changes that manual method may NOT even work due to hidden services unless manually killed as well so recommend to use this script instead.
+
+## License
+
+This work is licensed under the Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-nd/4.0/ or see the [LICENSE](./LICENSE) file.
