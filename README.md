@@ -9,7 +9,9 @@
 
 3. Exit all BlueStacks instances or Multi-Instance Manager.
 
-4. Run the `split.cmd` file once (grant admin permissions when prompted). Should delete file after run successfully. **ONLY DO THIS STEP ONCE!**
+4. Skip to step 10 if you want to **ONLY HAVE ROOTED INSTANCES** and 0 unrooted instances across all versions.
+
+5. Run the `split.cmd` file once (grant admin permissions when prompted). Should delete file after run successfully. **ONLY DO THIS STEP ONCE!**
    
 6. Run `rootjunction.cmd` and multiinstance manager should appear.
 
