@@ -40,7 +40,7 @@ You must turn off and on the emulator after script has complete **at least confi
 - Report any issues with clear steps to reproduce the issue and a video if possible.
 - For BlueStacks instances running Android 11, please use my uploaded Magisk or the Magisk version available at: [https://github.com/HuskyDG/magisk-files/releases/tag/1707294287](https://github.com/HuskyDG/magisk-files/releases/tag/1707294287)
 
-- BlueStacks instances running Android 9 are only supported by Magisk version 25.2. Please note that using this outdated version is at your own risk, as it may contain unpatched vulnerabilities or compatibility issues. It is highly recommended to upgrade your BlueStacks instance to a newer version of Android for better stability and security.
+- BlueStacks instances running Android 7 and possibly 9 are only supported by Magisk version 25.2. Please note that using this outdated version is at your own risk, as it may contain unpatched vulnerabilities or compatibility issues. It is highly recommended to upgrade your BlueStacks instance to a newer version of Android for better stability and security.
 However, I cannot reproduce the issue and the latest magisk with zygisk is working though u may need to install to system in magisk app twice. Do not undo root until you are satisified it is working
 ![image](https://github.com/Jordan231111/BluestacksRoot/assets/79342877/7d8da465-2d0c-492d-920b-78bae89828ea)
 
