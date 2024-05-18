@@ -26,7 +26,7 @@ Microsoft Defender SmartScreen prevented an unrecognized app from starting
 **Important:** DO NOT unroot until Magisk says it's installed and you get the SU conflict message in the Magisk app.
 You must turn off and on the emulator after script has complete **at least confirm you got the SU conflict message** for each instance
 
-12. Go back to script and apply final undo root option
+12. Go back to script and apply final undo root option. **Only now can you launch multiple Unrooted or Rooted instances at the same time**
 
 13. For convenience, Magisk Kitsune is provided in this repository.
 
