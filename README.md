@@ -5,29 +5,39 @@
 
 1. Download `blueStackRoot.cmd` `split.cmd`, `rootjunction.cmd`, and `norootjunction.cmd` in [releases](https://github.com/Jordan231111/BluestacksRoot/releases)
 
-2. Launch the BlueStacks instance that you want to root once beforehand.
+2. Launch bluestacks once if you just installed it.
 
 3. Exit all BlueStacks instances or Multi-Instance Manager.
 
-4. Run the `blueStackRoot.cmd` file (grant admin permissions when prompted).
+4. Run the `split.cmd` file once (grant admin permissions when prompted). Should delete file after run successfully. **ONLY DO THIS STEP ONCE!**
+   
+6. Run `rootjunction.cmd` and multiinstance manager should appear.
 
-5. If the following popup appears, click "More info" and then "Run anyway" (Windows blocks ALL .cmd files by default):
+7. If the following popup appears, click "More info" and then "Run anyway" (Windows blocks ALL .cmd files by default):
 Microsoft Defender SmartScreen prevented an unrecognized app from starting
 
-6. Wait for the rooting process to complete in the command prompt window. Then install magisk delta to system partition
+8. create many temporary instances and **DELETE** them afterwards. I recommend 50 to avoid conflicts. Note that you must create and delete more temporary instance than the number of unrooted instances you wish to have. **ONLY DO THIS STEP ONCE!**
+
+9. Label the master instance Do Not Launch and now create the rooted instances. If you want 5, create 5 new instances right now. You can modify it later by creating more.
+
+10. For each instance INDIVIDUALLY install magisk, then run `blueStackRoot.cmd`
+
+11. Wait for the rooting process to complete in the command prompt window. Then install magisk delta to system partition
 **Important:** DO NOT unroot until Magisk says it's installed and you get the SU conflict message in the Magisk app.
-You must turn off and on the emulator after script has complete at least confirm you got the SU conflict message
+You must turn off and on the emulator after script has complete **at least confirm you got the SU conflict message** for each instance
 
-7. Go back to script and undo the root for that version
+12. Go back to script and apply final undo root option
 
-8. For convenience, Magisk Kitsune is provided in this repository.
+13. For convenience, Magisk Kitsune is provided in this repository.
+
+14. To switch to noroot run `norootjunction.cmd` and now you can launch your UnRooted instances, do not modify these or use the tool in here **ALL Modification must be done in `rootjunction.cmd`
 
 ## Video tutorial here
-[YoutubeLink](https://www.youtube.com/watch?v=cKIUSwz2Lx0)
+[YoutubeLink](https://youtu.be/LOhKGxuhLrU)
 
 ## Other Important Information
 - Please create a PR for contribution with a clear explanation and images if applicable of the changes and edits
-
+- Report any issues with clear steps to reproduce the issue and a video if possible.
 - For BlueStacks instances running Android 11, please use my uploaded Magisk or the Magisk version available at: [https://github.com/HuskyDG/magisk-files/releases/tag/1707294287](https://github.com/HuskyDG/magisk-files/releases/tag/1707294287)
 
 - BlueStacks instances running Android 9 are only supported by Magisk version 25.2. Please note that using this outdated version is at your own risk, as it may contain unpatched vulnerabilities or compatibility issues. It is highly recommended to upgrade your BlueStacks instance to a newer version of Android for better stability and security.
