@@ -11,7 +11,7 @@
 
 4. Skip to step 10 if you want to **ONLY HAVE ROOTED INSTANCES** and 0 unrooted instances across all versions.
 
-5. Run the `split.cmd` file once (grant admin permissions when prompted). Should delete file after run successfully. **ONLY DO THIS STEP ONCE!**
+5. Run the `split.cmd` file once (grant admin permissions when prompted). Should delete `split.cmd` after you run it successfully once. **ONLY DO THIS STEP ONCE!**
    
 6. Run `rootjunction.cmd` and multiinstance manager should appear.
 
