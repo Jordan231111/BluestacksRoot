@@ -51,6 +51,9 @@ However, I cannot reproduce the issue and the latest magisk with zygisk is worki
 - Manual root method my code is mainly based off this method [here](https://xdaforums.com/t/bluestacks-tweaker-6-tool-for-modifing-bluestacks-2-3-3n-4-5.3622681/post-89306676)
 - Due to changes that manual method may NOT even work due to hidden services unless manually killed as well so recommend to use this script instead.
 
+## Support/Donation
+https://buymeacoffee.com/yejordan
+
 ## License
 
 This work is licensed under the Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-nd/4.0/ or see the [LICENSE](./LICENSE) file.
