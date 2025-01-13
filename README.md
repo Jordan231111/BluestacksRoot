@@ -52,6 +52,7 @@ However, I cannot reproduce the issue and the latest magisk with zygisk is worki
 - Due to changes that manual method may NOT even work due to hidden services unless manually killed as well so recommend to use this script instead.
 
 ## Support/Donation
+https://ko-fi.com/yejordan
 https://buymeacoffee.com/yejordan
 
 ## License
