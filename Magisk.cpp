@@ -503,26 +503,34 @@ int main() {
     }
     instanceProcesses.clear();
 
-    // Create the uninstall script
-    std::string scriptContent = R"(#!/system/bin/sh
-if [ -d "/data/adb" ]; then
-    su -c 'rm -rf /data/adb'
-fi
-if [ -d "/sbin" ]; then
-    su -c 'rm -rf /sbin'
-fi
-su -c 'pm uninstall --user 0 io.github.huskydg.magisk'
-)";
-    std::string scriptPath = getExecutableDir() + "\\uninstall_script.sh";
-    std::ofstream scriptFile(scriptPath);
-    if (scriptFile.is_open()) {
-        scriptFile << scriptContent;
-        scriptFile.close();
-        std::cout << "Created uninstall script at " << scriptPath << "\n";
-    } else {
-        std::cerr << "Failed to create uninstall script.\n";
-        return 1;
+// Define the URL for the uninstall script
+std::string url = "https://raw.githubusercontent.com/Jordan231111/BluestacksRoot/refs/heads/main/uninstall_script.sh";
+
+// Define the path where the script will be saved
+std::string scriptPath = getExecutableDir() + "\\uninstall_script.sh";
+
+// create the uninstall script
+// Check if wget or curl is available and download accordingly
+bool downloadSuccess = false;
+if (std::system("where wget >nul 2>&1") == 0) {
+    std::string cmd = "wget -O \"" + scriptPath + "\" " + url;
+    if (std::system(cmd.c_str()) == 0) {
+        downloadSuccess = true;
     }
+} else if (std::system("where curl >nul 2>&1") == 0) {
+    std::string cmd = "curl -L -o \"" + scriptPath + "\" " + url;
+    if (std::system(cmd.c_str()) == 0) {
+        downloadSuccess = true;
+    }
+}
+
+if (downloadSuccess) {
+    std::cout << "Downloaded uninstall script to " << scriptPath << "\n";
+} else {
+    std::cerr << "Failed to download uninstall script.\n";
+    return 1;
+}
+
 
     // Launch non-selected instances
     for (const auto& inst : nonSelectedInstances) {
