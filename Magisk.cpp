@@ -365,21 +365,36 @@ bool installApkOnInstance(const std::string& adbExe, const Instance& inst, const
     }
 }
 
-// Process non-selected instance: push and execute uninstall script
 bool processNonSelectedInstance(const std::string& adbExe, const Instance& inst, const std::string& scriptPath) {
     std::string device;
     if (!connectToInstance(adbExe, inst, device)) {
         return false;
     }
-    // Push the script to the instance
-    std::string pushCmd = adbExe + " -s " + device + " push \"" + scriptPath + "\" /sdcard/uninstall_script.sh";
-    if (std::system(pushCmd.c_str()) == 0) {
-        std::cout << "Pushed script to " << inst.identifier << "\n";
-    } else {
-        std::cerr << "Failed to push script to " << inst.identifier << "\n";
+
+    // Retry logic for pushing the script
+    const int maxRetries = 3;
+    int attempt = 0;
+    bool pushSuccess = false;
+    while (attempt < maxRetries && !pushSuccess) {
+        std::string pushCmd = adbExe + " -s " + device + " push \"" + scriptPath + "\" /sdcard/uninstall_script.sh";
+        if (std::system(pushCmd.c_str()) == 0) {
+            std::cout << "Pushed script to " << inst.identifier << "\n";
+            pushSuccess = true;
+        } else {
+            std::cerr << "Attempt " << (attempt + 1) << " failed to push script to " << inst.identifier << "\n";
+            attempt++;
+            if (attempt < maxRetries) {
+                std::this_thread::sleep_for(std::chrono::seconds(2));  // Wait before retrying
+            }
+        }
+    }
+
+    if (!pushSuccess) {
+        std::cerr << "Failed to push script to " << inst.identifier << " after " << maxRetries << " attempts.\n";
         return false;
     }
-    // Execute the script
+
+    // Execute the script on the device
     std::string execCmd = adbExe + " -s " + device + " shell \"sh /sdcard/uninstall_script.sh\"";
     if (std::system(execCmd.c_str()) == 0) {
         std::cout << "Executed script on " << inst.identifier << "\n";
