@@ -1,0 +1,34 @@
+name: Compile and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Add ubuntu-toolchain-r/test PPA
+        run: sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+
+      - name: Update package list
+        run: sudo apt update
+
+      - name: Install g++-14
+        run: sudo apt install g++-14
+
+      - name: Compile C++ file
+        run: g++-14 Magisk.cpp -o magisk
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            magisk
+            NewblueStacksRoot.cmd
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
