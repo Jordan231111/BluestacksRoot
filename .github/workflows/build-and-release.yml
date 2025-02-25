@@ -5,16 +5,23 @@ on:
     tags:
       - 'v*'
   workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag for the release (e.g. v1.2.3)'
+        required: true
 
 jobs:
   build:
     runs-on: windows-latest
+    env:
+      RELEASE_TAG: ${{ github.event.inputs.tag || github.ref_name }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
       - name: Download winlibs (GCC 14.1.0)
-        run: Invoke-WebRequest -Uri https://github.com/brechtsanders/winlibs_mingw/releases/download/14.2.0posix-19.1.7-12.0.0-msvcrt-r3/winlibs-x86_64-posix-seh-gcc-14.2.0-mingw-w64msvcrt-12.0.0-r3.zip -OutFile winlibs.zip
+        run: |
+          Invoke-WebRequest -Uri "https://github.com/brechtsanders/winlibs_mingw/releases/download/14.2.0posix-19.1.7-12.0.0-msvcrt-r3/winlibs-x86_64-posix-seh-gcc-14.2.0-mingw-w64msvcrt-12.0.0-r3.zip" -OutFile winlibs.zip
 
       - name: Extract winlibs
         run: 7z x winlibs.zip -oC:\winlibs
@@ -25,9 +32,11 @@ jobs:
       - name: Compile C++ file
         run: g++ Magisk.cpp -o magisk.exe
 
-      - name: Release
+      - name: Create GitHub Release
+        if: startsWith(env.RELEASE_TAG, 'v')
         uses: softprops/action-gh-release@v1
         with:
+          tag_name: ${{ env.RELEASE_TAG }}
           files: |
             magisk.exe
             NewblueStacksRoot.cmd
