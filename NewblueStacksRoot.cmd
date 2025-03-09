@@ -164,10 +164,10 @@ if "%choice%"=="1" (
     powershell -Command "(Get-Content '%TEMP_FILE%') -replace 'type=\"ReadOnly\"', 'type=\"Normal\"' | Set-Content '%TEMP_FILE%'"
     move /Y "%TEMP_FILE%" "%XML_FILE%" >nul
 
-    :: Modify configuration file (enable root for all instances)
+    :: Modify configuration file (enable root for all instances) - FIXED VERSION
     attrib -R "%CONF_FILE%"
     copy "%CONF_FILE%" "%TEMP_FILE%" /Y >nul
-    powershell -Command "$baseVersion = '%clonedVersion%'; (Get-Content '%TEMP_FILE%') -replace ('(^bst\.instance\.' + [regex]::Escape($baseVersion) + '(_\d+)?\.enable_root_access=)\""0\""'), '$1\"1\"' -replace 'bst\.feature\.rooting=\"0\"', 'bst\.feature\.rooting=\"1\"' | Set-Content '%TEMP_FILE%'"
+    powershell -Command "$baseVersion = '%clonedVersion%'; (Get-Content '%TEMP_FILE%') -replace ('(^bst\.instance\.' + [regex]::Escape($baseVersion) + '(_\d+)?\.enable_root_access=)\"0\"'), '$1\"1\"' -replace 'bst.feature.rooting=\"0\"', 'bst.feature.rooting=\"1\"' | Set-Content '%TEMP_FILE%'"
     move /Y "%TEMP_FILE%" "%CONF_FILE%" >nul
 
     :: Notify success and clean up
@@ -232,7 +232,7 @@ if "%choice%"=="1" (
     )
     move /Y "%TEMP_FILE%" "%XML_FILE%" >nul
 
-    :: Revert configuration file (disable root)
+    :: Revert configuration file (disable root) - FIXED VERSION
     attrib -R "%CONF_FILE%"
     copy "%CONF_FILE%" "%TEMP_FILE%" /Y >nul
     powershell -Command "(Get-Content '%TEMP_FILE%') -replace 'bst.instance.%version%.enable_root_access=\"1\"', 'bst.instance.%version%.enable_root_access=\"0\"' -replace 'bst.feature.rooting=\"1\"', 'bst.feature.rooting=\"0\"' | Set-Content '%TEMP_FILE%'"
@@ -329,10 +329,10 @@ if "%choice%"=="1" (
     )
     move /Y "%TEMP_FILE%" "%XML_FILE%" >nul
 
-    :: Revert configuration file (disable root for all instances)
+    :: Revert configuration file (disable root for all instances) - FIXED VERSION
     attrib -R "%CONF_FILE%"
     copy "%CONF_FILE%" "%TEMP_FILE%" /Y >nul
-    powershell -Command "$baseVersion = '%clonedVersion%'; (Get-Content '%TEMP_FILE%') -replace ('(^bst\.instance\.' + [regex]::Escape($baseVersion) + '(_\d+)?\.enable_root_access=)\""1\""'), '$1\"0\"' -replace 'bst\.feature\.rooting=\"1\"', 'bst\.feature\.rooting=\"0\"' | Set-Content '%TEMP_FILE%'"
+    powershell -Command "$baseVersion = '%clonedVersion%'; (Get-Content '%TEMP_FILE%') -replace ('(^bst\.instance\.' + [regex]::Escape($baseVersion) + '(_\d+)?\.enable_root_access=)\"1\"'), '$1\"0\"' -replace 'bst.feature.rooting=\"1\"', 'bst.feature.rooting=\"0\"' | Set-Content '%TEMP_FILE%'"
     if %errorlevel% neq 0 (
         echo Failed to revert conf changes. Restoring from backup...
         copy "%CONF_FILE%.bak" "%CONF_FILE%" /Y >nul
