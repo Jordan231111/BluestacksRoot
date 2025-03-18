@@ -7,9 +7,14 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Tag for the release (e.g. v1.2.3)'
+        description: 'Tag for the release (e.g. v1.0.0)'
         required: true
 
+# Add permissions to fix the 403 Forbidden error
+permissions:
+  contents: write
+  packages: read
+  
 jobs:
   build:
     runs-on: windows-latest
@@ -17,25 +22,41 @@ jobs:
       RELEASE_TAG: ${{ github.event.inputs.tag || github.ref_name }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
+      # Add caching for faster builds
+      - name: Cache MinGW
+        uses: actions/cache@v4
+        id: cache
+        with:
+          path: C:\winlibs
+          key: ${{ runner.os }}-mingw-14.2.0
+          
       - name: Download winlibs (GCC 14.1.0)
+        if: steps.cache.outputs.cache-hit != 'true'
         run: |
           Invoke-WebRequest -Uri "https://github.com/brechtsanders/winlibs_mingw/releases/download/14.2.0posix-19.1.7-12.0.0-msvcrt-r3/winlibs-x86_64-posix-seh-gcc-14.2.0-mingw-w64msvcrt-12.0.0-r3.zip" -OutFile winlibs.zip
-
-      - name: Extract winlibs
-        run: 7z x winlibs.zip -oC:\winlibs
+          7z x winlibs.zip -oC:\winlibs
 
       - name: Add winlibs to PATH
         run: echo "C:\winlibs\mingw64\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
-      - name: Compile C++ file
-        run: g++ Magisk.cpp -o magisk.exe
-
+      # Add optimization flags to the compilation
+      - name: Compile C++ file with optimizations
+        run: g++ Magisk.cpp -o magisk.exe -O3 -s -DNDEBUG
+        
+      # Improved Create Release step
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.RELEASE_TAG }}
+          name: "BlueStacks Root ${{ env.RELEASE_TAG }}"
+          body: |
+            BlueStacks Root Tool Release ${{ env.RELEASE_TAG }}
+            
+            ## Files:
+            - `magisk.exe`: Compiled binary for rooting BlueStacks
+            - `NewblueStacksRoot.cmd`: Optimized script for rooting BlueStacks
           files: |
             magisk.exe
             NewblueStacksRoot.cmd
