@@ -186,10 +186,13 @@ REM Function to detect BlueStacks instance
     echo.
     echo  Scanning logs for %pattern% instances...
     
-    REM Check log file exists
-    set "LOG_FILE=!customDirectory!\Logs\Player.log"
+    REM Set the log file path correctly by starting from Engine path and going up one level
+    powershell -Command "$enginePath = '!ENGINE_PATH!'; $logPath = $enginePath -replace '\\Engine$',''; $logFile = Join-Path $logPath 'Logs\Player.log'; Write-Output $logFile" > "%temp%\logpath.txt"
+    set /p LOG_FILE=<"%temp%\logpath.txt"
+    del "%temp%\logpath.txt" >nul 2>&1
+    
     if not exist "!LOG_FILE!" (
-        powershell -Command "Write-Host ' ERROR: ' -NoNewline -ForegroundColor Black -BackgroundColor Red; Write-Host ' Log file not found. Please run BlueStacks at least once.' -ForegroundColor Red"
+        powershell -Command "Write-Host ' ERROR: ' -NoNewline -ForegroundColor Black -BackgroundColor Red; Write-Host ' Log file not found (!LOG_FILE!). Please run BlueStacks at least once.' -ForegroundColor Red"
         pause
         set "detectedInstance=%pattern%"
         exit /b
@@ -210,14 +213,12 @@ REM Function to detect BlueStacks instance
         exit /b
     )
     
-    REM Detect instance from log
-    for /f "delims=" %%i in ('powershell -Command "Get-Content '!LOG_FILE!' | Select-String '!pattern!(_\\d+)?' -AllMatches | ForEach-Object { $_.Matches } | ForEach-Object { $_.Value } | Select-Object -Last 1"') do (
-        if not "%%i" == "" (
-            powershell -Command "Write-Host ' DETECTED: ' -NoNewline -ForegroundColor Black -BackgroundColor Green; Write-Host ' Found instance %%i' -ForegroundColor Green"
-            set "detectedInstance=%%i"
-        ) else (
-            set "detectedInstance=!pattern!"
-        )
+    REM Detect instance from log - improved to match main.cmd's approach
+    powershell -Command "Write-Host ' DEBUG: ' -NoNewline -ForegroundColor Black -BackgroundColor Gray; Write-Host ' Searching for %pattern% instances in !LOG_FILE! ' -ForegroundColor Gray"
+    
+    for /f "delims=" %%i in ('powershell -Command "$logFile = '!LOG_FILE!'; $pattern = '%pattern%'; $logContent = Get-Content $logFile -ReadCount 0; $instanceNumber = $logContent | Select-String ($pattern + '(_\d+)?') -AllMatches | ForEach-Object { $_.Matches } | ForEach-Object { $_.Value } | Select-Object -Last 1; if($instanceNumber) { Write-Output $instanceNumber } else { Write-Output $pattern }"') do (
+        powershell -Command "Write-Host ' DETECTED: ' -NoNewline -ForegroundColor Black -BackgroundColor Green; Write-Host ' Found instance %%i' -ForegroundColor Green"
+        set "detectedInstance=%%i"
     )
     
     if not defined detectedInstance set "detectedInstance=!pattern!"
@@ -256,54 +257,61 @@ REM Main Menu Function
 REM =========================================================================
 :main_menu
     cls
-    powershell -Command "Write-Host ''"
-    powershell -Command "Write-Host ' ██████╗ ██╗     ██╗   ██╗███████╗███████╗████████╗ █████╗  ██████╗██╗  ██╗███████╗' -ForegroundColor Blue"
-    powershell -Command "Write-Host ' ██╔══██╗██║     ██║   ██║██╔════╝██╔════╝╚══██╔══╝██╔══██╗██╔════╝██║ ██╔╝██╔════╝' -ForegroundColor Blue"
-    powershell -Command "Write-Host ' ██████╔╝██║     ██║   ██║█████╗  ███████╗   ██║   ███████║██║     █████╔╝ ███████╗' -ForegroundColor Blue"
-    powershell -Command "Write-Host ' ██╔══██╗██║     ██║   ██║██╔══╝  ╚════██║   ██║   ██╔══██║██║     ██╔═██╗ ╚════██║' -ForegroundColor Blue"
-    powershell -Command "Write-Host ' ██████╔╝███████╗╚██████╔╝███████╗███████║   ██║   ██║  ██║╚██████╗██║  ██╗███████║' -ForegroundColor Blue"
-    powershell -Command "Write-Host ' ╚═════╝ ╚══════╝ ╚═════╝ ╚══════╝╚══════╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝╚══════╝' -ForegroundColor Blue"
-    powershell -Command "Write-Host ''"
-    powershell -Command "Write-Host ' ██████╗  ██████╗  ██████╗ ████████╗    ████████╗ ██████╗  ██████╗ ██╗     ' -ForegroundColor Cyan"
-    powershell -Command "Write-Host ' ██╔══██╗██╔═══██╗██╔═══██╗╚══██╔══╝    ╚══██╔══╝██╔═══██╗██╔═══██╗██║     ' -ForegroundColor Cyan"
-    powershell -Command "Write-Host ' ██████╔╝██║   ██║██║   ██║   ██║          ██║   ██║   ██║██║   ██║██║     ' -ForegroundColor Cyan"
-    powershell -Command "Write-Host ' ██╔══██╗██║   ██║██║   ██║   ██║          ██║   ██║   ██║██║   ██║██║     ' -ForegroundColor Cyan"
-    powershell -Command "Write-Host ' ██║  ██║╚██████╔╝╚██████╔╝   ██║          ██║   ╚██████╔╝╚██████╔╝███████╗' -ForegroundColor Cyan"
-    powershell -Command "Write-Host ' ╚═╝  ╚═╝ ╚═════╝  ╚═════╝    ╚═╝          ╚═╝    ╚═════╝  ╚═════╝ ╚══════╝  v%VERSION%' -ForegroundColor Cyan"
-    echo.
+    REM Display the entire menu UI in a single PowerShell command to reduce lag
+    powershell -Command ^
+    "Write-Host ''; ^
+     Write-Host ' ██████╗ ██╗     ██╗   ██╗███████╗███████╗████████╗ █████╗  ██████╗██╗  ██╗███████╗' -ForegroundColor Blue; ^
+     Write-Host ' ██╔══██╗██║     ██║   ██║██╔════╝██╔════╝╚══██╔══╝██╔══██╗██╔════╝██║ ██╔╝██╔════╝' -ForegroundColor Blue; ^
+     Write-Host ' ██████╔╝██║     ██║   ██║█████╗  ███████╗   ██║   ███████║██║     █████╔╝ ███████╗' -ForegroundColor Blue; ^
+     Write-Host ' ██╔══██╗██║     ██║   ██║██╔══╝  ╚════██║   ██║   ██╔══██║██║     ██╔═██╗ ╚════██║' -ForegroundColor Blue; ^
+     Write-Host ' ██████╔╝███████╗╚██████╔╝███████╗███████║   ██║   ██║  ██║╚██████╗██║  ██╗███████║' -ForegroundColor Blue; ^
+     Write-Host ' ╚═════╝ ╚══════╝ ╚═════╝ ╚══════╝╚══════╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝╚══════╝' -ForegroundColor Blue; ^
+     Write-Host ''; ^
+     Write-Host ' ██████╗  ██████╗  ██████╗ ████████╗    ████████╗ ██████╗  ██████╗ ██╗     ' -ForegroundColor Cyan; ^
+     Write-Host ' ██╔══██╗██╔═══██╗██╔═══██╗╚══██╔══╝    ╚══██╔══╝██╔═══██╗██╔═══██╗██║     ' -ForegroundColor Cyan; ^
+     Write-Host ' ██████╔╝██║   ██║██║   ██║   ██║          ██║   ██║   ██║██║   ██║██║     ' -ForegroundColor Cyan; ^
+     Write-Host ' ██╔══██╗██║   ██║██║   ██║   ██║          ██║   ██║   ██║██║   ██║██║     ' -ForegroundColor Cyan; ^
+     Write-Host ' ██║  ██║╚██████╔╝╚██████╔╝   ██║          ██║   ╚██████╔╝╚██████╔╝███████╗' -ForegroundColor Cyan; ^
+     Write-Host ' ╚═╝  ╚═╝ ╚═════╝  ╚═════╝    ╚═╝          ╚═╝    ╚═════╝  ╚═════╝ ╚══════╝  v%VERSION%' -ForegroundColor Cyan; ^
+     Write-Host ''; ^
+     # Draw box header ^
+     $line = '═' * 70; ^
+     Write-Host (' ' + $line); ^
+     $title = 'MAIN MENU'; ^
+     $padding = '   '; ^
+     $titleLen = $title.Length; ^
+     $spaces = [math]::Max(1, (70-$titleLen-6)/2); ^
+     $titlePadding = ' ' * $spaces; ^
+     Write-Host (' ║' + $padding + $titlePadding + $title + $titlePadding + $padding + '║'); ^
+     Write-Host (' ' + $line); ^
+     Write-Host ''; ^
+     # Root options section ^
+     Write-Host ''; Write-Host ' ROOT OPTIONS ' -ForegroundColor Black -BackgroundColor Green; Write-Host ''; ^
+     Write-Host ' [1] ' -NoNewline -ForegroundColor Black -BackgroundColor Green; Write-Host ' Android 7  (Nougat32)  ' -NoNewline -ForegroundColor Green; Write-Host '  Enable root access for Android 7'; ^
+     Write-Host ' [2] ' -NoNewline -ForegroundColor Black -BackgroundColor Green; Write-Host ' Android 9  (Pie64)     ' -NoNewline -ForegroundColor Green; Write-Host '  Enable root access for Android 9'; ^
+     Write-Host ' [3] ' -NoNewline -ForegroundColor Black -BackgroundColor Green; Write-Host ' Android 11 (Rvc64)     ' -NoNewline -ForegroundColor Green; Write-Host '  Enable root access for Android 11'; ^
+     Write-Host ' [4] ' -NoNewline -ForegroundColor Black -BackgroundColor Green; Write-Host ' Android 13 (Tiramisu64)' -NoNewline -ForegroundColor Green; Write-Host '  Enable root access for Android 13'; ^
+     # Unroot options section ^
+     Write-Host ''; Write-Host ' UNROOT OPTIONS ' -ForegroundColor Black -BackgroundColor Yellow; Write-Host ''; ^
+     Write-Host ' [5] ' -NoNewline -ForegroundColor Black -BackgroundColor Yellow; Write-Host ' Android 7  (Nougat32)  ' -NoNewline -ForegroundColor Yellow; Write-Host '  Disable root access for Android 7'; ^
+     Write-Host ' [6] ' -NoNewline -ForegroundColor Black -BackgroundColor Yellow; Write-Host ' Android 9  (Pie64)     ' -NoNewline -ForegroundColor Yellow; Write-Host '  Disable root access for Android 9'; ^
+     Write-Host ' [7] ' -NoNewline -ForegroundColor Black -BackgroundColor Yellow; Write-Host ' Android 11 (Rvc64)     ' -NoNewline -ForegroundColor Yellow; Write-Host '  Disable root access for Android 11'; ^
+     Write-Host ' [8] ' -NoNewline -ForegroundColor Black -BackgroundColor Yellow; Write-Host ' Android 13 (Tiramisu64)' -NoNewline -ForegroundColor Yellow; Write-Host '  Disable root access for Android 13'; ^
+     # Other options section ^
+     Write-Host ''; Write-Host ' OTHER OPTIONS ' -ForegroundColor Black -BackgroundColor Cyan; Write-Host ''; ^
+     Write-Host ' [9]  ' -NoNewline -ForegroundColor Black -BackgroundColor Cyan; Write-Host ' Final Undo Root       ' -NoNewline -ForegroundColor Cyan; Write-Host '  Disable root after Magisk system install'; ^
+     Write-Host ' [10] ' -NoNewline -ForegroundColor Black -BackgroundColor Cyan; Write-Host ' Set Custom Path       ' -NoNewline -ForegroundColor Cyan; Write-Host '  Configure BlueStacks installation path'; ^
+     Write-Host ' [11] ' -NoNewline -ForegroundColor Black -BackgroundColor Cyan; Write-Host ' About                 ' -NoNewline -ForegroundColor Cyan; Write-Host '  Information about this tool'; ^
+     Write-Host ' [12] ' -NoNewline -ForegroundColor Black -BackgroundColor Cyan; Write-Host ' Help                  ' -NoNewline -ForegroundColor Cyan; Write-Host '  Show instructions and troubleshooting'; ^
+     Write-Host ' [0]  ' -NoNewline -ForegroundColor Black -BackgroundColor Red; Write-Host ' Exit                  ' -NoNewline -ForegroundColor Red; Write-Host '  Close this application'; ^
+     # Status bar ^
+     Write-Host ''; ^
+     $line2 = '─' * 70; ^
+     Write-Host (' ' + $line2); ^
+     Write-Host ' Current Path: ' -NoNewline -ForegroundColor Magenta; Write-Host '!customDirectory!' -ForegroundColor White; ^
+     Write-Host (' ' + $line2); ^
+     Write-Host '';"
     
-    call :draw_box "MAIN MENU" 70
-    echo.
-
-    REM Root options section
-    call :section_header "ROOT OPTIONS" %PS_GREEN%
-    powershell -Command "Write-Host ' [1] ' -NoNewline -ForegroundColor Black -BackgroundColor Green; Write-Host ' Android 7  (Nougat32)  ' -NoNewline -ForegroundColor Green; Write-Host '  Enable root access for Android 7'"
-    powershell -Command "Write-Host ' [2] ' -NoNewline -ForegroundColor Black -BackgroundColor Green; Write-Host ' Android 9  (Pie64)     ' -NoNewline -ForegroundColor Green; Write-Host '  Enable root access for Android 9'"
-    powershell -Command "Write-Host ' [3] ' -NoNewline -ForegroundColor Black -BackgroundColor Green; Write-Host ' Android 11 (Rvc64)     ' -NoNewline -ForegroundColor Green; Write-Host '  Enable root access for Android 11'"
-    powershell -Command "Write-Host ' [4] ' -NoNewline -ForegroundColor Black -BackgroundColor Green; Write-Host ' Android 13 (Tiramisu64)' -NoNewline -ForegroundColor Green; Write-Host '  Enable root access for Android 13'"
-
-    REM Unroot options section
-    call :section_header "UNROOT OPTIONS" %PS_YELLOW%
-    powershell -Command "Write-Host ' [5] ' -NoNewline -ForegroundColor Black -BackgroundColor Yellow; Write-Host ' Android 7  (Nougat32)  ' -NoNewline -ForegroundColor Yellow; Write-Host '  Disable root access for Android 7'"
-    powershell -Command "Write-Host ' [6] ' -NoNewline -ForegroundColor Black -BackgroundColor Yellow; Write-Host ' Android 9  (Pie64)     ' -NoNewline -ForegroundColor Yellow; Write-Host '  Disable root access for Android 9'"
-    powershell -Command "Write-Host ' [7] ' -NoNewline -ForegroundColor Black -BackgroundColor Yellow; Write-Host ' Android 11 (Rvc64)     ' -NoNewline -ForegroundColor Yellow; Write-Host '  Disable root access for Android 11'"
-    powershell -Command "Write-Host ' [8] ' -NoNewline -ForegroundColor Black -BackgroundColor Yellow; Write-Host ' Android 13 (Tiramisu64)' -NoNewline -ForegroundColor Yellow; Write-Host '  Disable root access for Android 13'"
-
-    REM Other options section
-    call :section_header "OTHER OPTIONS" %PS_CYAN%
-    powershell -Command "Write-Host ' [9]  ' -NoNewline -ForegroundColor Black -BackgroundColor Cyan; Write-Host ' Final Undo Root       ' -NoNewline -ForegroundColor Cyan; Write-Host '  Disable root after Magisk system install'"
-    powershell -Command "Write-Host ' [10] ' -NoNewline -ForegroundColor Black -BackgroundColor Cyan; Write-Host ' Set Custom Path       ' -NoNewline -ForegroundColor Cyan; Write-Host '  Configure BlueStacks installation path'"
-    powershell -Command "Write-Host ' [11] ' -NoNewline -ForegroundColor Black -BackgroundColor Cyan; Write-Host ' About                 ' -NoNewline -ForegroundColor Cyan; Write-Host '  Information about this tool'"
-    powershell -Command "Write-Host ' [12] ' -NoNewline -ForegroundColor Black -BackgroundColor Cyan; Write-Host ' Help                  ' -NoNewline -ForegroundColor Cyan; Write-Host '  Show instructions and troubleshooting'"
-    powershell -Command "Write-Host ' [0]  ' -NoNewline -ForegroundColor Black -BackgroundColor Red; Write-Host ' Exit                  ' -NoNewline -ForegroundColor Red; Write-Host '  Close this application'"
-
-    REM Status bar
-    echo.
-    call :draw_line "─" 70
-    powershell -Command "Write-Host ' Current Path: ' -NoNewline -ForegroundColor Magenta; Write-Host '!customDirectory!' -ForegroundColor White;"
-    call :draw_line "─" 70
-    echo.
-
     REM Get user choice
     set "choice="
     set /p "choice=Enter option number (0-12): "
