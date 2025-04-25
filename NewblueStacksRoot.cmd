@@ -38,16 +38,16 @@ if errorlevel 1 (
     echo.
     
     REM Create and run elevation script
-    echo Set UAC = CreateObject^("Shell.Application"^) > "%temp%\getadmin.vbs"
-    echo UAC.ShellExecute "%~s0", "", "", "runas", 1 >> "%temp%\getadmin.vbs"
-    "%temp%\getadmin.vbs"
+    echo Set UAC = CreateObject^("Shell.Application"^) > "%temp%\\getadmin.vbs"
+    echo UAC.ShellExecute "%~s0", "", "", "runas", 1 >> "%temp%\\getadmin.vbs"
+    "%temp%\\getadmin.vbs"
     
     REM Exit this instance - will continue in elevated instance
     exit /b
 )
 
 REM Clean up temporary VBScript file and set working directory
-if exist "%temp%\getadmin.vbs" del "%temp%\getadmin.vbs"
+if exist "%temp%\\getadmin.vbs" del "%temp%\\getadmin.vbs"
 cd /d "%~dp0"
 
 REM =========================================================================
@@ -56,33 +56,43 @@ REM =========================================================================
 
 REM Retrieve BlueStacks installation path from registry
 set "defaultDirectory="
-for /f "tokens=2*" %%a in ('reg query "HKEY_LOCAL_MACHINE\SOFTWARE\BlueStacks_nxt" /v "UserDefinedDir" 2^>nul') do (
+for /f "tokens=2*" %%a in ('reg query "HKEY_LOCAL_MACHINE\\SOFTWARE\\BlueStacks_nxt" /v "UserDefinedDir" 2^>nul') do (
     set "defaultDirectory=%%b"
 )
+REM DEBUG: Default directory from registry: %defaultDirectory%
+powershell -Command "Write-Host ' DEBUG: Default directory from registry: %defaultDirectory%' -ForegroundColor Gray"
 
 REM Handle missing registry entry
 if not defined defaultDirectory (
     echo Warning: BlueStacks registry entry not found.
     powershell -Command "Write-Host '  Please use option 10 to set the correct path. ' -ForegroundColor Black -BackgroundColor Yellow"
-    set "defaultDirectory=%ProgramData%\BlueStacks_nxt"
+    set "defaultDirectory=%ProgramData%\\BlueStacks_nxt"
 )
+REM DEBUG: Default directory final: %defaultDirectory%
+powershell -Command "Write-Host ' DEBUG: Default directory final: %defaultDirectory%' -ForegroundColor Gray"
 
 REM Load custom directory from config file or use default
 if exist "%~dp0bluestacksconfig.txt" (
     set /p customDirectory=<"%~dp0bluestacksconfig.txt"
+    REM DEBUG: Read custom directory from file: !customDirectory!
+    powershell -Command "Write-Host ' DEBUG: Read custom directory from file: !customDirectory!' -ForegroundColor Gray"
     if "!customDirectory!"=="" set "customDirectory=!defaultDirectory!"
     if not exist "!customDirectory!" (
         echo Custom directory in bluestacksconfig.txt does not exist. Reverting to default.
         set "customDirectory=!defaultDirectory!"
     )
 ) else (
+    REM DEBUG: Config file not found, using default.
+    powershell -Command "Write-Host ' DEBUG: Config file not found, using default.' -ForegroundColor Gray"
     set "customDirectory=!defaultDirectory!"
 )
 
 REM Remove trailing spaces and slashes from custom directory
 set "customDirectory=!customDirectory: =!"
-if "!customDirectory:~-1!"=="\" set "customDirectory=!customDirectory:~0,-1!"
+if "!customDirectory:~-1!"=="\\" set "customDirectory=!customDirectory:~0,-1!"
 if "!customDirectory:~-1!"=="/" set "customDirectory=!customDirectory:~0,-1!"
+REM DEBUG: Final custom directory after cleaning: %customDirectory%
+powershell -Command "Write-Host ' DEBUG: Final custom directory after cleaning: !customDirectory!' -ForegroundColor Gray"
 
 REM =========================================================================
 REM Utility Functions
@@ -173,79 +183,113 @@ REM Function to terminate BlueStacks processes
 
 REM Function to initialize paths
 :initialize_paths
-    set "ENGINE_PATH=%customDirectory%\Engine"
-    set "CONF_FILE=%customDirectory%\bluestacks.conf"
+    set "ENGINE_PATH=%customDirectory%\\Engine"
+    REM DEBUG: ENGINE_PATH set to: %ENGINE_PATH%
+    powershell -Command "Write-Host ' DEBUG: ENGINE_PATH set to: %ENGINE_PATH%' -ForegroundColor Gray"
+    set "CONF_FILE=%customDirectory%\\bluestacks.conf"
+    REM DEBUG: CONF_FILE set to: %CONF_FILE%
+    powershell -Command "Write-Host ' DEBUG: CONF_FILE set to: %CONF_FILE%' -ForegroundColor Gray"
     set "TEMP_FILE=%CONF_FILE%.tmp"
+    REM DEBUG: TEMP_FILE set to: %TEMP_FILE%
+    powershell -Command "Write-Host ' DEBUG: TEMP_FILE set to: %TEMP_FILE%' -ForegroundColor Gray"
     exit /b
 
 REM Function to detect BlueStacks instance
 :detect_instance
     set "pattern=%~1"
+    REM DEBUG: Entering :detect_instance with pattern: %pattern%
+    powershell -Command "Write-Host ' DEBUG: Entering :detect_instance with pattern: %pattern%' -ForegroundColor Gray"
     powershell -Command "Write-Host ' Automatically detecting instance... ' -ForegroundColor Cyan"
     echo  Please ensure you've run the target instance at least once.
     echo.
     echo  Scanning logs for %pattern% instances...
     
     REM Set the log file path correctly by starting from Engine path and going up one level
-    powershell -Command "$enginePath = '!ENGINE_PATH!'; $logPath = $enginePath -replace '\\Engine$',''; $logFile = Join-Path $logPath 'Logs\Player.log'; Write-Output $logFile" > "%temp%\logpath.txt"
-    set /p LOG_FILE=<"%temp%\logpath.txt"
-    del "%temp%\logpath.txt" >nul 2>&1
+    powershell -Command "$enginePath = '!ENGINE_PATH!'; $logPath = $enginePath -replace '\\Engine$',''; $logFile = Join-Path $logPath 'Logs\\Player.log'; Write-Output $logFile" > "%temp%\\logpath.txt"
+    set /p LOG_FILE=<"%temp%\\logpath.txt"
+    del "%temp%\\logpath.txt" >nul 2>&1
     
+    REM DEBUG: Determined LOG_FILE path: %LOG_FILE%
+    powershell -Command "Write-Host ' DEBUG: Determined LOG_FILE path: !LOG_FILE!' -ForegroundColor Gray"
     if not exist "!LOG_FILE!" (
         powershell -Command "Write-Host ' ERROR: ' -NoNewline -ForegroundColor Black -BackgroundColor Red; Write-Host ' Log file not found (!LOG_FILE!). Please run BlueStacks at least once.' -ForegroundColor Red"
         pause
+        REM DEBUG: Log file not found, setting detectedInstance to pattern: %pattern%
+        powershell -Command "Write-Host ' DEBUG: Log file not found, setting detectedInstance to pattern: %pattern%' -ForegroundColor Gray"
         set "detectedInstance=%pattern%"
-        exit /b
+        echo  The program will process: !detectedInstance!
+        ping -n 2 127.0.0.1 > nul
+        echo.
+    ) else (
+        REM Check log file size
+        for /f "tokens=*" %%a in ('powershell -Command "if (Test-Path '!LOG_FILE!') { Write-Output ((Get-Item '!LOG_FILE!').Length / 1MB) }"') do (
+            set "fileSize=%%a"
+        )
+        
+        REM DEBUG: Log file size: %fileSize% MB
+        powershell -Command "Write-Host ' DEBUG: Log file size: !fileSize! MB' -ForegroundColor Gray"
+        REM If log file too large, delete it
+        set /a "fileSizeInt=!fileSize!"
+        if !fileSizeInt! gtr 10 (
+            del "!LOG_FILE!" /f
+            powershell -Command "Write-Host ' ERROR: ' -NoNewline -ForegroundColor Black -BackgroundColor Red; Write-Host ' Log file too large and deleted. Rerun your instance and retry.' -ForegroundColor Red"
+            pause
+            set "detectedInstance=%pattern%"
+            REM DEBUG: Log file too large, setting detectedInstance to pattern: %pattern%
+            powershell -Command "Write-Host ' DEBUG: Log file too large, setting detectedInstance to pattern: %pattern%' -ForegroundColor Gray"
+            echo  The program will process: !detectedInstance!
+            ping -n 2 127.0.0.1 > nul
+            echo.
+        ) else (
+            REM Detect instance from log - improved to match main.cmd's approach
+            powershell -Command "Write-Host ' DEBUG: ' -NoNewline -ForegroundColor Black -BackgroundColor Gray; Write-Host ' Searching for %pattern% instances in !LOG_FILE! ' -ForegroundColor Gray"
+            
+            for /f "delims=" %%i in ('powershell -Command "$logFile = ''!LOG_FILE!''; $pattern = ''%pattern%''; try { $logContent = Get-Content $logFile -ReadCount 0 -ErrorAction Stop } catch { Write-Output $pattern; return }; $instanceNumber = $logContent | Select-String ($pattern + ''(_\\d+)?'') -AllMatches | ForEach-Object { $_.Matches } | ForEach-Object { $_.Value } | Select-Object -Last 1; if($instanceNumber) { Write-Output $instanceNumber } else { Write-Output $pattern }"') do (
+                powershell -Command "Write-Host ' DETECTED: ' -NoNewline -ForegroundColor Black -BackgroundColor Green; Write-Host ' Found instance %%i' -ForegroundColor Green"
+                set "detectedInstance=%%i"
+            )
+            REM DEBUG: Instance detection loop finished. detectedInstance is now: !detectedInstance!
+            powershell -Command "Write-Host ' DEBUG: Instance detection loop finished. detectedInstance is now: !detectedInstance!' -ForegroundColor Gray"
+            if not defined detectedInstance set "detectedInstance=!pattern!"
+        )
     )
     
-    REM Check log file size
-    for /f "tokens=*" %%a in ('powershell -Command "if (Test-Path '!LOG_FILE!') { Write-Output ((Get-Item '!LOG_FILE!').Length / 1MB) }"') do (
-        set "fileSize=%%a"
-    )
-    
-    REM If log file too large, delete it
-    set /a "fileSizeInt=!fileSize!"
-    if !fileSizeInt! gtr 10 (
-        del "!LOG_FILE!" /f
-        powershell -Command "Write-Host ' ERROR: ' -NoNewline -ForegroundColor Black -BackgroundColor Red; Write-Host ' Log file too large and deleted. Rerun your instance and retry.' -ForegroundColor Red"
-        pause
-        set "detectedInstance=%pattern%"
-        exit /b
-    )
-    
-    REM Detect instance from log - improved to match main.cmd's approach
-    powershell -Command "Write-Host ' DEBUG: ' -NoNewline -ForegroundColor Black -BackgroundColor Gray; Write-Host ' Searching for %pattern% instances in !LOG_FILE! ' -ForegroundColor Gray"
-    
-    for /f "delims=" %%i in ('powershell -Command "$logFile = '!LOG_FILE!'; $pattern = '%pattern%'; $logContent = Get-Content $logFile -ReadCount 0; $instanceNumber = $logContent | Select-String ($pattern + '(_\d+)?') -AllMatches | ForEach-Object { $_.Matches } | ForEach-Object { $_.Value } | Select-Object -Last 1; if($instanceNumber) { Write-Output $instanceNumber } else { Write-Output $pattern }"') do (
-        powershell -Command "Write-Host ' DETECTED: ' -NoNewline -ForegroundColor Black -BackgroundColor Green; Write-Host ' Found instance %%i' -ForegroundColor Green"
-        set "detectedInstance=%%i"
-    )
-    
-    if not defined detectedInstance set "detectedInstance=!pattern!"
-    
+    REM DEBUG: Final detectedInstance value in :detect_instance: !detectedInstance!
+    powershell -Command "Write-Host ' DEBUG: Final detectedInstance value in :detect_instance: !detectedInstance!' -ForegroundColor Gray"
     echo  The program will process: !detectedInstance!
     ping -n 2 127.0.0.1 > nul
     echo.
-    exit /b
+    REM DEBUG: Exiting :detect_instance
+    powershell -Command "Write-Host ' DEBUG: Returning from :detect_instance' -ForegroundColor Gray"
 
 REM Function to prompt for BlueStacks path
 :prompt_for_path
     echo.
     powershell -Command "Write-Host ' Configuration file not found.' -ForegroundColor Yellow"
-    powershell -Command "Write-Host ' The default path is C:\ProgramData\BlueStacks_nxt' -ForegroundColor Cyan"
+    powershell -Command "Write-Host ' The default path is C:\\ProgramData\\BlueStacks_nxt' -ForegroundColor Cyan"
     echo.
     set /p "BLUESTACKS_PATH=Please enter your BlueStacks_nxt directory: "
     
+    REM DEBUG: User entered path: %BLUESTACKS_PATH%
+    powershell -Command "Write-Host ' DEBUG: User entered path in :prompt_for_path: !BLUESTACKS_PATH!' -ForegroundColor Gray"
     REM Use default if empty
-    if "!BLUESTACKS_PATH!"=="" set "BLUESTACKS_PATH=%ProgramData%\BlueStacks_nxt"
+    if "!BLUESTACKS_PATH!"=="" set "BLUESTACKS_PATH=%ProgramData%\\BlueStacks_nxt"
     
+    REM DEBUG: Path after default check: %BLUESTACKS_PATH%
+    powershell -Command "Write-Host ' DEBUG: Path after default check in :prompt_for_path: !BLUESTACKS_PATH!' -ForegroundColor Gray"
     REM Trim trailing characters
-    if "!BLUESTACKS_PATH:~-1!"=="\" set "BLUESTACKS_PATH=!BLUESTACKS_PATH:~0,-1!"
+    if "!BLUESTACKS_PATH:~-1!"=="\\" set "BLUESTACKS_PATH=!BLUESTACKS_PATH:~0,-1!"
     if "!BLUESTACKS_PATH:~-1!"=="/" set "BLUESTACKS_PATH=!BLUESTACKS_PATH:~0,-1!"
     
+    REM DEBUG: Path after trimming: %BLUESTACKS_PATH%
+    powershell -Command "Write-Host ' DEBUG: Path after trimming in :prompt_for_path: !BLUESTACKS_PATH!' -ForegroundColor Gray"
     set "customDirectory=!BLUESTACKS_PATH!"
-    set "ENGINE_PATH=!BLUESTACKS_PATH!\Engine"
-    set "CONF_FILE=!BLUESTACKS_PATH!\bluestacks.conf"
+    set "ENGINE_PATH=!BLUESTACKS_PATH!\\Engine"
+    REM DEBUG: Setting ENGINE_PATH in :prompt_for_path: %ENGINE_PATH%
+    powershell -Command "Write-Host ' DEBUG: Setting ENGINE_PATH in :prompt_for_path: !ENGINE_PATH!' -ForegroundColor Gray"
+    set "CONF_FILE=!BLUESTACKS_PATH!\\bluestacks.conf"
+    REM DEBUG: Setting CONF_FILE in :prompt_for_path: %CONF_FILE%
+    powershell -Command "Write-Host ' DEBUG: Setting CONF_FILE in :prompt_for_path: !CONF_FILE!' -ForegroundColor Gray"
     set "TEMP_FILE=!CONF_FILE!.tmp"
     
     attrib -R "!CONF_FILE!" 2>nul
@@ -310,6 +354,8 @@ REM =========================================================================
     set "choice="
     set /p "choice=Enter option number (0-12): "
     if not defined choice set "choice=0"
+    REM DEBUG: User choice: %choice%
+    powershell -Command "Write-Host ' DEBUG: User choice: %choice%' -ForegroundColor Gray"
 
     REM Process user choice
     if "%choice%"=="0" (
@@ -346,12 +392,16 @@ REM =========================================================================
                 set "clonedVersion=%%v"
             )
         )
+        REM DEBUG: Determined clonedVersion: %clonedVersion%
+        powershell -Command "Write-Host ' DEBUG: Determined clonedVersion (Root): !clonedVersion!' -ForegroundColor Gray"
         
         if not defined clonedVersion (
             powershell -Command "Write-Host ' ERROR: ' -NoNewline -ForegroundColor Black -BackgroundColor Red; Write-Host ' Failed to determine Android version for choice %choice%.' -ForegroundColor Red"
             pause
             goto :main_menu
         )
+        REM DEBUG: Calling :apply_changes for %clonedVersion%
+        powershell -Command "Write-Host ' DEBUG: Calling :apply_changes for !clonedVersion!' -ForegroundColor Gray"
 
         if "%choice%"=="1" (
             powershell -Command "Write-Host ''; Write-Host ' IMPORTANT: ' -NoNewline -ForegroundColor Black -BackgroundColor Yellow; Write-Host ' You chose to root Android 7 (Nougat32)' -ForegroundColor Yellow"
@@ -377,18 +427,24 @@ REM =========================================================================
                 set "clonedVersion=%%v"
             )
         )
+        REM DEBUG: Determined clonedVersion: %clonedVersion%
+        powershell -Command "Write-Host ' DEBUG: Determined clonedVersion (Unroot): !clonedVersion!' -ForegroundColor Gray"
 
         if not defined clonedVersion (
             powershell -Command "Write-Host ' ERROR: ' -NoNewline -ForegroundColor Black -BackgroundColor Red; Write-Host ' Failed to determine Android version for choice %choice%.' -ForegroundColor Red"
             pause
             goto :main_menu
         )
+        REM DEBUG: Calling :undo_both_changes for %clonedVersion%
+        powershell -Command "Write-Host ' DEBUG: Calling :undo_both_changes for !clonedVersion!' -ForegroundColor Gray"
 
         call :undo_both_changes
         goto :main_menu
     )
 
     REM Other options
+    REM DEBUG: Other option selected: %choice%
+    powershell -Command "Write-Host ' DEBUG: Other option selected: %choice%' -ForegroundColor Gray"
     if "%choice%"=="9" (
         call :undo_all_changes_final
         goto :main_menu
@@ -522,6 +578,8 @@ REM Root Operations Functions
 REM =========================================================================
 :apply_changes
     REM Show operation header
+    REM DEBUG: Entering :apply_changes for %clonedVersion%
+    powershell -Command "Write-Host ' DEBUG: Entering :apply_changes for %clonedVersion%' -ForegroundColor Gray"
     cls
     call :draw_box "APPLYING ROOT - %clonedVersion%" 70
     echo.
@@ -540,6 +598,8 @@ REM =========================================================================
         powershell -Command "Write-Host ' ALERT: ' -NoNewline -ForegroundColor Black -BackgroundColor Yellow; Write-Host ' Configuration file not found. Prompting for path...     ' -ForegroundColor Yellow"
         call :prompt_for_path
         if not exist "!CONF_FILE!" (
+            REM DEBUG: Config file still not found after prompt in :apply_changes. Exiting.
+            powershell -Command "Write-Host ' DEBUG: Config file still not found after prompt in :apply_changes. Exiting.' -ForegroundColor Gray"
             powershell -Command "Write-Host ' ERROR: ' -NoNewline -ForegroundColor Black -BackgroundColor Red; Write-Host ' Configuration file still not found. Please rerun and use option 10.' -ForegroundColor Red"
             pause
             exit /b
@@ -550,10 +610,14 @@ REM =========================================================================
     powershell -Command "Write-Host ' [3/5] ' -NoNewline -ForegroundColor Black -BackgroundColor Cyan; Write-Host ' Detecting instance...                                         ' -ForegroundColor Cyan"
     call :detect_instance "%clonedVersion%"
     set "version=%detectedInstance%"
-    set "XML_FILE=%customDirectory%\Engine\%version%\%version%.bstk"
+    set "XML_FILE=%customDirectory%\\Engine\\%version%\\%version%.bstk"
+    REM DEBUG: Target XML file path set to: %XML_FILE%
+    powershell -Command "Write-Host ' DEBUG: Target XML file path set to: !XML_FILE!' -ForegroundColor Gray"
     call :show_progress 60 " Progress:"
 
     REM Verify XML file exists
+    REM DEBUG: Checking if XML file exists: %XML_FILE%
+    powershell -Command "Write-Host ' DEBUG: Checking if XML file exists: !XML_FILE!' -ForegroundColor Gray"
     if not exist "%XML_FILE%" (
         powershell -Command "Write-Host ' ERROR: ' -NoNewline -ForegroundColor Black -BackgroundColor Red; Write-Host ' Android emulator not installed, not run at least once, or wrong instance chosen.' -ForegroundColor Red"
         pause
@@ -562,6 +626,8 @@ REM =========================================================================
 
     REM Set BLUESTACKS_PATH for exclusions
     for %%i in ("%CONF_FILE%") do set "BLUESTACKS_PATH=%%~dpi"
+    REM DEBUG: Parent directory for exclusions: %BLUESTACKS_PATH%
+    powershell -Command "Write-Host ' DEBUG: Parent directory for exclusions: %BLUESTACKS_PATH%' -ForegroundColor Gray"
 
     REM Temporarily exclude paths from Windows Defender
     powershell -Command "Write-Host ' [4/5] ' -NoNewline -ForegroundColor Black -BackgroundColor Cyan; Write-Host ' Setting up environment...                                     ' -ForegroundColor Cyan"
@@ -572,6 +638,8 @@ REM =========================================================================
     call :show_progress 80 " Progress:"
 
     REM Backup files
+    REM DEBUG: Backing up %XML_FILE% and %CONF_FILE%
+    powershell -Command "Write-Host ' DEBUG: Backing up XML_FILE (!XML_FILE!) and CONF_FILE (!CONF_FILE!)' -ForegroundColor Gray"
     attrib -R "%XML_FILE%.bak" 2>nul
     copy "%XML_FILE%" "%XML_FILE%.bak" /Y >nul
     attrib -R "%CONF_FILE%.bak" 2>nul
@@ -580,6 +648,8 @@ REM =========================================================================
     REM Modify XML file (make disks writable)
     powershell -Command "Write-Host ' [5/5] ' -NoNewline -ForegroundColor Black -BackgroundColor Cyan; Write-Host ' Applying root changes...                                      ' -ForegroundColor Cyan"
     
+    REM DEBUG: Modifying XML file: %XML_FILE% (ReadOnly -> Normal)
+    powershell -Command "Write-Host ' DEBUG: Modifying XML file: !XML_FILE! (ReadOnly -> Normal)' -ForegroundColor Gray"
     attrib -R "%XML_FILE%"
     copy "%XML_FILE%" "%TEMP_FILE%" /Y >nul
     powershell -Command "(Get-Content '%TEMP_FILE%') -replace 'type=\"ReadOnly\"', 'type=\"Normal\"' | Set-Content '%TEMP_FILE%'"
@@ -587,11 +657,13 @@ REM =========================================================================
     
     REM Modify configuration file (enable root for all instances)
     attrib -R "%CONF_FILE%"
+    REM DEBUG: Modifying CONF file: %CONF_FILE% (enable_root_access=1, bst.feature.rooting=1) for base version %clonedVersion%
+    powershell -Command "Write-Host ' DEBUG: Modifying CONF file: !CONF_FILE! (enable_root_access=1, bst.feature.rooting=1) for base version !clonedVersion!' -ForegroundColor Gray"
     copy "%CONF_FILE%" "%TEMP_FILE%" /Y >nul
     powershell -Command ^
         "$baseVersion = '%clonedVersion%'; ^
         (Get-Content '%TEMP_FILE%') -replace ^
-        ('(^bst\.instance\.' + [regex]::Escape($baseVersion) + '(_\\d+)?\.enable_root_access=)\"0\"'), ^
+        ('(^bst\\.instance\\.' + [regex]::Escape($baseVersion) + '(_\\d+)?\\.enable_root_access=)\"0\"'), ^
         '$1\"1\"' -replace 'bst.feature.rooting=\"0\"', 'bst.feature.rooting=\"1\"' | ^
         Set-Content '%TEMP_FILE%'"
     move /Y "%TEMP_FILE%" "%CONF_FILE%" >nul
@@ -617,10 +689,16 @@ REM =========================================================================
     call :draw_line "─" 70
     echo.
     
+    REM DEBUG: Pausing after :apply_changes for %version%.
+    powershell -Command "Write-Host ' DEBUG: Pausing after :apply_changes for !version!.' -ForegroundColor Gray"
     pause
+    REM DEBUG: Returning from :apply_changes
+    powershell -Command "Write-Host ' DEBUG: Returning from :apply_changes' -ForegroundColor Gray"
 
 :undo_both_changes
     REM Show operation header
+    REM DEBUG: Entering :undo_both_changes for %clonedVersion%
+    powershell -Command "Write-Host ' DEBUG: Entering :undo_both_changes for %clonedVersion%' -ForegroundColor Gray"
     cls
     call :draw_box "REMOVING ROOT - %clonedVersion%" 70
     echo.
@@ -639,6 +717,8 @@ REM =========================================================================
         powershell -Command "Write-Host ' ALERT: ' -NoNewline -ForegroundColor Black -BackgroundColor Yellow; Write-Host ' Configuration file not found. Prompting for path...     ' -ForegroundColor Yellow"
         call :prompt_for_path
         if not exist "!CONF_FILE!" (
+            REM DEBUG: Config file still not found after prompt in :undo_both_changes. Exiting.
+            powershell -Command "Write-Host ' DEBUG: Config file still not found after prompt in :undo_both_changes. Exiting.' -ForegroundColor Gray"
             powershell -Command "Write-Host ' ERROR: ' -NoNewline -ForegroundColor Black -BackgroundColor Red; Write-Host ' Configuration file still not found. Please rerun and use option 10.' -ForegroundColor Red"
             pause
             exit /b
@@ -649,10 +729,14 @@ REM =========================================================================
     powershell -Command "Write-Host ' [3/5] ' -NoNewline -ForegroundColor Black -BackgroundColor Cyan; Write-Host ' Detecting instance...                                         ' -ForegroundColor Cyan"
     call :detect_instance "%clonedVersion%"
     set "version=%detectedInstance%"
-    set "XML_FILE=%customDirectory%\Engine\%version%\%version%.bstk"
+    set "XML_FILE=%customDirectory%\\Engine\\%version%\\%version%.bstk"
+    REM DEBUG: Target XML file path set to: %XML_FILE%
+    powershell -Command "Write-Host ' DEBUG: Target XML file path set to: !XML_FILE!' -ForegroundColor Gray"
     call :show_progress 60 " Progress:"
 
     REM Verify XML file exists
+    REM DEBUG: Checking if XML file exists: %XML_FILE%
+    powershell -Command "Write-Host ' DEBUG: Checking if XML file exists: !XML_FILE!' -ForegroundColor Gray"
     if not exist "%XML_FILE%" (
         powershell -Command "Write-Host ' ERROR: ' -NoNewline -ForegroundColor Black -BackgroundColor Red; Write-Host ' Android emulator not installed, not run at least once, or wrong instance chosen.' -ForegroundColor Red"
         pause
@@ -661,6 +745,8 @@ REM =========================================================================
 
     REM Set BLUESTACKS_PATH for exclusions
     for %%i in ("%CONF_FILE%") do set "BLUESTACKS_PATH=%%~dpi"
+    REM DEBUG: Parent directory for exclusions: %BLUESTACKS_PATH%
+    powershell -Command "Write-Host ' DEBUG: Parent directory for exclusions: %BLUESTACKS_PATH%' -ForegroundColor Gray"
 
     REM Temporarily exclude paths from Windows Defender
     powershell -Command "Write-Host ' [4/5] ' -NoNewline -ForegroundColor Black -BackgroundColor Cyan; Write-Host ' Setting up environment...                                     ' -ForegroundColor Cyan"
@@ -673,6 +759,8 @@ REM =========================================================================
     REM Revert XML file (restore read-only disks)
     powershell -Command "Write-Host ' [5/5] ' -NoNewline -ForegroundColor Black -BackgroundColor Cyan; Write-Host ' Removing root access...                                       ' -ForegroundColor Cyan"
 
+    REM DEBUG: Reverting XML file: %XML_FILE% (Normal -> ReadOnly for fastboot/Root)
+    powershell -Command "Write-Host ' DEBUG: Reverting XML file: !XML_FILE! (Normal -> ReadOnly for fastboot/Root)' -ForegroundColor Gray"
     attrib -R "%XML_FILE%"
     copy "%XML_FILE%" "%TEMP_FILE%" /Y >nul
     powershell -Command ^
@@ -685,6 +773,8 @@ REM =========================================================================
         } | Set-Content '%TEMP_FILE%'"
     
     if errorlevel 1 (
+        REM DEBUG: Error occurred during XML revert. Restoring backup.
+        powershell -Command "Write-Host ' DEBUG: Error occurred during XML revert. Restoring backup.' -ForegroundColor Gray"
         powershell -Command "Write-Host ' ERROR: ' -NoNewline -ForegroundColor Black -BackgroundColor Red; Write-Host ' Failed to revert XML changes. Restoring from backup...' -ForegroundColor Red"
         copy "%XML_FILE%.bak" "%XML_FILE%" /Y >nul
         pause
@@ -692,18 +782,24 @@ REM =========================================================================
     )
     
     move /Y "%TEMP_FILE%" "%XML_FILE%" >nul
+    REM DEBUG: XML revert PowerShell command executed. Moving file.
+    powershell -Command "Write-Host ' DEBUG: XML revert PowerShell command executed. Moving file.' -ForegroundColor Gray"
 
     REM Revert configuration file (disable root)
+    REM DEBUG: Reverting CONF file: %CONF_FILE% (enable_root_access=0, bst.feature.rooting=0) for %version%
+    powershell -Command "Write-Host ' DEBUG: Reverting CONF file: !CONF_FILE! (enable_root_access=0, bst.feature.rooting=0) for !version!' -ForegroundColor Gray"
     attrib -R "%CONF_FILE%"
     copy "%CONF_FILE%" "%TEMP_FILE%" /Y >nul
     powershell -Command ^
         "(Get-Content '%TEMP_FILE%') -replace ^
-        'bst.instance.%version%.enable_root_access=\"1\"', ^
-        'bst.instance.%version%.enable_root_access=\"0\"' -replace ^
+        ('bst\.instance\.' + [regex]::Escape('%version%') + '\.enable_root_access=\"1\"'), ^
+        ('bst.instance.' + '%version%' + '.enable_root_access=\"0\"') -replace ^
         'bst.feature.rooting=\"1\"', 'bst.feature.rooting=\"0\"' | ^
         Set-Content '%TEMP_FILE%'"
     
     if errorlevel 1 (
+        REM DEBUG: Error occurred during CONF revert. Restoring backup.
+        powershell -Command "Write-Host ' DEBUG: Error occurred during CONF revert. Restoring backup.' -ForegroundColor Gray"
         powershell -Command "Write-Host ' ERROR: ' -NoNewline -ForegroundColor Black -BackgroundColor Red; Write-Host ' Failed to revert conf changes. Restoring from backup...' -ForegroundColor Red"
         copy "%CONF_FILE%.bak" "%CONF_FILE%" /Y >nul
         pause
@@ -711,6 +807,8 @@ REM =========================================================================
     )
     
     move /Y "%TEMP_FILE%" "%CONF_FILE%" >nul
+    REM DEBUG: CONF revert PowerShell command executed. Moving file.
+    powershell -Command "Write-Host ' DEBUG: CONF revert PowerShell command executed. Moving file.' -ForegroundColor Gray"
     call :show_progress 100 " Progress:"
 
     REM Notify success and clean up
@@ -721,10 +819,16 @@ REM =========================================================================
     powershell -Command "Try { Remove-MpPreference -ExclusionPath '%~dp0' -ErrorAction SilentlyContinue } Catch {}"
     
     echo.
+    REM DEBUG: Pausing after :undo_both_changes for %version%.
+    powershell -Command "Write-Host ' DEBUG: Pausing after :undo_both_changes for !version!.' -ForegroundColor Gray"
     pause
+    REM DEBUG: Returning from :undo_both_changes
+    powershell -Command "Write-Host ' DEBUG: Returning from :undo_both_changes' -ForegroundColor Gray"
 
 :undo_all_changes_final
     REM Show operation header
+    REM DEBUG: Entering :undo_all_changes_final
+    powershell -Command "Write-Host ' DEBUG: Entering :undo_all_changes_final' -ForegroundColor Gray"
     cls
     call :draw_box "FINAL UNDO ROOT (AFTER MAGISK SYSTEM INSTALL)" 70
     echo.
@@ -747,15 +851,32 @@ REM =========================================================================
     echo.
     
     set "version_choice="
+    REM DEBUG: Prompting for version choice in :undo_all_changes_final
+    powershell -Command "Write-Host ' DEBUG: Prompting for version choice in :undo_all_changes_final' -ForegroundColor Gray"
     set /p "version_choice=Enter option number (1-4): "
     if not defined version_choice set "version_choice=0"
 
     set "androidVersions=Nougat32 Pie64 Rvc64 Tiramisu64"
+    REM DEBUG: User choice for final undo: %version_choice%
+    powershell -Command "Write-Host ' DEBUG: User choice for final undo: %version_choice%' -ForegroundColor Gray"
     if "%version_choice%" geq "1" if "%version_choice%" leq "4" (
-        set /a androidIndex=%version_choice% - 1
-        for /f "tokens=%androidIndex% delims= " %%a in ("%androidVersions%") do (
-            set "clonedVersion=%%a"
+        REM *** Corrected version selection logic ***
+        set /a androidIndex=%version_choice%
+        set "counter=0"
+        set "clonedVersion="
+        for %%v in (%androidVersions%) do (
+            set /a counter+=1
+            if !counter! equ %androidIndex% (
+                set "clonedVersion=%%v"
+            )
         )
+        
+        if not defined clonedVersion (
+            powershell -Command "Write-Host ' ERROR: ' -NoNewline -ForegroundColor Black -BackgroundColor Red; Write-Host ' Failed to determine Android version for choice %version_choice%.' -ForegroundColor Red"
+            pause
+            goto :undo_all_changes_final
+        )
+        REM *** End of corrected logic ***
     ) else (
         powershell -Command "Write-Host ' ERROR: ' -NoNewline -ForegroundColor Black -BackgroundColor Red; Write-Host ' Invalid option. Please enter a number between 1 and 4.' -ForegroundColor Red"
         pause
@@ -772,6 +893,8 @@ REM =========================================================================
         powershell -Command "Write-Host ' ALERT: ' -NoNewline -ForegroundColor Black -BackgroundColor Yellow; Write-Host ' Configuration file not found. Prompting for path...     ' -ForegroundColor Yellow"
         call :prompt_for_path
         if not exist "!CONF_FILE!" (
+            REM DEBUG: Config file still not found after prompt in :undo_all_changes_final. Exiting.
+            powershell -Command "Write-Host ' DEBUG: Config file still not found after prompt in :undo_all_changes_final. Exiting.' -ForegroundColor Gray"
             powershell -Command "Write-Host ' ERROR: ' -NoNewline -ForegroundColor Black -BackgroundColor Red; Write-Host ' Configuration file still not found. Please rerun and use option 10.' -ForegroundColor Red"
             pause
             exit /b
@@ -782,10 +905,14 @@ REM =========================================================================
     powershell -Command "Write-Host ' [4/6] ' -NoNewline -ForegroundColor Black -BackgroundColor Cyan; Write-Host ' Detecting instance...                                         ' -ForegroundColor Cyan"
     call :detect_instance "%clonedVersion%"
     set "version=%detectedInstance%"
-    set "XML_FILE=%customDirectory%\Engine\%version%\%version%.bstk"
+    set "XML_FILE=%customDirectory%\\Engine\\%version%\\%version%.bstk"
+    REM DEBUG: Target XML file path set to: %XML_FILE%
+    powershell -Command "Write-Host ' DEBUG: Target XML file path set to: !XML_FILE!' -ForegroundColor Gray"
     call :show_progress 60 " Progress:"
 
     REM Verify XML file exists
+    REM DEBUG: Checking if XML file exists: %XML_FILE%
+    powershell -Command "Write-Host ' DEBUG: Checking if XML file exists: !XML_FILE!' -ForegroundColor Gray"
     if not exist "%XML_FILE%" (
         powershell -Command "Write-Host ' ERROR: ' -NoNewline -ForegroundColor Black -BackgroundColor Red; Write-Host ' Android emulator not installed, not run at least once, or wrong instance chosen.' -ForegroundColor Red"
         pause
@@ -794,6 +921,8 @@ REM =========================================================================
 
     REM Set BLUESTACKS_PATH for exclusions
     for %%i in ("%CONF_FILE%") do set "BLUESTACKS_PATH=%%~dpi"
+    REM DEBUG: Parent directory for exclusions: %BLUESTACKS_PATH%
+    powershell -Command "Write-Host ' DEBUG: Parent directory for exclusions: %BLUESTACKS_PATH%' -ForegroundColor Gray"
 
     REM Temporarily exclude paths from Windows Defender
     powershell -Command "Write-Host ' [5/6] ' -NoNewline -ForegroundColor Black -BackgroundColor Cyan; Write-Host ' Setting up environment...                                     ' -ForegroundColor Cyan"
@@ -806,6 +935,8 @@ REM =========================================================================
     REM Revert XML file (restore read-only disks)
     powershell -Command "Write-Host ' [6/6] ' -NoNewline -ForegroundColor Black -BackgroundColor Cyan; Write-Host ' Applying final changes...                                     ' -ForegroundColor Cyan"
     
+    REM DEBUG: Reverting XML file: %XML_FILE% (Normal -> ReadOnly for fastboot/Root)
+    powershell -Command "Write-Host ' DEBUG: Reverting XML file: !XML_FILE! (Normal -> ReadOnly for fastboot/Root)' -ForegroundColor Gray"
     attrib -R "%XML_FILE%"
     copy "%XML_FILE%" "%TEMP_FILE%" /Y >nul
     powershell -Command ^
@@ -818,6 +949,8 @@ REM =========================================================================
         } | Set-Content '%TEMP_FILE%'"
     
     if errorlevel 1 (
+        REM DEBUG: Error occurred during XML revert. Restoring backup.
+        powershell -Command "Write-Host ' DEBUG: Error occurred during XML revert. Restoring backup.' -ForegroundColor Gray"
         powershell -Command "Write-Host ' ERROR: ' -NoNewline -ForegroundColor Black -BackgroundColor Red; Write-Host ' Failed to revert XML changes. Restoring from backup...' -ForegroundColor Red"
         copy "%XML_FILE%.bak" "%XML_FILE%" /Y >nul
         pause
@@ -825,18 +958,24 @@ REM =========================================================================
     )
     
     move /Y "%TEMP_FILE%" "%XML_FILE%" >nul
+    REM DEBUG: XML revert PowerShell command executed. Moving file.
+    powershell -Command "Write-Host ' DEBUG: XML revert PowerShell command executed. Moving file.' -ForegroundColor Gray"
 
     REM Revert configuration file (disable root for all instances)
+    REM DEBUG: Reverting CONF file: %CONF_FILE% (enable_root_access=0, bst.feature.rooting=0) for base %clonedVersion%
+    powershell -Command "Write-Host ' DEBUG: Reverting CONF file: !CONF_FILE! (enable_root_access=0, bst.feature.rooting=0) for base !clonedVersion!' -ForegroundColor Gray"
     attrib -R "%CONF_FILE%"
     copy "%CONF_FILE%" "%TEMP_FILE%" /Y >nul
     powershell -Command ^
         "$baseVersion = '%clonedVersion%'; ^
         (Get-Content '%TEMP_FILE%') -replace ^
-        ('(^bst\.instance\.' + [regex]::Escape($baseVersion) + '(_\\d+)?\.enable_root_access=)\"1\"'), ^
+        ('(^bst\\.instance\\.' + [regex]::Escape($baseVersion) + '(_\\d+)?\\.enable_root_access=)\"1\"'), ^
         '$1\"0\"' -replace 'bst.feature.rooting=\"1\"', 'bst.feature.rooting=\"0\"' | ^
         Set-Content '%TEMP_FILE%'"
     
     if errorlevel 1 (
+        REM DEBUG: Error occurred during CONF revert. Restoring backup.
+        powershell -Command "Write-Host ' DEBUG: Error occurred during CONF revert. Restoring backup.' -ForegroundColor Gray"
         powershell -Command "Write-Host ' ERROR: ' -NoNewline -ForegroundColor Black -BackgroundColor Red; Write-Host ' Failed to revert conf changes. Restoring from backup...' -ForegroundColor Red"
         copy "%CONF_FILE%.bak" "%CONF_FILE%" /Y >nul
         pause
@@ -844,6 +983,8 @@ REM =========================================================================
     )
     
     move /Y "%TEMP_FILE%" "%CONF_FILE%" >nul
+    REM DEBUG: CONF revert PowerShell command executed. Moving file.
+    powershell -Command "Write-Host ' DEBUG: CONF revert PowerShell command executed. Moving file.' -ForegroundColor Gray"
     call :show_progress 100 " Progress:"
 
     REM Notify success and clean up
@@ -856,13 +997,19 @@ REM =========================================================================
     powershell -Command "Try { Remove-MpPreference -ExclusionPath '%~dp0' -ErrorAction SilentlyContinue } Catch {}"
     
     echo.
+    REM DEBUG: Pausing after :undo_all_changes_final for %version%.
+    powershell -Command "Write-Host ' DEBUG: Pausing after :undo_all_changes_final for !version!.' -ForegroundColor Gray"
     pause
+    REM DEBUG: Returning from :undo_all_changes_final
+    powershell -Command "Write-Host ' DEBUG: Returning from :undo_all_changes_final' -ForegroundColor Gray"
 
 :set_custom_path
+    REM DEBUG: Entering :set_custom_path
+    powershell -Command "Write-Host ' DEBUG: Entering :set_custom_path' -ForegroundColor Gray"
     cls
     call :draw_box "SET CUSTOM BLUESTACKS PATH" 70
     echo.
-    powershell -Command "Write-Host ' The default directory is C:\ProgramData\BlueStacks_nxt' -ForegroundColor Cyan"
+    powershell -Command "Write-Host ' The default directory is C:\\ProgramData\\BlueStacks_nxt' -ForegroundColor Cyan"
     echo.
     powershell -Command "Write-Host ' Current Path: ' -NoNewline -ForegroundColor Magenta; Write-Host '!customDirectory!' -ForegroundColor White;"
     echo.
@@ -871,14 +1018,22 @@ REM =========================================================================
     echo.
     set /p "customDirectory=New Path: "
     
+    REM DEBUG: User entered new path: %customDirectory%
+    powershell -Command "Write-Host ' DEBUG: User entered new path in :set_custom_path: !customDirectory!' -ForegroundColor Gray"
     REM Use default if empty
-    if "!customDirectory!"=="" set "customDirectory=%ProgramData%\BlueStacks_nxt"
+    if "!customDirectory!"=="" set "customDirectory=%ProgramData%\\BlueStacks_nxt"
     
+    REM DEBUG: Path after default check: %customDirectory%
+    powershell -Command "Write-Host ' DEBUG: Path after default check in :set_custom_path: !customDirectory!' -ForegroundColor Gray"
     REM Trim trailing slashes
-    if "!customDirectory:~-1!"=="\" set "customDirectory=!customDirectory:~0,-1!"
+    if "!customDirectory:~-1!"=="\\" set "customDirectory=!customDirectory:~0,-1!"
     if "!customDirectory:~-1!"=="/" set "customDirectory=!customDirectory:~0,-1!"
     
+    REM DEBUG: Path after trimming: %customDirectory%
+    powershell -Command "Write-Host ' DEBUG: Path after trimming in :set_custom_path: !customDirectory!' -ForegroundColor Gray"
     if not exist "!customDirectory!" (
+        REM DEBUG: Specified custom directory does not exist. Exiting function.
+        powershell -Command "Write-Host ' DEBUG: Specified custom directory does not exist. Exiting :set_custom_path function.' -ForegroundColor Gray"
         powershell -Command "Write-Host ' ERROR: ' -NoNewline -ForegroundColor Black -BackgroundColor Red; Write-Host ' The specified directory does not exist. Please try again.' -ForegroundColor Red"
         pause
         exit /b
@@ -886,7 +1041,11 @@ REM =========================================================================
     
     powershell -Command "Write-Host ' Path set to: ' -NoNewline -ForegroundColor Green; Write-Host '!customDirectory!' -ForegroundColor White;"
     echo !customDirectory!>bluestacksconfig.txt
+    REM DEBUG: Saved path to bluestacksconfig.txt
+    powershell -Command "Write-Host ' DEBUG: Saved path to bluestacksconfig.txt' -ForegroundColor Gray"
     powershell -Command "Write-Host ' SUCCESS: ' -NoNewline -ForegroundColor Black -BackgroundColor Green; Write-Host ' Path saved to bluestacksconfig.txt for future use.' -ForegroundColor Green"
     pause
+    REM DEBUG: Returning from :set_custom_path
+    powershell -Command "Write-Host ' DEBUG: Returning from :set_custom_path' -ForegroundColor Gray"
 
 REM End of script
