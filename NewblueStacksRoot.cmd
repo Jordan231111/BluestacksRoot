@@ -334,13 +334,25 @@ REM =========================================================================
 
     REM Root options (1-4)
     if "%choice%" geq "1" if "%choice%" leq "4" (
-        set /a androidIndex=%choice% - 1
+        set /a androidIndex=%choice%
         set "androidVersions=Nougat32 Pie64 Rvc64 Tiramisu64"
         
-        for /f "tokens=%androidIndex% delims= " %%a in ("%androidVersions%") do (
-            set "clonedVersion=%%a"
+        REM Correctly set clonedVersion based on index
+        set "counter=0"
+        set "clonedVersion="
+        for %%v in (%androidVersions%) do (
+            set /a counter+=1
+            if !counter! equ %androidIndex% (
+                set "clonedVersion=%%v"
+            )
         )
         
+        if not defined clonedVersion (
+            powershell -Command "Write-Host ' ERROR: ' -NoNewline -ForegroundColor Black -BackgroundColor Red; Write-Host ' Failed to determine Android version for choice %choice%.' -ForegroundColor Red"
+            pause
+            goto :main_menu
+        )
+
         if "%choice%"=="1" (
             powershell -Command "Write-Host ''; Write-Host ' IMPORTANT: ' -NoNewline -ForegroundColor Black -BackgroundColor Yellow; Write-Host ' You chose to root Android 7 (Nougat32)' -ForegroundColor Yellow"
             powershell -Command "Write-Host '          Please edit the bat file and replace Nougat32 with Nougat64 if using 64-bit Android 7' -ForegroundColor Yellow"
@@ -353,13 +365,25 @@ REM =========================================================================
 
     REM Unroot options (5-8)
     if "%choice%" geq "5" if "%choice%" leq "8" (
-        set /a androidIndex=%choice% - 5
+        set /a androidIndex=%choice% - 4 
         set "androidVersions=Nougat32 Pie64 Rvc64 Tiramisu64"
         
-        for /f "tokens=%androidIndex% delims= " %%a in ("%androidVersions%") do (
-            set "clonedVersion=%%a"
+        REM Correctly set clonedVersion based on index
+        set "counter=0"
+        set "clonedVersion="
+        for %%v in (%androidVersions%) do (
+            set /a counter+=1
+            if !counter! equ %androidIndex% (
+                set "clonedVersion=%%v"
+            )
         )
-        
+
+        if not defined clonedVersion (
+            powershell -Command "Write-Host ' ERROR: ' -NoNewline -ForegroundColor Black -BackgroundColor Red; Write-Host ' Failed to determine Android version for choice %choice%.' -ForegroundColor Red"
+            pause
+            goto :main_menu
+        )
+
         call :undo_both_changes
         goto :main_menu
     )
