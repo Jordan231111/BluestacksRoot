@@ -257,104 +257,110 @@ REM Main Menu Function
 REM =========================================================================
 :main_menu
     cls
-    REM Display the entire menu UI in a single PowerShell command to reduce lag
-    powershell -Command "@'
-    Write-Host ''
-    Write-Host ' ██████╗ ██╗     ██╗   ██╗███████╗███████╗████████╗ █████╗  ██████╗██╗  ██╗███████╗' -ForegroundColor Blue
-    Write-Host ' ██╔══██╗██║     ██║   ██║██╔════╝██╔════╝╚══██╔══╝██╔══██╗██╔════╝██║ ██╔╝██╔════╝' -ForegroundColor Blue
-    Write-Host ' ██████╔╝██║     ██║   ██║█████╗  ███████╗   ██║   ███████║██║     █████╔╝ ███████╗' -ForegroundColor Blue
-    Write-Host ' ██╔══██╗██║     ██║   ██║██╔══╝  ╚════██║   ██║   ██╔══██║██║     ██╔═██╗ ╚════██║' -ForegroundColor Blue
-    Write-Host ' ██████╔╝███████╗╚██████╔╝███████╗███████║   ██║   ██║  ██║╚██████╗██║  ██╗███████║' -ForegroundColor Blue
-    Write-Host ' ╚═════╝ ╚══════╝ ╚═════╝ ╚══════╝╚══════╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝╚══════╝' -ForegroundColor Blue
-    Write-Host ''
-    Write-Host ' ██████╗  ██████╗  ██████╗ ████████╗    ████████╗ ██████╗  ██████╗ ██╗     ' -ForegroundColor Cyan
-    Write-Host ' ██╔══██╗██╔═══██╗██╔═══██╗╚══██╔══╝    ╚══██╔══╝██╔═══██╗██╔═══██╗██║     ' -ForegroundColor Cyan
-    Write-Host ' ██████╔╝██║   ██║██║   ██║   ██║          ██║   ██║   ██║██║   ██║██║     ' -ForegroundColor Cyan
-    Write-Host ' ██╔══██╗██║   ██║██║   ██║   ██║          ██║   ██║   ██║██║   ██║██║     ' -ForegroundColor Cyan
-    Write-Host ' ██║  ██║╚██████╔╝╚██████╔╝   ██║          ██║   ╚██████╔╝╚██████╔╝███████╗' -ForegroundColor Cyan
-    Write-Host ' ╚═╝  ╚═╝ ╚═════╝  ╚═════╝    ╚═╝          ╚═╝    ╚═════╝  ╚═════╝ ╚══════╝  v$env:VERSION' -ForegroundColor Cyan
-    Write-Host ''
-    
-    # Draw box header
-    $line = '═' * 70
-    Write-Host (' ' + $line)
-    $title = 'MAIN MENU'
-    $padding = '   '
-    $titleLen = $title.Length
-    $spaces = [math]::Max(1, (70-$titleLen-6)/2)
-    $titlePadding = ' ' * $spaces
-    Write-Host (' ║' + $padding + $titlePadding + $title + $titlePadding + $padding + '║')
-    Write-Host (' ' + $line)
-    Write-Host ''
-    
-    # Root options section
-    Write-Host ''
-    Write-Host ' ROOT OPTIONS ' -ForegroundColor Black -BackgroundColor Green
-    Write-Host ''
-    Write-Host ' [1] ' -NoNewline -ForegroundColor Black -BackgroundColor Green
-    Write-Host ' Android 7  (Nougat32)  ' -NoNewline -ForegroundColor Green
-    Write-Host '  Enable root access for Android 7'
-    Write-Host ' [2] ' -NoNewline -ForegroundColor Black -BackgroundColor Green
-    Write-Host ' Android 9  (Pie64)     ' -NoNewline -ForegroundColor Green
-    Write-Host '  Enable root access for Android 9'
-    Write-Host ' [3] ' -NoNewline -ForegroundColor Black -BackgroundColor Green
-    Write-Host ' Android 11 (Rvc64)     ' -NoNewline -ForegroundColor Green
-    Write-Host '  Enable root access for Android 11'
-    Write-Host ' [4] ' -NoNewline -ForegroundColor Black -BackgroundColor Green
-    Write-Host ' Android 13 (Tiramisu64)' -NoNewline -ForegroundColor Green
-    Write-Host '  Enable root access for Android 13'
-    
-    # Unroot options section
-    Write-Host ''
-    Write-Host ' UNROOT OPTIONS ' -ForegroundColor Black -BackgroundColor Yellow
-    Write-Host ''
-    Write-Host ' [5] ' -NoNewline -ForegroundColor Black -BackgroundColor Yellow
-    Write-Host ' Android 7  (Nougat32)  ' -NoNewline -ForegroundColor Yellow
-    Write-Host '  Disable root access for Android 7'
-    Write-Host ' [6] ' -NoNewline -ForegroundColor Black -BackgroundColor Yellow
-    Write-Host ' Android 9  (Pie64)     ' -NoNewline -ForegroundColor Yellow
-    Write-Host '  Disable root access for Android 9'
-    Write-Host ' [7] ' -NoNewline -ForegroundColor Black -BackgroundColor Yellow
-    Write-Host ' Android 11 (Rvc64)     ' -NoNewline -ForegroundColor Yellow
-    Write-Host '  Disable root access for Android 11'
-    Write-Host ' [8] ' -NoNewline -ForegroundColor Black -BackgroundColor Yellow
-    Write-Host ' Android 13 (Tiramisu64)' -NoNewline -ForegroundColor Yellow
-    Write-Host '  Disable root access for Android 13'
-    
-    # Other options section
-    Write-Host ''
-    Write-Host ' OTHER OPTIONS ' -ForegroundColor Black -BackgroundColor Cyan
-    Write-Host ''
-    Write-Host ' [9]  ' -NoNewline -ForegroundColor Black -BackgroundColor Cyan
-    Write-Host ' Final Undo Root       ' -NoNewline -ForegroundColor Cyan
-    Write-Host '  Disable root after Magisk system install'
-    Write-Host ' [10] ' -NoNewline -ForegroundColor Black -BackgroundColor Cyan
-    Write-Host ' Set Custom Path       ' -NoNewline -ForegroundColor Cyan
-    Write-Host '  Configure BlueStacks installation path'
-    Write-Host ' [11] ' -NoNewline -ForegroundColor Black -BackgroundColor Cyan
-    Write-Host ' About                 ' -NoNewline -ForegroundColor Cyan
-    Write-Host '  Information about this tool'
-    Write-Host ' [12] ' -NoNewline -ForegroundColor Black -BackgroundColor Cyan
-    Write-Host ' Help                  ' -NoNewline -ForegroundColor Cyan
-    Write-Host '  Show instructions and troubleshooting'
-    Write-Host ' [0]  ' -NoNewline -ForegroundColor Black -BackgroundColor Red
-    Write-Host ' Exit                  ' -NoNewline -ForegroundColor Red
-    Write-Host '  Close this application'
-    
-    # Status bar
-    Write-Host ''
-    $line2 = '─' * 70
-    Write-Host (' ' + $line2)
-    Write-Host ' Current Path: ' -NoNewline -ForegroundColor Magenta
-    Write-Host '$env:customDirectory' -ForegroundColor White
-    Write-Host (' ' + $line2)
-    Write-Host ''
-'@ | ForEach-Object { $_ -replace '\$env:VERSION', '%VERSION%' -replace '\$env:customDirectory', '!customDirectory!' } | powershell -Command -"
+    REM Create a temporary PS1 file with our menu script
+    > "%temp%\bluestacks_menu.ps1" (
+        echo Write-Host ''
+        echo Write-Host ' ██████╗ ██╗     ██╗   ██╗███████╗███████╗████████╗ █████╗  ██████╗██╗  ██╗███████╗' -ForegroundColor Blue
+        echo Write-Host ' ██╔══██╗██║     ██║   ██║██╔════╝██╔════╝╚══██╔══╝██╔══██╗██╔════╝██║ ██╔╝██╔════╝' -ForegroundColor Blue
+        echo Write-Host ' ██████╔╝██║     ██║   ██║█████╗  ███████╗   ██║   ███████║██║     █████╔╝ ███████╗' -ForegroundColor Blue
+        echo Write-Host ' ██╔══██╗██║     ██║   ██║██╔══╝  ╚════██║   ██║   ██╔══██║██║     ██╔═██╗ ╚════██║' -ForegroundColor Blue
+        echo Write-Host ' ██████╔╝███████╗╚██████╔╝███████╗███████║   ██║   ██║  ██║╚██████╗██║  ██╗███████║' -ForegroundColor Blue
+        echo Write-Host ' ╚═════╝ ╚══════╝ ╚═════╝ ╚══════╝╚══════╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝╚══════╝' -ForegroundColor Blue
+        echo Write-Host ''
+        echo Write-Host ' ██████╗  ██████╗  ██████╗ ████████╗    ████████╗ ██████╗  ██████╗ ██╗     ' -ForegroundColor Cyan
+        echo Write-Host ' ██╔══██╗██╔═══██╗██╔═══██╗╚══██╔══╝    ╚══██╔══╝██╔═══██╗██╔═══██╗██║     ' -ForegroundColor Cyan
+        echo Write-Host ' ██████╔╝██║   ██║██║   ██║   ██║          ██║   ██║   ██║██║   ██║██║     ' -ForegroundColor Cyan
+        echo Write-Host ' ██╔══██╗██║   ██║██║   ██║   ██║          ██║   ██║   ██║██║   ██║██║     ' -ForegroundColor Cyan
+        echo Write-Host ' ██║  ██║╚██████╔╝╚██████╔╝   ██║          ██║   ╚██████╔╝╚██████╔╝███████╗' -ForegroundColor Cyan
+        echo Write-Host ' ╚═╝  ╚═╝ ╚═════╝  ╚═════╝    ╚═╝          ╚═╝    ╚═════╝  ╚═════╝ ╚══════╝  v%VERSION%' -ForegroundColor Cyan
+        echo Write-Host ''
+        echo.
+        echo # Draw box header
+        echo $line = '═' * 70
+        echo Write-Host (' ' + $line^)
+        echo $title = 'MAIN MENU'
+        echo $padding = '   '
+        echo $titleLen = $title.Length
+        echo $spaces = [math]::Max(1, (70-$titleLen-6^)/2^)
+        echo $titlePadding = ' ' * $spaces
+        echo Write-Host (' ║' + $padding + $titlePadding + $title + $titlePadding + $padding + '║'^)
+        echo Write-Host (' ' + $line^)
+        echo Write-Host ''
+        echo.
+        echo # Root options section
+        echo Write-Host ''
+        echo Write-Host ' ROOT OPTIONS ' -ForegroundColor Black -BackgroundColor Green
+        echo Write-Host ''
+        echo Write-Host ' [1] ' -NoNewline -ForegroundColor Black -BackgroundColor Green
+        echo Write-Host ' Android 7  (Nougat32)  ' -NoNewline -ForegroundColor Green
+        echo Write-Host '  Enable root access for Android 7'
+        echo Write-Host ' [2] ' -NoNewline -ForegroundColor Black -BackgroundColor Green
+        echo Write-Host ' Android 9  (Pie64)     ' -NoNewline -ForegroundColor Green
+        echo Write-Host '  Enable root access for Android 9'
+        echo Write-Host ' [3] ' -NoNewline -ForegroundColor Black -BackgroundColor Green
+        echo Write-Host ' Android 11 (Rvc64)     ' -NoNewline -ForegroundColor Green
+        echo Write-Host '  Enable root access for Android 11'
+        echo Write-Host ' [4] ' -NoNewline -ForegroundColor Black -BackgroundColor Green
+        echo Write-Host ' Android 13 (Tiramisu64)' -NoNewline -ForegroundColor Green
+        echo Write-Host '  Enable root access for Android 13'
+        echo.
+        echo # Unroot options section
+        echo Write-Host ''
+        echo Write-Host ' UNROOT OPTIONS ' -ForegroundColor Black -BackgroundColor Yellow
+        echo Write-Host ''
+        echo Write-Host ' [5] ' -NoNewline -ForegroundColor Black -BackgroundColor Yellow
+        echo Write-Host ' Android 7  (Nougat32)  ' -NoNewline -ForegroundColor Yellow
+        echo Write-Host '  Disable root access for Android 7'
+        echo Write-Host ' [6] ' -NoNewline -ForegroundColor Black -BackgroundColor Yellow
+        echo Write-Host ' Android 9  (Pie64)     ' -NoNewline -ForegroundColor Yellow
+        echo Write-Host '  Disable root access for Android 9'
+        echo Write-Host ' [7] ' -NoNewline -ForegroundColor Black -BackgroundColor Yellow
+        echo Write-Host ' Android 11 (Rvc64)     ' -NoNewline -ForegroundColor Yellow
+        echo Write-Host '  Disable root access for Android 11'
+        echo Write-Host ' [8] ' -NoNewline -ForegroundColor Black -BackgroundColor Yellow
+        echo Write-Host ' Android 13 (Tiramisu64)' -NoNewline -ForegroundColor Yellow
+        echo Write-Host '  Disable root access for Android 13'
+        echo.
+        echo # Other options section
+        echo Write-Host ''
+        echo Write-Host ' OTHER OPTIONS ' -ForegroundColor Black -BackgroundColor Cyan
+        echo Write-Host ''
+        echo Write-Host ' [9]  ' -NoNewline -ForegroundColor Black -BackgroundColor Cyan
+        echo Write-Host ' Final Undo Root       ' -NoNewline -ForegroundColor Cyan
+        echo Write-Host '  Disable root after Magisk system install'
+        echo Write-Host ' [10] ' -NoNewline -ForegroundColor Black -BackgroundColor Cyan
+        echo Write-Host ' Set Custom Path       ' -NoNewline -ForegroundColor Cyan
+        echo Write-Host '  Configure BlueStacks installation path'
+        echo Write-Host ' [11] ' -NoNewline -ForegroundColor Black -BackgroundColor Cyan
+        echo Write-Host ' About                 ' -NoNewline -ForegroundColor Cyan
+        echo Write-Host '  Information about this tool'
+        echo Write-Host ' [12] ' -NoNewline -ForegroundColor Black -BackgroundColor Cyan
+        echo Write-Host ' Help                  ' -NoNewline -ForegroundColor Cyan
+        echo Write-Host '  Show instructions and troubleshooting'
+        echo Write-Host ' [0]  ' -NoNewline -ForegroundColor Black -BackgroundColor Red
+        echo Write-Host ' Exit                  ' -NoNewline -ForegroundColor Red
+        echo Write-Host '  Close this application'
+        echo.
+        echo # Status bar
+        echo Write-Host ''
+        echo $line2 = '─' * 70
+        echo Write-Host (' ' + $line2^)
+        echo Write-Host ' Current Path: ' -NoNewline -ForegroundColor Magenta
+        echo Write-Host '%customDirectory%' -ForegroundColor White
+        echo Write-Host (' ' + $line2^)
+        echo Write-Host ''
+    )
 
+    REM Run the PowerShell script
+    powershell -ExecutionPolicy Bypass -File "%temp%\bluestacks_menu.ps1"
+    
     REM Get user choice
     set "choice="
     set /p "choice=Enter option number (0-12): "
     if not defined choice set "choice=0"
+
+    REM Delete the temporary file
+    del "%temp%\bluestacks_menu.ps1" >nul 2>&1
 
     REM Process user choice
     if "%choice%"=="0" (
