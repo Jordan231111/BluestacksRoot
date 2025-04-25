@@ -618,7 +618,6 @@ REM =========================================================================
     echo.
     
     pause
-    exit /b
 
 :undo_both_changes
     REM Show operation header
@@ -723,7 +722,6 @@ REM =========================================================================
     
     echo.
     pause
-    exit /b
 
 :undo_all_changes_final
     REM Show operation header
@@ -859,7 +857,6 @@ REM =========================================================================
     
     echo.
     pause
-    exit /b
 
 :set_custom_path
     cls
@@ -891,6 +888,5 @@ REM =========================================================================
     echo !customDirectory!>bluestacksconfig.txt
     powershell -Command "Write-Host ' SUCCESS: ' -NoNewline -ForegroundColor Black -BackgroundColor Green; Write-Host ' Path saved to bluestacksconfig.txt for future use.' -ForegroundColor Green"
     pause
-    exit /b
 
 REM End of script
