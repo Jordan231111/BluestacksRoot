@@ -5,7 +5,7 @@
 
 1. Download `blueStackRoot.cmd` `split.cmd`, `rootjunction.cmd`, and `norootjunction.cmd` in [releases](https://github.com/Jordan231111/BluestacksRoot/releases)
 
-2. Launch bluestacks once if you just installed it.
+2. Launch bluestacks once if you just installed it. Note on Rooting: BlueStacks versions 5.22.150.1014 and higher now enforce integrity checks that detect system changes. We recommend using BlueStacks 5.22.130.1019 or lower if you plan to root. [Click here for List of old versions](https://www.andnixsh.com/2025/12/bluestacks-older-versions-offline.html)
 
 3. Exit all BlueStacks instances or Multi-Instance Manager.
 
