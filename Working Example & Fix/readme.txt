@@ -1,0 +1,1 @@
+Magisk: https://github.com/1q23lyc45/KitsuneMagisk/releases/latest

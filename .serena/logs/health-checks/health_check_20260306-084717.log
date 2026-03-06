@@ -1,0 +1,313 @@
+INFO  2026-03-06 08:47:17,690 serena.cli:health_check:822 - Starting health check for project: C:\Users\Jordan\Documents\BluestacksRoot
+INFO  2026-03-06 08:47:17,690 serena.cli:health_check:826 - Creating SerenaAgent with disabled dashboard...
+INFO  2026-03-06 08:47:17,690 serena.util.file_system:_load_gitignore_files:152 - Processing .gitignore file: C:\Users\Jordan\Documents\BluestacksRoot\.serena\.gitignore
+INFO  2026-03-06 08:47:17,703 serena.util.file_system:stop:367 - Loading of .gitignore files completed in 0.014 seconds
+INFO  2026-03-06 08:47:17,705 serena.project:stop:367 - Gathering ignore spec for project BluestacksRoot completed in 0.016 seconds
+INFO  2026-03-06 08:47:17,707 serena.agent:__init__:311 - Will record tool usage statistics with token count estimator: CHAR_COUNT.
+INFO  2026-03-06 08:47:17,841 serena.agent:__init__:315 - Starting Serena server (version=0.1.4-a9b77811-dirty, process id=15944, parent process id=448; language backend=LSP)
+INFO  2026-03-06 08:47:17,841 serena.agent:__init__:319 - Configuration file: C:\Users\Jordan\.serena\serena_config.yml
+INFO  2026-03-06 08:47:17,841 serena.agent:__init__:320 - Available projects: BluestacksRoot
+INFO  2026-03-06 08:47:17,841 serena.agent:__init__:321 - Loaded tools (43): read_file, create_text_file, list_dir, find_file, replace_content, delete_lines, replace_lines, insert_at_line, search_for_pattern, restart_language_server, get_symbols_overview, find_symbol, find_referencing_symbols, replace_symbol_body, insert_after_symbol, insert_before_symbol, rename_symbol, write_memory, read_memory, list_memories, delete_memory, rename_memory, edit_memory, execute_shell_command, open_dashboard, activate_project, remove_project, switch_modes, get_current_config, check_onboarding_performed, onboarding, think_about_collected_information, think_about_task_adherence, think_about_whether_you_are_done, summarize_changes, prepare_for_new_conversation, initial_instructions, jet_brains_find_symbol, jet_brains_find_referencing_symbols, jet_brains_get_symbols_overview, jet_brains_type_hierarchy, list_queryable_projects, query_project
+INFO  2026-03-06 08:47:17,842 serena.agent:__init__:333 - Using language backend from global configuration: LSP
+INFO  2026-03-06 08:47:17,853 serena.config.serena_config:start:360 - Loading project instance for RegisteredProject[project_root=C:\Users\Jordan\Documents\BluestacksRoot, project_config=ProjectConfig[project_name=BluestacksRoot]] starting ...
+INFO  2026-03-06 08:47:17,854 serena.project:__init__:207 - Serena project data folder: C:\Users\Jordan\Documents\BluestacksRoot\.serena
+INFO  2026-03-06 08:47:17,854 serena.project:start:360 - Gathering ignore spec for project BluestacksRoot starting ...
+INFO  2026-03-06 08:47:17,854 serena.config.serena_config:stop:367 - Loading project instance for RegisteredProject[project_root=C:\Users\Jordan\Documents\BluestacksRoot, project_config=ProjectConfig[project_name=BluestacksRoot]] completed in 0.001 seconds
+INFO  2026-03-06 08:47:17,854 serena.util.file_system:start:360 - Loading of .gitignore files starting ...
+INFO  2026-03-06 08:47:17,854 serena.agent:activate_project_from_path_or_name:741 - Found registered project 'BluestacksRoot' at path C:\Users\Jordan\Documents\BluestacksRoot
+INFO  2026-03-06 08:47:17,854 serena.agent:_activate_project:698 - Activating BluestacksRoot at C:\Users\Jordan\Documents\BluestacksRoot
+INFO  2026-03-06 08:47:17,854 serena.util.file_system:_load_gitignore_files:152 - Processing .gitignore file: C:\Users\Jordan\Documents\BluestacksRoot\.gitignore
+INFO  2026-03-06 08:47:17,854 serena.task_executor:issue_task:192 - Scheduling Task-1:init_language_server_manager
+INFO  2026-03-06 08:47:17,855 serena.agent:get_mode_names:215 - Active modes: ['editing', 'interactive']
+INFO  2026-03-06 08:47:17,855 serena.util.file_system:_load_gitignore_files:152 - Processing .gitignore file: C:\Users\Jordan\Documents\BluestacksRoot\.serena\.gitignore
+INFO  2026-03-06 08:47:17,857 serena.agent:apply:155 - SerenaAgentContext[name='desktop-app'] included 1 tools: switch_modes
+INFO  2026-03-06 08:47:17,858 serena.agent:_create_base_toolset:449 - Number of exposed tools: 27
+INFO  2026-03-06 08:47:17,859 serena.agent:__init__:360 - Number of exposed tools: 27
+INFO  2026-03-06 08:47:17,859 serena.agent:_update_active_tools:652 - Active tools (27): activate_project, check_onboarding_performed, create_text_file, delete_memory, edit_memory, execute_shell_command, find_file, find_referencing_symbols, find_symbol, get_current_config, get_symbols_overview, initial_instructions, insert_after_symbol, insert_before_symbol, list_dir, list_memories, onboarding, prepare_for_new_conversation, read_file, read_memory, rename_memory, rename_symbol, replace_content, replace_symbol_body, search_for_pattern, switch_modes, write_memory
+INFO  2026-03-06 08:47:17,859 serena.cli:health_check:829 - SerenaAgent created successfully
+INFO  2026-03-06 08:47:17,859 serena.cli:health_check:832 - Searching for analyzable files...
+INFO  2026-03-06 08:47:17,860 serena.util.file_system:stop:367 - Loading of .gitignore files completed in 0.006 seconds
+INFO  2026-03-06 08:47:17,860 serena.project:stop:367 - Gathering ignore spec for project BluestacksRoot completed in 0.006 seconds
+INFO  2026-03-06 08:47:17,863 serena.cli:health_check:841 - Found analyzable file: Magisk.cpp
+INFO  2026-03-06 08:47:17,863 serena.cli:health_check:859 - Testing GetSymbolsOverviewTool on file: Magisk.cpp
+INFO  2026-03-06 08:47:17,863 serena.task_executor:issue_task:192 - Scheduling Task-2:<lambda>
+INFO  2026-03-06 08:47:17,943 serena.task_executor:_process_task_queue:123 - Starting execution of Task-1:init_language_server_manager
+INFO  2026-03-06 08:47:17,943 serena.task_executor:start:360 - Task-1:init_language_server_manager starting ...
+INFO  2026-03-06 08:47:17,943 serena.agent:start:360 - Language server initialization starting ...
+INFO  2026-03-06 08:47:17,943 serena.project:create_language_server_manager:573 - Creating language server manager for C:\Users\Jordan\Documents\BluestacksRoot
+INFO  2026-03-06 08:47:17,943 sensai.util.logging:start:360 - Language server startup (language=cpp) starting ...
+INFO  2026-03-06 08:47:17,943 serena.ls_manager:create_language_server:48 - Creating language server instance for C:\Users\Jordan\Documents\BluestacksRoot, language=cpp.
+INFO  2026-03-06 08:47:18,000 solidlsp.language_servers.clangd_language_server:_get_or_install_core_dependency:189 - Clangd executable not found at C:\Users\Jordan\.serena\language_servers\static\ClangdLanguageServer\clangd\clangd_19.1.2/bin/clangd.exe. Downloading from https://github.com/clangd/clangd/releases/download/19.1.2/clangd-windows-19.1.2.zip
+INFO  2026-03-06 08:47:21,646 solidlsp.ls:start:2208 - Starting language server with language cpp for C:\Users\Jordan\Documents\BluestacksRoot
+INFO  2026-03-06 08:47:21,646 solidlsp.language_servers.clangd_language_server:_start_server:290 - Starting Clangd server process
+INFO  2026-03-06 08:47:21,646 solidlsp.ls_process:start:192 - Starting language server process via command: ['C:\\Users\\Jordan\\.serena\\language_servers\\static\\ClangdLanguageServer\\clangd\\clangd_19.1.2/bin/clangd.exe', '--background-index']
+INFO  2026-03-06 08:47:21,648 solidlsp.language_servers.clangd_language_server:_start_server:294 - Sending initialize request from LSP client to LSP server and awaiting response
+INFO  2026-03-06 08:47:21,717 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:21.717] clangd version 19.1.2 (https://github.com/llvm/llvm-project 7ba7d8e2f7b6445b60679da826210cdde29eaf8b)
+
+INFO  2026-03-06 08:47:21,717 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:21.717] Features: windows+grpc
+
+INFO  2026-03-06 08:47:21,717 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:21.717] PID: 14196
+
+INFO  2026-03-06 08:47:21,717 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:21.717] Working directory: C:\Users\Jordan\Documents\BluestacksRoot
+
+INFO  2026-03-06 08:47:21,717 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:21.717] argv[0]: C:\Users\Jordan\.serena\language_servers\static\ClangdLanguageServer\clangd\clangd_19.1.2\bin\clangd.exe
+
+INFO  2026-03-06 08:47:21,717 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:21.717] argv[1]: --background-index
+
+INFO  2026-03-06 08:47:21,719 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:21.720] Starting LSP over stdin/stdout
+
+INFO  2026-03-06 08:47:21,720 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:21.720] <-- initialize(1)
+
+INFO  2026-03-06 08:47:21,727 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:21.728] --> reply:initialize(1) 7 ms
+
+INFO  2026-03-06 08:47:21,727 sensai.util.logging:stop:367 - Language server startup (language=cpp) completed in 3.784 seconds
+INFO  2026-03-06 08:47:21,727 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:21.728] <-- initialized
+
+INFO  2026-03-06 08:47:21,727 serena.agent:stop:367 - Language server initialization completed in 3.784 seconds
+INFO  2026-03-06 08:47:21,728 serena.task_executor:stop:367 - Task-1:init_language_server_manager completed in 3.785 seconds
+INFO  2026-03-06 08:47:21,728 serena.task_executor:_process_task_queue:123 - Starting execution of Task-2:<lambda>
+INFO  2026-03-06 08:47:21,728 serena.task_executor:start:360 - Task-2:<lambda> starting ...
+INFO  2026-03-06 08:47:21,729 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:21.730] <-- textDocument/didOpen
+
+INFO  2026-03-06 08:47:21,729 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:21.730] <-- textDocument/documentSymbol(2)
+
+INFO  2026-03-06 08:47:21,730 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:21.731] --> textDocument/publishDiagnostics
+
+INFO  2026-03-06 08:47:21,730 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:21.731] Failed to find compilation database for C:\Users\Jordan\Documents\BluestacksRoot\Magisk.cpp
+
+INFO  2026-03-06 08:47:21,730 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:21.731] ASTWorker building file C:\Users\Jordan\Documents\BluestacksRoot\Magisk.cpp version 0 with command clangd fallback
+
+INFO  2026-03-06 08:47:21,730 solidlsp.ls_process:_read_ls_process_stderr:388 - [C:\Users\Jordan\Documents\BluestacksRoot]
+
+INFO  2026-03-06 08:47:21,730 solidlsp.ls_process:_read_ls_process_stderr:388 - "C:\\msys64\\ucrt64\\bin\\clang" "-resource-dir=C:\\Users\\Jordan\\.serena\\language_servers\\static\\ClangdLanguageServer\\clangd\\clangd_19.1.2\\lib\\clang\\19" -- "C:\\Users\\Jordan\\Documents\\BluestacksRoot\\Magisk.cpp"
+
+INFO  2026-03-06 08:47:21,751 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:21.752] Built preamble of size 256712 for file C:\Users\Jordan\Documents\BluestacksRoot\Magisk.cpp version 0 in 0.01 seconds
+
+ERROR 2026-03-06 08:47:21,774 solidlsp.ls_process:_read_ls_process_stderr:388 - E[08:47:21.775] IncludeCleaner: Failed to get an entry for resolved path : no such file or directory
+
+ERROR 2026-03-06 08:47:21,775 solidlsp.ls_process:_read_ls_process_stderr:388 - E[08:47:21.775] IncludeCleaner: Failed to get an entry for resolved path : no such file or directory
+
+ERROR 2026-03-06 08:47:21,775 solidlsp.ls_process:_read_ls_process_stderr:388 - E[08:47:21.775] IncludeCleaner: Failed to get an entry for resolved path : no such file or directory
+
+ERROR 2026-03-06 08:47:21,775 solidlsp.ls_process:_read_ls_process_stderr:388 - E[08:47:21.775] IncludeCleaner: Failed to get an entry for resolved path : no such file or directory
+
+ERROR 2026-03-06 08:47:21,775 solidlsp.ls_process:_read_ls_process_stderr:388 - E[08:47:21.775] IncludeCleaner: Failed to get an entry for resolved path : no such file or directory
+
+ERROR 2026-03-06 08:47:21,775 solidlsp.ls_process:_read_ls_process_stderr:388 - E[08:47:21.775] IncludeCleaner: Failed to get an entry for resolved path : no such file or directory
+
+ERROR 2026-03-06 08:47:21,775 solidlsp.ls_process:_read_ls_process_stderr:388 - E[08:47:21.775] IncludeCleaner: Failed to get an entry for resolved path : no such file or directory
+
+ERROR 2026-03-06 08:47:21,775 solidlsp.ls_process:_read_ls_process_stderr:388 - E[08:47:21.775] IncludeCleaner: Failed to get an entry for resolved path : no such file or directory
+
+ERROR 2026-03-06 08:47:21,775 solidlsp.ls_process:_read_ls_process_stderr:388 - E[08:47:21.775] IncludeCleaner: Failed to get an entry for resolved path : no such file or directory
+
+ERROR 2026-03-06 08:47:21,775 solidlsp.ls_process:_read_ls_process_stderr:388 - E[08:47:21.775] IncludeCleaner: Failed to get an entry for resolved path : no such file or directory
+
+ERROR 2026-03-06 08:47:21,775 solidlsp.ls_process:_read_ls_process_stderr:388 - E[08:47:21.775] IncludeCleaner: Failed to get an entry for resolved path : no such file or directory
+
+ERROR 2026-03-06 08:47:21,775 solidlsp.ls_process:_read_ls_process_stderr:388 - E[08:47:21.775] IncludeCleaner: Failed to get an entry for resolved path : no such file or directory
+
+ERROR 2026-03-06 08:47:21,776 solidlsp.ls_process:_read_ls_process_stderr:388 - E[08:47:21.775] IncludeCleaner: Failed to get an entry for resolved path : no such file or directory
+
+INFO  2026-03-06 08:47:21,777 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:21.778] --> textDocument/publishDiagnostics
+
+INFO  2026-03-06 08:47:21,780 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:21.781] --> reply:textDocument/documentSymbol(2) 50 ms
+
+INFO  2026-03-06 08:47:21,782 serena.task_executor:stop:367 - Task-2:<lambda> completed in 0.054 seconds
+INFO  2026-03-06 08:47:21,782 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:21.782] <-- textDocument/didClose
+
+INFO  2026-03-06 08:47:21,782 serena.cli:health_check:861 - GetSymbolsOverviewTool returned: [{'name': 'Instance', 'kind': 'Class'}, {'name': 'getExecutableDir', 'kind': 'Function'}, {'name': 'getRegistryValue', 'kind': 'Function'}, {'name': 'getBlueStacksInstallDir', 'kind': 'Function'}, {'name': 'getBlueStacksDataDir', 'kind': 'Function'}, {'name': 'terminateBlueStacksProcesses', 'kind': 'Function'}, {'name': 'enableAdbInConfig', 'kind': 'Function'}, {'name': 'ensureAdbAvailable', 'kind': 'Function'}, {'name': 'getApkPath', 'kind': 'Function'}, {'name': 'parseInstances', 'kind': 'Function'}, {'name': 'selectInstances', 'kind': 'Function'}, {'name': 'connectToInstance', 'kind': 'Function'}, {'name': 'installApkOnInstance', 'kind': 'Function'}, {'name': 'processNonSelectedInstance', 'kind': 'Function'}, {'name': 'stringToWstring', 'kind': 'Function'}, {'name': 'runCommand', 'kind': 'Function'}, {'name': 'getExecutableDir', 'kind': 'Function'}, {'name': 'stringToWstring', 'kind': 'Function'}, {'name': 'getRegistryValue', 'kind': 'Function'}, {'name': 'getBlueStacksInstallDir', 'kind': 'Function'}, {'name': 'getBlueStacksDataDir', 'kind': 'Function'}, {'name': 'terminateBlueStacksProcesses', 'kind': 'Function'}, {'name': 'enableAdbInConfig', 'kind': 'Function'}, {'name': 'ensureAdbAvailable', 'kind': 'Function'}, {'name': 'getApkPath', 'kind': 'Function'}, {'name': 'parseInstances', 'kind': 'Function'}, {'name': 'selectInstances', 'kind': 'Function'}, {'name': 'runCommand', 'kind': 'Function'}, {'name': 'connectToInstance', 'kind': 'Function'}, {'name': 'installApkOnInstance', 'kind': 'Function'}, {'name': 'processNonSelectedInstance', 'kind': 'Function'}, {'name': 'main', 'kind': 'Function'}]
+INFO  2026-03-06 08:47:21,782 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:21.782] --> textDocument/publishDiagnostics
+
+INFO  2026-03-06 08:47:21,782 serena.cli:health_check:884 - Using symbol for testing: Instance (kind: Class)
+INFO  2026-03-06 08:47:21,782 serena.cli:health_check:887 - Testing FindSymbolTool for symbol: Instance
+INFO  2026-03-06 08:47:21,782 serena.task_executor:issue_task:192 - Scheduling Task-3:<lambda>
+INFO  2026-03-06 08:47:21,883 serena.task_executor:_process_task_queue:123 - Starting execution of Task-3:<lambda>
+INFO  2026-03-06 08:47:21,883 serena.task_executor:start:360 - Task-3:<lambda> starting ...
+INFO  2026-03-06 08:47:21,884 serena.task_executor:stop:367 - Task-3:<lambda> completed in 0.001 seconds
+INFO  2026-03-06 08:47:21,884 serena.cli:health_check:892 - FindSymbolTool found 1 matches for symbol Instance
+INFO  2026-03-06 08:47:21,884 serena.cli:health_check:895 - Testing FindReferencingSymbolsTool for symbol: Instance
+INFO  2026-03-06 08:47:21,884 serena.task_executor:issue_task:192 - Scheduling Task-4:<lambda>
+INFO  2026-03-06 08:47:21,985 serena.task_executor:_process_task_queue:123 - Starting execution of Task-4:<lambda>
+INFO  2026-03-06 08:47:21,985 serena.task_executor:start:360 - Task-4:<lambda> starting ...
+INFO  2026-03-06 08:47:21,986 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:21.986] <-- textDocument/didOpen
+
+INFO  2026-03-06 08:47:21,986 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:21.986] Failed to find compilation database for C:\Users\Jordan\Documents\BluestacksRoot\Magisk.cpp
+
+INFO  2026-03-06 08:47:21,986 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:21.986] ASTWorker building file C:\Users\Jordan\Documents\BluestacksRoot\Magisk.cpp version 0 with command clangd fallback
+
+INFO  2026-03-06 08:47:21,987 solidlsp.ls_process:_read_ls_process_stderr:388 - [C:\Users\Jordan\Documents\BluestacksRoot]
+
+INFO  2026-03-06 08:47:21,987 solidlsp.ls_process:_read_ls_process_stderr:388 - "C:\\msys64\\ucrt64\\bin\\clang" "-resource-dir=C:\\Users\\Jordan\\.serena\\language_servers\\static\\ClangdLanguageServer\\clangd\\clangd_19.1.2\\lib\\clang\\19" -- "C:\\Users\\Jordan\\Documents\\BluestacksRoot\\Magisk.cpp"
+
+INFO  2026-03-06 08:47:21,996 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:21.997] Built preamble of size 256712 for file C:\Users\Jordan\Documents\BluestacksRoot\Magisk.cpp version 0 in 0.01 seconds
+
+ERROR 2026-03-06 08:47:22,011 solidlsp.ls_process:_read_ls_process_stderr:388 - E[08:47:22.012] IncludeCleaner: Failed to get an entry for resolved path : no such file or directory
+
+ERROR 2026-03-06 08:47:22,012 solidlsp.ls_process:_read_ls_process_stderr:388 - E[08:47:22.012] IncludeCleaner: Failed to get an entry for resolved path : no such file or directory
+
+ERROR 2026-03-06 08:47:22,012 solidlsp.ls_process:_read_ls_process_stderr:388 - E[08:47:22.012] IncludeCleaner: Failed to get an entry for resolved path : no such file or directory
+
+ERROR 2026-03-06 08:47:22,012 solidlsp.ls_process:_read_ls_process_stderr:388 - E[08:47:22.012] IncludeCleaner: Failed to get an entry for resolved path : no such file or directory
+
+ERROR 2026-03-06 08:47:22,012 solidlsp.ls_process:_read_ls_process_stderr:388 - E[08:47:22.012] IncludeCleaner: Failed to get an entry for resolved path : no such file or directory
+
+ERROR 2026-03-06 08:47:22,012 solidlsp.ls_process:_read_ls_process_stderr:388 - E[08:47:22.012] IncludeCleaner: Failed to get an entry for resolved path : no such file or directory
+
+ERROR 2026-03-06 08:47:22,012 solidlsp.ls_process:_read_ls_process_stderr:388 - E[08:47:22.012] IncludeCleaner: Failed to get an entry for resolved path : no such file or directory
+
+ERROR 2026-03-06 08:47:22,012 solidlsp.ls_process:_read_ls_process_stderr:388 - E[08:47:22.012] IncludeCleaner: Failed to get an entry for resolved path : no such file or directory
+
+ERROR 2026-03-06 08:47:22,012 solidlsp.ls_process:_read_ls_process_stderr:388 - E[08:47:22.012] IncludeCleaner: Failed to get an entry for resolved path : no such file or directory
+
+ERROR 2026-03-06 08:47:22,012 solidlsp.ls_process:_read_ls_process_stderr:388 - E[08:47:22.012] IncludeCleaner: Failed to get an entry for resolved path : no such file or directory
+
+ERROR 2026-03-06 08:47:22,012 solidlsp.ls_process:_read_ls_process_stderr:388 - E[08:47:22.012] IncludeCleaner: Failed to get an entry for resolved path : no such file or directory
+
+ERROR 2026-03-06 08:47:22,012 solidlsp.ls_process:_read_ls_process_stderr:388 - E[08:47:22.012] IncludeCleaner: Failed to get an entry for resolved path : no such file or directory
+
+ERROR 2026-03-06 08:47:22,012 solidlsp.ls_process:_read_ls_process_stderr:388 - E[08:47:22.012] IncludeCleaner: Failed to get an entry for resolved path : no such file or directory
+
+INFO  2026-03-06 08:47:22,013 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:22.014] --> textDocument/publishDiagnostics
+
+INFO  2026-03-06 08:47:23,987 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:23.987] <-- textDocument/references(3)
+
+INFO  2026-03-06 08:47:23,987 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:23.987] --> reply:textDocument/references(3) 0 ms
+
+INFO  2026-03-06 08:47:23,988 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:23.988] <-- textDocument/didClose
+
+INFO  2026-03-06 08:47:23,988 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:23.988] --> textDocument/publishDiagnostics
+
+INFO  2026-03-06 08:47:23,989 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:23.989] <-- textDocument/didOpen
+
+INFO  2026-03-06 08:47:23,989 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:23.989] Failed to find compilation database for C:\Users\Jordan\Documents\BluestacksRoot\Magisk.cpp
+
+INFO  2026-03-06 08:47:23,989 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:23.989] ASTWorker building file C:\Users\Jordan\Documents\BluestacksRoot\Magisk.cpp version 0 with command clangd fallback
+
+INFO  2026-03-06 08:47:23,990 solidlsp.ls_process:_read_ls_process_stderr:388 - [C:\Users\Jordan\Documents\BluestacksRoot]
+
+WARNING 2026-03-06 08:47:23,990 solidlsp.ls:request_referencing_symbols:1724 - Could not find containing symbol for Magisk.cpp:34:56. Returning file symbol instead
+INFO  2026-03-06 08:47:23,990 solidlsp.ls_process:_read_ls_process_stderr:388 - "C:\\msys64\\ucrt64\\bin\\clang" "-resource-dir=C:\\Users\\Jordan\\.serena\\language_servers\\static\\ClangdLanguageServer\\clangd\\clangd_19.1.2\\lib\\clang\\19" -- "C:\\Users\\Jordan\\Documents\\BluestacksRoot\\Magisk.cpp"
+
+INFO  2026-03-06 08:47:23,990 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:23.990] <-- textDocument/didClose
+
+INFO  2026-03-06 08:47:23,990 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:23.990] --> textDocument/publishDiagnostics
+
+INFO  2026-03-06 08:47:23,991 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:23.991] <-- textDocument/didOpen
+
+INFO  2026-03-06 08:47:23,991 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:23.991] Failed to find compilation database for C:\Users\Jordan\Documents\BluestacksRoot\Magisk.cpp
+
+INFO  2026-03-06 08:47:23,991 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:23.991] ASTWorker building file C:\Users\Jordan\Documents\BluestacksRoot\Magisk.cpp version 0 with command clangd fallback
+
+INFO  2026-03-06 08:47:23,992 solidlsp.ls_process:_read_ls_process_stderr:388 - [C:\Users\Jordan\Documents\BluestacksRoot]
+
+WARNING 2026-03-06 08:47:23,992 solidlsp.ls:request_referencing_symbols:1724 - Could not find containing symbol for Magisk.cpp:35:59. Returning file symbol instead
+INFO  2026-03-06 08:47:23,992 solidlsp.ls_process:_read_ls_process_stderr:388 - "C:\\msys64\\ucrt64\\bin\\clang" "-resource-dir=C:\\Users\\Jordan\\.serena\\language_servers\\static\\ClangdLanguageServer\\clangd\\clangd_19.1.2\\lib\\clang\\19" -- "C:\\Users\\Jordan\\Documents\\BluestacksRoot\\Magisk.cpp"
+
+INFO  2026-03-06 08:47:23,992 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:23.992] <-- textDocument/didClose
+
+INFO  2026-03-06 08:47:23,992 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:23.992] --> textDocument/publishDiagnostics
+
+INFO  2026-03-06 08:47:23,993 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:23.993] <-- textDocument/didOpen
+
+INFO  2026-03-06 08:47:23,993 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:23.993] Failed to find compilation database for C:\Users\Jordan\Documents\BluestacksRoot\Magisk.cpp
+
+INFO  2026-03-06 08:47:23,993 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:23.993] ASTWorker building file C:\Users\Jordan\Documents\BluestacksRoot\Magisk.cpp version 0 with command clangd fallback
+
+INFO  2026-03-06 08:47:23,993 solidlsp.ls_process:_read_ls_process_stderr:388 - [C:\Users\Jordan\Documents\BluestacksRoot]
+
+INFO  2026-03-06 08:47:23,993 solidlsp.ls_process:_read_ls_process_stderr:388 - "C:\\msys64\\ucrt64\\bin\\clang" "-resource-dir=C:\\Users\\Jordan\\.serena\\language_servers\\static\\ClangdLanguageServer\\clangd\\clangd_19.1.2\\lib\\clang\\19" -- "C:\\Users\\Jordan\\Documents\\BluestacksRoot\\Magisk.cpp"
+
+WARNING 2026-03-06 08:47:23,993 solidlsp.ls:request_referencing_symbols:1724 - Could not find containing symbol for Magisk.cpp:36:65. Returning file symbol instead
+INFO  2026-03-06 08:47:23,994 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:23.994] <-- textDocument/didClose
+
+INFO  2026-03-06 08:47:23,994 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:23.994] --> textDocument/publishDiagnostics
+
+INFO  2026-03-06 08:47:23,994 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:23.994] <-- textDocument/didOpen
+
+INFO  2026-03-06 08:47:23,994 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:23.995] Failed to find compilation database for C:\Users\Jordan\Documents\BluestacksRoot\Magisk.cpp
+
+INFO  2026-03-06 08:47:23,995 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:23.995] ASTWorker building file C:\Users\Jordan\Documents\BluestacksRoot\Magisk.cpp version 0 with command clangd fallback
+
+INFO  2026-03-06 08:47:23,995 solidlsp.ls_process:_read_ls_process_stderr:388 - [C:\Users\Jordan\Documents\BluestacksRoot]
+
+INFO  2026-03-06 08:47:23,995 solidlsp.ls_process:_read_ls_process_stderr:388 - "C:\\msys64\\ucrt64\\bin\\clang" "-resource-dir=C:\\Users\\Jordan\\.serena\\language_servers\\static\\ClangdLanguageServer\\clangd\\clangd_19.1.2\\lib\\clang\\19" -- "C:\\Users\\Jordan\\Documents\\BluestacksRoot\\Magisk.cpp"
+
+INFO  2026-03-06 08:47:23,995 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:23.995] <-- textDocument/didClose
+
+INFO  2026-03-06 08:47:23,995 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:23.995] --> textDocument/publishDiagnostics
+
+INFO  2026-03-06 08:47:23,996 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:23.996] <-- textDocument/didOpen
+
+INFO  2026-03-06 08:47:23,996 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:23.996] Failed to find compilation database for C:\Users\Jordan\Documents\BluestacksRoot\Magisk.cpp
+
+INFO  2026-03-06 08:47:23,996 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:23.996] ASTWorker building file C:\Users\Jordan\Documents\BluestacksRoot\Magisk.cpp version 0 with command clangd fallback
+
+INFO  2026-03-06 08:47:23,996 solidlsp.ls_process:_read_ls_process_stderr:388 - [C:\Users\Jordan\Documents\BluestacksRoot]
+
+INFO  2026-03-06 08:47:23,996 solidlsp.ls_process:_read_ls_process_stderr:388 - "C:\\msys64\\ucrt64\\bin\\clang" "-resource-dir=C:\\Users\\Jordan\\.serena\\language_servers\\static\\ClangdLanguageServer\\clangd\\clangd_19.1.2\\lib\\clang\\19" -- "C:\\Users\\Jordan\\Documents\\BluestacksRoot\\Magisk.cpp"
+
+INFO  2026-03-06 08:47:23,997 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:23.997] <-- textDocument/didClose
+
+INFO  2026-03-06 08:47:23,997 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:23.997] --> textDocument/publishDiagnostics
+
+INFO  2026-03-06 08:47:23,997 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:23.997] <-- textDocument/didOpen
+
+INFO  2026-03-06 08:47:23,997 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:23.998] Failed to find compilation database for C:\Users\Jordan\Documents\BluestacksRoot\Magisk.cpp
+
+INFO  2026-03-06 08:47:23,997 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:23.998] ASTWorker building file C:\Users\Jordan\Documents\BluestacksRoot\Magisk.cpp version 0 with command clangd fallback
+
+INFO  2026-03-06 08:47:23,998 solidlsp.ls_process:_read_ls_process_stderr:388 - [C:\Users\Jordan\Documents\BluestacksRoot]
+
+INFO  2026-03-06 08:47:23,998 solidlsp.ls_process:_read_ls_process_stderr:388 - "C:\\msys64\\ucrt64\\bin\\clang" "-resource-dir=C:\\Users\\Jordan\\.serena\\language_servers\\static\\ClangdLanguageServer\\clangd\\clangd_19.1.2\\lib\\clang\\19" -- "C:\\Users\\Jordan\\Documents\\BluestacksRoot\\Magisk.cpp"
+
+INFO  2026-03-06 08:47:23,998 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:23.998] <-- textDocument/didClose
+
+INFO  2026-03-06 08:47:23,998 solidlsp.ls_process:_read_ls_process_stderr:388 - I[08:47:23.998] --> textDocument/publishDiagnostics
+
+INFO  2026-03-06 08:47:23,999 serena.task_executor:stop:367 - Task-4:<lambda> completed in 2.014 seconds
+INFO  2026-03-06 08:47:24,000 serena.cli:health_check:899 - FindReferencingSymbolsTool found 1 references for symbol Instance
+INFO  2026-03-06 08:47:24,000 serena.cli:health_check:905 - Testing SearchForPatternTool for pattern: Instance
+INFO  2026-03-06 08:47:24,000 serena.task_executor:issue_task:192 - Scheduling Task-5:<lambda>
+INFO  2026-03-06 08:47:24,100 serena.task_executor:_process_task_queue:123 - Starting execution of Task-5:<lambda>
+INFO  2026-03-06 08:47:24,100 serena.task_executor:start:360 - Task-5:<lambda> starting ...
+INFO  2026-03-06 08:47:24,105 serena.util.text_utils:search_files:366 - Processing 1 files.
+INFO  2026-03-06 08:47:24,125 serena.util.text_utils:search_files:407 - Found 42 total matches across 1 files
+INFO  2026-03-06 08:47:24,126 serena.task_executor:stop:367 - Task-5:<lambda> completed in 0.026 seconds
+INFO  2026-03-06 08:47:24,126 serena.cli:health_check:912 - SearchForPatternTool found 42 pattern matches for Instance
+INFO  2026-03-06 08:47:24,126 serena.cli:health_check:926 - Health check completed successfully
+ERROR 2026-03-06 08:47:24,126 serena.cli:health_check:934 - Health check failed with exception: 'charmap' codec can't encode character '\u2705' in position 0: character maps to <undefined>
+Traceback (most recent call last):
+  File "C:\Users\Jordan\AppData\Local\uv\cache\archive-v0\XUyi5tPqsMT-xcQgQRrxD\Lib\site-packages\serena\cli.py", line 929, in health_check
+    click.echo("✅ Health check passed - All tools working correctly")
+  File "C:\Users\Jordan\AppData\Local\uv\cache\archive-v0\XUyi5tPqsMT-xcQgQRrxD\Lib\site-packages\click\utils.py", line 321, in echo
+    file.write(out)  # type: ignore
+    ^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2705' in position 0: character maps to <undefined>
+ERROR 2026-03-06 08:47:24,131 sensai.util.logging:__exit__:410 - Exception within FileLoggerContext
+Traceback (most recent call last):
+  File "C:\Users\Jordan\AppData\Local\uv\cache\archive-v0\XUyi5tPqsMT-xcQgQRrxD\Lib\site-packages\serena\cli.py", line 929, in health_check
+    click.echo("✅ Health check passed - All tools working correctly")
+  File "C:\Users\Jordan\AppData\Local\uv\cache\archive-v0\XUyi5tPqsMT-xcQgQRrxD\Lib\site-packages\click\utils.py", line 321, in echo
+    file.write(out)  # type: ignore
+    ^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2705' in position 0: character maps to <undefined>
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Jordan\AppData\Local\uv\cache\archive-v0\XUyi5tPqsMT-xcQgQRrxD\Lib\site-packages\serena\cli.py", line 935, in health_check
+    click.echo(f"❌ Health check failed: {e!s}")
+  File "C:\Users\Jordan\AppData\Local\uv\cache\archive-v0\XUyi5tPqsMT-xcQgQRrxD\Lib\site-packages\click\utils.py", line 321, in echo
+    file.write(out)  # type: ignore
+    ^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u274c' in position 0: character maps to <undefined>
