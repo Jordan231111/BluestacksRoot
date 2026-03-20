@@ -55,27 +55,6 @@ However, I cannot reproduce the issue and the latest magisk with zygisk is worki
 - Manual root method my code is mainly based off this method [here](https://xdaforums.com/t/bluestacks-tweaker-6-tool-for-modifing-bluestacks-2-3-3n-4-5.3622681/post-89306676)
 - Due to changes that manual method may NOT even work due to hidden services unless manually killed as well so recommend to use this script instead.
 
-
-## Star History
-
-<a href="https://www.star-history.com/#Jordan231111/BluestacksRoot&Date">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=Jordan231111/BluestacksRoot&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=Jordan231111/BluestacksRoot&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=Jordan231111/BluestacksRoot&type=Date" />
- </picture>
-</a>
-
-## Star History
-
-<a href="https://www.star-history.com/?repos=Jordan231111%2FBluestacksRoot&type=date&legend=top-left">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/image?repos=Jordan231111/BluestacksRoot&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/image?repos=Jordan231111/BluestacksRoot&type=date&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/image?repos=Jordan231111/BluestacksRoot&type=date&legend=top-left" />
- </picture>
-</a>
-
 ## License
 
 This work is licensed under the Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-nd/4.0/ or see the [LICENSE](./LICENSE) file.
