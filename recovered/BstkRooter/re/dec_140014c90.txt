@@ -1,0 +1,373 @@
+/* r2dec pseudo code output (r2 6.1.4) */
+/* /Users/jordan/Downloads/new @ 0x140014c90 */
+#include <stdint.h>
+ 
+int64_t fcn_140014c90 (int64_t arg_120h, int64_t arg_128h, int64_t arg_130h, int64_t arg1, int64_t arg2, int64_t arg3, int64_t arg4) {
+    int64_t var_18h;
+    int64_t var_bp_38h;
+    int64_t var_bp_50h;
+    int64_t var_bp_78h;
+    int64_t var_8ch;
+    int64_t var_110h;
+    int64_t var_80h;
+    int64_t var_bp_70h;
+    int64_t var_68h;
+    int64_t var_bp_60h;
+    int64_t var_58h;
+    int64_t var_bp_30h;
+    int64_t var_bp_28h;
+    int64_t var_bp_8h;
+    int64_t var_20h;
+    int64_t var_28h;
+    int64_t var_30h;
+    int64_t var_38h;
+    int64_t var_40h;
+    int64_t var_48h;
+    int64_t var_50h;
+    int64_t var_sp_58h;
+    int64_t var_60h;
+    int64_t var_sp_68h;
+    int64_t var_70h;
+    int64_t var_78h;
+    int64_t var_8h;
+    int64_t var_10h;
+    rcx = arg1;
+    rdx = arg2;
+    r8 = arg3;
+    r9 = arg4;
+    *((rsp + 0x10)) = rbx;
+    *((rsp + 8)) = rcx;
+    rbp = rsp - 0xc0;
+    r12 = r9;
+    rsi = r8;
+    rbx = rdx;
+    r13 = *((rbp + 0x128));
+    eax = 0;
+    *((rsp + 0x40)) = rax;
+    *((rsp + 0x48)) = al;
+    __asm ("xorps xmm0, xmm0");
+    __asm ("movdqa xmmword [rsp + 0x50], xmm0");
+    __asm ("xorps xmm1, xmm1");
+    __asm ("movdqa xmmword [rsp + 0x60], xmm1");
+    *((rsp + 0x70)) = rax;
+    *((rsp + 0x78)) = al;
+    __asm ("movdqa xmmword [rbp - 0x80], xmm0");
+    *((rbp - 0x70)) = al;
+    *((rbp - 0x68)) = rax;
+    *((rbp - 0x60)) = rax;
+    *((rbp - 0x58)) = al;
+    r14d = *((rbp + 0x130));
+    *((rbp + 0x110)) = r14d;
+    edi = eax;
+    r8 = *((rsp + 0x50));
+label_1:
+    edi |= r14d;
+    r14 = rsi;
+    rax = *((rbp + 0x120));
+    rcx = *(rax);
+    if (rcx == 0) {
+        goto label_2;
+    }
+    r15b = 0;
+    if (((edi >> 0xe) & 1) < 0) {
+        if (rsi == r12) {
+            goto label_3;
+        }
+        r14 = rsi + 1;
+    }
+label_3:
+    r9 = rax + 8;
+    eax = *((rcx + 0x20));
+    eax = *((rcx + 0x28));
+    r8 = r12;
+    rdx = r14;
+    rcx = rbp - 0x30;
+    void (*0x1400168a0)(uint64_t) (edi);
+    r8d = 0;
+    rdx = rsp + 0x40;
+    rcx = rbp - 0x30;
+    al = void (*0x140014570)() ();
+    if (al != 0) {
+        goto label_4;
+    }
+    if (r14 == r12) {
+        goto label_5;
+    }
+    if ((dil & 0x40) != 0) {
+        goto label_5;
+    }
+    eax = *((rbp + 0x8c));
+    __asm ("btr eax, 0xd");
+    __asm ("bts eax, 8");
+    *((rbp + 0x8c)) = eax;
+    rdx = r14 + 1;
+    r9d = 0;
+    r8 = r12;
+    rcx = rbp - 0x30;
+    rax = void (*0x14002afc0)() ();
+    rdi = rax;
+    if (rax == r12) {
+        goto label_6;
+    }
+    do {
+        *((rbp + 0x78)) = rdi;
+        r8d = 0;
+        rdx = rsp + 0x40;
+        rcx = rbp - 0x30;
+        al = void (*0x140014570)() ();
+        if (al != 0) {
+            goto label_4;
+        }
+        rdx = rdi + 1;
+        r9d = 0;
+        r8 = r12;
+        rcx = rbp - 0x30;
+        rax = void (*0x14002afc0)() ();
+        rdi = rax;
+    } while (rax != r12);
+label_6:
+    *((rbp + 0x78)) = r12;
+    r8d = 0;
+    rdx = rsp + 0x40;
+    rcx = rbp - 0x30;
+    al = void (*0x140014570)() ();
+    if (al != 0) {
+label_4:
+        r15b = 1;
+        rsp + 0x78 = (rsi != *((rsp + 0x70))) ? 1 : 0;
+    }
+label_5:
+    rcx = rbp + 0x50;
+    void (*0x140018320)(uint64_t) (rsi);
+    rcx = rbp + 0x38;
+    void (*0x140018320)() ();
+    rcx = rbp + 0x18;
+    void (*0x14002b8b0)() ();
+    rcx = rbp - 8;
+    void (*0x140018320)() ();
+    rcx = rbp - 0x28;
+    void (*0x14002b8b0)() ();
+    if (r15b == 0) {
+        goto label_7;
+    }
+    if ((*((rbp + 0x130)) & 0x800) != 0) {
+        goto label_8;
+    }
+    rsi = *((rsp + 0x70));
+    rdi = *((rsp + 0x68));
+    if (rdi == rsi) {
+        goto label_8;
+    }
+    do {
+        edx = *(rdi);
+        rcx = rbx;
+        rax = void (*0x14002d920)() ();
+        rdi++;
+    } while (rdi != rsi);
+label_8:
+    r15 = *((r13 + 0x10));
+    if (*((r13 + 0x18)) > 0xf) {
+        rsi = *(r13);
+        r15 += rsi;
+    } else {
+        r15 += r13;
+        rsi = r13;
+    }
+    r14d = *((rbp + 0x110));
+    if (((r14d >> 0xa) & 1) >= 0) {
+        goto label_9;
+    }
+    r8 = *((rsp + 0x50));
+    if (rsi == r15) {
+        goto label_10;
+    }
+    r13 = 0x2aaaaaaaaaaaaaab;
+label_0:
+    edx = *(rsi);
+    rax = rsi + 1;
+    rsi = rax;
+    if (dl != 0x26) {
+        goto label_11;
+    }
+    rcx = *((rsp + 0x58));
+    rcx -= r8;
+    rax = r13;
+    rdx:rax = rax * rcx;
+    rdx >>= 2;
+    rax = rdx;
+    rax >>= 0x3f;
+    rdx += rax;
+    if (rdx == 0) {
+        goto label_12;
+    }
+    rdi = *(r8);
+    r14 = *((r8 + 8));
+    if (rdi == r14) {
+        goto label_12;
+    }
+    do {
+        edx = *(rdi);
+        rcx = rbx;
+        rax = void (*0x14002d920)() ();
+        rdi++;
+    } while (rdi != r14);
+    goto label_13;
+label_11:
+    if (dl != 0x5c) {
+        goto label_14;
+    }
+    if (rsi == r15) {
+        goto label_15;
+    }
+    edx = *(rax);
+    if (dl < 0x30) {
+        goto label_16;
+    }
+    if (dl > 0x39) {
+        goto label_16;
+    }
+    rsi++;
+    r9d = rdx - 0x30;
+    rcx = *((rsp + 0x58));
+    rcx -= r8;
+    rax = r13;
+    rdx:rax = rax * rcx;
+    rdx >>= 2;
+    rax = rdx;
+    rax >>= 0x3f;
+    rdx += rax;
+    if (r9 >= rdx) {
+        goto label_12;
+    }
+    rax = r9 * 3;
+    rdi = *((r8 + rax*8));
+    r14 = *((r8 + rax*8 + 8));
+    if (rdi == r14) {
+        goto label_12;
+    }
+    do {
+        edx = *(rdi);
+        rcx = rbx;
+        void (*0x14002d920)() ();
+        rdi++;
+    } while (rdi != r14);
+    goto label_13;
+label_16:
+    rsi++;
+label_14:
+    rcx = rbx;
+    void (*0x14002d920)() ();
+label_13:
+    r8 = *((rsp + 0x50));
+label_12:
+    if (rsi != r15) {
+        goto label_0;
+    }
+label_15:
+    r13 = *((rbp + 0x128));
+    r14d = *((rbp + 0x110));
+    goto label_10;
+label_9:
+    r9 = rsi;
+    r8 = rbx;
+    rdx = rsp + 0x40;
+    rcx = rbp - 0x38;
+    rax = void (*0x140013f40)(uint64_t) (r14d);
+    rbx = *(rax);
+    r8 = *((rsp + 0x50));
+label_10:
+    rcx = *((rsp + 0x58));
+    rcx -= r8;
+    rdi = 0x2aaaaaaaaaaaaaab;
+    rax = rdi;
+    rdx:rax = rax * rcx;
+    rdx >>= 2;
+    rax = rdx;
+    rax >>= 0x3f;
+    rdx += rax;
+    rax = rbp - 0x68;
+    if (rdx != 0) {
+        rax = r8;
+    }
+    rsi = *((rax + 8));
+    if (rsi != r12) {
+        if ((*((rbp + 0x130)) & 0x1000) != 0) {
+            goto label_17;
+        }
+        if (rdx == 0) {
+            rax = rbp - 0x68;
+            rcx = rbp - 0x68;
+        } else {
+            rax = r8;
+            rcx = r8;
+        }
+        rdx = *(rax);
+        rax = *((rcx + 8));
+        if (rdx != rax) {
+            __asm ("bts r14d, 8");
+            *((rbp + 0x110)) = r14d;
+        }
+        edi = 0x2000;
+        eax = 0;
+        if (rdx != rax) {
+            edi = eax;
+        }
+        goto label_1;
+label_7:
+        r8 = *((rsp + 0x50));
+label_2:
+        rdi = 0x2aaaaaaaaaaaaaab;
+    }
+label_17:
+    if ((*((rbp + 0x130)) & 0x800) != 0) {
+        goto label_18;
+    }
+    if (rsi == r12) {
+        goto label_18;
+    }
+    do {
+        edx = *(rsi);
+        rcx = rbx;
+        void (*0x14002d920)() ();
+        rsi++;
+    } while (rsi != r12);
+    r8 = *((rsp + 0x50));
+label_18:
+    r15 = *((rbp + 0x100));
+    *(r15) = rbx;
+    if (r8 != 0) {
+        rcx = *((rsp + 0x60));
+        rcx -= r8;
+        rax = rdi;
+        rdx:rax = rax * rcx;
+        rdx >>= 2;
+        rax = rdx;
+        rax >>= 0x3f;
+        rdx += rax;
+        rdx *= 3;
+        rdx <<= 3;
+        rax = r8;
+        if (rdx >= 0x1000) {
+            rdx += 0x27;
+            r8 = *((r8 - 8));
+            rax -= r8;
+            rax -= 8;
+            if (rax <= 0x1f) {
+                goto label_19;
+            }
+            eax = 0;
+            r9d = 0;
+            r8d = 0;
+            edx = 0;
+            ecx = 0;
+            _invoke_watson (rax);
+            __asm ("int3");
+        }
+label_19:
+        rcx = r8;
+        void (*0x1400aa1f8)() ();
+    }
+    rax = r15;
+    rbx = *((rsp + 0x208));
+    return rax;
+}

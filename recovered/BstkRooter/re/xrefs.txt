@@ -1,0 +1,27 @@
+=== XREFS ===
+--- Root.vhd found (root fn) 0x1400afaa8 ---
+fcn.14001d370 0x14001d9c7 [DATA:r--] movups[38;2;193;156;0m xmm0[0m,[38;2;193;156;0m xmmword[38;2;193;156;0m [0m[[38;2;193;156;0mstr.___Found_Root.vhd:[0m][38;2;204;204;204m[0m
+fcn.14001f540 0x14001fb3a [DATA:r--] movups[38;2;193;156;0m xmm0[0m,[38;2;193;156;0m xmmword[38;2;193;156;0m [0m[[38;2;193;156;0mstr.___Found_Root.vhd:[0m][38;2;204;204;204m[0m
+--- bstk_su_c.tmp 0x1400afb40 ---
+fcn.14001d370 0x14001dd20 [DATA:r--] lea[38;2;204;204;204m rdx[0m,[38;2;193;156;0m[38;2;193;156;0m str.bstk_su_c.tmp[0m
+--- Rooted successfully 0x1400aff90 ---
+fcn.14001d370 0x14001f0e1 [DATA:r--] movups[38;2;193;156;0m xmm0[0m,[38;2;193;156;0m xmmword[38;2;193;156;0m [0m[[38;2;193;156;0mstr.Rooted_successfully_[0m][38;2;204;204;204m[0m
+--- Unrooted successfully 0x1400b0030 ---
+fcn.14001f540 0x14002011a [DATA:r--] movups[38;2;193;156;0m xmm0[0m,[38;2;193;156;0m xmmword[38;2;193;156;0m [0m[[38;2;193;156;0mstr.Unrooted_successfully_[0m][38;2;204;204;204m[0m
+--- Disk set to R/W 0x1400afa40 ---
+fcn.140019f40 0x14001abcd [DATA:r--] movups[38;2;193;156;0m xmm0[0m,[38;2;193;156;0m xmmword[38;2;193;156;0m [0m[[38;2;193;156;0mstr.Disk_set_to_R_W.[0m][38;2;204;204;204m[0m
+--- Disk reverted RO 0x1400afa68 ---
+fcn.140024680 0x140025310 [DATA:r--] movups[38;2;193;156;0m xmm0[0m,[38;2;193;156;0m xmmword[38;2;193;156;0m [0m[[38;2;193;156;0mstr.Disk_reverted_to_Readonly.[0m][38;2;204;204;204m[0m
+--- Patched successfully 0x1400af8c8 ---
+fcn.1400203f0 0x1400220a4 [DATA:r--] movups[38;2;193;156;0m xmm0[0m,[38;2;193;156;0m xmmword[38;2;193;156;0m [0m[[38;2;193;156;0mstr.Patched_successfully_[0m][38;2;204;204;204m[0m
+--- Emulator stopped 0x1400af238 ---
+fcn.14001d240 0x14001d2a9 [DATA:r--] movups[38;2;193;156;0m xmm0[0m,[38;2;193;156;0m xmmword[38;2;193;156;0m [0m[[38;2;193;156;0mstr.Emulator_processes_stopped.[0m][38;2;204;204;204m[0m
+--- enable_root_access 0x1400aff10 ---
+fcn.14001d370 0x14001ebb4 [DATA:r--] lea[38;2;204;204;204m rdx[0m,[38;2;193;156;0m[38;2;193;156;0m str..enable_root_access[0m
+--- EFI PART 0x1400b0928 ---
+fcn.140031560 0x1400319d2 [DATA:r--] lea[38;2;204;204;204m rdx[0m,[38;2;193;156;0m[38;2;193;156;0m str.EFI_PART[0m
+--- conectix 0x1400b08b0 ---
+fcn.140031560 0x140031759 [DATA:r--] lea[38;2;204;204;204m rdx[0m,[38;2;193;156;0m[38;2;193;156;0m str.conectix[0m
+fcn.140031cf0 0x140031dfe [DATA:r--] lea[38;2;204;204;204m rdx[0m,[38;2;193;156;0m[38;2;193;156;0m str.conectix[0m
+fcn.140031cf0 0x14003206f [DATA:r--] lea[38;2;204;204;204m rdx[0m,[38;2;193;156;0m[38;2;193;156;0m str.conectix[0m
+=== DONE ===

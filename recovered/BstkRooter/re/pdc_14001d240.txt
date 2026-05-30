@@ -1,0 +1,83 @@
+// callconv: rax ms (rcx, rdx, r8, r9, stack);
+void fcn.14001d240 (int64_t arg1) {
+        push (rbx)
+        rsp -= 0x60
+        rax = qword [0x1400e0140] // [0x1400e0140:8]=0x2b992ddfa232
+        rax ^= rsp
+        qword [var_50h] = rax
+        rbx = rcx    // arg1
+        rcx = rip + str.HD_Player.exe // 0x1400af1f8 // "HD-Player.exe"
+        0x14001d140 () // 0x14001d140(0x0, 0x0, 0x0, 0x1400af1f8)
+        rcx = rip + str.HD_MultiInstanceManager.exe // 0x1400af208 // "HD-MultiInstanceManager.exe"
+        0x14001d140 () // 0x14001d140(0x0, 0x0, 0x0, 0x1400af208)
+        rcx = rip + str.BstkSVC.exe // 0x1400af228 // "BstkSVC.exe"
+        0x14001d140 () // 0x14001d140(0x0, 0x0, 0x0, 0x1400af228)
+        xmm0 ^= xmm0
+        xmmword [var_30h] = xmm0
+        ecx = 0x20   // 32
+        0x140012c40 () // 0x140012c40(0x0, 0x0, 0x0, 0x20)
+        rcx = rax
+        qword [var_30h] = rax
+        qword [var_40h] = 0x1b // [0x1b:8]=-1 // 27
+        edx = 0x1f   // 31
+        qword [var_48h] = rdx
+        xmm0 = xmmword [str.Emulator_processes_stopped.] // [0x1400af238:16]=-1 // "Emulator processes stopped."
+        xmmword [rax] = xmm0
+        xmm0 = qword [0x1400af248] // [0x1400af248:8]=0x70706f7473207365 // "es stopped."
+        qword [rax + 0x10] = xmm0
+        eax = word [0x1400af250] // [0x1400af250:2]=0x6465 // "ed."
+        word [rcx + 0x18] = ax
+        eax = byte [0x1400af252] // [0x1400af252:1]=46 // "."
+        byte [rcx + 0x1a] = al
+        byte [rcx + 0x1b] = 0
+        rax = rbx + 0x128
+        r9 = var_30h
+        v = rax - r9
+        if (!v) goto loc_0x14001d305 // unlikely
+        goto loc_0x14001d2ea;
+    loc_0x14001d305:
+        byte [rbx + 0x148] = 0
+        v = rdx - 0xf // 15
+        if (((unsigned) v) <= 0) goto 0x14001d355 // likely
+        goto loc_0x14001d312;
+    loc_0x14001d355:
+        rcx = qword [var_50h]
+        rcx ^= rsp
+        0x1400aa370 () // 0x1400aa370(0x0, 0x0, 0x0, 0x178000)
+        rsp += 0x60
+        rbx = pop ()
+        return
+        goto loc_0x14001d321;
+        return rax;
+    loc_0x14001d350: // orphan
+         0x1400aa1f8 ()           // 0x1400aa1f8(0x0, 0x0, 0x0, 0x0)
+
+         goto loc_0x14001d321;
+    loc_0x14001d321: // orphan
+         rdx += 0x27              // 39
+         rcx = qword [rcx - 8]
+         rax -= rcx
+         rax -= 8
+         v = rax - 0x1f           // 31
+         if (((unsigned) v) <= 0) 
+         goto loc_0x14001d336;
+    loc_0x14001d336: // orphan
+         qword [var_20h] = 0
+         r9d = 0
+         r8d = 0
+         edx = 0
+         ecx = 0
+         qword [sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson] () // [0x1400ad928:8]=0xdf0de reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson(0x0, 0x0, 0x0, 0x0)
+         int3
+
+        return rax;
+    loc_0x14001d2ea: // orphan
+         r8d = 0x1b               // 27
+         rdx = rcx
+         rcx = rax
+         0x14002c270 ()           // 0x14002c270(0x0, 0x0, 0x0, 0x0)
+         rdx = qword [var_48h]
+         rcx = qword [var_30h]
+
+}
+

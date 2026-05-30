@@ -1,0 +1,600 @@
+// callconv: rax ms (rcx, rdx, r8, r9, stack);
+void fcn.140031560 (int64_t arg1) {
+        qword [var_10h] = rbx
+        qword [var_18h] = rsi
+        qword [var_20h] = rdi
+        push (rbp)
+        push (r12)
+        push (r13)
+        push (r14)
+        push (r15)
+        rbp = rsp - 0x390
+        rsp -= 0x490
+        rax = qword [0x1400e0140] // [0x1400e0140:8]=0x2b992ddfa232
+        rax ^= rsp
+        qword [var_380h] = rax
+        rsi = rcx    // arg1
+        rax = qword [rcx + 0x48] // arg1
+        v = rax - qword [rcx + 0x50] // arg1
+        if (!v) goto loc_0x1400315a9 // likely
+        goto loc_0x1400315a5;
+    loc_0x1400315a9:
+        r15d = 0
+        r13d = 1
+        v = byte [0x1400e0a90] - r15b // [0x1400e0a90:1]=0
+        if (!v) goto loc_0x140031723 // likely
+        goto loc_0x1400315bf;
+    loc_0x140031723:
+        r9d = 0
+        r8d = 0
+        edx = 0
+        rcx = qword [rcx] // arg1
+        qword [sym.imp.KERNEL32.dll_SetFilePointer] () // [0x1400ad1d0:8]=0xdeb06 reloc.KERNEL32.dll_SetFilePointer // reloc.KERNEL32.dll_SetFilePointer // DWORD SetFilePointer(-1, 0, 0, 0)
+        qword [var_20h_2] = r15
+        r9 = var_34h
+        ebx = 0x200  // 512
+        r8d = ebx
+        rdx = var_80h
+        rcx = qword [rsi]
+        qword [sym.imp.KERNEL32.dll_ReadFile] () // [0x1400ad1d8:8]=0xdeafa reloc.KERNEL32.dll_ReadFile // reloc.KERNEL32.dll_ReadFile // BOOL ReadFile(-1, 0x177f80, -1, 0x0000000000000000, -1)
+        r8d = 8
+        rdx = rip + str.conectix // 0x1400b08b0 // "conectix"
+        rcx = var_80h
+        0x1400ab0fe () // 0x1400ab0fe(0x0, 0x0, 0x1400b08b0, 0x177f80)
+        v = eax & eax
+        if (v) goto loc_0x140031798 // unlikely
+        goto loc_0x14003176d;
+    loc_0x140031798:
+        eax = 0xaa55
+        v = word [var_17eh] - ax
+        if (v) goto loc_0x14003194c // likely
+        goto loc_0x1400317aa;
+    loc_0x14003194c:
+        r14d = byte [0x1400e0a90] // [0x1400e0a90:1]=0
+        v = r14b & r14b
+        if (!v) goto loc_0x140031995 // likely
+        goto loc_0x140031959;
+    loc_0x140031995:
+        rdx = rbx
+        
+    loc_0x140031998:
+        // CODE XREF from fcn.140031560 @ 0x140031993(x)
+        r9d = 0
+        r8d = 0
+        rcx = qword [rsi]
+        qword [sym.imp.KERNEL32.dll_SetFilePointerEx] () // [0x1400ad1c8:8]=0xdeb18 reloc.KERNEL32.dll_SetFilePointerEx // reloc.KERNEL32.dll_SetFilePointerEx // BOOL SetFilePointerEx(-1, 0, 0, 0)
+        qword [var_20h_2] = r15
+        r9 = var_34h
+        r8d = ebx
+        rdx = var_180h
+        rcx = qword [rsi]
+        qword [sym.imp.KERNEL32.dll_ReadFile] () // [0x1400ad1d8:8]=0xdeafa reloc.KERNEL32.dll_ReadFile // reloc.KERNEL32.dll_ReadFile // BOOL ReadFile(-1, 0x178180, 0, 0x0000000000000000, -1)
+        r14d = byte [0x1400e0a90] // [0x1400e0a90:1]=0
+        goto loc_0x140031967;
+        goto loc_0x1400317b5;
+        goto loc_0x1400315d1;
+        return rax;
+    loc_0x140031adc: // orphan
+         qword [var_38h] = 0x400  // [0x400:8]=-1 // 1024
+         qword [var_40h] = 0x600  // [0x600:8]=-1 // 1536
+         qword [var_48h] = r15
+         r14d = r15d
+         rdi = r15
+         eax = 0x400              // 1024
+
+         goto loc_0x140031c7f;
+    loc_0x140031c7f: // orphan
+         byte [var_58h] = 0x83    // [0x83:1]=255 // 131
+         rax = r14d
+         v = qword [rsp + rax*8 + 0x38] - 0x400
+         if (!v) rbx = r15
+         qword [var_60h] = rbx
+         rcx = qword [rsi]
+         0x1400301e0 ()           // 0x1400301e0(0x0, 0x0, 0x0, -1)
+         rax -= rbx
+         qword [var_68h] = rax
+         v = byte [rsi + 0xa0] - r15b
+         if (v) 
+    loc_0x140031cbd: // orphan
+         byte [var_70h] = r13b
+         rcx = rsi + 0x48
+         rdx = qword [rcx + 8]
+         v = rdx - qword [rcx + 0x10]
+         if (!v) 
+    loc_0x1400316a5: // orphan
+         r8 = var_58h
+
+         goto loc_0x140031cd4;
+    loc_0x140031cd4: // orphan
+         xmm0 = xmmword [var_58h]
+         xmmword [rdx] = xmm0
+         xmm1 = xmmword [var_68h]
+         xmmword [rdx + 0x10] = xmm1
+         qword [rcx + 8] += 0x20  // [0x20:8]=-1 // 32
+         
+    loc_0x1400316af: // orphan
+         // CODE XREFS from fcn.140031560 @ 0x14003169f(x), 0x140031a43(x), 0x140031ba8(x), 0x140031cea(x)
+         al = 1
+
+         goto loc_0x140031cb2;
+    loc_0x140031cb2: // orphan
+         rax += 0xfffffffffffffe00
+         qword [var_68h] = rax
+
+         goto loc_0x140031b40;
+    loc_0x140031b40: // orphan
+         r14d++
+         rdi++
+         rax = qword [rsp + rdi*8 + 0x38]
+         v = rax & rax
+         if (v) 
+    loc_0x140031b00: // orphan
+         rdx = rax + 0x38
+         r9d = 0
+         r8d = 0
+         rcx = qword [rsi]
+         qword [sym.imp.KERNEL32.dll_SetFilePointerEx] () // [0x1400ad1c8:8]=0xdeb18 reloc.KERNEL32.dll_SetFilePointerEx // reloc.KERNEL32.dll_SetFilePointerEx // BOOL SetFilePointerEx(-1,, 0, 0)
+         qword [var_20h_2] = r15
+         r9 = var_34h
+         r8d = 2
+         rdx = var_30h
+         rcx = qword [rsi]
+         qword [sym.imp.KERNEL32.dll_ReadFile] () // [0x1400ad1d8:8]=0xdeafa reloc.KERNEL32.dll_ReadFile // reloc.KERNEL32.dll_ReadFile // BOOL ReadFile(-1, 0x178030, 0x00000000, 0x0000040000000000, -1)
+         ecx = word [var_30h]
+         v = cx - r12w
+         if (!v) 
+         goto loc_0x140031b50;
+    loc_0x140031b50: // orphan
+         // CODE XREF from fcn.140031560 @ 0x140031ada(x)
+         v = cx - r12w
+         if (v) 
+    loc_0x140031bb7: // orphan
+         xmm0 ^= xmm0
+         xmmword [var_58h] = xmm0
+         ecx = 0x30               // '0' // 48
+         0x140012c40 ()           // 0x140012c40(0x0, 0x0, 0x0, 0x30)
+         rcx = rax
+         qword [var_58h] = rax
+         xmm0 = xmmword [0x1400b0b40] // [0x1400b0b40:16]=-1
+         xmmword [var_68h] = xmm0
+         xmm0 = xmmword [str.No_partition_table_or_ext4_filesystem_found] // [0x1400b0938:16]=-1 // "No partition table or ext4 filesystem found"
+         xmmword [rax] = xmm0
+         xmm1 = xmmword [0x1400b0948] // [0x1400b0948:16]=-1 // "le or ext4 filesystem found"
+         xmmword [rax + 0x10] = xmm1
+         xmm0 = qword [0x1400b0958] // [0x1400b0958:8]=0x6f66206d65747379 // "ystem found"
+         qword [rax + 0x20] = xmm0
+         eax = word [0x1400b0960] // [0x1400b0960:2]=0x6e75 // "und"
+         word [rcx + 0x28] = ax
+         eax = byte [0x1400b0962] // [0x1400b0962:1]=100 // "d"
+         byte [rcx + 0x2a] = al
+         byte [rcx + 0x2b] = r15b
+         rcx = rsi + 0x28         // "und"
+         rdx = var_58h
+         0x140018810 ()           // 0x140018810(0x0, 0x0, 0x178050, 0x28)
+         rdx = qword [var_70h]
+         v = rdx - 0xf            // "ble or ext4 files" // "o partition table or ext4 files"
+         if (((unsigned) v) <= 0) 
+    loc_0x140031c78: // orphan
+         al = 0                   // "o partition table or ext4 files" // "o partition table or ext4 files"
+         
+    loc_0x1400316b1: // orphan
+         // CODE XREF from fcn.140031560 @ 0x140031c7a(x)
+         rcx = qword [var_380h]
+         rcx ^= rsp               // (cstr 0x00000000) "No partition table or ext4 files" // "o partition table or ext4 files"
+         0x1400aa370 ()           // 0x1400aa370(0x0, 0x0, 0x0, 0x178000)
+         r11 = var_490h           // (cstr 0x00000000) "No partition table or ext4 files"
+         rbx = qword [r11 + 0x38]
+         rsi = qword [r11 + 0x40]
+         rdi = qword [r11 + 0x48]
+         rsp = r11                // (cstr 0x00000000) "No partition table or ext4 files"
+         r15 = pop ()             // (cstr 0x00000000) "No partition table or ext4 files"
+         r14 = pop ()             // (cstr 0x00000000) "No partition table or ext4 files"
+         r13 = pop ()             // (cstr 0x00000000) "No partition table or ext4 files"
+         r12 = pop ()             // (cstr 0x00000000) "No partition table or ext4 files"
+         rbp = pop ()             // (cstr 0x00000000) "No partition table or ext4 files"
+         return
+
+    loc_0x140031c34: // orphan
+         rdx++                    // "o partition table or ext4 files"
+         rcx = qword [var_58h]
+         rax = rcx
+         v = rdx - 0x1000         // "o partition table or ext4 files" // "o partition table or ext4 files"
+         if (((unsigned) v) < 0) 
+    loc_0x140031c73: // orphan
+         0x1400aa1f8 ()           // 0x1400aa1f8(0x0, 0x0, 0x0, 0x0)
+
+         goto loc_0x140031c48;
+    loc_0x140031c48: // orphan
+         rdx += 0x27              // 39 // "o partition table or ext4 files"
+         rcx = qword [rcx - 8]
+         rax -= rcx               // "o partition table or ext4 files" // "o partition table or ext4 files" // "o partition table or ext4 files"
+         rax -= 8                 // "o partition table or ext4 files" // "o partition table or ext4 files" // "o partition table or ext4 files"
+         v = rax - 0x1f           // "o partition table or ext4 files" // "o partition table or ext4 files"
+         if (((unsigned) v) <= 0) 
+         goto loc_0x140031c5d;
+    loc_0x140031c5d: // orphan
+         qword [var_20h_2] = r15
+         r9d = 0                  // "o partition table or ext4 files" // "o partition table or ext4 files"
+         r8d = 0                  // "o partition table or ext4 files" // "o partition table or ext4 files"
+         edx = 0                  // "o partition table or ext4 files" // "o partition table or ext4 files"
+         ecx = 0                  // "o partition table or ext4 files" // "o partition table or ext4 files"
+         qword [sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson] () // [0x1400ad928:8]=0xdf0de reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson(0x0, 0x0, 0x0, 0x0)
+         int3
+
+        return rax;
+    loc_0x140031b56: // orphan
+         byte [var_38h] = 0x83    // [0x83:1]=255 // 131
+         qword [var_40h] = r15
+         v = byte [0x1400e0a90] - r15b // [0x1400e0a90:1]=0 // "o partition table or ext4 files" // "o partition table or ext4 files"
+         if (!v) 
+    loc_0x140031b72: // orphan
+         rcx = qword [rsi]
+         0x1400301e0 ()           // 0x1400301e0(0x0, 0x0, 0x0, 0x6974726170206f4e)
+
+         goto loc_0x140031bad;
+    loc_0x140031bad: // orphan
+         r8 = var_38h
+         
+    loc_0x1400316aa: // orphan
+         // CODE XREFS from fcn.140031560 @ 0x140031a51(x), 0x140031bb2(x)
+         0x14002f080 ()           // 0x14002f080(0x0, 0x0, 0x0, 0x0)
+
+         goto loc_0x140031b92;
+    loc_0x140031b92: // orphan
+         xmm0 = xmmword [var_38h]
+         xmmword [rdx] = xmm0
+         xmm1 = xmmword [var_48h]
+         xmmword [rdx + 0x10] = xmm1
+         qword [rcx + 8] += 0x20  // [0x20:8]=0
+         
+         goto loc_0x140031b69;
+    loc_0x140031b69: // orphan
+         rax = qword [0x1400e0aa8] // [0x1400e0aa8:8]=0
+         
+    loc_0x140031b7a: // orphan
+         // CODE XREF from fcn.140031560 @ 0x140031b70(x)
+         qword [var_48h] = rax
+         byte [var_50h] = r13b
+         rcx = rsi + 0x48
+         rdx = qword [rcx + 8]
+         v = rdx - qword [rcx + 0x10]
+         if (!v) 
+         goto loc_0x140031a67;
+    loc_0x140031a67: // orphan
+         rax = qword [0x1400e0ab0] // [0x1400e0ab0:8]=0
+         ecx = dword [rax]
+         v = ecx - 0xffffffff
+         if (!v) 
+         goto loc_0x140031a79;
+    loc_0x140031a79: // orphan
+         eax = dword [0x1400e0a94] // [0x1400e0a94:4]=0
+         eax >>>= 9
+         eax += 7
+         eax >>>= 3
+         eax += 0x1ff             // 511
+         eax >>>= 9
+         v = eax & eax
+         if (!v) eax = r13d
+         eax <<<= 9
+         edx = rax + 0x438
+         eax = ecx
+         rax <<<= 9
+         rdx += rax
+         r9d = 0
+         r8d = 0
+         rcx = qword [rsi]
+         qword [sym.imp.KERNEL32.dll_SetFilePointerEx] () // [0x1400ad1c8:8]=0xdeb18 reloc.KERNEL32.dll_SetFilePointerEx // reloc.KERNEL32.dll_SetFilePointerEx // BOOL SetFilePointerEx(-1,, 0, 0)
+         qword [var_20h_2] = r15
+         r9 = var_34h
+         r8d = 2
+         rdx = var_30h
+         rcx = qword [rsi]
+         qword [sym.imp.KERNEL32.dll_ReadFile] () // [0x1400ad1d8:8]=0xdeafa reloc.KERNEL32.dll_ReadFile // reloc.KERNEL32.dll_ReadFile // BOOL ReadFile(-1, 0x178030, 0x00000000, 0x0000048300000000, -1)
+         ecx = word [var_30h]
+         
+         goto loc_0x1400319e9;
+    loc_0x1400319e9: // orphan
+         byte [var_38h] = 0x83    // [0x83:1]=255 // 131
+         qword [var_40h] = 0x100000 // [0x100000:8]=0
+         v = r14b & r14b
+         if (!v) 
+    loc_0x140031a0b: // orphan
+         rcx = qword [rsi]
+         0x1400301e0 ()           // 0x1400301e0(0x0, 0x0, 0x0, 0x483)
+         rax -= 0x100000
+
+         goto loc_0x140031a48;
+    loc_0x140031a48: // orphan
+         r8 = var_38h
+         rcx = rsi + 0x48
+         
+         goto loc_0x140031a2d;
+    loc_0x140031a2d: // orphan
+         xmm0 = xmmword [var_38h]
+         xmmword [rdx] = xmm0
+         xmm1 = xmmword [var_48h]
+         xmmword [rdx + 0x10] = xmm1
+         qword [rsi + 0x50] += 0x20 // [0x20:8]=0
+         
+         goto loc_0x1400319fc;
+    loc_0x1400319fc: // orphan
+         rax = qword [0x1400e0aa8] // [0x1400e0aa8:8]=0
+         rax += 0xfffffffffff00000
+         
+    loc_0x140031a19: // orphan
+         // CODE XREF from fcn.140031560 @ 0x140031a09(x)
+         qword [var_48h] = rax
+         byte [var_50h] = r13b
+         rdx = qword [rsi + 0x50]
+         v = rdx - qword [rsi + 0x58]
+         if (!v) 
+         goto loc_0x140031959;
+    loc_0x140031959: // orphan
+         rax = qword [0x1400e0ab0] // [0x1400e0ab0:8]=0
+         ecx = dword [rax]
+         v = ecx - 0xffffffff
+         if (!v) 
+    loc_0x1400319cc: // orphan
+         r8d = 8
+         rdx = rip + str.EFI_PART // 0x1400b0928 // "EFI PART"
+         rcx = var_180h
+         0x1400ab0fe ()           // 0x1400ab0fe(0x0, 0x0, 0x1400b0928, 0x178180)
+         v = eax & eax
+         if (v) 
+         goto loc_0x140031967;
+    loc_0x140031967: // orphan
+         eax = dword [0x1400e0a94] // [0x1400e0a94:4]=0
+         eax >>>= 9
+         eax += 7
+         eax >>>= 3
+         eax += 0x1ff             // 511
+         eax >>>= 9
+         v = eax & eax
+         if (!v) eax = r13d
+         edx = rax + 1
+         edx <<<= 9
+         eax = ecx
+         rax <<<= 9
+         rdx += rax
+         
+    loc_0x1400317aa: // orphan
+         ecx = byte [var_142h]
+         v = cl & cl
+         if (!v) 
+    loc_0x14003180f: // orphan
+         // CODE XREF from fcn.140031560 @ 0x1400317ff(x)
+         ecx = byte [var_152h]
+         v = cl & cl
+         if (!v) 
+    loc_0x140031874: // orphan
+         // CODE XREF from fcn.140031560 @ 0x140031864(x)
+         ecx = byte [var_162h]
+         v = cl & cl
+         if (!v) 
+    loc_0x1400318d9: // orphan
+         // CODE XREF from fcn.140031560 @ 0x1400318c9(x)
+         ecx = byte [var_172h]
+         v = cl & cl
+         if (!v) 
+    loc_0x14003193e: // orphan
+         // CODE XREF from fcn.140031560 @ 0x14003192e(x)
+         rax = qword [rsi + 0x50]
+         v = qword [rsi + 0x48] - rax
+         if (v) 
+         goto loc_0x1400318e4;
+    loc_0x1400318e4: // orphan
+         byte [var_38h] = cl
+         eax = dword [var_176h]
+         rax <<<= 9
+         qword [var_40h] = rax
+         eax = dword [var_17ah]
+         rax <<<= 9
+         qword [var_48h] = rax
+         v = cl - 0x83            // 131
+         byte [var_50h] = v == 0
+         rdx = qword [rsi + 0x50]
+         v = rdx - qword [rsi + 0x58]
+         if (!v) 
+    loc_0x140031930: // orphan
+         r8 = var_38h
+         rcx = rsi + 0x48
+         0x14002f080 ()           // 0x14002f080(0x0, 0x0, 0x0, 0x48)
+
+         goto loc_0x140031918;
+    loc_0x140031918: // orphan
+         xmm0 = xmmword [var_38h]
+         xmmword [rdx] = xmm0
+         xmm1 = xmmword [var_48h]
+         xmmword [rdx + 0x10] = xmm1
+         qword [rsi + 0x50] += 0x20 // [0x20:8]=0
+         
+         goto loc_0x14003187f;
+    loc_0x14003187f: // orphan
+         byte [var_38h] = cl
+         eax = dword [var_166h]
+         rax <<<= 9
+         qword [var_40h] = rax
+         eax = dword [var_16ah]
+         rax <<<= 9
+         qword [var_48h] = rax
+         v = cl - 0x83            // 131
+         byte [var_50h] = v == 0
+         rdx = qword [rsi + 0x50]
+         v = rdx - qword [rsi + 0x58]
+         if (!v) 
+    loc_0x1400318cb: // orphan
+         r8 = var_38h
+         rcx = rsi + 0x48
+         0x14002f080 ()           // 0x14002f080(0x0, 0x0, 0x0, 0x48)
+
+         goto loc_0x1400318b3;
+    loc_0x1400318b3: // orphan
+         xmm0 = xmmword [var_38h]
+         xmmword [rdx] = xmm0
+         xmm1 = xmmword [var_48h]
+         xmmword [rdx + 0x10] = xmm1
+         qword [rsi + 0x50] += 0x20 // [0x20:8]=0
+         
+         goto loc_0x14003181a;
+    loc_0x14003181a: // orphan
+         byte [var_38h] = cl
+         eax = dword [var_156h]
+         rax <<<= 9
+         qword [var_40h] = rax
+         eax = dword [var_15ah]
+         rax <<<= 9
+         qword [var_48h] = rax
+         v = cl - 0x83            // 131
+         byte [var_50h] = v == 0
+         rdx = qword [rsi + 0x50]
+         v = rdx - qword [rsi + 0x58]
+         if (!v) 
+    loc_0x140031866: // orphan
+         r8 = var_38h
+         rcx = rsi + 0x48
+         0x14002f080 ()           // 0x14002f080(0x0, 0x0, 0x0, 0x48)
+
+         goto loc_0x14003184e;
+    loc_0x14003184e: // orphan
+         xmm0 = xmmword [var_38h]
+         xmmword [rdx] = xmm0
+         xmm1 = xmmword [var_48h]
+         xmmword [rdx + 0x10] = xmm1
+         qword [rsi + 0x50] += 0x20 // [0x20:8]=0
+         
+         goto loc_0x1400317b5;
+    loc_0x1400317b5: // orphan
+         byte [var_38h] = cl
+         eax = dword [var_146h]
+         rax <<<= 9
+         qword [var_40h] = rax
+         eax = dword [var_14ah]
+         rax <<<= 9
+         qword [var_48h] = rax
+         v = cl - 0x83            // 131
+         byte [var_50h] = v == 0
+         rdx = qword [rsi + 0x50]
+         v = rdx - qword [rsi + 0x58]
+         if (!v) 
+    loc_0x140031801: // orphan
+         r8 = var_38h
+         rcx = rsi + 0x48
+         0x14002f080 ()           // 0x14002f080(0x0, 0x0, 0x0, 0x48)
+
+         goto loc_0x1400317e9;
+    loc_0x1400317e9: // orphan
+         xmm0 = xmmword [var_38h]
+         xmmword [rdx] = xmm0
+         xmm1 = xmmword [var_48h]
+         xmmword [rdx + 0x10] = xmm1
+         qword [rsi + 0x50] += 0x20 // [0x20:8]=0
+         
+         goto loc_0x14003176d;
+    loc_0x14003176d: // orphan
+         r9d = 0
+         r8d = 0
+         edx = ebx
+         rcx = qword [rsi]
+         qword [sym.imp.KERNEL32.dll_SetFilePointer] () // [0x1400ad1d0:8]=0xdeb06 reloc.KERNEL32.dll_SetFilePointer // reloc.KERNEL32.dll_SetFilePointer // DWORD SetFilePointer(-1, 0, 0, 0)
+
+         goto loc_0x1400315bf;
+    loc_0x1400315bf: // orphan
+         rax = qword [0x1400e0ab0] // [0x1400e0ab0:8]=0
+         ecx = dword [rax]
+         v = ecx - 0xffffffff
+         if (v) 
+    loc_0x1400316e1: // orphan
+         eax = dword [0x1400e0a94] // [0x1400e0a94:4]=0
+         eax >>>= 9
+         eax += 7
+         eax >>>= 3
+         eax += 0x1ff             // 511
+         eax >>>= 9
+         v = eax & eax
+         if (!v) eax = r13d
+         eax <<<= 9
+         edx = eax
+         rax = rcx
+         rax <<<= 9
+         rdx += rax
+         r9d = 0
+         r8d = 0
+         rcx = qword [rsi]
+         qword [sym.imp.KERNEL32.dll_SetFilePointerEx] () // [0x1400ad1c8:8]=0xdeb18 reloc.KERNEL32.dll_SetFilePointerEx // reloc.KERNEL32.dll_SetFilePointerEx // BOOL SetFilePointerEx(-1, 0, 0, 0)
+         ebx = 0x200              // 512
+         
+    loc_0x14003177e: // orphan
+         // CODE XREF from fcn.140031560 @ 0x140031721(x)
+         qword [var_20h_2] = r15
+         r9 = var_34h
+         r8d = ebx
+         rdx = var_80h
+         rcx = qword [rsi]
+         qword [sym.imp.KERNEL32.dll_ReadFile] () // [0x1400ad1d8:8]=0xdeafa reloc.KERNEL32.dll_ReadFile // reloc.KERNEL32.dll_ReadFile // BOOL ReadFile(-1, 0x177f80, 0, 0x0000040000000000, -1)
+
+         goto loc_0x1400315d1;
+    loc_0x1400315d1: // orphan
+         xmm0 ^= xmm0
+         xmmword [var_58h] = xmm0
+         ecx = 0x30               // '0' // 48
+         0x140012c40 ()           // 0x140012c40(0x0, 0x0, 0x0, 0x30)
+         qword [var_58h] = rax
+         xmm0 = xmmword [0x1400b0b30] // [0x1400b0b30:16]=-1
+         xmmword [var_68h] = xmm0
+         xmm0 = xmmword [str.Block_0_not_allocated_in_dynamic_VHD] // [0x1400b0900:16]=-1 // "Block 0 not allocated in dynamic VHD"
+         xmmword [rax] = xmm0
+         xmm1 = xmmword [0x1400b0910] // [0x1400b0910:16]=-1 // "cated in dynamic VHD"
+         xmmword [rax + 0x10] = xmm1
+         ecx = dword [0x1400b0920] // [0x1400b0920:4]=0x44485620 // " VHD"
+         dword [rax + 0x20] = ecx
+         byte [rax + 0x24] = r15b
+         rcx = rsi + 0x28         // "und"
+         rdx = var_58h
+         0x140018810 ()           // 0x140018810(0x0, 0x0, 0x178050, 0x28)
+         rdx = qword [var_70h]    // (pstr 0x00000000) "Block 0 not allocated in dynamic VHD"
+         v = rdx - 0xf            // "ocated in dynamic VHD" // "lock 0 not allocated in dynamic VHD"
+         if (((unsigned) v) <= 0) 
+    loc_0x140031664: // orphan
+         byte [var_58h] = 0x83    // [0x83:1]=255 // 131
+         qword [var_60h] = r15
+         rax = qword [0x1400e0aa8] // [0x1400e0aa8:8]=0
+         qword [var_68h] = rax
+         byte [var_70h] = 1
+         rdx = qword [rsi + 0x50]
+         v = rdx - qword [rsi + 0x58] // "lock 0 not allocated in dynamic VHD" // "lock 0 not allocated in dynamic VHD"
+         if (!v) 
+    loc_0x1400316a1: // orphan
+         rcx = rsi + 0x48
+
+         goto loc_0x140031689;
+    loc_0x140031689: // orphan
+         xmm0 = xmmword [var_58h]
+         xmmword [rdx] = xmm0
+         xmm1 = xmmword [var_68h]
+         xmmword [rdx + 0x10] = xmm1
+         qword [rsi + 0x50] += 0x20 // [0x20:8]=0x44485620 // " VHD"
+         
+         goto loc_0x140031632;
+    loc_0x140031632: // orphan
+         rdx++
+         rcx = qword [var_58h]
+         rax = rcx
+         v = rdx - 0x1000
+         if (((unsigned) v) < 0) 
+    loc_0x14003165f: // orphan
+         0x1400aa1f8 ()           // 0x1400aa1f8(0x0, 0x0, 0x0, 0x0)
+
+         goto loc_0x140031646;
+    loc_0x140031646: // orphan
+         rdx += 0x27              // 39
+         rcx = qword [rcx - 8]
+         rax -= rcx
+         rax -= 8
+         v = rax - 0x1f
+         if (((unsigned) v) > 0) 
+         goto loc_0x1400315a5;
+    loc_0x1400315a5: // orphan
+         qword [rcx + 0x50] = rax // arg1
+
+}
+

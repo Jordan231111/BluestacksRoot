@@ -1,0 +1,298 @@
+// callconv: rax ms (rcx, rdx, r8, r9, stack);
+void fcn.140031cf0 (int64_t arg1) {
+        qword [var_10h] = rbx
+        qword [var_18h] = rsi
+        qword [var_20h] = rdi
+        push (rbp)
+        rbp = rsp - 0x570
+        rsp -= 0x670
+        rax = qword [0x1400e0140] // [0x1400e0140:8]=0x2b992ddfa232
+        rax ^= rsp
+        qword [var_560h] = rax
+        rdi = rcx    // arg1
+        r9d = 0
+        r8d = 0
+        edx = 0
+        rcx = qword [rcx] // arg1
+        qword [sym.imp.KERNEL32.dll_SetFilePointer] () // [0x1400ad1d0:8]=0xdeb06 reloc.KERNEL32.dll_SetFilePointer // reloc.KERNEL32.dll_SetFilePointer // DWORD SetFilePointer(-1, 0, 0, 0)
+        ebx = 0
+        qword [var_20h_2] = rbx
+        r9 = var_30h
+        r8d = 0x200  // 512
+        rdx = var_60h
+        rcx = qword [rdi]
+        qword [sym.imp.KERNEL32.dll_ReadFile] () // [0x1400ad1d8:8]=0xdeafa reloc.KERNEL32.dll_ReadFile // reloc.KERNEL32.dll_ReadFile // BOOL ReadFile(-1, 0x1779e8, -1, 0x0000000000000000, -1)
+        v = eax & eax
+        if (v) goto loc_0x140031df6 // likely
+        goto loc_0x140031d5c;
+    loc_0x140031df6:
+        esi = 8
+        r8d = esi
+        rdx = rip + str.conectix // 0x1400b08b0 // "conectix"
+        rcx = var_60h
+        0x1400ab0fe () // 0x1400ab0fe(0x0, 0x8, 0x1400b08b0, 0x178060)
+        v = eax & eax
+        if (v) goto loc_0x140032025 // unlikely
+        goto loc_0x140031e17;
+    loc_0x140032025:
+        rdx = var_38h
+        rcx = qword [rdi]
+        qword [sym.imp.KERNEL32.dll_GetFileSizeEx] () // [0x1400ad280:8]=0xdeaea reloc.KERNEL32.dll_GetFileSizeEx // reloc.KERNEL32.dll_GetFileSizeEx // BOOL GetFileSizeEx(-1, 0x0000000000000000)
+        rdx = qword [var_38h]
+        rdx += 0xfffffffffffffe00
+        r9d = 0
+        r8d = 0
+        rcx = qword [rdi]
+        qword [sym.imp.KERNEL32.dll_SetFilePointerEx] () // [0x1400ad1c8:8]=0xdeb18 reloc.KERNEL32.dll_SetFilePointerEx // reloc.KERNEL32.dll_SetFilePointerEx // BOOL SetFilePointerEx(-1,, 0, 0)
+        qword [var_20h_2] = rbx
+        r9 = var_30h
+        r8d = 0x200  // 512
+        rdx = var_60h
+        rcx = qword [rdi]
+        qword [sym.imp.KERNEL32.dll_ReadFile] () // [0x1400ad1d8:8]=0xdeafa reloc.KERNEL32.dll_ReadFile // reloc.KERNEL32.dll_ReadFile // BOOL ReadFile(-1, 0x178060, -1, 0x0000000000000000, -1)
+        r8 = rsi
+        rdx = rip + str.conectix // 0x1400b08b0 // "conectix"
+        rcx = var_60h
+        0x1400ab0fe () // 0x1400ab0fe(0x0, 0x0, 0x1400b08b0, 0x178060)
+        v = eax & eax
+        if (!v) goto loc_0x140032148 // likely
+        goto loc_0x140032088;
+    loc_0x140032148:
+        // CODE XREF from fcn.140031cf0 @ 0x140032020(x)
+        al = 1
+        
+    loc_0x14003214a:
+        // CODE XREF from fcn.140031cf0 @ 0x140031df1(x)
+        rcx = qword [var_560h]
+        rcx ^= rsp
+        0x1400aa370 () // 0x1400aa370(0x0, 0x0, 0x0, 0x178000)
+        r11 = var_670h
+        rbx = qword [r11 + 0x18]
+        rsi = qword [r11 + 0x20]
+        rdi = qword [r11 + 0x28]
+        rsp = r11
+        rbp = pop ()
+        return
+        goto loc_0x140032104;
+        goto loc_0x140031e34;
+        goto loc_0x140031dbd;
+        return rax;
+    loc_0x140031dbd:
+        rdx++        // "ailed to read file"
+        rcx = qword [var_40h]
+        rax = rcx
+        v = rdx - 0x1000 // "ailed to read file" // "ailed to read file"
+        if (((unsigned) v) < 0) goto 0x140031dea // likely
+        goto loc_0x140031dd1;
+    loc_0x140031dea:
+        0x1400aa1f8 () // 0x1400aa1f8(0x0, 0x0, 0x0, 0x0)
+        
+    loc_0x140031def:
+        al = 0       // "ailed to read file" // "ailed to read file"
+        goto loc_0x14003214a
+        goto loc_0x140031dea;
+        return rax;
+    loc_0x14003212d:
+        qword [var_20h_2] = rbx
+        r9d = 0      // "ailed to read file" // "ailed to read file"
+        r8d = 0      // "ailed to read file" // "ailed to read file"
+        edx = 0      // "ailed to read file" // "ailed to read file"
+        ecx = 0      // "ailed to read file" // "ailed to read file"
+        qword [sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson] () // [0x1400ad928:8]=0xdf0de reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson(0x0, 0x0, 0x0, 0x0)
+        int3
+        return rax;
+    loc_0x140032104: // orphan
+         rdx++                    // "o VHD footer found - treating a"
+         rcx = qword [var_40h]
+         rax = rcx
+         v = rdx - 0x1000         // "o VHD footer found - treating a" // "o VHD footer found - treating a"
+         if (((unsigned) v) < 0) 
+    loc_0x140032143: // orphan
+         0x1400aa1f8 ()           // 0x1400aa1f8(0x0, 0x0, 0x0, 0x0)
+
+         goto loc_0x140032118;
+    loc_0x140032118: // orphan
+         rdx += 0x27              // 39 // "o VHD footer found - treating a"
+         rcx = qword [rcx - 8]
+         rax -= rcx               // "o VHD footer found - treating a" // "o VHD footer found - treating a" // "o VHD footer found - treating a"
+         rax -= 8                 // "o VHD footer found - treating a" // "o VHD footer found - treating a" // "o VHD footer found - treating a"
+         v = rax - 0x1f           // "o VHD footer found - treating a" // "o VHD footer found - treating a"
+         if (((unsigned) v) <= 0) 
+         goto loc_0x14003212d;
+    loc_0x140031e17: // orphan
+         rdx = qword [var_70h]
+         bswap rdx
+         rcx = qword [var_bp_70h]
+         bswap rcx
+         eax = dword [var_64h]
+         bswap eax
+         v = eax - 3              // "VHD footer found - treating a" // "o VHD footer found - treating a" // "o VHD footer found - treating a" // "o VHD footer found - treating a"
+         if (v) 
+         goto loc_0x140031e34;
+    loc_0x140031e34: // orphan
+         byte [0x1400e0a90] = 1   // [0x1400e0a90:1]=0
+         qword [0x1400e0aa8] = rcx // [0x1400e0aa8:8]=0
+         r9d = 0                  // "o VHD footer found - treating a" // "o VHD footer found - treating a"
+         r8d = 0                  // "o VHD footer found - treating a" // "o VHD footer found - treating a"
+         rcx = qword [rdi]
+         qword [sym.imp.KERNEL32.dll_SetFilePointerEx] () // [0x1400ad1c8:8]=0xdeb18 reloc.KERNEL32.dll_SetFilePointerEx // reloc.KERNEL32.dll_SetFilePointerEx // BOOL SetFilePointerEx(-1, 0, 0, 0)
+         qword [var_20h_2] = rbx
+         r9 = var_30h             // (cstr 0x00000000) "No VHD footer found - treating a"
+         r8d = 0x400              // 1024
+         rdx = var_160h           // (cstr 0x00000000) "No VHD footer found - treating a"
+         rcx = qword [rdi]
+         qword [sym.imp.KERNEL32.dll_ReadFile] () // [0x1400ad1d8:8]=0xdeafa reloc.KERNEL32.dll_ReadFile // reloc.KERNEL32.dll_ReadFile // BOOL ReadFile(-1, 0x178160, -1, 0x0000000000000000, -1)
+         r8d = esi
+         rdx = rip + str.cxsparse // 0x1400b08c0 // "cxsparse"
+         rcx = var_160h           // (cstr 0x00000000) "No VHD footer found - treating a"
+         0x1400ab0fe ()           // 0x1400ab0fe(0x0, 0x0, 0x1400b08c0, 0x178160)
+         v = eax & eax            // "o VHD footer found - treating a" // "o VHD footer found - treating a"
+         if (v) 
+         goto loc_0x140031e8f;
+    loc_0x140031e8f: // orphan
+         rax = qword [var_170h]
+         bswap rax
+         qword [0x1400e0aa0] = rax // [0x1400e0aa0:8]=0
+         ecx = dword [var_17ch]
+         bswap ecx
+         ecx = ecx
+         dword [0x1400e0a98] = ecx // [0x1400e0a98:4]=0
+         eax = dword [var_180h]
+         bswap eax
+         dword [0x1400e0a94] = eax // [0x1400e0a94:4]=0
+         eax = 4                  // "HD footer found - treating a"
+         rax = rax * rcx
+         rcx = 0xffffffffffffffff
+         cmovb rax rcx
+         rcx = rax
+         0x1400aa758 ()           // 0x1400aa758(0x0, 0x0, 0x0, 0x0)
+         qword [0x1400e0ab0] = rax // [0x1400e0ab0:8]=0
+         r9d = 0                  // "o VHD footer found - treating a" // "o VHD footer found - treating a"
+         r8d = 0                  // "o VHD footer found - treating a" // "o VHD footer found - treating a"
+         rdx = qword [0x1400e0aa0] // [0x1400e0aa0:8]=0
+         rcx = qword [rdi]
+         qword [sym.imp.KERNEL32.dll_SetFilePointerEx] () // [0x1400ad1c8:8]=0xdeb18 reloc.KERNEL32.dll_SetFilePointerEx // reloc.KERNEL32.dll_SetFilePointerEx // BOOL SetFilePointerEx(-1, 0, 0, 0)
+         r8d = dword [0x1400e0a98] // [0x1400e0a98:4]=0
+         r8d = r8*4
+         qword [var_20h_2] = rbx
+         r9 = var_30h             // (cstr 0x00000000) "No VHD footer found - treating a"
+         rdx = qword [0x1400e0ab0] // [0x1400e0ab0:8]=0
+         rcx = qword [rdi]
+         qword [sym.imp.KERNEL32.dll_ReadFile] () // [0x1400ad1d8:8]=0xdeafa reloc.KERNEL32.dll_ReadFile // reloc.KERNEL32.dll_ReadFile // BOOL ReadFile(-1, 0, 0, 0x0000000000000000, -1)
+         edx = dword [0x1400e0a98] // [0x1400e0a98:4]=0
+         v = edx & edx            // "o VHD footer found - treating a" // "o VHD footer found - treating a"
+         if (!v) 
+         goto loc_0x140031f2d;
+    loc_0x140031f2d: // orphan
+         r8 = qword [0x1400e0ab0] // [0x1400e0ab0:8]=0
+         v = edx - 2              // " VHD footer found - treating a" // "o VHD footer found - treating a" // "o VHD footer found - treating a" // "o VHD footer found - treating a"
+         if (((unsigned) v) < 0) 
+    loc_0x140031ffa: // orphan
+         v = ebx - edx            // "o VHD footer found - treating a" // "o VHD footer found - treating a"
+         jae 0x140032148          // likely
+
+         goto loc_0x140032002;
+    loc_0x140032002: // orphan
+         eax = ebx
+         rcx = r8 + rax*4
+         edx -= ebx               // "o VHD footer found - treating a" // "o VHD footer found - treating a"
+         r8d = edx
+
+    loc_0x140032010: // orphan
+         eax = dword [rcx]
+         bswap eax
+         dword [rcx] = eax
+         rcx = rcx + 4            // "HD footer found - treating a"
+         r8 -= 1                  // " oNHD footer found - treating a" // " oNHD footer found - treating a" // " oNHD footer found - treating a" // " oNHD footer found - treating a"
+         if (v) 
+         goto loc_0x140032020;
+    loc_0x140032020: // orphan
+         
+         goto loc_0x140031f3d;
+    loc_0x140031f3d: // orphan
+         v = dword [0x1400e00f6] - 2 // [0x1400e00f8:4]=1 // " oNHD footer found - treating a" // " oNHD footer found - treating a" // " oNHD footer found - treating a" // " oNHD footer found - treating a"
+         jl 0x140031ffa           // likely
+
+         goto loc_0x140031f4a;
+    loc_0x140031f4a: // orphan
+         xmm1 = xmmword [0x1400b0b50] // [0x1400b0b50:16]=-1
+         v = edx - 0x10           // "und - treating a" // " oNHD footer found - treating a" // " oNHD footer found - treating a" // " oNHD footer found - treating a"
+         if (((unsigned) v) < 0) 
+    loc_0x140031fcf: // orphan
+         eax = edx
+         eax &= 1                 // " oNHD footer found - treating a" // " oNHD footer found - treating a"
+         ecx = edx
+         ecx -= eax               // " oNHD footer found - treating a" // " oNHD footer found - treating a"
+
+    loc_0x140031fe0: // orphan
+         eax = ebx
+         xmm0 = qword [r8 + rax*4]
+         pshufb xmm0 xmm1
+         qword [r8 + rax*4] = xmm0
+         ebx += 2
+         v = ebx - ecx
+         if (((unsigned) v) < 0) 
+         goto loc_0x140031f57;
+    loc_0x140031f57: // orphan
+         r9d = edx
+         r9d &= 0xf               // "ound - treating a"
+         r10d = edx
+         r10d -= r9d
+         
+
+    loc_0x140031f70: // orphan
+         eax = ebx
+         xmm0 = xmmword [r8 + rax*4]
+         pshufb xmm0 xmm1
+         xmmword [r8 + rax*4] = xmm0
+         eax = rsi - 4
+         xmm0 = xmmword [r8 + rax*4]
+         pshufb xmm0 xmm1
+         xmmword [r8 + rax*4] = xmm0
+         eax = esi
+         xmm0 = xmmword [r8 + rax*4]
+         pshufb xmm0 xmm1
+         xmmword [r8 + rax*4] = xmm0
+         eax = rsi + 4
+         xmm0 = xmmword [r8 + rax*4]
+         pshufb xmm0 xmm1
+         xmmword [r8 + rax*4] = xmm0
+         ebx += 0x10              // "und - treating a"
+         esi += 0x10              // "und - treating a"
+         v = ebx - r10d
+         if (((unsigned) v) < 0) 
+         goto loc_0x140031fc9;
+    loc_0x140031fc9: // orphan
+         v = r9d - 2
+         if (((unsigned) v) < 0) 
+         goto loc_0x140031d5c;
+    loc_0x140031d5c: // orphan
+         xmm0 ^= xmm0
+         xmmword [var_40h] = xmm0
+         ecx = 0x20
+         0x140012c40 ()           // 0x140012c40(0x0, 0x0, 0x0, 0x20)
+         qword [var_40h] = rax
+         xmm0 = xmmword [0x1400b0b10] // [0x1400b0b10:16]=-1 // " - treating a" // "a"
+         xmmword [var_50h] = xmm0
+         xmm0 = xmmword [str.Failed_to_read_file] // [0x1400b0898:16]=-1 // "Failed to read file"
+         xmmword [rax] = xmm0
+         ecx = word [0x1400b08a8] // [0x1400b08a8:2]=0x6c69 // "ile"
+         word [rax + 0x10] = cx
+         ecx = byte [0x1400b08aa] // [0x1400b08aa:1]=101 // "e"
+         byte [rax + 0x12] = cl
+         byte [rax + 0x13] = bl
+         rcx = rdi + 0x28         // "age"
+         rdx = var_40h
+         0x140018810 ()           // 0x140018810(0x0, 0x0, 0x178038, 0x28)
+         rdx = qword [var_58h]
+         v = rdx - 0xf            // "file" // "ailed to read file"
+         if (((unsigned) v) <= 0) 
+    loc_0x140031dd1: // orphan
+         rdx += 0x27              // 39 // "ailed to read file"
+         rcx = qword [rcx - 8]
+         rax -= rcx               // "ailed to read file" // "ailed to read file" // "ailed to read file"
+         rax -= 8                 // "ailed to read file" // "ailed to read file" // "ailed to read file"
+         v = rax - 0x1f           // "ailed to read file" // "ailed to read file"
+         if (((unsigned) v) > 0) 
+}
+

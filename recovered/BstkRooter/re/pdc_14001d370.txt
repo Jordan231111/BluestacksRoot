@@ -1,0 +1,2406 @@
+// callconv: rax ms (rcx, rdx, r8, r9, stack);
+void fcn.14001d370 (int64_t arg1, int64_t arg2, int64_t arg3) {
+        rax = rsp
+        qword [rax + 0x20] = rbx
+        push (rbp)
+        push (rsi)
+        push (rdi)
+        push (r12)
+        push (r13)
+        push (r14)
+        push (r15)
+        rbp = rax - 0x5c8
+        rsp -= 0x690
+        xmmword [rax - 0x48] = xmm6
+        xmmword [rax - 0x58] = xmm7
+        xmmword [rax - 0x68] = xmm8
+        rax = qword [0x1400e0140] // [0x1400e0140:8]=0x2b992ddfa232
+        rax ^= rsp
+        qword [rbp + 0x550] = rax
+        qword [var_68h] = r8 // arg3
+        rdi = rdx    // arg2
+        qword [rbp + 0x10] = rdx // arg2
+        rbx = rcx    // arg1
+        qword [var_48h] = rcx // arg1
+        esi = 0
+        v = qword [rdx + 0x10] - rsi // arg2
+        if (!v) goto loc_0x14001f457 // unlikely
+        goto loc_0x14001d3ce;
+    loc_0x14001f457:
+        ecx = 0x30   // '0' // 48
+        0x140012c40 () // 0x140012c40(0x0, 0x0, 0x0, 0x30)
+        rcx = rax
+        xmm0 = xmmword [str.____DataDir_or_instance_name_is_empty.] // [0x1400af978:16]=-1 // "[!] DataDir or instance name is empty."
+        xmmword [rax] = xmm0
+        xmm1 = xmmword [0x1400af988] // [0x1400af988:16]=-1 // "nstance name is empty."
+        xmmword [rax + 0x10] = xmm1
+        eax = dword [0x1400af998] // [0x1400af998:4]=0x74706d65 // "empty."
+        dword [rcx + 0x20] = eax
+        eax = word [0x1400af99c] // [0x1400af99c:2]=0x2e79 // "y."
+        word [rcx + 0x24] = ax
+        byte [rcx + 0x26] = sil
+        edx = 0x30   // '0' // 48
+        
+    loc_0x14001f496:
+        0x1400aa1f8 () // 0x1400aa1f8(0x0, 0x0, 0x0, 0x0)
+        goto loc_0x14001d3d8;
+        return rax;
+    loc_0x14001d3d8:
+        rdx = rbp + 0x238 // (cstr 0x00000000) "[!] DataDir or instance name is empty."
+        0x14001c760 () // 0x14001c760(0x0, 0x0, 0x178238, 0x0)
+        ecx = 0x30   // '0' // 48
+        0x140012c40 () // 0x140012c40(0x0, 0x0, 0x178238, 0x30)
+        rcx = rax
+        xmm0 = xmmword [str.___Killing_emulator_processes...] // [0x1400af2e0:16]=-1 // "[*] Killing emulator processes..."
+        xmmword [rax] = xmm0
+        xmm1 = xmmword [0x1400af2f0] // [0x1400af2f0:16]=-1 // "ator processes..."
+        xmmword [rax + 0x10] = xmm1
+        eax = byte [0x1400af300] // [0x1400af300:1]=46 // "."
+        byte [rcx + 0x20] = al
+        byte [rcx + 0x21] = sil
+        edx = 0x30   // '0' // 48
+        0x1400aa1f8 () // 0x1400aa1f8(0x0, 0x0, 0x30, 0x0)
+        rcx = rbx
+        0x14001d240 () // 0x14001d240(0x0, 0x0, 0x30, 0x0)
+        ecx = 0x3e8  // 1000
+        qword [sym.imp.KERNEL32.dll_Sleep] () // [0x1400ad260:8]=0xde9de reloc.KERNEL32.dll_Sleep // (pstr 0x00000000) "[*] Killing emulator processes..." // reloc.KERNEL32.dll_Sleep // VOID Sleep(-1)
+        xmm0 ^= xmm0
+        xmmword [rbp + 0xf0] = xmm0
+        qword [rbp + 0x100] = rsi
+        qword [rbp + 0x108] = rsi
+        rbx = qword [rdi + 0x10]
+        r14 = rdi
+        v = qword [rdi + 0x18] - 0xf // "*] Killing emulator processes..."
+        if (((unsigned) v) <= 0) goto 0x14001d45b // unlikely
+        goto loc_0x14001d458;
+    loc_0x14001d45b:
+        rsi = 0x7fffffffffffffff // 9223372036854775807
+        v = rbx - rsi // "*] Killing emulator processes..." // "*] Killing emulator processes..." // "*] Killing emulator processes..."
+        if (((unsigned) v) > 0) goto 0x14001f4ef // unlikely
+        goto loc_0x14001d46e;
+    loc_0x14001f4ef:
+        0x14002bd80 () // 0x14002bd80(0x0, 0x0, 0x0, 0x0)
+        
+    loc_0x14001f4f5:
+        0x14002bd80 () // 0x14002bd80(0x0, 0x0, 0x0, 0x0)
+        goto loc_0x14001d47e;
+        return rax;
+    loc_0x14001d46e: // orphan
+         eax = 0x16               // "rocesses..."
+         r13d = 0xf               // "lator processes..."
+         v = rbx - r13            // "*] Killing emulator processes..." // "*] Killing emulator processes..." // "*] Killing emulator processes..."
+         if (((unsigned) v) > 0) 
+    loc_0x14001d4ae: // orphan
+         r15 = rbx
+         r15 |= r13               // "*] Killing emulator processes..." // "*] Killing emulator processes..."
+         v = r15 - rsi            // "*] Killing emulator processes..." // "*] Killing emulator processes..."
+         if (((unsigned) v) <= 0) 
+    loc_0x14001d4c3: // orphan
+         v = r15 - rax            // "*] Killing emulator processes..." // "*] Killing emulator processes..."
+         cmovb r15 rax
+         qword [var_58h] = r15
+
+         goto loc_0x14001d568;
+    loc_0x14001d568: // orphan
+         rcx = qword [var_50h]
+
+         goto loc_0x14001f4f5;
+    loc_0x14001d583: // orphan
+         rax = rbp + 0xf0         // (cstr 0x00000000) "[*] Killing emulator processes..."
+         v = r15 - 0xf            // "lator processes..." // "*] Killing emulator processes..." // "*] Killing emulator processes..." // "*] Killing emulator processes..."
+         cmova rax rcx
+         qword [rbp - 0x40] = rax
+         rcx = rbp + 0x238        // (cstr 0x00000000) "[*] Killing emulator processes..."
+         v = qword [rbp + 0x250] - 0xf // "*] Killing emulator processes..." // "*] Killing emulator processes..." // "*] Killing emulator processes..."
+         cmova rcx qword [rbp + 0x238]
+         qword [var_60h] = rcx
+         xmm0 ^= xmm0
+         xmmword [rbp + 0xb0] = xmm0
+         xmm1 ^= xmm1
+         xmmword [rbp + 0xc0] = xmm1
+         r15 = r12 + rdi
+         rbx = r13
+         r14 = rbp + 0xb0         // (cstr 0x00000000) "[*] Killing emulator processes..."
+         v = r15 - rbx            // "*] Killing emulator processes..." // "*] Killing emulator processes..."
+         if (((unsigned) v) <= 0) 
+    loc_0x14001d60f: // orphan
+         qword [rbp + 0xc0] = r15
+         qword [rbp + 0xc8] = rbx
+         r8 = rdi
+         rdx = rax
+         rcx = r14
+         0x1400ab0c8 ()           // 0x1400ab0c8(0x0, 0x0, 0x0, 0x0)
+         rcx = rdi + r14
+         r8 = r12
+         rdx = qword [var_60h]
+         0x1400ab0c8 ()           // 0x1400ab0c8(0x0, 0x0, 0x0, 0x0)
+         byte [r14 + r15] = 0
+         r8d = 1                  // "*] Killing emulator processes..."
+         rdx = rip + 0x92352      // "\" // 0x1400af9a0
+         rcx = rbp + 0xb0
+         0x14002be00 ()           // 0x14002be00(0x0, 0x0, 0x1400af9a0, 0x1780b0)
+         xmm7 = xmmword [rax]
+         xmmword [var_78h] = xmm7
+         xmm6 = xmmword [rax + 0x10]
+         xmmword [rbp - 0x78] = xmm6
+         r8d = 0                  // "*] Killing emulator processes..." // "*] Killing emulator processes..."
+         qword [rax + 0x10] = r8
+         qword [rax + 0x18] = r13
+         byte [rax] = r8b
+         rdx = qword [rbp + 0xc8]
+         v = rdx - 0xf            // "*] Killing emul" // "*] Killing emul" // "*] Killing emul"
+         if (((unsigned) v) <= 0) 
+    loc_0x14001d6c8: // orphan
+         xmm8 = xmmword [0x1400b0590] // [0x1400b0590:16]=-1
+         xmmword [rbp + 0xc0] = xmm8
+         byte [rbp + 0xb0] = 0
+         rax = rsi
+         r14 = xmm6
+         rax -= r14               // "*] Killing emul" // "*] Killing emul"
+         v = rax - 8              // "ing emul" // "*] Killing emul" // "*] Killing emul"
+         if (((unsigned) v) < 0) 
+    loc_0x14001f4fb: // orphan
+         0x14002bd80 ()           // 0x14002bd80(0x0, 0x0, 0x0, 0x0)
+
+         goto loc_0x14001d6f6;
+    loc_0x14001d6f6: // orphan
+         r12 = var_78h
+         rax = xmm7
+         qword [var_70h] = rax
+         psrldq xmm6 8
+         rcx = xmm6
+         qword [var_60h] = rcx
+         v = rcx - 0xf            // "*] Killing emul" // "*] Killing emul" // "*] Killing emul"
+         cmova r12 rax
+         xmm0 ^= xmm0
+         xmmword [rbp + 0x50] = xmm0
+         xmm1 ^= xmm1
+         xmmword [rbp + 0x60] = xmm1
+         r15 = r14 + 8            // "ing emul"
+         rbx = r13
+         rdi = rbp + 0x50
+         v = r15 - rbx
+         if (((unsigned) v) <= 0) 
+    loc_0x14001d769: // orphan
+         qword [rbp + 0x60] = r15
+         qword [rbp + 0x68] = rbx
+         r8 = r14
+         rdx = r12
+         rcx = rdi
+         0x1400ab0c8 ()           // 0x1400ab0c8(0x0, 0x0, 0x0, 0x0)
+         rax = 0x6468762e746f6f52 // 'Root.vhd'
+         qword [r14 + rdi] = rax
+         byte [rdi + r15] = 0
+         rax = rbp + 0x50
+         v = qword [rbp + 0x68] - 0xf // "oot.vhding emul" // "oot.vhding emul" // "oot.vhding emul"
+         cmova rax qword [rbp + 0x50]
+         qword [rbp - 0x40] = rax
+         rax = qword [rbp + 0x60]
+         qword [rbp - 0x38] = rax
+         r8d = 0                  // "oot.vhding emul" // "oot.vhding emul"
+         rdx = rbp - 0x40
+         rcx = rbp - 0x68
+         0x1400133d0 ()           // 0x1400133d0(0x0, 0x0, 0x177fc0, 0x177f98)
+         rcx = rbp - 0x68
+         v = qword [rbp - 0x50] - 7 // "oot.vhding emul" // "oot.vhding emul" // "oot.vhding emul" // "oot.vhding emul"
+         cmova rcx qword [rbp - 0x68]
+         r9d = 0xffffffff         // -1
+         r8d = 3                  // "t.vhding emul"
+         rdx = rbp + 0x30
+         0x1400a9928 ()           // 0x1400a9928(0x0, 0x0, 0x178030, 0x177f98)
+         v = eax & eax            // "oot.vhding emul" // "oot.vhding emul"
+         if (v) 
+    loc_0x14001d819: // orphan
+         v = eax - 0x40           // '@' // 64 // "oot.vhding emul" // "oot.vhding emul" // "oot.vhding emul"
+         if (((unsigned) v) > 0) 
+    loc_0x14001d831: // orphan
+         v = eax - 0x7b           // '{' // 123 // "oot.vhding emul" // "oot.vhding emul" // "oot.vhding emul"
+         if (!v) 
+    loc_0x14001d841: // orphan
+         ecx = 1                  // "oot.vhding emul"
+
+         goto loc_0x14001d8c0;
+    loc_0x14001d8c0: // orphan
+         ebx = 1                  // "oot.vhding emul"
+         v = eax & eax            // "oot.vhding emul" // "oot.vhding emul"
+         if (v) 
+    loc_0x14001f4da: // orphan
+         r8 = rbp - 0x68
+         rdx = rbp - 0x40
+         rcx = rip + str.exists   // 0x1400aee50 // "exists"
+         0x14002b610 ()           // 0x14002b610(0x0, 0x0, 0x177fc0, 0x1400aee50)
+
+         goto loc_0x14001d8cd;
+    loc_0x14001d8cd: // orphan
+         
+    loc_0x14001d867: // orphan
+         // CODE XREF from fcn.14001d370 @ 0x14001d8cd(x)
+         rcx = rbp - 0x68
+         0x14002b920 ()           // 0x14002b920(0x0, 0x0, 0x0, 0x177f98)
+         rax = rsi
+         v = bl & bl              // "oot.vhding emul" // "oot.vhding emul"
+         if (!v) 
+    loc_0x14001d95f: // orphan
+         r14 = qword [rbp + 0x60]
+         rax -= r14               // "oot.vhding emul" // "oot.vhding emul"
+         v = rax - 0x14           // "oot.vhding emul" // "oot.vhding emul" // "oot.vhding emul"
+         if (((unsigned) v) < 0) 
+    loc_0x14001f501: // orphan
+         0x14002bd80 ()           // 0x14002bd80(0x0, 0x0, 0x0, 0x0)
+
+         goto loc_0x14001d970;
+    loc_0x14001d970: // orphan
+         r12 = rbp + 0x50
+         v = qword [rbp + 0x68] - 0xf // "oot.vhding emul" // "oot.vhding emul" // "oot.vhding emul"
+         cmova r12 qword [rbp + 0x50]
+         xmm0 ^= xmm0
+         xmmword [rbp - 0x68] = xmm0
+         r15 = r14 + 0x14
+         rbx = r13
+         rdi = rbp - 0x68
+         v = r15 - rbx            // "oot.vhding emul"
+         if (((unsigned) v) <= 0) 
+    loc_0x14001d9c3: // orphan
+         qword [rbp - 0x50] = rbx
+         xmm0 = xmmword [str.___Found_Root.vhd:] // [0x1400afaa8:16]=-1 // "[*] Found Root.vhd:"
+         xmmword [rdi] = xmm0
+         ecx = dword [0x1400afab8] // [0x1400afab8:4]=0x203a6468 // "hd: "
+         dword [rdi + 0x10] = ecx
+         rcx = rdi + 0x14         // (pstr 0x00000000) "[*] Found Root.vhd: "
+         r8 = r14
+         rdx = r12
+         0x1400ab0c8 ()           // 0x1400ab0c8(0x0, 0x0, 0x0, 0x14)
+         byte [rdi + r15] = 0
+         rdx = qword [rbp - 0x50]
+         v = rdx - 0xf            // "vhd: " // "*] Found Root.vhd: " // "*] Found Root.vhd: " // "*] Found Root.vhd: "
+         if (((unsigned) v) <= 0) 
+    loc_0x14001da29: // orphan
+         edx = 0x65               // 'e' // 101
+         ecx = 0                  // "*] Found Root.vhd: " // "*] Found Root.vhd: "
+         r8d = 0xa                // "Root.vhd: "
+         qword [sym.imp.KERNEL32.dll_FindResourceA] () // [0x1400ad238:8]=0xdea2c reloc.KERNEL32.dll_FindResourceA // ",\xea\r" // reloc.KERNEL32.dll_FindResourceA // HRSRC FindResourceA(0, -1, 0x6468762e746f6f52)
+         rbx = rax
+         v = rax & rax            // "*] Found Root.vhd: " // "*] Found Root.vhd: "
+         if (v) 
+    loc_0x14001daf2: // orphan
+         rdx = rbx
+         ecx = 0                  // "*] Found Root.vhd: " // "*] Found Root.vhd: "
+         qword [sym.imp.KERNEL32.dll_LoadResource] () // [0x1400ad250:8]=0xde9fa reloc.KERNEL32.dll_LoadResource // reloc.KERNEL32.dll_LoadResource // HGLOBAL LoadResource(0, 0)
+         r14 = rax
+         v = rax & rax            // "*] Found Root.vhd: " // "*] Found Root.vhd: "
+         if (v) 
+    loc_0x14001dbbb: // orphan
+         rdx = rbx
+         ecx = 0                  // "*] Found Root.vhd: " // "*] Found Root.vhd: "
+         qword [sym.imp.KERNEL32.dll_SizeofResource] () // [0x1400ad240:8]=0xdea1a reloc.KERNEL32.dll_SizeofResource // reloc.KERNEL32.dll_SizeofResource // DWORD SizeofResource(0, 0)
+         edi = eax
+         rcx = r14
+         qword [sym.imp.KERNEL32.dll_LockResource] () // [0x1400ad248:8]=0xdea0a reloc.KERNEL32.dll_LockResource // "\n\xea\r" // reloc.KERNEL32.dll_LockResource // LPVOID LockResource(0)
+         rbx = rax
+         v = rax & rax            // "*] Found Root.vhd: " // "*] Found Root.vhd: "
+         if (!v) 
+    loc_0x14001f26c: // orphan
+         xmm0 ^= xmm0
+         xmmword [rbp + 0x258] = xmm0
+         ecx = 0x30               // '0' // 48
+         0x140012c40 ()           // 0x140012c40(0x0, 0x0, 0x0, 0x30)
+         rdx = rax
+         qword [rbp + 0x258] = rax
+         qword [rbp + 0x268] = 0x22 // '\"'
+         r8d = 0x2f               // '/' // 47
+         qword [rbp + 0x270] = r8
+         xmm0 = xmmword [str.Internal_error:_su_resource_empty.] // [0x1400afb18:16]=-1 // "Internal error: su resource empty."
+         xmmword [rax] = xmm0
+         xmm1 = xmmword [0x1400afb28] // [0x1400afb28:16]=-1 // "su resource empty."
+         xmmword [rax + 0x10] = xmm1
+         eax = word [0x1400afb38] // [0x1400afb38:2]=0x2e79 // "y."
+         word [rdx + 0x20] = ax
+         byte [rdx + 0x22] = 0
+         rbx = qword [var_48h]
+         rcx = rbx + 0x128
+         rax = rbp + 0x258
+         v = rcx - rax            // "nternal error: su resource empty." // "nternal error: su resource empty."
+         if (!v) 
+    loc_0x14001f2e9: // orphan
+         byte [rbx + 0x148] = 1
+         rcx = rbp + 0x258
+         0x1400010f0 ()           // 0x1400010f0(0x0, 0x0, 0x0, 0x178258)
+
+         goto loc_0x14001f34e;
+    loc_0x14001f34e: // orphan
+         xmmword [rbp + 0x60] = xmm8
+         byte [rbp + 0x50] = 0
+         rdx = qword [var_60h]
+         v = rdx - 0xf            // " su resource empty." // "nternal error: su resource empty." // "nternal error: su resource empty." // "nternal error: su resource empty."
+         if (((unsigned) v) <= 0) 
+    loc_0x14001f3ac: // orphan
+         rdx = qword [var_58h]
+         v = rdx - 0xf            // " su resource empty." // "nternal error: su resource empty." // "nternal error: su resource empty." // "nternal error: su resource empty."
+         if (((unsigned) v) <= 0) 
+    loc_0x14001f400: // orphan
+         rax = qword [rbp + 0x250]
+         v = rax - 0xf            // " su resource empty." // "nternal error: su resource empty." // "nternal error: su resource empty." // "nternal error: su resource empty."
+         if (((unsigned) v) <= 0) 
+    loc_0x14001f49b: // orphan
+         rcx = qword [rbp + 0x550]
+         rcx ^= rsp               // (cstr 0x00000000) "Internal error: su resource empty." // "nternal error: su resource empty."
+         0x1400aa370 ()           // 0x1400aa370(0x0, 0x0, 0x0, 0x178000)
+         r11 = var_690h           // (cstr 0x00000000) "Internal error: su resource empty."
+         rbx = qword [r11 + 0x58]
+         xmm6 = xmmword [r11 - 0x10]
+         xmm7 = xmmword [r11 - 0x20]
+         xmm8 = xmmword [r11 - 0x30]
+         rsp = r11                // (cstr 0x00000000) "Internal error: su resource empty."
+         r15 = pop ()             // (cstr 0x00000000) "Internal error: su resource empty."
+         r14 = pop ()             // (cstr 0x00000000) "Internal error: su resource empty."
+         r13 = pop ()             // (cstr 0x00000000) "Internal error: su resource empty."
+         r12 = pop ()             // (cstr 0x00000000) "Internal error: su resource empty."
+         rdi = pop ()             // (cstr 0x00000000) "Internal error: su resource empty."
+         rsi = pop ()             // (cstr 0x00000000) "Internal error: su resource empty."
+         rbp = pop ()             // (cstr 0x00000000) "Internal error: su resource empty."
+         return
+
+    loc_0x14001f411: // orphan
+         rdx = rax + 1            // "nternal error: su resource empty."
+         rcx = qword [rbp + 0x238]
+         rax = rcx
+         v = rdx - 0x1000         // "nternal error: su resource empty." // "nternal error: su resource empty."
+         if (((unsigned) v) < 0) 
+    loc_0x14001f428: // orphan
+         rdx += 0x27              // 39 // "nternal error: su resource empty."
+         rcx = qword [rcx - 8]
+         rax -= rcx               // "nternal error: su resource empty." // "nternal error: su resource empty." // "nternal error: su resource empty."
+         rax -= 8                 // "nternal error: su resource empty." // "nternal error: su resource empty." // "nternal error: su resource empty."
+         v = rax - 0x1f           // "nternal error: su resource empty." // "nternal error: su resource empty."
+         if (((unsigned) v) <= 0) 
+         goto loc_0x14001f43d;
+    loc_0x14001f43d: // orphan
+         qword [var_20h] = 0
+         r9d = 0                  // "nternal error: su resource empty." // "nternal error: su resource empty."
+         r8d = 0                  // "nternal error: su resource empty." // "nternal error: su resource empty."
+         edx = 0                  // "nternal error: su resource empty." // "nternal error: su resource empty."
+         ecx = 0                  // "nternal error: su resource empty." // "nternal error: su resource empty."
+         qword [sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson] () // [0x1400ad928:8]=0xdf0de reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson(0x0, 0x0, 0x0, 0x0)
+         int3
+
+        return rax;
+    loc_0x14001f3b7: // orphan
+         rdx++                    // "nternal error: su resource empty."
+         rcx = qword [var_50h]
+         rax = rcx
+         v = rdx - 0x1000         // "nternal error: su resource empty." // "nternal error: su resource empty."
+         if (((unsigned) v) < 0) 
+    loc_0x14001f3fa: // orphan
+         0x1400aa1f8 ()           // 0x1400aa1f8(0x0, 0x0, 0x0, 0x0)
+
+         goto loc_0x14001f3cb;
+    loc_0x14001f3cb: // orphan
+         rdx += 0x27              // 39 // "nternal error: su resource empty."
+         rcx = qword [rcx - 8]
+         rax -= rcx               // "nternal error: su resource empty." // "nternal error: su resource empty." // "nternal error: su resource empty."
+         rax -= 8                 // "nternal error: su resource empty." // "nternal error: su resource empty." // "nternal error: su resource empty."
+         v = rax - 0x1f           // "nternal error: su resource empty." // "nternal error: su resource empty."
+         if (((unsigned) v) <= 0) 
+         goto loc_0x14001f3e0;
+    loc_0x14001f3e0: // orphan
+         qword [var_20h] = 0
+         r9d = 0                  // "nternal error: su resource empty." // "nternal error: su resource empty."
+         r8d = 0                  // "nternal error: su resource empty." // "nternal error: su resource empty."
+         edx = 0                  // "nternal error: su resource empty." // "nternal error: su resource empty."
+         ecx = 0                  // "nternal error: su resource empty." // "nternal error: su resource empty."
+         qword [sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson] () // [0x1400ad928:8]=0xdf0de reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson(0x0, 0x0, 0x0, 0x0)
+         int3
+
+        return rax;
+    loc_0x14001f363: // orphan
+         rdx++                    // "nternal error: su resource empty."
+         rcx = qword [var_70h]
+         rax = rcx
+         v = rdx - 0x1000         // "nternal error: su resource empty." // "nternal error: su resource empty."
+         if (((unsigned) v) < 0) 
+    loc_0x14001f3a6: // orphan
+         0x1400aa1f8 ()           // 0x1400aa1f8(0x0, 0x0, 0x0, 0x0)
+
+         goto loc_0x14001f377;
+    loc_0x14001f377: // orphan
+         rdx += 0x27              // 39 // "nternal error: su resource empty."
+         rcx = qword [rcx - 8]
+         rax -= rcx               // "nternal error: su resource empty." // "nternal error: su resource empty." // "nternal error: su resource empty."
+         rax -= 8                 // "nternal error: su resource empty." // "nternal error: su resource empty." // "nternal error: su resource empty."
+         v = rax - 0x1f           // "nternal error: su resource empty." // "nternal error: su resource empty."
+         if (((unsigned) v) <= 0) 
+         goto loc_0x14001f38c;
+    loc_0x14001f38c: // orphan
+         qword [var_20h] = 0
+         r9d = 0                  // "nternal error: su resource empty." // "nternal error: su resource empty."
+         r8d = 0                  // "nternal error: su resource empty." // "nternal error: su resource empty."
+         edx = 0                  // "nternal error: su resource empty." // "nternal error: su resource empty."
+         ecx = 0                  // "nternal error: su resource empty." // "nternal error: su resource empty."
+         qword [sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson] () // [0x1400ad928:8]=0xdf0de reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson(0x0, 0x0, 0x0, 0x0)
+         int3
+
+        return rax;
+    loc_0x14001f307: // orphan
+         rdx++                    // "nternal error: su resource empty."
+         rcx = qword [rbp + 0x50]
+         rax = rcx
+         v = rdx - 0x1000         // "nternal error: su resource empty." // "nternal error: su resource empty."
+         if (((unsigned) v) < 0) 
+    loc_0x14001f349: // orphan
+         0x1400aa1f8 ()           // 0x1400aa1f8(0x0, 0x0, 0x0, 0x0)
+
+         goto loc_0x14001f31a;
+    loc_0x14001f31a: // orphan
+         rdx += 0x27              // 39 // "nternal error: su resource empty."
+         rcx = qword [rcx - 8]
+         rax -= rcx               // "nternal error: su resource empty." // "nternal error: su resource empty." // "nternal error: su resource empty."
+         rax -= 8                 // "nternal error: su resource empty." // "nternal error: su resource empty." // "nternal error: su resource empty."
+         v = rax - 0x1f           // "nternal error: su resource empty." // "nternal error: su resource empty."
+         if (((unsigned) v) <= 0) 
+         goto loc_0x14001f32f;
+    loc_0x14001f32f: // orphan
+         qword [var_20h] = 0
+         r9d = 0                  // "nternal error: su resource empty." // "nternal error: su resource empty."
+         r8d = 0                  // "nternal error: su resource empty." // "nternal error: su resource empty."
+         edx = 0                  // "nternal error: su resource empty." // "nternal error: su resource empty."
+         ecx = 0                  // "nternal error: su resource empty." // "nternal error: su resource empty."
+         qword [sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson] () // [0x1400ad928:8]=0xdf0de reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson(0x0, 0x0, 0x0, 0x0)
+         int3
+
+        return rax;
+    loc_0x14001f2de: // orphan
+         r8d = 0x22               // '\"' // 34
+         0x14002c270 ()           // 0x14002c270(0x0, 0x0, 0x0, 0x0)
+
+         goto loc_0x14001dbdd;
+    loc_0x14001dbdd: // orphan
+         v = edi & edi            // "nternal error: su resource empty." // "nternal error: su resource empty."
+         if (!v) 
+         goto loc_0x14001dbe5;
+    loc_0x14001dbe5: // orphan
+         r8 = var_sp_40h          // (cstr 0x00000000) "Internal error: su resource empty."
+         edx = edi
+         rcx = rbp + 0xb0         // (cstr 0x00000000) "Internal error: su resource empty."
+         0x1400171e0 ()           // 0x1400171e0(0x0, 0x0, 0x0, 0x1780b0)
+         r8d = 0                  // "nternal error: su resource empty." // "nternal error: su resource empty."
+         r12 = qword [rbp + 0xb0]
+         v = edi & edi            // "nternal error: su resource empty." // "nternal error: su resource empty."
+         if (!v) 
+    loc_0x14001dcc5: // orphan
+         edx = 0                  // "nternal error: su resource empty." // "nternal error: su resource empty."
+         r8d = 0x104              // 260
+         rcx = rbp + 0x440        // (cstr 0x00000000) "Internal error: su resource empty."
+         0x1400ab0ce ()           // 0x1400ab0ce(0x0, 0x0, 0x0, 0x178440)
+         rdx = rbp + 0x440        // (cstr 0x00000000) "Internal error: su resource empty."
+         ecx = 0x104              // 260
+         qword [sym.imp.KERNEL32.dll_GetTempPathA] () // [0x1400ad230:8]=0xdea3c reloc.KERNEL32.dll_GetTempPathA // "<\xea\r" // reloc.KERNEL32.dll_GetTempPathA // DWORD GetTempPathA(-1, NULL"Internal error: su resource empty.")
+         xmm0 ^= xmm0
+         xmmword [rbp + 0x30] = xmm0
+         xmm1 ^= xmm1
+         xmmword [rbp + 0x40] = xmm1
+         rcx = rbp + 0x440        // (cstr 0x00000000) "Internal error: su resource empty."
+         0x1400ab134 ()           // 0x1400ab134(0x0, 0x0, 0x178440, 0x178440)
+         r8 = rax
+         rdx = rbp + 0x440        // (cstr 0x00000000) "Internal error: su resource empty."
+         rcx = rbp + 0x30         // (cstr 0x00000000) "Internal error: su resource empty."
+         0x140013040 ()           // 0x140013040(0x0, 0x0, 0x178440, 0x178030)
+         r8d = 0xd                // "r: su resource empty."
+         rdx = rip + str.bstk_su_c.tmp // 0x1400afb40 // "bstk_su_c.tmp"
+         rcx = rbp + 0x30         // (cstr 0x00000000) "Internal error: su resource empty."
+         0x14002be00 ()           // 0x14002be00(0x0, 0x0, 0x1400afb40, 0x178030)
+         xmm0 ^= xmm0
+         xmmword [rbp + 0x1f0] = xmm0
+         xmm1 ^= xmm1
+         xmmword [rbp + 0x200] = xmm1
+         xmm0 = xmmword [rax]
+         xmmword [rbp + 0x1f0] = xmm0
+         xmm1 = xmmword [rax + 0x10]
+         xmmword [rbp + 0x200] = xmm1
+         qword [rax + 0x10] = 0
+         qword [rax + 0x18] = r13
+         byte [rax] = 0
+         r8 = qword [rbp + 0x48]
+         v = r8 - 0xf             // "nternal error: " // "nternal error: " // "nternal error: "
+         if (((unsigned) v) <= 0) 
+    loc_0x14001dd80: // orphan
+         xmmword [rbp + 0x40] = xmm8
+         byte [rbp + 0x30] = 0
+         dword [var_20h] = 1
+         r9d = 0x40               // '@' // 64
+         r8d = 0x20               // "y."
+         rdx = rbp + 0x1f0        // "Internal error: su resource empt"
+         rcx = rbp + 0x330
+         0x140016dd0 ()           // 0x140016dd0(0x0, 0x0, 0x1781f0, 0x178330)
+         rax = qword [rbp + 0x330]
+         rdx = dword [rax + 4]
+         rcx = rbp + 0x330
+         rcx += rdx
+         qword [sym.imp.MSVCP140.dll___7ios_base_std__QEBA_NXZ] () // [0x1400ad3e8:8]=0xdd548 reloc.MSVCP140.dll___7ios_base_std__QEBA_NXZ // "H\xd5\r" // reloc.MSVCP140.dll___7ios_base_std__QEBA_NXZ // sym.imp.MSVCP140.dll___7ios_base_std__QEBA_NXZ(0x0, 0x0, 0x6c616e72, 0x6c78f1a2)
+         v = al & al              // "nternal error: " // "nternal error: "
+         if (!v) 
+    loc_0x14001de99: // orphan
+         r8 = rdi
+         rdx = r12
+         rcx = rbp + 0x330
+         qword [sym.imp.MSVCP140.dll__write___basic_ostream_DU__char_traits_D_std___std__QEAAAEAV12_PEBD_J_Z] () // [0x1400ad4e8:8]=0xddfe6 reloc.MSVCP140.dll__write___basic_ostream_DU__char_traits_D_std___std__QEAAAEAV12_PEBD_J_Z // reloc.MSVCP140.dll__write___basic_ostream_DU__char_traits_D_std___std__QEAAAEAV12_PEBD_J_Z // sym.imp.MSVCP140.dll__write___basic_ostream_DU__char_traits_D_std___std__QEAAAEAV12_PEBD_J_Z(0x0, 0x0, 0x0, 0x178330)
+         rcx = rbp + 0x330
+         0x140019760 ()           // 0x140019760(0x0, 0x0, 0x0, 0x178330)
+         edx = edi
+         rcx = rbp - 0x2b
+         0x140015de0 ()           // 0x140015de0(0x0, 0x0, 0x0, 0x177fd5)
+         r9 = var_sp_40h
+         r8 = rbp - 0x2b
+         rdx = rax
+         rcx = rbp - 0x68
+         0x140012880 ()           // 0x140012880(0x0, 0x0, 0x0, 0x177f98)
+         r8 = rbp - 0x68
+         rdx = rip + str.___Decrypted_embedded_su__ // 0x1400afb88 // "[*] Decrypted embedded su ("
+         rcx = rbp - 0x20
+         0x140012a40 ()           // 0x140012a40(0x0, 0x0, 0x1400afb88, 0x177fe0)
+         r8d = 0x10
+         rdx = rip + str._bytes__to_temp. // 0x1400afb70 // " bytes) to temp."
+         rcx = rax
+         0x14002be00 ()           // 0x14002be00(0x0, 0x0, 0x1400afb70, 0x0)
+         xmm1 = xmmword [rax]
+         xmm0 = xmmword [rax + 0x10]
+         r14d = 0                 // "nternal error: " // "nternal error: "
+         qword [rax + 0x10] = r14
+         qword [rax + 0x18] = r13
+         byte [rax] = r14b
+         psrldq xmm0 8
+         r8 = xmm0
+         v = r8 - 0xf             // "nternal error: " // "nternal error: " // "nternal error: "
+         if (((unsigned) v) <= 0) 
+    loc_0x14001df38: // orphan
+         rcx = rbp - 0x20
+         0x1400010f0 ()           // 0x1400010f0(0x0, 0x0, 0x0, 0x177fe0)
+         rcx = rbp - 0x68
+         0x1400010f0 ()           // 0x1400010f0(0x0, 0x0, 0x0, 0x177f98)
+         rcx = rbp + 0x280
+         0x14002f200 ()           // 0x14002f200(0x0, 0x0, 0x0, 0x178280)
+         ecx = 0x20               // "y."
+         0x140012c40 ()           // 0x140012c40(0x0, 0x0, 0x0, 0x20)
+         rdx = rax
+         xmm0 = xmmword [str.___Opening_VHD...] // [0x1400afba8:16]=-1 // "[*] Opening VHD..."
+         xmmword [rax] = xmm0
+         eax = word [0x1400afbb8] // [0x1400afbb8:2]=0x2e2e // ".."
+         word [rdx + 0x10] = ax
+         byte [rdx + 0x12] = 0
+         r15d = 0x1f              // 31
+         r8d = r15d
+         rcx = rbp - 0x20
+         0x1400016c0 ()           // 0x1400016c0(0x0, 0x0, 0x0, 0x177fe0)
+         rdx = rbp + 0x50         // (cstr 0x00000000) "[*] Opening VHD..."
+         rcx = rbp + 0x280        // (cstr 0x00000000) "[*] Opening VHD..."
+         0x140030b00 ()           // 0x140030b00(0x0, 0x0, 0x178050, 0x178280)
+         v = al & al              // "*] Opening VHD..."
+         if (v) 
+    loc_0x14001dfe1: // orphan
+         qword [var_690h] = r14
+         ecx = 0x20               // "y."
+         0x140012c40 ()           // 0x140012c40(0x0, 0x0, 0x0, 0x20)
+         qword [rbp - 0x68] = rax
+         xmm0 = xmmword [0x1400b0630] // [0x1400b0630:16]=-1 // (pstr 0x00000000) "[*] Opening VHD..."
+         xmmword [rbp - 0x58] = xmm0
+         xmm0 = xmmword [str.___VHD_opened_successfully.] // [0x1400afbe0:16]=-1 // "[+] VHD opened successfully."
+         xmmword [rax] = xmm0
+         xmm0 = qword [0x1400afbf0] // [0x1400afbf0:8]=0x7566737365636375 // "uccessfully."
+         qword [rax + 0x10] = xmm0
+         ecx = dword [0x1400afbf8] // [0x1400afbf8:4]=0x2e796c6c // "lly."
+         dword [rax + 0x18] = ecx
+         byte [rax + 0x1c] = 0
+         rcx = rbp - 0x68
+         0x1400010f0 ()           // 0x1400010f0(0x0, 0x0, 0x0, 0x177f98)
+         rdx = qword [rbp + 0x2d0]
+         rdx -= qword [rbp + 0x2c8] // "+] VHD opened s" // "+] VHD opened s"
+         rdx >>= 5                // "+] VHD opened s" // "+] VHD opened s"
+         rcx = rbp - 0x2b
+         0x140015e20 ()           // 0x140015e20(0x0, 0x0, 0x0, 0x177fd5)
+         r9 = var_sp_40h          // (cstr 0x00000000) "[+] VHD opened s"
+         r8 = rbp - 0x2b
+         rdx = rax
+         rcx = rbp + 0x30         // (cstr 0x00000000) "[+] VHD opened s"
+         0x140012880 ()           // 0x140012880(0x0, 0x0, 0x0, 0x178030)
+         r8 = rbp + 0x30          // (cstr 0x00000000) "[+] VHD opened s"
+         rdx = rip + str.___Found // 0x1400afc10 // "[*] Found"
+         rcx = rbp - 0x20
+         0x140012a40 ()           // 0x140012a40(0x0, 0x0, 0x1400afc10, 0x177fe0)
+         r8d = 0xe                // " s"
+         rdx = rip + str._partition_s_. // 0x1400afc00 // " partition(s)."
+         rcx = rax
+         0x14002be00 ()           // 0x14002be00(0x0, 0x0, 0x1400afc00, 0x0)
+         xmm0 = xmmword [rax]
+         xmmword [rbp - 0x68] = xmm0
+         xmm1 = xmmword [rax + 0x10]
+         xmmword [rbp - 0x58] = xmm1
+         qword [rax + 0x10] = r14
+         qword [rax + 0x18] = r13
+         byte [rax] = 0
+         rcx = rbp - 0x68         // "[+] VHD opened s"
+         0x1400010f0 ()           // 0x1400010f0(0x0, 0x0, 0x1400afc00, 0x177f98)
+         rcx = rbp - 0x20
+         0x1400010f0 ()           // 0x1400010f0(0x0, 0x0, 0x1400afc00, 0x177fe0)
+         rcx = rbp + 0x30
+         0x1400010f0 ()           // 0x1400010f0(0x0, 0x0, 0x1400afc00, 0x178030)
+         ebx = 0xffffffff         // -1
+         rax = qword [rbp + 0x2d0]
+         rdx = qword [rbp + 0x2c8]
+         rax -= rdx               // "+] VHD opened s" // "+] VHD opened s"
+         rax >>= 5                // "+] VHD opened s" // "+] VHD opened s"
+         v = rax & rax            // "+] VHD opened s" // "+] VHD opened s"
+         if (!v) 
+    loc_0x14001f19f: // orphan
+         ecx = 0x30               // '0' // 48
+         0x140012c40 ()           // 0x140012c40(0x0, 0x0, 0x0, 0x30)
+         rdx = rax
+         xmm0 = xmmword [str.____No_ext4_partition_found_in_VHD.] // [0x1400afc60:16]=-1 // "[!] No ext4 partition found in VHD."
+         xmmword [rax] = xmm0
+         xmm1 = xmmword [0x1400afc70] // [0x1400afc70:16]=-1 // "ition found in VHD."
+         xmmword [rax + 0x10] = xmm1
+         eax = word [0x1400afc80] // [0x1400afc80:2]=0x4448 // "HD."
+         word [rdx + 0x20] = ax
+         eax = byte [0x1400afc82] // [0x1400afc82:1]=46 // "."
+         byte [rdx + 0x22] = al
+         byte [rdx + 0x23] = 0
+         r8d = 0x2f               // '/' // 47
+         rcx = rbp - 0x20
+         0x1400016c0 ()           // 0x1400016c0(0x0, 0x0, 0x0, 0x177fe0)
+
+         goto loc_0x14001f2fd;
+    loc_0x14001f2fd: // orphan
+         // CODE XREFS from fcn.14001d370 @ 0x14001d95a(x), 0x14001daed(x), 0x14001dbb6(x), 0x14001f267(x)
+         rdx = qword [rbp + 0x68]
+         v = rdx - 0xf            // "tition found in VHD." // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         if (((unsigned) v) <= 0) 
+         goto loc_0x14001f219;
+    loc_0x14001f219: // orphan
+         rdx = qword [rbp + 0xc0]
+         rdx -= r12               // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         rax = r12
+         v = rdx - 0x1000         // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         if (((unsigned) v) < 0) 
+    loc_0x14001f25f: // orphan
+         rcx = r12
+         0x1400aa1f8 ()           // 0x1400aa1f8(0x0, 0x0, 0x0, 0x0)
+         
+         goto loc_0x14001f22f;
+    loc_0x14001f22f: // orphan
+         rdx += 0x27              // 39 // "!] No ext4 partition found in VHD."
+         r12 = qword [r12 - 8]
+         rax -= r12               // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         rax -= 8                 // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         v = rax - 0x1f           // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         if (((unsigned) v) <= 0) 
+         goto loc_0x14001f245;
+    loc_0x14001f245: // orphan
+         qword [var_20h] = 0
+         r9d = 0                  // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         r8d = 0                  // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         edx = 0                  // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         ecx = 0                  // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         qword [sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson] () // [0x1400ad928:8]=0xdf0de reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson(0x0, 0x0, 0x0, 0x0)
+         int3
+
+        return rax;
+    loc_0x14001e0e2: // orphan
+         edi = 0                  // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         r12 = rip + 0x91b31      // "Yes" // 0x1400afc1c
+         xmm6 = qword [0x1400b0520] // [0x1400b0520:8]=0x3f50000000000000
+         
+
+         goto loc_0x14001e124;
+    loc_0x14001e124: // orphan
+         rax = rcx
+         rax >>>= 1               // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         ecx &= 1                 // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         rax |= rcx               // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         cvtsi2sd xmm0 rax
+         addsd xmm0 xmm0
+
+         goto loc_0x14001e1ba;
+    loc_0x14001e1ba: // orphan
+         r14++                    // "!] No ext4 partition found in VHD."
+         rdi += 0x20              // "HD."
+         rax = qword [rbp + 0x2d0]
+         rax -= rdx               // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         rax >>= 5                // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         v = r14 - rax
+         if (((unsigned) v) < 0) 
+    loc_0x14001e100: // orphan
+         r8 = rip + 0x91b19       // "No" // 0x1400afc20
+         v = byte [rdi + rdx + 0x18] - 0
+         if (!zf) r8 = r12
+         rcx = qword [rdi + rdx + 0x10]
+         xmm0 ^= xmm0
+         v = rcx & rcx            // "!] No ext4 partition found in VHD."
+         js 0x14001e124           // unlikely
+
+         goto loc_0x14001e1d8;
+    loc_0x14001e1d8: // orphan
+         v = ebx & ebx            // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         r12 = qword [rbp + 0xb0]
+         js 0x14001f19f           // unlikely
+
+         goto loc_0x14001e1e7;
+    loc_0x14001e1e7: // orphan
+         edx = ebx
+         rcx = rbp - 0x2b
+         0x140015de0 ()           // 0x140015de0(0x0, 0x0, 0x0, 0x177fd5)
+         r9 = var_sp_40h          // (cstr 0x00000000) "[!] No ext4 partition found in VHD."
+         r8 = rbp - 0x2b
+         rdx = rax
+         rcx = rbp + 0x30         // (cstr 0x00000000) "[!] No ext4 partition found in VHD."
+         0x140012880 ()           // 0x140012880(0x0, 0x0, 0x0, 0x178030)
+         r8 = rbp + 0x30          // (cstr 0x00000000) "[!] No ext4 partition found in VHD."
+         rdx = rip + str.___Mounting_ext4_partition // 0x1400afc88 // "[*] Mounting ext4 partition"
+         rcx = rbp - 0x20
+         0x140012a40 ()           // 0x140012a40(0x0, 0x0, 0x1400afc88, 0x177fe0)
+         r8d = 3                  // " No ext4 partition found in VHD."
+         rdx = rip + 0x91a5a      // "..." // 0x1400afc84
+         rcx = rax
+         0x14002be00 ()           // 0x14002be00(0x0, 0x0, 0x1400afc84, 0x0)
+         xmm0 = xmmword [rax]
+         xmmword [rbp - 0x68] = xmm0
+         xmm1 = xmmword [rax + 0x10]
+         xmmword [rbp - 0x58] = xmm1
+         r14d = 0                 // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         qword [rax + 0x10] = r14
+         qword [rax + 0x18] = r13
+         byte [rax] = r14b
+         rcx = rbp - 0x68
+         0x1400010f0 ()           // 0x1400010f0(0x0, 0x0, 0x1400afc84, 0x177f98)
+         rcx = rbp - 0x20
+         0x1400010f0 ()           // 0x1400010f0(0x0, 0x0, 0x1400afc84, 0x177fe0)
+         rcx = rbp + 0x30
+         0x1400010f0 ()           // 0x1400010f0(0x0, 0x0, 0x1400afc84, 0x178030)
+         edx = ebx
+         rcx = rbp + 0x280
+         0x1400304a0 ()           // 0x1400304a0(0x0, 0x0, 0x0, 0x178280)
+         v = al & al              // "!] No ext4 part" // "!] No ext4 part"
+         if (v) 
+    loc_0x14001e2bb: // orphan
+         ecx = 0x20               // "HD."
+         0x140012c40 ()           // 0x140012c40(0x0, 0x0, 0x0, 0x20)
+         rdx = rax
+         xmm0 = xmmword [str.___ext4_partition_mounted.] // [0x1400afcc8:16]=-1 // "[+] ext4 partition mounted."
+         xmmword [rax] = xmm0
+         xmm0 = qword [0x1400afcd8] // [0x1400afcd8:8]=0x746e756f6d206e6f // "on mounted."
+         qword [rax + 0x10] = xmm0
+         eax = word [0x1400afce0] // [0x1400afce0:2]=0x6465 // "ed."
+         word [rdx + 0x18] = ax
+         eax = byte [0x1400afce2] // [0x1400afce2:1]=46
+         byte [rdx + 0x1a] = al
+         byte [rdx + 0x1b] = 0
+         r8 = r15
+         rcx = rbp - 0x20
+         0x1400016c0 ()           // 0x1400016c0(0x0, 0x0, 0x0, 0x177fe0)
+         xmm0 ^= xmm0
+         xmmword [rbp + 0x130] = xmm0
+         xmm1 ^= xmm1
+         xmmword [rbp + 0x140] = xmm1
+         ecx = 0x20               // "HD."
+         0x140012c40 ()           // 0x140012c40(0x0, 0x0, 0x0, 0x20)
+         qword [rbp + 0x130] = rax
+         xmm0 = xmmword [0x1400b05f0] // [0x1400b05f0:16]=-1 // (pstr 0x00000000) "[+] ext4 partiti"
+         xmmword [rbp + 0x140] = xmm0
+         xmm0 = xmmword [str._android_system_xbin] // [0x1400afce8:16]=-1 // "/android/system/xbin"
+         xmmword [rax] = xmm0
+         ecx = dword [0x1400afcf8] // [0x1400afcf8:4]=0x6e696278 // "xbin"
+         dword [rax + 0x10] = ecx
+         byte [rax + 0x14] = 0
+         rax = rsi
+         rcx = qword [rbp + 0x140] // (pstr 0x00000000) "[+] ext4 partiti"
+         rax -= rcx               // "+] ext4 partiti" // "+] ext4 partiti" // "+] ext4 partiti"
+         v = rax - 0xd            // "iti" // "+] ext4 partiti" // "+] ext4 partiti"
+         if (((unsigned) v) < 0) 
+    loc_0x14001f507: // orphan
+         0x14002bd80 ()           // 0x14002bd80(0x0, 0x0, 0x0, 0x0)
+
+         goto loc_0x14001e368;
+    loc_0x14001e368: // orphan
+         rax = rbp + 0x130        // (pstr 0x0000002e) "/android/system/xbin"
+         v = qword [rbp + 0x148] - 0xf
+         cmova rax qword [rbp + 0x130] // "/android/system/xbin"
+         qword [var_30h] = rcx
+         qword [var_28h] = rax
+         qword [var_20h] = 0xd    // [0xd:8]=0x697469 // "iti"
+         r9 = rip + str.___Creating // 0x1400afd10 // "[*] Creating"
+         r8 = rbp + 0x130         // (pstr 0x0000002e) "/android/system/xbin"
+         edx = byte [var_sp_40h]
+         rcx = rbp - 0x68
+         0x140017020 ()           // 0x140017020(0x0, 0x0, 0x0, 0x177f98)
+         r8d = 0xd                // "iti"
+         rdx = rip + str._directory... // 0x1400afd00 // " directory..."
+         rcx = rbp - 0x68
+         0x14002be00 ()           // 0x14002be00(0x0, 0x0, 0x1400afd00, 0x177f98)
+         xmm1 = xmmword [rax]
+         xmm0 = xmmword [rax + 0x10]
+         qword [rax + 0x10] = r14
+         qword [rax + 0x18] = r13
+         byte [rax] = 0
+         psrldq xmm0 8
+         r8 = xmm0
+         v = r8 - 0xf             // "+] ext4 partiti" // "+] ext4 partiti"
+         if (((unsigned) v) <= 0) 
+    loc_0x14001e3f6: // orphan
+         rcx = rbp - 0x68
+         0x1400010f0 ()           // 0x1400010f0(0x0, 0x0, 0x0, 0x177f98)
+         rdx = rbp + 0x130
+         rcx = rbp + 0x280        // (cstr 0x00000000) "[+] ext4 partiti"
+         0x140030260 ()           // 0x140030260(0x0, 0x0, 0x178130, 0x178280)
+         v = al & al              // "+] ext4 partiti" // "+] ext4 partiti"
+         if (!v) 
+    loc_0x14001e46b: // orphan
+         rdx = rbp + 0x2a8        // (cstr 0x00000000) "[+] ext4 partiti"
+         rcx = rbp - 0x68
+         0x140016f10 ()           // 0x140016f10(0x0, 0x0, 0x1782a8, 0x177f98)
+         r8 = rbp - 0x68
+         rdx = rip + str.____Directory_may_already_exist: // 0x1400afd50 // "[~] Directory may already exist:"
+         rcx = rbp - 0x20
+         0x140012a40 ()           // 0x140012a40(0x0, 0x0, 0x1400afd50, 0x177fe0)
+         rcx = rbp - 0x20
+         0x1400010f0 ()           // 0x1400010f0(0x0, 0x0, 0x1400afd50, 0x177fe0)
+
+         goto loc_0x14001f50d;
+    loc_0x14001f50d: // orphan
+         0x14002bd80 ()           // 0x14002bd80(0x0, 0x0, 0x0, 0x0)
+
+         goto loc_0x14001e51f;
+    loc_0x14001e51f: // orphan
+         rax = rbp + 0x110        // (cstr 0x00000000) "[+] ext4 partiti"
+         v = qword [rbp + 0x128] - 0xf // "+] ext4 partiti" // "+] ext4 partiti" // "+] ext4 partiti"
+         cmova rax qword [rbp + 0x110]
+         qword [var_30h] = rcx
+         qword [var_28h] = rax
+         qword [var_20h] = 0x14   // [0x14:8]=0x2e646500000000
+         r9 = rip + str.___Copying_su_c___ // 0x1400afd90 // "[*] Copying su_c ->"
+         r8 = rbp + 0x110         // (cstr 0x00000000) "[+] ext4 partiti"
+         edx = byte [var_sp_40h]
+         rcx = rbp - 0x68
+         0x140017020 ()           // 0x140017020(0x0, 0x0, 0x0, 0x177f98)
+         r8d = 3                  // " ext4 partiti"
+         rdx = rip + 0x91711      // "..." // 0x1400afc84
+         rcx = rbp - 0x68
+         0x14002be00 ()           // 0x14002be00(0x0, 0x0, 0x1400afc84, 0x177f98)
+         xmm1 = xmmword [rax]
+         xmm0 = xmmword [rax + 0x10]
+         qword [rax + 0x10] = r14
+         qword [rax + 0x18] = r13
+         byte [rax] = 0
+         psrldq xmm0 8
+         r8 = xmm0
+         v = r8 - 0xf             // "+] ext4 partiti" // "+] ext4 partiti" // "+] ext4 partiti"
+         if (((unsigned) v) <= 0) 
+    loc_0x14001e5ad: // orphan
+         rcx = rbp - 0x68
+         0x1400010f0 ()           // 0x1400010f0(0x0, 0x0, 0x0, 0x177f98)
+         r8 = rbp + 0x110         // (cstr 0x00000000) "[+] ext4 partiti"
+         rdx = rbp + 0x1f0        // "Internal error: su resource empt"
+         rcx = rbp + 0x280        // (cstr 0x00000000) "[+] ext4 partiti"
+         0x14002fa30 ()           // 0x14002fa30(0x0, 0x0, 0x1781f0, 0x178280)
+         v = al & al              // "+] ext4 partiti" // "+] ext4 partiti"
+         if (v) 
+    loc_0x14001e698: // orphan
+         qword [var_690h] = r14
+         r8 = rsi
+         rdx = r13
+         ecx = 0x15
+         0x140026cc0 ()           // 0x140026cc0(0x0, 0x0, 0x0, 0x15)
+         qword [rbp - 0x40] = rax
+         rdx = rbp - 0x40         // (pstr 0x00000000) "[+] ext4 partiti"
+         rcx = rbp - 0x68         // "[!] No e"
+         0x140012cb0 ()           // 0x140012cb0(0x0, 0x0, 0x177fc0, 0x177f98)
+         rbx = rax
+         qword [rbp - 0x68] = rax
+         qword [rbp - 0x58] = 0x15
+         rcx = qword [rbp - 0x40]
+         qword [rbp - 0x50] = rcx
+         r8d = 0x15
+         rdx = rip + str.___su_binary_copied. // 0x1400afdc8 // "[+] su binary copied."
+         rcx = rax
+         0x14002c780 ()           // 0x14002c780(0x0, 0x0, 0x1400afdc8, 0x0)
+         byte [rbx + 0x15] = 0
+         rcx = rbp - 0x68
+         0x1400010f0 ()           // 0x1400010f0(0x0, 0x0, 0x1400afdc8, 0x177f98)
+         rdx = rip + str.___Setting_permissions_06755__suid_sgid_... // 0x1400afde0 // "[*] Setting permissions 06755 (suid/sgid)..."
+         rcx = rbp - 0x20
+         0x140016fd0 ()           // 0x140016fd0(0x0, 0x0, 0x1400afde0, 0x177fe0)
+         rcx = rbp - 0x20
+         0x1400010f0 ()           // 0x1400010f0(0x0, 0x0, 0x1400afde0, 0x177fe0)
+         r8d = 0xded              // 3565
+         rdx = rbp + 0x110        // (cstr 0x00000000) "[+] ext4 partiti"
+         rcx = rbp + 0x280        // (cstr 0x00000000) "[+] ext4 partiti"
+         0x1400323c0 ()           // 0x1400323c0(0x0, 0x0, 0x178110, 0x178280)
+         v = al & al              // "+] ext4 partiti" // "+] ext4 partiti"
+         if (!v) 
+    loc_0x14001e742: // orphan
+         rdx = rbp - 0x68
+         rcx = rbp + 0x280        // (cstr 0x00000000) "[+] ext4 partiti"
+         0x14001c740 ()           // 0x14001c740(0x0, 0x0, 0x177f98, 0x178280)
+         r8 = rax
+         rdx = rip + str.____chmod_failed: // 0x1400afe30 // "[!] chmod failed:"
+         rcx = rbp - 0x20
+         0x140012a40 ()           // 0x140012a40(0x0, 0x0, 0x1400afe30, 0x177fe0)
+         rcx = rbp - 0x20
+         0x1400010f0 ()           // 0x1400010f0(0x0, 0x0, 0x1400afe30, 0x177fe0)
+         rcx = rbp - 0x68
+
+         goto loc_0x14001e7c5;
+    loc_0x14001e7c5: // orphan
+         rdx = rbp - 0x68
+         rcx = rbp + 0x280        // (cstr 0x00000000) "[+] ext4 partiti"
+         0x14001c740 ()           // 0x14001c740(0x0, 0x0, 0x177f98, 0x178280)
+         r8 = rax
+         rdx = rip + str.____chown_failed: // 0x1400afe90 // "[!] chown failed:"
+         rcx = rbp - 0x20
+         0x140012a40 ()           // 0x140012a40(0x0, 0x0, 0x1400afe90, 0x177fe0)
+         rcx = rbp - 0x20
+         0x1400010f0 ()           // 0x1400010f0(0x0, 0x0, 0x1400afe90, 0x177fe0)
+         rcx = rbp - 0x68
+
+         goto loc_0x14001f513;
+    loc_0x14001f513: // orphan
+         rdx >>>= 0x20            // "+] ext4 partiti" // "+] ext4 partiti"
+         r8 = rbp - 0x68
+         rcx = rip + str.remove   // 0x1400aee58 // "remove"
+         0x14002b6d0 ()           // 0x14002b6d0(0x0, 0x0, 0x0, 0x1400aee58)
+
+         goto loc_0x14001e87c;
+    loc_0x14001e87c: // orphan
+         rcx = rbp - 0x68
+         0x14002b920 ()           // 0x14002b920(0x0, 0x0, 0x0, 0x177f98)
+         rdx = qword [rbp + 0x10]
+         rcx = rbp + 0xd0         // (cstr 0x00000000) "[+] ext4 partiti"
+         0x140016f10 ()           // 0x140016f10(0x0, 0x0, 0x0, 0x1780d0)
+         v = qword [rbp + 0xe0] - 0 // "+] ext4 partiti" // "+] ext4 partiti"
+         if (!v) 
+    loc_0x14001e8d0: // orphan
+         rdx = rbp + 0xd0         // (cstr 0x00000000) "[+] ext4 partiti"
+         rcx = rbp + 0x150        // (cstr 0x00000000) "[+] ext4 partiti"
+         0x140016f10 ()           // 0x140016f10(0x0, 0x0, 0x1780d0, 0x178150)
+         rbx = rbp + 0x150        // (cstr 0x00000000) "[+] ext4 partiti"
+         v = qword [rbp + 0x168] - 0xf // "+] ext4 partiti" // "+] ext4 partiti" // "+] ext4 partiti"
+         cmova rbx qword [rbp + 0x150]
+         rcx = rbp + 0x150        // (cstr 0x00000000) "[+] ext4 partiti"
+         cmova rcx qword [rbp + 0x150]
+         rdi = qword [rbp + 0x160]
+         rdi += rcx               // (cstr 0x00000000) "[+] ext4 partiti" // "+] ext4 partiti"
+         v = rbx - rdi            // "+] ext4 partiti" // "+] ext4 partiti"
+         if (!v) 
+    loc_0x14001e933: // orphan
+         r8d = 0                  // "+] ext4 partiti" // "+] ext4 partiti"
+         rdx = rip + 0x906d3      // "engine\\" // 0x1400af010
+         rcx = rbp + 0x150        // (cstr 0x00000000) "[+] ext4 partiti"
+         0x14002cea0 ()           // 0x14002cea0(0x0, 0x0, 0x1400af010, 0x178150)
+         r8 = rax
+         v = rax - 0xffffffffffffffff // "+] ext4 partiti" // "+] ext4 partiti"
+         if (!v) 
+    loc_0x14001e9b7: // orphan
+         rcx = rbp + 0x150        // (cstr 0x00000000) "[+] ext4 partiti"
+         0x1400010f0 ()           // 0x1400010f0(0x0, 0x0, 0x0, 0x178150)
+         r14 = qword [rbp + 0xe0]
+         rax = rsi
+         rax -= r14               // "+] ext4 partiti" // "+] ext4 partiti"
+         v = rax - 0xf            // "+] ext4 partiti" // "+] ext4 partiti" // "+] ext4 partiti"
+         if (((unsigned) v) < 0) 
+    loc_0x14001f528: // orphan
+         0x14002bd80 ()           // 0x14002bd80(0x0, 0x0, 0x0, 0x0)
+
+         goto loc_0x14001e9da;
+    loc_0x14001e9da: // orphan
+         r12 = rbp + 0xd0         // (cstr 0x00000000) "[+] ext4 partiti"
+         v = qword [rbp + 0xe8] - 0xf // "+] ext4 partiti" // "+] ext4 partiti" // "+] ext4 partiti"
+         cmova r12 qword [rbp + 0xd0]
+         xmm0 ^= xmm0
+         xmmword [rbp + 0x90] = xmm0
+         xmm1 ^= xmm1
+         xmmword [rbp + 0xa0] = xmm1
+         r15 = r14 + 0xf          // "i"
+         rbx = r13
+         rdi = rbp + 0x90         // (cstr 0x00000000) "[+] ext4 partiti"
+         v = r15 - rbx            // "+] ext4 partiti"
+         if (((unsigned) v) <= 0) 
+    loc_0x14001ea4a: // orphan
+         qword [rbp + 0xa0] = r15
+         qword [rbp + 0xa8] = rbx
+         r8 = r14
+         rdx = r12
+         rcx = rdi
+         0x1400ab0c8 ()           // 0x1400ab0c8(0x0, 0x0, 0x0, 0x0)
+         xmm0 = qword [str.bluestacks.conf] // [0x1400afed8:8]=0x6361747365756c62 // "bluestacks.conf"
+         qword [r14 + rdi] = xmm0
+         eax = dword [0x1400afee0] // [0x1400afee0:4]=0x632e736b // "ks.conf"
+         dword [r14 + rdi + 8] = eax
+         eax = word [0x1400afee4] // [0x1400afee4:2]=0x6e6f // "onf"
+         word [r14 + rdi + 0xc] = ax
+         eax = byte [0x1400afee6] // [0x1400afee6:1]=102 // "f"
+         byte [r14 + rdi + 0xe] = al
+         byte [rdi + r15] = 0
+         rax = rbp + 0x90
+         v = qword [rbp + 0xa8] - 0xf
+         cmova rax qword [rbp + 0x90]
+         qword [rbp + 0x10] = rax
+         rax = qword [rbp + 0xa0]
+         qword [rbp + 0x18] = rax
+         r8d = 0
+         rdx = rbp + 0x10
+         rcx = rbp - 0x68
+         0x1400133d0 ()           // 0x1400133d0(0x0, 0x0, 0x178010, 0x177f98)
+         rcx = rbp - 0x68
+         0x14002ce20 ()           // 0x14002ce20(0x0, 0x0, 0x178010, 0x177f98)
+         ebx = al
+         rcx = rbp - 0x68
+         0x14002b920 ()           // 0x14002b920(0x0, 0x0, 0x178010, 0x177f98)
+         v = bl & bl
+         if (!v) 
+    loc_0x14001f0a7: // orphan
+         ebx = 0x1f
+         rdi = qword [var_48h]
+
+         goto loc_0x14001f124;
+    loc_0x14001f124: // orphan
+         byte [rdi + 0x148] = 0
+         v = rbx - 0xf
+         if (((unsigned) v) <= 0) 
+    loc_0x14001f141: // orphan
+         r8 = qword [rbp + 0xa8]
+         v = r8 - 0xf
+         if (((unsigned) v) <= 0) 
+    loc_0x14001f161: // orphan
+         xmmword [rbp + 0xa0] = xmm8
+         byte [rbp + 0x90] = 0
+         rcx = rbp + 0xd0
+         0x1400010f0 ()           // 0x1400010f0(0x0, 0x0, 0x0, 0x1780d0)
+         r12 = qword [rbp + 0xb0]
+
+         goto loc_0x14001f1f6;
+    loc_0x14001f1f6: // orphan
+         // CODE XREFS from fcn.14001d370 @ 0x14001dfdc(x), 0x14001f19d(x)
+         rcx = rbp + 0x280
+         0x14002f2f0 ()           // 0x14002f2f0(0x0, 0x0, 0x0, 0x178280)
+
+         goto loc_0x14001f14e;
+    loc_0x14001f14e: // orphan
+         rdx = qword [rbp + 0x90]
+         rcx = rbp + 0x90
+         0x1400016c0 ()           // 0x1400016c0(0x0, 0x0, 0x0, 0x178090)
+
+         goto loc_0x14001f131;
+    loc_0x14001f131: // orphan
+         r8 = rbx
+         rcx = rbp + 0x1d0
+         0x1400016c0 ()           // 0x1400016c0(0x0, 0x0, 0x0, 0x1781d0)
+
+         goto loc_0x14001f10b;
+    loc_0x14001f10b: // orphan
+         r8d = 0x14
+         0x14002c270 ()           // 0x14002c270(0x0, 0x0, 0x0, 0x0)
+         rbx = qword [rbp + 0x1e8]
+         rdx = qword [rbp + 0x1d0]
+
+         goto loc_0x14001eaf1;
+    loc_0x14001eaf1: // orphan
+         rbx = qword [var_68h]
+         rcx = qword [rbx + 0x10]
+         rax = rsi
+         rax -= rcx
+         v = rax - 0x21           // '!' // "D."
+         if (((unsigned) v) < 0) 
+    loc_0x14001f52e: // orphan
+         0x14002bd80 ()           // 0x14002bd80(0x0, 0x0, 0x0, 0x0)
+
+         goto loc_0x14001eb0a;
+    loc_0x14001eb0a: // orphan
+         rax = rbx
+         v = qword [rbx + 0x18] - 0xf
+         if (((unsigned) v) <= 0) 
+    loc_0x14001eb17: // orphan
+         qword [var_30h] = rcx
+         qword [var_28h] = rax
+         qword [var_20h] = 0x21   // '!' // [0x21:8]=0xffff002e79002e44 // "D."
+         r9 = rip + str.___Updating_bluestacks.conf_for // 0x1400afee8 // "[*] Updating bluestacks.conf for"
+         r8 = rbx
+         edx = byte [var_sp_40h]
+         rcx = rbp - 0x68
+         0x140017020 ()           // 0x140017020(0x0, 0x0, 0x0, 0x177f98)
+         rcx = rbp - 0x68
+         0x1400010f0 ()           // 0x1400010f0(0x0, 0x0, 0x0, 0x177f98)
+         r8 = rbp + 0x90
+         rdx = rbp - 0x20
+         rcx = qword [var_48h]
+         0x140022540 ()           // 0x140022540(0x0, 0x0, 0x177fe0, 0x0)
+         rcx = qword [rbx + 0x10]
+         rax = rsi
+         rax -= rcx
+         v = rax - 0xd            // "nfi"
+         if (((unsigned) v) < 0) 
+    loc_0x14001f534: // orphan
+         0x14002bd80 ()           // 0x14002bd80(0x0, 0x0, 0x0, 0x0)
+         int3
+
+        return rax;
+    loc_0x14001eb75: // orphan
+         rax = rbx
+         v = qword [rbx + 0x18] - 0xf
+         if (((unsigned) v) <= 0) 
+    loc_0x14001eb82: // orphan
+         qword [var_30h] = rcx
+         qword [var_28h] = rax
+         qword [var_20h] = 0xd    // [0xd:8]=0x69666e // "nfi"
+         r9 = rip + str.bst.instance. // 0x1400aff28 // "bst.instance."
+         r8 = rbx
+         edx = byte [var_sp_40h]
+         rcx = rbp - 0x68
+         0x140017020 ()           // 0x140017020(0x0, 0x0, 0x0, 0x177f98)
+         r8d = 0x14
+         rdx = rip + str..enable_root_access // 0x1400aff10 // ".enable_root_access="
+         rcx = rbp - 0x68
+         0x14002be00 ()           // 0x14002be00(0x0, 0x0, 0x1400aff10, 0x177f98)
+         xmm0 ^= xmm0
+         xmmword [rbp + 0x10] = xmm0
+         ebx = 0
+         qword [rbp + 0x20] = rbx
+         qword [rbp + 0x28] = rbx
+         xmm0 = xmmword [rax]
+         xmmword [rbp + 0x10] = xmm0
+         xmm1 = xmmword [rax + 0x10]
+         xmmword [rbp + 0x20] = xmm1
+         qword [rax + 0x10] = rbx
+         qword [rax + 0x18] = r13
+         byte [rax] = bl
+         rcx = rbp - 0x68
+         0x1400010f0 ()           // 0x1400010f0(0x0, 0x0, 0x1400aff10, 0x177f98)
+         xmm0 ^= xmm0
+         xmmword [rbp + 0x30] = xmm0
+         xmmword [rbp + 0x40] = xmm8
+         byte [rbp + 0x30] = bl
+         r9d = 1
+         r8d = r9d
+         rdx = rbp - 0x20
+         rcx = rbp + 0x330
+         0x140016c70 ()           // 0x140016c70(0x0, 0x0, 0x177fe0, 0x178330)
+         xmm0 ^= xmm0
+         xmmword [rbp + 0x70] = xmm0
+         qword [rbp + 0x80] = rbx
+         qword [rbp + 0x88] = r13
+         byte [rbp + 0x70] = bl
+         al = 0
+         byte [var_sp_40h] = al
+         rax = qword [rbp + 0x330]
+         rcx = dword [rax + 4]
+         rax = rbp + 0x330
+         rcx += rax
+         dl = 0xa                 // ".confi"
+         qword [sym.imp.MSVCP140.dll__widen___basic_ios_DU__char_traits_D_std___std__QEBADD_Z] () // [0x1400ad510:8]=0xdde90 reloc.MSVCP140.dll__widen___basic_ios_DU__char_traits_D_std___std__QEBADD_Z // reloc.MSVCP140.dll__widen___basic_ios_DU__char_traits_D_std___std__QEBADD_Z // sym.imp.MSVCP140.dll__widen___basic_ios_DU__char_traits_D_std___std__QEBADD_Z(0x0, 0x0, 0x177f0a, 0x178330)
+         r8d = al                 // "ndroid/system/"
+         rdx = rbp + 0x70
+         rcx = rbp + 0x330
+         0x140015f00 ()           // 0x140015f00(0x0, 0x0, 0x178070, 0x178330)
+         rcx = qword [rax]
+         rcx = dword [rcx + 4]
+         rcx += rax
+         qword [sym.imp.MSVCP140.dll___Bios_base_std__QEBA_NXZ] () // [0x1400ad3e0:8]=0xdd52c reloc.MSVCP140.dll___Bios_base_std__QEBA_NXZ // ",\xd5\r" // reloc.MSVCP140.dll___Bios_base_std__QEBA_NXZ // sym.imp.MSVCP140.dll___Bios_base_std__QEBA_NXZ(0x0, 0x0, 0x178070, 0x178330)
+         v = al & al
+         if (!v) 
+    loc_0x14001eef1: // orphan
+         rax = qword [rbp + 0x20]
+         rsi -= rax
+         v = rsi - 4
+         if (((unsigned) v) < 0) 
+    loc_0x14001f4d4: // orphan
+         0x14002bd80 ()           // 0x14002bd80(0x0, 0x0, 0x0, 0x0)
+
+         goto loc_0x14001ef02;
+    loc_0x14001ef02: // orphan
+         r9 = rbp + 0x10
+         v = qword [rbp + 0x28] - 0xf
+         cmova r9 qword [rbp + 0x10]
+         qword [var_30h] = 4
+         rcx = rip + str._0__n    // 0x1400aff3c // ""0"\n"
+         qword [var_28h] = rcx
+         qword [var_20h] = rax
+         r8 = rbp + 0x10
+         edx = byte [var_sp_40h]
+         rcx = rbp - 0x68
+         0x140017020 ()           // 0x140017020(0x0, 0x0, 0x0, 0x177f98)
+         rdx = rbp - 0x68
+         v = qword [rbp - 0x50] - 0xf
+         cmova rdx qword [rbp - 0x68]
+         r8 = qword [rbp - 0x58]
+         rcx = rbp + 0x30
+         0x14002be00 ()           // 0x14002be00(0x0, 0x0, 0x177f98, 0x178030)
+         rcx = rbp - 0x68
+         0x1400010f0 ()           // 0x1400010f0(0x0, 0x0, 0x177f98, 0x177f98)
+
+         goto loc_0x14001efdc;
+    loc_0x14001efdc: // orphan
+         xmm0 ^= xmm0
+         xmmword [rbp - 0x68] = xmm0
+         ecx = 0x30               // '0' // "ndroid/system/"
+         0x140012c40 ()           // 0x140012c40(0x0, 0x0, 0x0, 0x30)
+         rdx = rax
+         qword [rbp - 0x68] = rax
+         xmm0 = xmmword [0x1400b0650] // [0x1400b0650:16]=-1 // "android/system/"
+         xmmword [rbp - 0x58] = xmm0
+         xmm0 = xmmword [str.____Failed_to_write_bluestacks.conf] // [0x1400aff68:16]=-1 // "[!] Failed to write bluestacks.conf"
+         xmmword [rax] = xmm0
+         xmm1 = xmmword [0x1400aff78] // [0x1400aff78:16]=-1 // "ite bluestacks.conf"
+         xmmword [rax + 0x10] = xmm1
+         ecx = word [0x1400aff88] // [0x1400aff88:2]=0x6e6f // "onf"
+         word [rax + 0x20] = cx
+         eax = byte [0x1400aff8a] // [0x1400aff8a:1]=102
+         byte [rdx + 0x22] = al
+         byte [rdx + 0x23] = 0
+         rcx = rbp - 0x68
+         0x1400010f0 ()           // 0x1400010f0(0x0, 0x0, 0x0, 0x177f98)
+         ebx = 0x1f               // "conf"
+
+         goto loc_0x14001f06b;
+    loc_0x14001f06b: // orphan
+         xmmword [rbp + 0x40] = xmm8
+         byte [rbp + 0x30] = 0
+         r8 = qword [rbp + 0x28]  // "\"0\"\n" str._0__n
+         v = r8 - 0xf             // "rite bluestacks.conf" // "!] Failed to write bluestacks.conf" // "!] Failed to write bluestacks.conf"
+         if (((unsigned) v) <= 0) 
+    loc_0x14001f08c: // orphan
+         qword [rbp + 0x20] = 0
+         qword [rbp + 0x28] = r13
+         byte [rbp + 0x10] = 0
+         rcx = rbp - 0x20
+         0x1400010f0 ()           // 0x1400010f0(0x0, 0x0, 0x0, 0x177fe0)
+         
+    loc_0x14001f0b1: // orphan
+         // CODE XREF from fcn.14001d370 @ 0x14001f0a5(x)
+         xmm0 ^= xmm0
+         xmmword [rbp + 0x1d0] = xmm0
+         ecx = 0x20               // "onf"
+         0x140012c40 ()           // 0x140012c40(0x0, 0x0, 0x0, 0x20)
+         rdx = rax
+         qword [rbp + 0x1d0] = rax
+         qword [rbp + 0x1e0] = 0x14 // "bluestacks.conf"
+         qword [rbp + 0x1e8] = rbx
+         xmm0 = xmmword [str.Rooted_successfully_] // [0x1400aff90:16]=-1 // "Rooted successfully!"
+         xmmword [rax] = xmm0
+         eax = dword [0x1400affa0] // [0x1400affa0:4]=0x21796c6c // "lly!"
+         dword [rdx + 0x10] = eax
+         byte [rdx + 0x14] = 0
+         rcx = rdi + 0x128
+         rax = rbp + 0x1d0
+         v = rcx - rax            // "ooted successfully!" // "ooted successfully!"
+         if (!v) 
+         goto loc_0x14001f07f;
+    loc_0x14001f07f: // orphan
+         rdx = qword [rbp + 0x10]
+         rcx = rbp + 0x10         // (pstr 0x00000000) "Rooted successfully!"
+         0x1400016c0 ()           // 0x1400016c0(0x0, 0x0, 0x0, 0x178010)
+
+         goto loc_0x14001f05e;
+    loc_0x14001f05e: // orphan
+         rdx = qword [rbp + 0x30]
+         rcx = rbp + 0x30         // (cstr 0x00000000) "Rooted successfully!"
+         0x1400016c0 ()           // 0x1400016c0(0x0, 0x0, 0x0, 0x178030)
+
+         goto loc_0x14001ef7e;
+    loc_0x14001ef7e: // orphan
+         ecx = 0x20               // "onf"
+         0x140012c40 ()           // 0x140012c40(0x0, 0x0, 0x0, 0x20)
+         rdx = rax
+         xmm0 = xmmword [str.___bluestacks.conf_updated.] // [0x1400aff48:16]=-1 // "[+] bluestacks.conf updated."
+         xmmword [rax] = xmm0
+         xmm0 = qword [0x1400aff58] // [0x1400aff58:8]=0x6164707520666e6f // "onf updated."
+         qword [rax + 0x10] = xmm0
+         eax = dword [0x1400aff60] // [0x1400aff60:4]=0x2e646574 // "ted."
+         dword [rdx + 0x18] = eax
+         byte [rdx + 0x1c] = 0
+         ebx = 0x1f               // "conf"
+         r8d = ebx                // "conf"
+         rcx = rbp - 0x68
+         0x1400016c0 ()           // 0x1400016c0(0x0, 0x0, 0x0, 0x177f98)
+         
+    loc_0x14001f03d: // orphan
+         // CODE XREF from fcn.14001d370 @ 0x14001efc0(x)
+         rcx = rbp + 0x70         // (cstr 0x00000000) "[+] bluestacks.c"
+         0x1400010f0 ()           // 0x1400010f0(0x0, 0x0, 0x0, 0x178070)
+         rcx = rbp + 0x330        // (cstr 0x00000000) "[+] bluestacks.c"
+         0x140019700 ()           // 0x140019700(0x0, 0x0, 0x0, 0x178330)
+         r8 = qword [rbp + 0x48]
+         v = r8 - 0xf             // "+] bluestacks.c" // "+] bluestacks.c" // "+] bluestacks.c"
+         if (((unsigned) v) <= 0) 
+         goto loc_0x14001ec88;
+    loc_0x14001ec88: // orphan
+         
+
+         goto loc_0x14001edc5;
+    loc_0x14001edc5: // orphan
+         rax = rsi
+         rax -= r14               // "+] bluestacks.c" // "+] bluestacks.c"
+         v = rax - 1              // "+] bluestacks.c"
+         if (((unsigned) v) < 0) 
+         goto loc_0x14001edd5;
+    loc_0x14001edd5: // orphan
+         r12 = rbp + 0x70         // (cstr 0x00000000) "[+] bluestacks.c"
+         v = qword [rbp + 0x88] - 0xf // "+] bluestacks.c" // "+] bluestacks.c" // "+] bluestacks.c"
+         cmova r12 qword [rbp + 0x70]
+         xmm0 ^= xmm0
+         xmmword [rbp - 0x40] = xmm0
+         r15 = r14 + 1            // "+] bluestacks.c"
+         rbx = r13
+         rdi = rbp - 0x40
+         v = r15 - rbx
+         if (((unsigned) v) <= 0) 
+    loc_0x14001ee2b: // orphan
+         qword [rbp - 0x30] = r15
+         qword [rbp - 0x28] = rbx
+         r8 = r14
+         rdx = r12
+         rcx = rdi
+         0x1400ab0c8 ()           // 0x1400ab0c8(0x0, 0x0, 0x0, 0x0)
+         byte [r14 + rdi] = 0xa
+         byte [rdi + r15] = 0
+         rdx = rbp - 0x40
+         v = qword [rbp - 0x28] - 0xf // "+] bluestacks.c" // "+] bluestacks.c" // "+] bluestacks.c"
+         cmova rdx qword [rbp - 0x40]
+         r8 = qword [rbp - 0x30]
+         rcx = rbp + 0x30
+         0x14002be00 ()           // 0x14002be00(0x0, 0x0, 0x177fc0, 0x178030)
+         rdx = qword [rbp - 0x28]
+         v = rdx - 0xf            // "+] bluestacks.c" // "+] bluestacks.c" // "+] bluestacks.c"
+         if (((unsigned) v) <= 0) 
+    loc_0x14001eea2: // orphan
+         rax = qword [rbp + 0x330]
+         rcx = dword [rax + 4]
+         rax = rbp + 0x330
+         rcx += rax
+         dl = 0xa                 // "acks.c"
+         qword [sym.imp.MSVCP140.dll__widen___basic_ios_DU__char_traits_D_std___std__QEBADD_Z] () // [0x1400ad510:8]=0xdde90 reloc.MSVCP140.dll__widen___basic_ios_DU__char_traits_D_std___std__QEBADD_Z // reloc.MSVCP140.dll__widen___basic_ios_DU__char_traits_D_std___std__QEBADD_Z // sym.imp.MSVCP140.dll__widen___basic_ios_DU__char_traits_D_std___std__QEBADD_Z(0x0, 0x0, 0xa, 0x658cef92)
+         r8d = al                 // "ndroid/system/"
+         rdx = rbp + 0x70
+         rcx = rbp + 0x330
+         0x140015f00 ()           // 0x140015f00(0x0, 0x0, 0x178070, 0x178330)
+         rcx = qword [rax]
+         rcx = dword [rcx + 4]
+         rcx += rax
+         qword [sym.imp.MSVCP140.dll___Bios_base_std__QEBA_NXZ] () // [0x1400ad3e0:8]=0xdd52c reloc.MSVCP140.dll___Bios_base_std__QEBA_NXZ // ",\xd5\r" // reloc.MSVCP140.dll___Bios_base_std__QEBA_NXZ // sym.imp.MSVCP140.dll___Bios_base_std__QEBA_NXZ(0x0, 0x0, 0x178070, 0x658cef92)
+         v = al & al              // "+] bluestacks.c"
+         if (v) 
+    loc_0x14001ec90: // orphan
+         rdi = qword [rbp + 0x20]
+         r8 = rbp + 0x10
+         rcx = qword [rbp + 0x10]
+         rdx = qword [rbp + 0x28]
+         v = rdx - 0xf            // "+] bluestacks.c" // "+] bluestacks.c" // "+] bluestacks.c"
+         cmova r8 rcx
+         r15 = rbp + 0x70
+         v = qword [rbp + 0x88] - 0xf // "+] bluestacks.c" // "+] bluestacks.c" // "+] bluestacks.c"
+         cmova r15 qword [rbp + 0x70]
+         r14 = qword [rbp + 0x80]
+         v = rdi - r14            // "+] bluestacks.c" // "+] bluestacks.c"
+         if (((unsigned) v) > 0) 
+         goto loc_0x14001eeeb;
+    loc_0x14001eeeb: // orphan
+         v = byte [var_sp_40h] - al // "+] bluestacks.c" // "+] bluestacks.c"
+         if (v) 
+    loc_0x14001ef62: // orphan
+         r8 = rbp + 0x30
+         rdx = rbp + 0x90
+         rdi = qword [var_48h]
+         rcx = rdi
+         0x140025b80 ()           // 0x140025b80(0x0, 0x0, 0x178090, 0x0)
+         v = al & al              // "+] bluestacks.c" // "+] bluestacks.c"
+         if (!v) 
+         goto loc_0x14001ee71;
+    loc_0x14001ee71: // orphan
+         rdx++                    // "+] bluestacks.c"
+         rcx = qword [rbp - 0x40]
+         rax = rcx
+         v = rdx - 0x1000         // "+] bluestacks.c" // "+] bluestacks.c"
+         if (((unsigned) v) < 0) 
+    loc_0x14001ee9d: // orphan
+         0x1400aa1f8 ()           // 0x1400aa1f8(0x0, 0x0, 0x0, 0x0)
+
+         goto loc_0x14001ee84;
+    loc_0x14001ee84: // orphan
+         rdx += 0x27              // "+] bluestacks.c"
+         rcx = qword [rcx - 8]
+         rax -= rcx               // "+] bluestacks.c" // "+] bluestacks.c" // "+] bluestacks.c"
+         rax -= 8                 // "+] bluestacks.c" // "+] bluestacks.c" // "+] bluestacks.c"
+         v = rax - 0x1f           // "conf" // "+] bluestacks.c" // "+] bluestacks.c"
+         if (((unsigned) v) > 0) 
+    loc_0x14001efc2: // orphan
+         qword [var_20h] = 0
+         r9d = 0                  // "+] bluestacks.c" // "+] bluestacks.c"
+         r8d = 0                  // "+] bluestacks.c" // "+] bluestacks.c"
+         edx = 0                  // "+] bluestacks.c" // "+] bluestacks.c"
+         ecx = 0                  // "+] bluestacks.c" // "+] bluestacks.c"
+         qword [sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson] () // [0x1400ad928:8]=0xdf0de reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson(0x0, 0x0, 0x0, 0x0)
+         int3
+
+        return rax;
+    loc_0x14001edfd: // orphan
+         rbx = r15
+         rbx |= 0xf               // "c" // "+] bluestacks.c"
+         v = rbx - rsi            // "+] bluestacks.c"
+         if (((unsigned) v) <= 0) 
+    loc_0x14001ee0e: // orphan
+         v = rbx - 0x16           // "+] bluestacks.c" // "+] bluestacks.c" // "+] bluestacks.c"
+         eax = 0x16
+         cmovb rbx rax
+
+         goto loc_0x14001ee09;
+    loc_0x14001ee09: // orphan
+         rbx = rsi
+         
+    loc_0x14001ee1b: // orphan
+         // CODE XREF from fcn.14001d370 @ 0x14001ee0c(x)
+         rcx = rbx + 1            // "+] bluestacks.c"
+         0x140012c40 ()           // 0x140012c40(0x0, 0x0, 0x0, 0x1)
+         rdi = rax
+         qword [rbp - 0x40] = rax
+
+         goto loc_0x14001ecc9;
+    loc_0x14001ecc9: // orphan
+         v = rdi & rdi            // "+] bluestacks.c" // "+] bluestacks.c"
+         if (!v) 
+    loc_0x14001ed02: // orphan
+         rax = rsi
+         rax -= rdi               // "+] bluestacks.c" // "+] bluestacks.c"
+         v = rax - 3              // " bluestacks.c" // "+] bluestacks.c" // "+] bluestacks.c" // "+] bluestacks.c"
+         if (((unsigned) v) < 0) 
+         goto loc_0x14001ed12;
+    loc_0x14001ed12: // orphan
+         r12 = rbp + 0x10
+         v = rdx - 0xf            // "+] bluestacks.c" // "+] bluestacks.c" // "+] bluestacks.c"
+         cmova r12 rcx
+         xmm0 ^= xmm0
+         xmmword [rbp - 0x68] = xmm0
+         r15 = rdi + 3            // " bluestacks.c"
+         rbx = r13
+         r14 = rbp - 0x68
+         v = r15 - rbx            // "+] bluestacks.c"
+         if (((unsigned) v) <= 0) 
+    loc_0x14001ed63: // orphan
+         qword [rbp - 0x58] = r15
+         qword [rbp - 0x50] = rbx
+         r8 = rdi
+         rdx = r12
+         rcx = r14
+         0x1400ab0c8 ()           // 0x1400ab0c8(0x0, 0x0, 0x0, 0x0)
+         ecx = dword [0x1400aff38] // [0x1400aff38:4]=0x223022 // "\"0\""
+         word [r14 + rdi] = cx
+         eax = byte [0x1400aff3a] // [0x1400aff3a:1]=34 // "f"
+         byte [r14 + rdi + 2] = al
+         byte [r14 + r15] = 0
+         rdx = rbp - 0x68
+         rcx = rbp + 0x70
+         0x140018770 ()           // 0x140018770(0x0, 0x0, 0x177f98, 0x178070)
+         r8 = qword [rbp - 0x50]
+         v = r8 - 0xf             // "0\" bluestacks.c" // "0\" bluestacks.c" // "0\" bluestacks.c"
+         if (((unsigned) v) <= 0) 
+    loc_0x14001edb9: // orphan
+         byte [var_sp_40h] = 1
+
+         goto loc_0x14001edac;
+    loc_0x14001edac: // orphan
+         rdx = qword [rbp - 0x68]
+         rcx = rbp - 0x68
+         0x1400016c0 ()           // 0x1400016c0(0x0, 0x0, 0x0, 0x177f98)
+
+         goto loc_0x14001ed35;
+    loc_0x14001ed35: // orphan
+         rbx = r15
+         rbx |= 0xf               // "c" // "0\" bluestacks.c"
+         v = rbx - rsi            // "0\" bluestacks.c"
+         if (((unsigned) v) <= 0) 
+    loc_0x14001ed46: // orphan
+         v = rbx - 0x16           // "0\" bluestacks.c" // "0\" bluestacks.c" // "0\" bluestacks.c"
+         eax = 0x16
+         cmovb rbx rax
+
+         goto loc_0x14001ed41;
+    loc_0x14001ed41: // orphan
+         rbx = rsi
+         
+    loc_0x14001ed53: // orphan
+         // CODE XREF from fcn.14001d370 @ 0x14001ed44(x)
+         rcx = rbx + 1            // "0\" bluestacks.c"
+         0x140012c40 ()           // 0x140012c40(0x0, 0x0, 0x0, 0x1)
+         r14 = rax
+         qword [rbp - 0x68] = rax
+
+         goto loc_0x14001ecce;
+    loc_0x14001ecce: // orphan
+         rbx = r14 + r15
+         r9 = rdi
+         rdx = rbx
+         rcx = r15
+         0x1400a90d0 ()           // 0x1400a90d0(0x0, 0x0, 0x0, 0x0)
+         v = rax - rbx            // "0\" bluestacks.c" // "0\" bluestacks.c"
+         if (!v) 
+    loc_0x14001edbe: // orphan
+         r14 = qword [rbp + 0x80]
+
+         goto loc_0x14001ece9;
+    loc_0x14001ece9: // orphan
+         rax -= r15               // "0\" bluestacks.c" // "0\" bluestacks.c"
+         v = rax - 0xffffffffffffffff // "0\" bluestacks.c" // "0\" bluestacks.c"
+         if (!v) 
+         goto loc_0x14001ecf6;
+    loc_0x14001ecf6: // orphan
+         rdx = qword [rbp + 0x28]
+         rdi = qword [rbp + 0x20]
+         rcx = qword [rbp + 0x10]
+
+         goto loc_0x14001eb7f;
+    loc_0x14001eb7f: // orphan
+         rax = qword [rbx]
+
+         goto loc_0x14001eb14;
+    loc_0x14001eb14: // orphan
+         rax = qword [rbx]
+
+         goto loc_0x14001ea19;
+    loc_0x14001ea19: // orphan
+         rbx = r15
+         rbx |= 0xf               // "c" // "0\" bluestacks.c"
+         v = rbx - rsi            // "0\" bluestacks.c"
+         if (((unsigned) v) <= 0) 
+    loc_0x14001ea2a: // orphan
+         v = rbx - 0x16           // "0\" bluestacks.c" // "0\" bluestacks.c" // "0\" bluestacks.c"
+         eax = 0x16
+         cmovb rbx rax
+
+         goto loc_0x14001ea25;
+    loc_0x14001ea25: // orphan
+         rbx = rsi
+         
+    loc_0x14001ea37: // orphan
+         // CODE XREF from fcn.14001d370 @ 0x14001ea28(x)
+         rcx = rbx + 1            // "0\" bluestacks.c"
+         0x140012c40 ()           // 0x140012c40(0x0, 0x0, 0x0, 0x1)
+         rdi = rax
+         qword [rbp + 0x90] = rax
+
+         goto loc_0x14001e952;
+    loc_0x14001e952: // orphan
+         rcx = rax + 7            // "estacks.c"
+         v = rcx - qword [rbp + 0x160]
+         if (v) 
+         goto loc_0x14001e95f;
+    loc_0x14001e95f: // orphan
+         xmm0 ^= xmm0
+         xmmword [rbp - 0x68] = xmm0
+         xmm1 ^= xmm1
+         xmmword [rbp - 0x58] = xmm1
+         v = qword [rbp + 0xe0] - rax // "0\" bluestacks.c" // "0\" bluestacks.c"
+         cmovb r8 qword [rbp + 0xe0]
+         rdx = rbp + 0xd0
+         v = qword [rbp + 0xe8] - 0xf // "0\" bluestacks.c" // "0\" bluestacks.c" // "0\" bluestacks.c"
+         cmova rdx qword [rbp + 0xd0]
+         rcx = rbp - 0x68
+         0x140013040 ()           // 0x140013040(0x0, 0x0, 0x1780d0, 0x177f98)
+         rdx = rbp - 0x68
+         rcx = rbp + 0xd0
+         0x140018770 ()           // 0x140018770(0x0, 0x0, 0x177f98, 0x1780d0)
+         rcx = rbp - 0x68
+         0x1400010f0 ()           // 0x1400010f0(0x0, 0x0, 0x177f98, 0x177f98)
+
+         goto loc_0x14001e919;
+    loc_0x14001e919: // orphan
+         
+
+    loc_0x14001e920: // orphan
+         ecx = byte [rbx]
+         qword [sym.imp.api_ms_win_crt_string_l1_1_0.dll_tolower] () // [0x1400ada58:8]=0xdf23c reloc.api_ms_win_crt_string_l1_1_0.dll_tolower // "<\xf2\r" // reloc.api_ms_win_crt_string_l1_1_0.dll_tolower // int tolower(0)
+         byte [rbx] = al
+         rbx++                    // "0\" bluestacks.c"
+         v = rbx - rdi
+         if (v) 
+         goto loc_0x14001e8a0;
+    loc_0x14001e8a0: // orphan
+         rcx = rbp + 0xd0
+         0x14002c4b0 ()           // 0x14002c4b0(0x0, 0x0, 0x0, 0x1780d0)
+         v = byte [rax] - 0x5c    // '\\' // "0\" bluestacks.c" // "0\" bluestacks.c" // "0\" bluestacks.c"
+         if (!v) 
+         goto loc_0x14001e8b1;
+    loc_0x14001e8b1: // orphan
+         rcx = rbp + 0xd0
+         0x14002c4b0 ()           // 0x14002c4b0(0x0, 0x0, 0x0, 0x1780d0)
+         v = byte [rax] - 0x2f    // '/' // "0\" bluestacks.c" // "0\" bluestacks.c" // "0\" bluestacks.c" // "0\" bluestacks.c"
+         if (!v) 
+         goto loc_0x14001e8c2;
+    loc_0x14001e8c2: // orphan
+         dl = 0x5c                // '\\' // 92
+         rcx = rbp + 0xd0
+         0x14002d920 ()           // 0x14002d920(0x0, 0x0, 0x5c, 0x1780d0)
+
+         goto loc_0x14001e7af;
+    loc_0x14001e7af: // orphan
+         rdx = rip + str.___Owner_set:_root:root // 0x1400afe70 // "[+] Owner set: root:root"
+         rcx = rbp - 0x20
+         0x140016fd0 ()           // 0x140016fd0(0x0, 0x0, 0x1400afe70, 0x177fe0)
+         rcx = rbp - 0x20
+         
+    loc_0x14001e7f7: // orphan
+         // CODE XREF from fcn.14001d370 @ 0x14001e7c3(x)
+         0x1400010f0 ()           // 0x1400010f0(0x0, 0x0, 0x0, 0x0)
+         rdx = rip + str.___Unmounting_ext4... // 0x1400afea8 // "[*] Unmounting ext4..."
+         rcx = rbp - 0x20
+         0x140016fd0 ()           // 0x140016fd0(0x0, 0x0, 0x1400afea8, 0x177fe0)
+         rcx = rbp - 0x20
+         0x1400010f0 ()           // 0x1400010f0(0x0, 0x0, 0x1400afea8, 0x177fe0)
+         rcx = rbp + 0x280
+         0x140032600 ()           // 0x140032600(0x0, 0x0, 0x1400afea8, 0x178280)
+         rdx = rip + str.___Closing_VHD... // 0x1400afec0 // "[*] Closing VHD..."
+         rcx = rbp - 0x20
+         0x140016fd0 ()           // 0x140016fd0(0x0, 0x0, 0x1400afec0, 0x177fe0)
+         rcx = rbp - 0x20
+         0x1400010f0 ()           // 0x1400010f0(0x0, 0x0, 0x1400afec0, 0x177fe0)
+         rcx = rbp + 0x280
+         0x14002f960 ()           // 0x14002f960(0x0, 0x0, 0x1400afec0, 0x178280)
+         r8d = 0                  // "0\" bluestacks.c" // "0\" bluestacks.c"
+         rdx = rbp + 0x1f0        // "Internal error: su resource empt"
+         rcx = rbp - 0x68
+         0x140012970 ()           // 0x140012970(0x0, 0x0, 0x1781f0, 0x177f98)
+         rcx = rbp - 0x68
+         v = qword [rbp - 0x50] - 7 // "0\" bluestacks.c" // "0\" bluestacks.c" // "0\" bluestacks.c" // "0\" bluestacks.c"
+         cmova rcx qword [rbp - 0x68]
+         0x1400a9ca8 ()           // 0x1400a9ca8(0x0, 0x0, 0x1781f0, 0x177f98)
+         rdx = rax
+         rax >>>= 0x20            // "0\" bluestacks.c" // "0\" bluestacks.c"
+         v = eax & eax            // "0\" bluestacks.c" // "0\" bluestacks.c"
+         if (v) 
+         goto loc_0x14001e72c;
+    loc_0x14001e72c: // orphan
+         rdx = rip + str.___Permissions_set:_06755 // 0x1400afe10 // "[+] Permissions set: 06755"
+         rcx = rbp - 0x20
+         0x140016fd0 ()           // 0x140016fd0(0x0, 0x0, 0x1400afe10, 0x177fe0)
+         rcx = rbp - 0x20
+         
+    loc_0x14001e774: // orphan
+         // CODE XREF from fcn.14001d370 @ 0x14001e740(x)
+         0x1400010f0 ()           // 0x1400010f0(0x0, 0x0, 0x0, 0x0)
+         rdx = rip + str.___Setting_owner_root:root__0:0_... // 0x1400afe48 // "[*] Setting owner root:root (0:0)..."
+         rcx = rbp - 0x20
+         0x140016fd0 ()           // 0x140016fd0(0x0, 0x0, 0x1400afe48, 0x177fe0)
+         rcx = rbp - 0x20
+         0x1400010f0 ()           // 0x1400010f0(0x0, 0x0, 0x1400afe48, 0x177fe0)
+         r9d = 0                  // "0\" bluestacks.c" // "0\" bluestacks.c"
+         r8d = 0                  // "0\" bluestacks.c" // "0\" bluestacks.c"
+         rdx = rbp + 0x110
+         rcx = rbp + 0x280
+         0x140032180 ()           // 0x140032180(0x0, 0x0, 0x178110, 0x178280)
+         v = al & al              // "0\" bluestacks.c" // "0\" bluestacks.c"
+         if (!v) 
+         goto loc_0x14001e5d8;
+    loc_0x14001e5d8: // orphan
+         xmm0 ^= xmm0
+         xmmword [rbp + 0x1b0] = xmm0
+         ecx = 0x20               // "onf"
+         0x140012c40 ()           // 0x140012c40(0x0, 0x0, 0x0, 0x20)
+         rdx = rax
+         qword [rbp + 0x1b0] = rax
+         qword [rbp + 0x1c0] = 0x1a // "d."
+         qword [rbp + 0x1c8] = r15
+         xmm0 = xmmword [str.Failed_to_write_su_binary.] // [0x1400afda8:16]=-1 // "Failed to write su binary."
+         xmmword [rax] = xmm0
+         xmm0 = qword [0x1400afdb8] // [0x1400afdb8:8]=0x72616e6962207573 // "su binary."
+         qword [rax + 0x10] = xmm0
+         eax = word [0x1400afdc0] // [0x1400afdc0:2]=0x2e79 // "y."
+         word [rdx + 0x18] = ax
+         byte [rdx + 0x1a] = 0
+         rbx = qword [var_48h]    // "ailed to write "
+         rcx = rbx + 0x128
+         rax = rbp + 0x1b0
+         v = rcx - rax            // "ailed to write " // "ailed to write "
+         if (!v) 
+    loc_0x14001e65f: // orphan
+         byte [rbx + 0x148] = 1
+         v = r15 - 0xf            // "ailed to write " // "ailed to write " // "ailed to write "
+         if (((unsigned) v) <= 0) 
+    loc_0x14001e67b: // orphan
+         rcx = rbp + 0x280        // (cstr 0x00000000) "Failed to write "
+         0x140032600 ()           // 0x140032600(0x0, 0x0, 0x0, 0x178280)
+         rcx = rbp + 0x280        // (cstr 0x00000000) "Failed to write "
+         0x14002f960 ()           // 0x14002f960(0x0, 0x0, 0x0, 0x178280)
+         
+    loc_0x14001f184: // orphan
+         // CODE XREF from fcn.14001d370 @ 0x14001e693(x)
+         rcx = rbp + 0x110        // (cstr 0x00000000) "Failed to write "
+         0x1400010f0 ()           // 0x1400010f0(0x0, 0x0, 0x0, 0x178110)
+         rcx = rbp + 0x130
+         0x1400010f0 ()           // 0x1400010f0(0x0, 0x0, 0x0, 0x178130)
+         
+         goto loc_0x14001e66c;
+    loc_0x14001e66c: // orphan
+         r8 = r15
+         rcx = rbp + 0x1b0
+         0x1400016c0 ()           // 0x1400016c0(0x0, 0x0, 0x0, 0x1781b0)
+
+         goto loc_0x14001e646;
+    loc_0x14001e646: // orphan
+         r8d = 0x1a
+         0x14002c270 ()           // 0x14002c270(0x0, 0x0, 0x0, 0x0)
+         r15 = qword [rbp + 0x1c8]
+         rdx = qword [rbp + 0x1b0]
+
+         goto loc_0x14001e59e;
+    loc_0x14001e59e: // orphan
+         rdx = xmm1
+         rcx = rbp - 0x20
+         0x1400016c0 ()           // 0x1400016c0(0x0, 0x0, 0x0, 0x177fe0)
+
+         goto loc_0x14001e416;
+    loc_0x14001e416: // orphan
+         qword [var_690h] = r14
+         ecx = 0x30               // '0' // "ndroid/system/"
+         0x140012c40 ()           // 0x140012c40(0x0, 0x0, 0x0, 0x30)
+         rcx = rax
+         qword [rbp - 0x68] = rax
+         xmm0 = xmmword [0x1400b0660] // [0x1400b0660:16]=-1 // "android/system/"
+         xmmword [rbp - 0x58] = xmm0
+         xmm0 = xmmword [str.___Directory_created__or_already_exists_.] // [0x1400afd20:16]=-1 // "[+] Directory created (or already exists)."
+         xmmword [rax] = xmm0
+         xmm1 = xmmword [0x1400afd30] // [0x1400afd30:16]=-1 // "eated (or already exists)."
+         xmmword [rax + 0x10] = xmm1
+         xmm0 = qword [0x1400afd40] // [0x1400afd40:8]=0x7374736978652079 // "y exists)."
+         qword [rax + 0x20] = xmm0
+         eax = word [0x1400afd48] // [0x1400afd48:2]=0x2e29 // ")."
+         word [rcx + 0x28] = ax
+         byte [rcx + 0x2a] = 0
+         
+    loc_0x14001e49a: // orphan
+         // CODE XREF from fcn.14001d370 @ 0x14001e469(x)
+         rcx = rbp - 0x68
+         0x1400010f0 ()           // 0x1400010f0(0x0, 0x0, 0x0, 0x177f98)
+         xmm0 ^= xmm0
+         xmmword [rbp + 0x110] = xmm0
+         xmm1 ^= xmm1
+         xmmword [rbp + 0x120] = xmm1
+         ecx = 0x20               // (pstr 0x00000000) "[+] Directory created (or alread"
+         0x140012c40 ()           // 0x140012c40(0x0, 0x0, 0x0, 0x20)
+         rdx = rax
+         qword [rbp + 0x110] = rax
+         xmm0 = xmmword [0x1400b0610] // [0x1400b0610:16]=-1 // "or alread" // "d"
+         xmmword [rbp + 0x120] = xmm0
+         xmm0 = xmmword [str._android_system_xbin_su] // [0x1400afd78:16]=-1 // "/android/system/xbin/su"
+         xmmword [rax] = xmm0
+         ecx = dword [0x1400afd88] // [0x1400afd88:4]=0x6e696278 // "xbin/su"
+         dword [rax + 0x10] = ecx
+         ecx = word [0x1400afd8c] // [0x1400afd8c:2]=0x732f // "/su"
+         word [rax + 0x14] = cx
+         eax = byte [0x1400afd8e] // [0x1400afd8e:1]=117 // "u"
+         byte [rdx + 0x16] = al
+         byte [rdx + 0x17] = 0
+         rax = rsi
+         rcx = qword [rbp + 0x120]
+         rax -= rcx               // "android/system/xbin/su" // "android/system/xbin/su" // "android/system/xbin/su"
+         v = rax - 0x14           // "/su" // "android/system/xbin/su" // "android/system/xbin/su"
+         if (((unsigned) v) < 0) 
+         goto loc_0x14001e3e7;
+    loc_0x14001e3e7: // orphan
+         rdx = xmm1
+         rcx = rbp - 0x20
+         0x1400016c0 ()           // 0x1400016c0(0x0, 0x0, 0x0, 0x177fe0)
+
+         goto loc_0x14001e27e;
+    loc_0x14001e27e: // orphan
+         rdx = rbp + 0x2a8        // (cstr 0x00000000) "/android/system/xbin/su"
+         rcx = rbp - 0x68
+         0x140016f10 ()           // 0x140016f10(0x0, 0x0, 0x1782a8, 0x177f98)
+         r8 = rbp - 0x68
+         rdx = rip + str.____Failed_to_mount_ext4: // 0x1400afca8 // "[!] Failed to mount ext4:"
+         rcx = rbp - 0x20
+         0x140012a40 ()           // 0x140012a40(0x0, 0x0, 0x1400afca8, 0x177fe0)
+         rcx = rbp - 0x20
+         0x1400010f0 ()           // 0x1400010f0(0x0, 0x0, 0x1400afca8, 0x177fe0)
+         rcx = rbp - 0x68
+         0x1400010f0 ()           // 0x1400010f0(0x0, 0x0, 0x1400afca8, 0x177f98)
+         
+    loc_0x14001f1e9: // orphan
+         // CODE XREF from fcn.14001d370 @ 0x14001e2b6(x)
+         rcx = rbp + 0x280        // (cstr 0x00000000) "/android/system/xbin/su"
+         0x14002f960 ()           // 0x14002f960(0x0, 0x0, 0x0, 0x178280)
+
+         goto loc_0x14001e1b4;
+    loc_0x14001e1b4: // orphan
+         v = ebx & ebx            // "android/system/xbin/su" // "android/system/xbin/su"
+         cmovs ebx r14d
+
+         goto loc_0x14001e11d;
+    loc_0x14001e11d: // orphan
+         cvtsi2sd xmm0 rcx
+         
+    loc_0x14001e139: // orphan
+         // CODE XREF from fcn.14001d370 @ 0x14001e122(x)
+         mulsd al
+         mulsd al
+         eax = byte [rdi + rdx]   // "android/system/"
+         qword [var_30h] = r8
+         qword [var_28h] = xmm0
+         dword [var_20h] = eax
+         r9 = r14
+         r8 = rip + str._______zu__Type:_0x_02X__Size:__.2f_MB__ext4:__s // 0x1400afc28 // "[*]   [%zu] Type: 0x%02X, Size: %.2f MB, ext4: %s"
+         edx = 0x80               // 128
+         rcx = rbp + 0x330        // (cstr 0x00000000) "/android/system/xbin/su"
+         0x14002ee70 ()           // 0x14002ee70(0x0, 0x0, 0x80, 0x178330)
+         xmm0 ^= xmm0
+         xmmword [rbp - 0x68] = xmm0
+         xmm1 ^= xmm1
+         xmmword [rbp - 0x58] = xmm1
+         rcx = rbp + 0x330        // (cstr 0x00000000) "/android/system/xbin/su"
+         0x1400ab134 ()           // 0x1400ab134(0x0, 0x0, 0x80, 0x178330)
+         r8 = rax                 // "android/system/"
+         rdx = rbp + 0x330        // (cstr 0x00000000) "/android/system/xbin/su"
+         rcx = rbp - 0x68         // (cstr 0x00000000) "/android/system/xbin/su"
+         0x140013040 ()           // 0x140013040(0x0, 0x0, 0x178330, 0x177f98)
+         rcx = rbp - 0x68         // (cstr 0x00000000) "/android/system/xbin/su"
+         0x1400010f0 ()           // 0x1400010f0(0x0, 0x0, 0x178330, 0x177f98)
+         rdx = qword [rbp + 0x2c8]
+         v = byte [rdi + rdx + 0x18] - 0 // "android/system/xbin/su"
+         if (!v) 
+         goto loc_0x14001dfa4;
+    loc_0x14001dfa4: // orphan
+         rdx = rbp + 0x2a8        // (cstr 0x00000000) "/android/system/xbin/su"
+         rcx = rbp - 0x68         // (cstr 0x00000000) "/android/system/xbin/su"
+         0x140016f10 ()           // 0x140016f10(0x0, 0x0, 0x1782a8, 0x177f98)
+         r8 = rbp - 0x68          // (cstr 0x00000000) "/android/system/xbin/su"
+         rdx = rip + str.____Failed_to_open_VHD: // 0x1400afbc0 // "[!] Failed to open VHD:"
+         rcx = rbp - 0x20
+         0x140012a40 ()           // 0x140012a40(0x0, 0x0, 0x1400afbc0, 0x177fe0)
+         rcx = rbp - 0x20
+         0x1400010f0 ()           // 0x1400010f0(0x0, 0x0, 0x1400afbc0, 0x177fe0)
+         rcx = rbp - 0x68         // (cstr 0x00000000) "/android/system/xbin/su"
+         0x1400010f0 ()           // 0x1400010f0(0x0, 0x0, 0x1400afbc0, 0x177f98)
+         
+         goto loc_0x14001df29;
+    loc_0x14001df29: // orphan
+         rdx = xmm1
+         rcx = rbp - 0x40
+         0x1400016c0 ()           // 0x1400016c0(0x0, 0x0, 0x0, 0x177fc0)
+
+         goto loc_0x14001ddd5;
+    loc_0x14001ddd5: // orphan
+         xmm0 ^= xmm0
+         xmmword [rbp + 0x190] = xmm0
+         ecx = 0x20               // (pstr 0x00000000) "/android/system/xbin/su"
+         0x140012c40 ()           // 0x140012c40(0x0, 0x0, 0x0, 0x20)
+         rdx = rax
+         qword [rbp + 0x190] = rax
+         qword [rbp + 0x1a0] = 0x1b // "lread"
+         ebx = 0x1f               // "d"
+         qword [rbp + 0x1a8] = rbx
+         xmm0 = xmmword [str.Failed_to_create_temp_file.] // [0x1400afb50:16]=-1 // "Failed to create temp file."
+         xmmword [rax] = xmm0
+         xmm0 = qword [0x1400afb60] // [0x1400afb60:8]=0x696620706d657420 // " temp file."
+         qword [rax + 0x10] = xmm0
+         eax = word [0x1400afb68] // [0x1400afb68:2]=0x656c // "le."
+         word [rdx + 0x18] = ax
+         eax = byte [0x1400afb6a] // [0x1400afb6a:1]=46 // "."
+         byte [rdx + 0x1a] = al
+         byte [rdx + 0x1b] = 0
+         rdi = qword [var_48h]    // "ailed to create"
+         rcx = rdi + 0x128
+         rax = rbp + 0x190
+         v = rcx - rax            // "ailed to create" // "ailed to create" // "ailed to create"
+         if (!v) 
+    loc_0x14001de6b: // orphan
+         byte [rdi + 0x148] = 1
+         v = rbx - 0xf            // "ailed to create" // "ailed to create" // "ailed to create"
+         if (((unsigned) v) <= 0) 
+    loc_0x14001de88: // orphan
+         rcx = rbp + 0x330        // (cstr 0x00000000) "Failed to create"
+         0x140019760 ()           // 0x140019760(0x0, 0x0, 0x0, 0x178330)
+         
+    loc_0x14001f203: // orphan
+         // CODE XREF from fcn.14001d370 @ 0x14001de94(x)
+         rcx = rbp + 0x1f0        // "Internal error: su resource empt"
+         0x1400010f0 ()           // 0x1400010f0(0x0, 0x0, 0x0, 0x1781f0)
+         v = r12 & r12            // "ailed to create" // "ailed to create"
+         if (!v) 
+         goto loc_0x14001de78;
+    loc_0x14001de78: // orphan
+         r8 = rbx
+         rcx = rbp + 0x190
+         0x1400016c0 ()           // 0x1400016c0(0x0, 0x0, 0x0, 0x178190)
+
+         goto loc_0x14001de52;
+    loc_0x14001de52: // orphan
+         r8d = 0x1b
+         0x14002c270 ()           // 0x14002c270(0x0, 0x0, 0x0, 0x0)
+         rbx = qword [rbp + 0x1a8] // "d"
+         rdx = qword [rbp + 0x190]
+
+         goto loc_0x14001dd73;
+    loc_0x14001dd73: // orphan
+         rdx = qword [rbp + 0x30]
+         rcx = rbp + 0x30         // (cstr 0x00000001) "ailed to create"
+         0x1400016c0 ()           // 0x1400016c0(0x0, 0x0, 0x0, 0x178030)
+
+         goto loc_0x14001dc0b;
+    loc_0x14001dc0b: // orphan
+         v = edi - 0x40           // '@' // "ailed to create" // "ailed to create" // "ailed to create"
+         if (((unsigned) v) < 0) 
+    loc_0x14001dc92: // orphan
+         rcx = r8 + rbx
+         rdx = r8 + r12
+         eax = edi
+         eax -= r8d               // "ailed to create" // "ailed to create"
+         r8d = eax
+         
+
+    loc_0x14001dcb0: // orphan
+         eax = byte [rcx]         // (pstr 0x00000000) "Failed to create"
+         al ^= 0xa7               // 167 // "ailed to create" // "ailed to create"
+         byte [rdx] = al
+         rdx = rdx + 1            // "ailed to create"
+         rcx = rcx + 1            // "ailed to create"
+         r8 -= 1                  // "ailed to create" // "ailed to create" // "ailed to create" // "ailed to create"
+         if (v) 
+         goto loc_0x14001dc14;
+    loc_0x14001dc14: // orphan
+         eax = rdi - 1
+         rdx = rax + r12
+         rax += rbx               // "ailed to create"
+         v = r12 - rax            // "ailed to create" // "ailed to create" // "ailed to create"
+         if (((unsigned) v) > 0) 
+    loc_0x14001dc28: // orphan
+         r9d = edi
+         r9d &= 0xffffffc0        // 4294967232 // "ailed to create" // "ailed to create"
+         xmm1 = xmmword [0x1400b0770] // [0x1400b0770:16]=-1
+         edx = 0x20
+
+    loc_0x14001dc40: // orphan
+         xmm0 = xmmword [rbx + r8]
+         xmm0 ^= xmm1
+         xmmword [r8 + r12] = xmm0
+         eax = rdx - 0x10
+         xmm0 = xmmword [rbx + rax]
+         xmm0 ^= xmm1
+         xmmword [rax + r12] = xmm0
+         eax = edx
+         xmm0 = xmmword [rbx + rax]
+         xmm0 ^= xmm1
+         xmmword [rax + r12] = xmm0
+         eax = rdx + 0x10
+         xmm0 = xmmword [rbx + rax]
+         xmm0 ^= xmm1
+         xmmword [rax + r12] = xmm0
+         r8d += 0x40
+         edx += 0x40
+         v = r8d - r9d
+         if (((unsigned) v) < 0) 
+         goto loc_0x14001dc8d;
+    loc_0x14001dc8d: // orphan
+         v = r8d - edi            // "ailed to create" // "ailed to create"
+         jae 0x14001dcc5          // likely
+
+         goto loc_0x14001dc23;
+    loc_0x14001dc23: // orphan
+         v = rdx - rbx            // "ailed to create" // "ailed to create"
+         jae 0x14001dc92          // likely
+
+         goto loc_0x14001db09;
+    loc_0x14001db09: // orphan
+         xmm0 ^= xmm0
+         xmmword [rbp + 0x170] = xmm0
+         ecx = 0x30               // '0' // "ndroid/system/"
+         0x140012c40 ()           // 0x140012c40(0x0, 0x0, 0x0, 0x30)
+         qword [rbp + 0x170] = rax
+         qword [rbp + 0x180] = 0x28 // '(' // ")."
+         r8d = 0x2f               // '/' // "android/system/"
+         qword [rbp + 0x188] = r8
+         xmm0 = xmmword [str.Internal_error:_su_resource_load_failed.] // [0x1400afae8:16]=-1 // "Internal error: su resource load failed."
+         xmmword [rax] = xmm0
+         xmm1 = xmmword [0x1400afaf8] // [0x1400afaf8:16]=-1 // "su resource load failed."
+         xmmword [rax + 0x10] = xmm1
+         xmm0 = qword [0x1400afb08] // [0x1400afb08:8]=0x2e64656c69616620 // " failed."
+         qword [rax + 0x20] = xmm0
+         byte [rax + 0x28] = r14b
+         rbx = qword [var_48h]    // "nternal error: su resource load"
+         rcx = rbx + 0x128
+         rdx = rbp + 0x170
+         v = rcx - rdx            // "nternal error: su resource load" // "nternal error: su resource load"
+         if (!v) 
+    loc_0x14001db96: // orphan
+         byte [rbx + 0x148] = 1
+         v = r8 - 0xf             // " su resource load" // "nternal error: su resource load" // "nternal error: su resource load" // "nternal error: su resource load"
+         if (((unsigned) v) <= 0) 
+         goto loc_0x14001dba7;
+    loc_0x14001dba7: // orphan
+         rdx = rax
+         rcx = rbp + 0x170
+         0x1400016c0 ()           // 0x1400016c0(0x0, 0x0, 0x0, 0x178170)
+         
+         goto loc_0x14001db7a;
+    loc_0x14001db7a: // orphan
+         r8d = 0x28               // '('
+         rdx = rax
+         0x14002c270 ()           // 0x14002c270(0x0, 0x0, 0x0, 0x0)
+         r8 = qword [rbp + 0x188] // "android/system/"
+         rax = qword [rbp + 0x170]
+
+         goto loc_0x14001da48;
+    loc_0x14001da48: // orphan
+         xmm0 ^= xmm0
+         xmmword [rbp + 0x210] = xmm0
+         ecx = 0x30               // '0' // "ndroid/system/"
+         0x140012c40 ()           // 0x140012c40(0x0, 0x0, 0x0, 0x30)
+         rdx = rax
+         qword [rbp + 0x210] = rax
+         qword [rbp + 0x220] = 0x24 // '$'
+         r8d = 0x2f               // '/' // "android/system/"
+         qword [rbp + 0x228] = r8
+         xmm0 = xmmword [str.Internal_error:_su_resource_missing.] // [0x1400afac0:16]=-1 // "Internal error: su resource missing."
+         xmmword [rax] = xmm0
+         xmm1 = xmmword [0x1400afad0] // [0x1400afad0:16]=-1 // "su resource missing."
+         xmmword [rax + 0x10] = xmm1
+         eax = dword [0x1400afae0] // [0x1400afae0:4]=0x2e676e69 // "ing."
+         dword [rdx + 0x20] = eax
+         byte [rdx + 0x24] = bl
+         rbx = qword [var_48h]    // "nternal error: su resource missing."
+         rcx = rbx + 0x128
+         rax = rbp + 0x210
+         v = rcx - rax            // "nternal error: su resource missing." // "nternal error: su resource missing."
+         if (!v) 
+    loc_0x14001dad0: // orphan
+         byte [rbx + 0x148] = 1
+         v = r8 - 0xf             // " su resource missing." // "nternal error: su resource missing." // "nternal error: su resource missing." // "nternal error: su resource missing."
+         if (((unsigned) v) <= 0) 
+         goto loc_0x14001dae1;
+    loc_0x14001dae1: // orphan
+         rcx = rbp + 0x210
+         0x1400016c0 ()           // 0x1400016c0(0x0, 0x0, 0x0, 0x178210)
+         
+         goto loc_0x14001dab7;
+    loc_0x14001dab7: // orphan
+         r8d = 0x24               // '$' // (pstr 0x00000000) "Internal error: su resource missing."
+         0x14002c270 ()           // 0x14002c270(0x0, 0x0, 0x0, 0x0)
+         r8 = qword [rbp + 0x228] // "android/system/"
+         rdx = qword [rbp + 0x210]
+
+         goto loc_0x14001d9f8;
+    loc_0x14001d9f8: // orphan
+         rdx++                    // "nternal error: su resource missing."
+         rcx = qword [rbp - 0x68]
+         rax = rcx
+         v = rdx - 0x1000         // "nternal error: su resource missing." // "nternal error: su resource missing."
+         if (((unsigned) v) < 0) 
+    loc_0x14001da24: // orphan
+         0x1400aa1f8 ()           // 0x1400aa1f8(0x0, 0x0, 0x0, 0x0)
+
+         goto loc_0x14001da0b;
+    loc_0x14001da0b: // orphan
+         rdx += 0x27              // "nternal error: su resource missing."
+         rcx = qword [rcx - 8]
+         rax -= rcx               // "nternal error: su resource missing." // "nternal error: su resource missing." // "nternal error: su resource missing."
+         rax -= 8                 // "nternal error: su resource missing." // "nternal error: su resource missing." // "nternal error: su resource missing."
+         v = rax - 0x1f           // "sing." // "nternal error: su resource missing." // "nternal error: su resource missing."
+         if (((unsigned) v) > 0) 
+         goto loc_0x14001d995;
+    loc_0x14001d995: // orphan
+         rbx = r15
+         rbx |= 0xf               // " su resource missing." // "nternal error: su resource missing."
+         v = rbx - rsi            // "nternal error: su resource missing."
+         if (((unsigned) v) <= 0) 
+    loc_0x14001d9a6: // orphan
+         v = rbx - 0x16           // "ource missing." // "nternal error: su resource missing." // "nternal error: su resource missing." // "nternal error: su resource missing."
+         eax = 0x16               // "ource missing."
+         cmovb rbx rax            // "ource missing."
+
+         goto loc_0x14001d9a1;
+    loc_0x14001d9a1: // orphan
+         rbx = rsi
+         
+    loc_0x14001d9b3: // orphan
+         // CODE XREF from fcn.14001d370 @ 0x14001d9a4(x)
+         rcx = rbx + 1            // "nternal error: su resource missing."
+         0x140012c40 ()           // 0x140012c40(0x0, 0x0, 0x0, 0x1)
+         rdi = rax
+         qword [rbp - 0x68] = rax
+
+         goto loc_0x14001d87b;
+    loc_0x14001d87b: // orphan
+         rdi = qword [rbp + 0x60]
+         rax -= rdi               // "nternal error: su resource missing." // "nternal error: su resource missing."
+         v = rax - 0x18           // "rce missing." // "nternal error: su resource missing." // "nternal error: su resource missing." // "nternal error: su resource missing."
+         if (((unsigned) v) < 0) 
+         goto loc_0x14001d88c;
+    loc_0x14001d88c: // orphan
+         r15 = rbp + 0x50         // (cstr 0x00000000) "Internal error: su resource missing."
+         v = qword [rbp + 0x68] - 0xf // "nternal error: su resource missing." // "nternal error: su resource missing." // "nternal error: su resource missing."
+         cmova r15 qword [rbp + 0x50]
+         xmm0 ^= xmm0
+         xmmword [rbp - 0x68] = xmm0
+         r14 = rdi + 0x18         // "rce missing."
+         rbx = rbp - 0x68         // (cstr 0x00000000) "Internal error: su resource missing."
+         v = r14 - 0xf            // " su resource missing." // "nternal error: su resource missing." // "nternal error: su resource missing."
+         if (((unsigned) v) <= 0) 
+    loc_0x14001d8ec: // orphan
+         qword [rbp - 0x50] = r13
+         xmm0 = xmmword [str.____Root.vhd_not_found:] // [0x1400afa88:16]=-1 // "[!] Root.vhd not found:"
+         xmmword [rbx] = xmm0
+         xmm0 = qword [0x1400afa98] // [0x1400afa98:8]=0x203a646e756f6620 // " found: "
+         qword [rbx + 0x10] = xmm0
+         rcx = rbx + 0x18         // "rce missing."
+         r8 = rdi
+         rdx = r15
+         0x1400ab0c8 ()           // 0x1400ab0c8(0x0, 0x0, 0x0, 0x18)
+         byte [rbx + r14] = 0
+         rdx = qword [rbp - 0x50]
+         v = rdx - 0xf            // "!] Root.vhd not" // "!] Root.vhd not" // "!] Root.vhd not"
+         if (((unsigned) v) <= 0) 
+         goto loc_0x14001d929;
+    loc_0x14001d929: // orphan
+         rdx++                    // "!] Root.vhd not"
+         rcx = qword [rbp - 0x68]
+         rax = rcx
+         v = rdx - 0x1000         // "!] Root.vhd not" // "!] Root.vhd not"
+         if (((unsigned) v) < 0) 
+    loc_0x14001d955: // orphan
+         0x1400aa1f8 ()           // 0x1400aa1f8(0x0, 0x0, 0x0, 0x0)
+         
+         goto loc_0x14001d93c;
+    loc_0x14001d93c: // orphan
+         rdx += 0x27              // "!] Root.vhd not"
+         rcx = qword [rcx - 8]
+         rax -= rcx               // "!] Root.vhd not" // "!] Root.vhd not" // "!] Root.vhd not"
+         rax -= 8                 // "!] Root.vhd not" // "!] Root.vhd not" // "!] Root.vhd not"
+         v = rax - 0x1f           // "sing." // "!] Root.vhd not" // "!] Root.vhd not"
+         if (((unsigned) v) > 0) 
+         goto loc_0x14001d8af;
+    loc_0x14001d8af: // orphan
+         r13 = r14
+         r13 |= 0xf               // "t" // "!] Root.vhd not"
+         v = r13 - rsi            // "!] Root.vhd not"
+         if (((unsigned) v) <= 0) 
+    loc_0x14001d8cf: // orphan
+         v = r13 - 0x16           // "!] Root.vhd not" // "!] Root.vhd not" // "!] Root.vhd not"
+         eax = 0x16
+         cmovb r13 rax
+
+         goto loc_0x14001d8bb;
+    loc_0x14001d8bb: // orphan
+         r13 = rsi
+         
+    loc_0x14001d8dc: // orphan
+         // CODE XREF from fcn.14001d370 @ 0x14001d8be(x)
+         rcx = r13 + 1            // "!] Root.vhd not"
+         0x140012c40 ()           // 0x140012c40(0x0, 0x0, 0x0, 0x1)
+         rbx = rax
+         qword [rbp - 0x68] = rax
+
+         goto loc_0x14001d861;
+    loc_0x14001d861: // orphan
+         // CODE XREFS from fcn.14001d370 @ 0x14001d7fd(x), 0x14001d80c(x)
+         v = ecx - 1              // "!] Root.vhd not"
+         bl = v == 0
+
+         goto loc_0x14001d836;
+    loc_0x14001d836: // orphan
+         v = eax - 0x10b          // 267 // "!] Root.vhd not" // "!] Root.vhd not" // "!] Root.vhd not" // "!] Root.vhd not"
+
+         goto loc_0x14001d83d;
+    loc_0x14001d83d: // orphan
+         ecx = 0                  // "!] Root.vhd not" // "!] Root.vhd not"
+         
+    loc_0x14001d846: // orphan
+         // CODE XREFS from fcn.14001d370 @ 0x14001d817(x), 0x14001d83f(x)
+         dword [rbp - 0x40] = eax
+         rdx = rip + 0xc2860      // 0x1400e00b0
+         qword [rbp - 0x38] = rdx
+         xmm0 = xmmword [rbp - 0x40]
+         xmmword [rbp - 0x40] = xmm0
+         v = ecx & ecx            // "!] Root.vhd not" // "!] Root.vhd not"
+         if (!v) 
+         goto loc_0x14001d81e;
+    loc_0x14001d81e: // orphan
+         if (!v) 
+         goto loc_0x14001d820;
+    loc_0x14001d820: // orphan
+         ecx = eax
+         ecx -= 2                 // "!] Root.vhd not" // "!] Root.vhd not" // "!] Root.vhd not"
+         if (!v) 
+         goto loc_0x14001d827;
+    loc_0x14001d827: // orphan
+         ecx -= 1                 // "!] Root.vhd not" // "!] Root.vhd not" // "!] Root.vhd not" // "!] Root.vhd not"
+         if (!v) 
+         goto loc_0x14001d82c;
+    loc_0x14001d82c: // orphan
+         v = ecx - 0x32           // '2' // "roid/system/" // "!] Root.vhd not" // "!] Root.vhd not" // "!] Root.vhd not"
+         
+    loc_0x14001d83b: // orphan
+         // CODE XREF from fcn.14001d370 @ 0x14001d82f(x)
+         if (!v) 
+         goto loc_0x14001d7e4;
+    loc_0x14001d7e4: // orphan
+         ecx = dword [rbp + 0x40] // "!] Root.vhd not"
+         bt ecx 0xa
+         jae 0x14001d80e          // likely
+
+    loc_0x14001d80e: // orphan
+         ecx &= 0x10              // "!] Root.vhd not" // "!] Root.vhd not"
+         ecx |= 0x20              // "ing."
+         ecx >>>= 4               // "] Root.vhd not"
+         
+         goto loc_0x14001d7ed;
+    loc_0x14001d7ed: // orphan
+         edx = dword [rbp + 0x44]
+         v = edx - 0xa000000c     // '\f' // "!] Root.vhd not" // "!] Root.vhd not"
+         if (v) 
+    loc_0x14001d7ff: // orphan
+         v = edx - 0xa0000003     // "!] Root.vhd not" // "!] Root.vhd not"
+         if (v) 
+         goto loc_0x14001d807;
+    loc_0x14001d807: // orphan
+         ecx = 0xa                // "hd not"
+         
+         goto loc_0x14001d7f8;
+    loc_0x14001d7f8: // orphan
+         ecx = 4                  // "Root.vhd not"
+         
+         goto loc_0x14001d73b;
+    loc_0x14001d73b: // orphan
+         rbx = r15
+         rbx |= 0xf               // "t" // "!] Root.vhd not"
+         v = rbx - rsi            // "!] Root.vhd not"
+         if (((unsigned) v) <= 0) 
+    loc_0x14001d74c: // orphan
+         v = rbx - 0x16           // "!] Root.vhd not" // "!] Root.vhd not" // "!] Root.vhd not"
+         eax = 0x16
+         cmovb rbx rax
+
+         goto loc_0x14001d747;
+    loc_0x14001d747: // orphan
+         rbx = rsi
+         
+    loc_0x14001d759: // orphan
+         // CODE XREF from fcn.14001d370 @ 0x14001d74a(x)
+         rcx = rbx + 1            // "!] Root.vhd not"
+         0x140012c40 ()           // 0x140012c40(0x0, 0x0, 0x0, 0x1)
+         rdi = rax
+         qword [rbp + 0x50] = rax
+
+         goto loc_0x14001d685;
+    loc_0x14001d685: // orphan
+         rdx++                    // "!] Root.vhd not"
+         rcx = qword [rbp + 0xb0]
+         rax = rcx
+         v = rdx - 0x1000         // "!] Root.vhd not" // "!] Root.vhd not"
+         if (((unsigned) v) < 0) 
+    loc_0x14001d6c3: // orphan
+         0x1400aa1f8 ()           // 0x1400aa1f8(0x0, 0x0, 0x0, 0x0)
+
+         goto loc_0x14001d69b;
+    loc_0x14001d69b: // orphan
+         rdx += 0x27              // "!] Root.vhd not"
+         rcx = qword [rcx - 8]
+         rax -= rcx               // "!] Root.vhd not" // "!] Root.vhd not" // "!] Root.vhd not"
+         rax -= 8                 // "!] Root.vhd not" // "!] Root.vhd not" // "!] Root.vhd not"
+         v = rax - 0x1f           // "sing." // "!] Root.vhd not" // "!] Root.vhd not"
+         if (((unsigned) v) <= 0) 
+         goto loc_0x14001d6b0;
+    loc_0x14001d6b0: // orphan
+         qword [var_20h] = r8
+         r9d = 0                  // "!] Root.vhd not" // "!] Root.vhd not"
+         edx = 0                  // "!] Root.vhd not" // "!] Root.vhd not"
+         ecx = 0                  // "!] Root.vhd not" // "!] Root.vhd not"
+         qword [sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson] () // [0x1400ad928:8]=0xdf0de reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson(0x0, 0x0, 0x0, 0x0)
+         int3
+
+        return rax;
+    loc_0x14001d5da: // orphan
+         rbx = r15
+         rbx |= 0xf               // "t" // "!] Root.vhd not"
+         v = rbx - rsi            // "!] Root.vhd not"
+         if (((unsigned) v) <= 0) 
+    loc_0x14001d5eb: // orphan
+         v = rbx - 0x16           // "!] Root.vhd not" // "!] Root.vhd not" // "!] Root.vhd not"
+         eax = 0x16
+         cmovb rbx rax
+
+         goto loc_0x14001d5e6;
+    loc_0x14001d5e6: // orphan
+         rbx = rsi
+         
+    loc_0x14001d5f8: // orphan
+         // CODE XREF from fcn.14001d370 @ 0x14001d5e9(x)
+         rcx = rbx + 1            // "!] Root.vhd not"
+         0x140012c40 ()           // 0x140012c40(0x0, 0x0, 0x0, 0x1)
+         r14 = rax
+         qword [rbp + 0xb0] = rax
+         rax = qword [rbp - 0x40]
+
+         goto loc_0x14001d50d;
+    loc_0x14001d50d: // orphan
+         rax = rbp + 0xf0
+         v = r15 - 0xf            // "!] Root.vhd not" // "!] Root.vhd not" // "!] Root.vhd not"
+         cmova rax r12
+         v = byte [rbx + rax - 1] - 0x5c // '\\' // "!] Root.vhd not" // "!] Root.vhd not" // "!] Root.vhd not"
+         if (!v) 
+         goto loc_0x14001d523;
+    loc_0x14001d523: // orphan
+         rax = rbp + 0xf0
+         v = r15 - 0xf            // "!] Root.vhd not" // "!] Root.vhd not" // "!] Root.vhd not"
+         cmova rax r12
+         v = byte [rbx + rax - 1] - 0x2f // '/' // "!] Root.vhd not" // "!] Root.vhd not" // "!] Root.vhd not" // "!] Root.vhd not"
+         if (!v) 
+         goto loc_0x14001d539;
+    loc_0x14001d539: // orphan
+         dl = 0x5c                // '\\' // 92
+         rcx = rbp + 0xf0
+         0x14002d920 ()           // 0x14002d920(0x0, 0x0, 0x5c, 0x1780f0)
+         r15 = qword [rbp + 0x108]
+         qword [var_58h] = r15
+         rdi = qword [rbp + 0x100]
+         rcx = qword [rbp + 0xf0]
+         qword [var_50h] = rcx
+         
+    loc_0x14001d56d: // orphan
+         // CODE XREF from fcn.14001d370 @ 0x14001d566(x)
+         rax = rsi
+         rax -= rdi               // "!] Root.vhd not" // "!] Root.vhd not"
+         r12 = qword [rbp + 0x248]
+         v = rax - r12            // "!] Root.vhd not" // "!] Root.vhd not"
+         if (((unsigned) v) < 0) 
+         goto loc_0x14001d4b9;
+    loc_0x14001d4b9: // orphan
+         r15 = rsi
+         qword [var_58h] = rsi
+         
+    loc_0x14001d4cf: // orphan
+         // CODE XREF from fcn.14001d370 @ 0x14001d4c1(x)
+         rcx = r15 + 1            // "!] Root.vhd not"
+         0x140012c40 ()           // 0x140012c40(0x0, 0x0, 0x0, 0x1)
+         r12 = rax
+         qword [var_50h] = rax
+         qword [rbp + 0xf0] = rax
+         rdi = rbx
+         qword [rbp + 0x100] = rbx
+         qword [rbp + 0x108] = r15
+         r8 = rbx + 1             // "!] Root.vhd not"
+         rdx = r14
+         rcx = rax
+         0x1400ab0c8 ()           // 0x1400ab0c8(0x0, 0x0, 0x0, 0x0)
+
+         goto loc_0x14001d47e;
+    loc_0x14001d47e: // orphan
+         rdi = rbx
+         qword [rbp + 0x100] = rbx
+         r15d = r13d
+         qword [var_58h] = r13
+         qword [rbp + 0x108] = r13
+         xmm0 = xmmword [r14]
+         xmmword [rbp + 0xf0] = xmm0
+         r12 = xmm0
+         qword [var_50h] = r12
+         
+    loc_0x14001d508: // orphan
+         // CODE XREF from fcn.14001d370 @ 0x14001d4ac(x)
+         v = rbx & rbx            // "!] Root.vhd not" // "!] Root.vhd not"
+         if (!v) 
+         goto loc_0x14001d458;
+    loc_0x14001d458: // orphan
+         r14 = qword [rdi]
+
+}
+

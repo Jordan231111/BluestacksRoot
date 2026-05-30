@@ -1,0 +1,1187 @@
+// callconv: rax ms (rcx, rdx, r8, r9, stack);
+void fcn.140019f40 (int64_t arg1, int64_t arg2, int64_t arg3) {
+        rax = rsp
+        qword [rax + 0x20] = rbx
+        push (rbp)
+        push (rsi)
+        push (rdi)
+        push (r12)
+        push (r13)
+        push (r14)
+        push (r15)
+        rbp = rax - 0x2c8
+        rsp -= 0x390
+        xmmword [rax - 0x48] = xmm6
+        xmmword [rax - 0x58] = xmm7
+        rax = qword [0x1400e0140] // [0x1400e0140:8]=0x2b992ddfa232
+        rax ^= rsp
+        qword [rbp + 0x268] = rax
+        rbx = r8     // arg3
+        rdi = rdx    // arg2
+        rsi = rcx    // arg1
+        qword [var_50h] = rcx // arg1
+        r14d = 0
+        dword [var_48h] = r14d
+        v = qword [rdx + 0x10] - r14 // arg2
+        if (!v) goto loc_0x14001af35 // unlikely
+        goto loc_0x140019f99;
+    loc_0x14001af35:
+        ecx = 0x30   // '0' // 48
+        0x140012c40 () // 0x140012c40(0x0, 0x0, 0x0, 0x30)
+        rcx = rax
+        xmm0 = xmmword [str.____DataDir_or_instance_name_is_empty.] // [0x1400af978:16]=-1 // "[!] DataDir or instance name is empty."
+        xmmword [rax] = xmm0
+        xmm1 = xmmword [0x1400af988] // [0x1400af988:16]=-1 // "nstance name is empty."
+        xmmword [rax + 0x10] = xmm1
+        eax = dword [0x1400af998] // [0x1400af998:4]=0x74706d65 // "empty."
+        dword [rcx + 0x20] = eax
+        eax = word [0x1400af99c] // [0x1400af99c:2]=0x2e79 // "y."
+        word [rcx + 0x24] = ax
+        byte [rcx + 0x26] = r14b
+        edx = 0x30   // '0' // 48
+        
+    loc_0x14001af74:
+        0x1400aa1f8 () // 0x1400aa1f8(0x0, 0x0, 0x0, 0x0)
+        goto loc_0x140019fa3;
+        return rax;
+    loc_0x140019fa3:
+        xmm0 ^= xmm0
+        xmmword [rbp + 0x200] = xmm0
+        ecx = 0x30   // '0' // 48
+        0x140012c40 () // 0x140012c40(0x0, 0x0, 0x0, 0x30)
+        qword [rbp + 0x200] = rax
+        xmm0 = xmmword [0x1400b0640] // [0x1400b0640:16]=-1 // "mpty."
+        xmmword [rbp + 0x210] = xmm0
+        xmm0 = xmmword [str.___Killing_emulator_processes...] // [0x1400af2e0:16]=-1 // "[*] Killing emulator processes..."
+        xmmword [rax] = xmm0
+        xmm1 = xmmword [0x1400af2f0] // [0x1400af2f0:16]=-1 // "ator processes..."
+        xmmword [rax + 0x10] = xmm1
+        ecx = byte [0x1400af300] // [0x1400af300:1]=46 // "."
+        byte [rax + 0x20] = cl
+        byte [rax + 0x21] = r14b
+        rcx = rbp + 0x200
+        0x1400010f0 () // 0x1400010f0(0x0, 0x0, 0x0, 0x178200)
+        rcx = rsi
+        0x14001d240 () // 0x14001d240(0x0, 0x0, 0x0, 0x0)
+        ecx = 0x3e8  // 1000
+        qword [sym.imp.KERNEL32.dll_Sleep] () // [0x1400ad260:8]=0xde9de reloc.KERNEL32.dll_Sleep // (pstr 0x00000000) "[*] Killing emulator processes..." // reloc.KERNEL32.dll_Sleep // VOID Sleep(-1)
+        rdx = rdi
+        rcx = rbp + 0x120 // (cstr 0x00000000) "[*] Killing emulator processes..."
+        0x140016f10 () // 0x140016f10(0x0, 0x0, 0x0, 0x178120)
+        rcx = qword [rbp + 0x130]
+        rdx = qword [rbp + 0x120]
+        r8 = qword [rbp + 0x138]
+        v = rcx & rcx // "*] Killing emulator processes..." // "*] Killing emulator processes..."
+        if (!v) goto loc_0x14001a089 // likely
+        goto loc_0x14001a03a;
+    loc_0x14001a089:
+        r10 = qword [rbx + 0x10]
+        rdi = 0x7fffffffffffffff // 9223372036854775807
+        rax = rdi
+        rax -= rcx   // "*] Killing emulator processes..."
+        v = rax - r10
+        if (((unsigned) v) < 0) goto 0x14001afc8 // unlikely
+        goto loc_0x14001a0a6;
+    loc_0x14001afc8:
+        0x14002bd80 () // 0x14002bd80(0x0, 0x0, 0x0, 0x0)
+        
+    loc_0x14001afce:
+        0x14002bd80 () // 0x14002bd80(0x0, 0x0, 0x0, 0x0)
+        goto loc_0x14001a0bf;
+        goto loc_0x14001a050;
+        return rax;
+    loc_0x14001a050:
+        rax = rbp + 0x120 // (cstr 0x00000000) "[*] Killing emulator processes..."
+        v = r8 - 0xf // "lator processes..." // "*] Killing emulator processes..." // "*] Killing emulator processes..." // "*] Killing emulator processes..."
+        cmova rax rdx
+        v = byte [rcx + rax - 1] - 0x2f // '/' // "*] Killing emulator processes..." // "*] Killing emulator processes..." // "*] Killing emulator processes..." // "*] Killing emulator processes..."
+        if (!v) goto loc_0x14001a089 // unlikely
+        goto loc_0x14001a066;
+    loc_0x14001a066:
+        dl = 0x5c    // '\\' // 92
+        rcx = rbp + 0x120 // (cstr 0x00000000) "[*] Killing emulator processes..."
+        0x14002d920 () // 0x14002d920(0x0, 0x0, 0x5c, 0x178120)
+        r8 = qword [rbp + 0x138]
+        rcx = qword [rbp + 0x130]
+        rdx = qword [rbp + 0x120]
+        break;
+    loc_0x14001a0a6: // orphan
+         r9 = rbp + 0x120         // (cstr 0x00000000) "[*] Killing emulator processes..."
+         v = r8 - 0xf             // "lator processes..." // "*] Killing emulator processes..." // "*] Killing emulator processes..." // "*] Killing emulator processes..."
+         cmova r9 rdx
+         rax = rbx
+         v = qword [rbx + 0x18] - 0xf // "*] Killing emulator processes..."
+         if (((unsigned) v) <= 0) 
+    loc_0x14001a0c2: // orphan
+         qword [var_30h] = r10
+         qword [var_28h] = rax
+         qword [var_20h] = rcx
+         r8 = rbp + 0x120         // (cstr 0x00000000) "[*] Killing emulator processes..."
+         edx = byte [var_40h]
+         rcx = rbp + 0x1a0        // (cstr 0x00000000) "[*] Killing emulator processes..."
+         0x140017020 ()           // 0x140017020(0x0, 0x0, 0x0, 0x1781a0)
+         r8d = 1                  // "*] Killing emulator processes..."
+         rdx = rip + 0x958a9      // "\" // 0x1400af9a0
+         rcx = rbp + 0x1a0        // (cstr 0x00000000) "[*] Killing emulator processes..."
+         0x14002be00 ()           // 0x14002be00(0x0, 0x0, 0x1400af9a0, 0x1781a0)
+         xmm7 = xmmword [rax]
+         xmmword [var_390h] = xmm7
+         xmm6 = xmmword [rax + 0x10]
+         xmmword [rbp - 0x50] = xmm6
+         qword [rax + 0x10] = r14
+         qword [rax + 0x18] = 0xf // [0xf:8]=108
+         byte [rax] = 0
+         rcx = rbp + 0x1a0
+         0x1400010f0 ()           // 0x1400010f0(0x0, 0x0, 0x1400af9a0, 0x1781a0)
+         rdx = qword [rbx + 0x10]
+         rax = rdi
+         r8 = xmm6
+         rax -= r8                // "*] Killing emul" // "*] Killing emul"
+         v = rax - rdx            // "*] Killing emul" // "*] Killing emul"
+         if (((unsigned) v) < 0) 
+    loc_0x14001a145: // orphan
+         r9 = var_390h            // "[*] Killing emulator processes.."
+         rcx = xmm7
+         psrldq xmm6 8
+         rax = xmm6
+         v = rax - 0xf            // "*] Killing emul" // "*] Killing emul" // "*] Killing emul"
+         cmova r9 rcx
+         v = qword [rbx + 0x18] - 0xf // "*] Killing emul" // "*] Killing emul"
+         if (((unsigned) v) <= 0) 
+    loc_0x14001a16a: // orphan
+         qword [var_30h] = rdx
+         qword [var_28h] = rbx
+         qword [var_20h] = r8
+         r8 = var_390h            // "[*] Killing emulator processes.."
+         edx = byte [var_40h]
+         rcx = rbp + 0x228
+         0x140017020 ()           // 0x140017020(0x0, 0x0, 0x0, 0x178228)
+         r8d = 5                  // "illing emul"
+         rdx = rip + str..bstk    // 0x1400af0b4 // ".bstk"
+         rcx = rbp + 0x228
+         0x14002be00 ()           // 0x14002be00(0x0, 0x0, 0x1400af0b4, 0x178228)
+         xmm0 = xmmword [rax]
+         xmmword [rbp + 0x1a0] = xmm0
+         xmm1 = xmmword [rax + 0x10] // "l"
+         xmmword [rbp + 0x1b0] = xmm1
+         qword [rax + 0x10] = r14
+         qword [rax + 0x18] = 0xf // [0xf:8]=108
+         byte [rax] = 0
+         r12d = 0x1e0             // 480
+         rcx = rbp + 0x228
+         0x1400010f0 ()           // 0x1400010f0(0x0, 0x0, 0x1400af0b4, 0x178228)
+         rdx = rbp + 0x1a0
+         rcx = rbp + 0x248
+         0x140016f10 ()           // 0x140016f10(0x0, 0x0, 0x1781a0, 0x178248)
+         r13 = rbp + 0x248
+         edi = 0x16d              // 365
+         xmm6 = xmmword [0x1400b0590] // [0x1400b0590:16]=-1 // "l"
+         xmm7 = xmmword [0x1400b05d0] // [0x1400b05d0:16]=-1 // "mul" // "l"
+
+         goto loc_0x14001a227;
+    loc_0x14001a227: // orphan
+         qword [rbp - 0x80] = rax
+         qword [rbp - 0x78] = rcx
+         r8d = 0                  // "*] Killing emul" // "*] Killing emul"
+         rdx = rbp - 0x80
+         rcx = rbp + 0x140
+         0x1400133d0 ()           // 0x1400133d0(0x0, 0x0, 0x177f80, 0x178140)
+         r12d |= 4                // "Killing emul"
+         rcx = rbp + 0x140
+         v = qword [rbp + 0x158] - 7 // "*] Killing emul" // "*] Killing emul" // "*] Killing emul" // "*] Killing emul"
+         cmova rcx qword [rbp + 0x140]
+         r9d = 0xffffffff         // -1
+         r8d = 3                  // " Killing emul"
+         rdx = rbp + 0x200
+         0x1400a9928 ()           // 0x1400a9928(0x0, 0x0, 0x178200, 0x178140)
+         edx = eax
+         v = eax & eax            // "*] Killing emul" // "*] Killing emul"
+         if (v) 
+    loc_0x14001a2c9: // orphan
+         dword [rbp + 0xe4] = 0xffff
+         v = edx - 0x40           // '@' // 64 // "*] Killing emul" // "*] Killing emul" // "*] Killing emul"
+         if (((unsigned) v) > 0) 
+    loc_0x14001a2e9: // orphan
+         v = edx - 0x7b           // '{' // 123 // "*] Killing emul" // "*] Killing emul" // "*] Killing emul"
+         if (!v) 
+    loc_0x14001a2f9: // orphan
+         eax = 1                  // "*] Killing emul"
+
+         goto loc_0x14001a31d;
+    loc_0x14001a31d: // orphan
+         ebx = 1                  // "*] Killing emul"
+         v = edx & edx            // "*] Killing emul" // "*] Killing emul"
+         if (v) 
+    loc_0x14001afad: // orphan
+         r8 = rbp + 0x140
+         rdx = rbp + 0xe0
+         rcx = rip + str.exists   // 0x1400aee50 // "exists"
+         0x14002b610 ()           // 0x14002b610(0x0, 0x0, 0x1780e0, 0x1400aee50)
+
+         goto loc_0x14001a32a;
+    loc_0x14001a32a: // orphan
+         // CODE XREF from fcn.140019f40 @ 0x14001a31b(x)
+         rcx = rbp + 0x140
+         0x14002b920 ()           // 0x14002b920(0x0, 0x0, 0x0, 0x178140)
+         v = bl & bl              // "*] Killing emul" // "*] Killing emul"
+         if (v) 
+    loc_0x14001ab69: // orphan
+         r13 += 0x20              // "." // 32
+         rax = rbp + 0x268
+         v = r13 - rax            // "*] Killing emul" // "*] Killing emul" // "*] Killing emul"
+         if (v) 
+    loc_0x14001a20e: // orphan
+         rbx = rip + 0xc5e9b      // 0x1400e00b0
+         rcx = qword [r13 + 0x10]
+         rax = r13
+         v = qword [r13 + 0x18] - 0xf // "*] Killing emul" // "*] Killing emul"
+         if (((unsigned) v) <= 0) 
+         goto loc_0x14001ab7d;
+    loc_0x14001ab7d: // orphan
+         r9 = rip - 0x19a94       // 0x1400010f0
+         edx = 0x20               // "." // 32
+         r8d = 1                  // "*] Killing emul"
+         rcx = rbp + 0x248
+         0x1400aa628 ()           // 0x1400aa628(0x0, 0x0, 0x20, 0x178248)
+         xmm0 ^= xmm0
+         xmmword [rbp + 0x1e0] = xmm0
+         ecx = 0x20               // "." // 32
+         0x140012c40 ()           // 0x140012c40(0x0, 0x0, 0x20, 0x20)
+         qword [rbp + 0x1e0] = rax
+         qword [rbp + 0x1f0] = 0x10
+         edx = 0x1f               // 31
+         qword [rbp + 0x1f8] = rdx
+         xmm0 = xmmword [str.Disk_set_to_R_W.] // [0x1400afa40:16]=-1 // "Disk set to R/W."
+         xmmword [rax] = xmm0
+         byte [rax + 0x10] = 0
+         rcx = rsi + 0x128
+         r9 = rbp + 0x1e0
+         v = rcx - r9             // "isk set to R/W." // "isk set to R/W." // "isk set to R/W."
+         if (!v) 
+    loc_0x14001ac0a: // orphan
+         byte [rsi + 0x148] = 0
+         v = rdx - 0xf            // "isk set to R/W." // "isk set to R/W." // "isk set to R/W."
+         if (((unsigned) v) <= 0) 
+    loc_0x14001ae41: // orphan
+         // CODE XREF from fcn.140019f40 @ 0x14001ae36(x)
+         rdx = qword [rbp + 0x1b8] // "."
+         v = rdx - 0xf            // "isk set to R/W." // "isk set to R/W."
+         if (((unsigned) v) <= 0) 
+    loc_0x14001ae95: // orphan
+         rdx = qword [rbp - 0x48]
+         v = rdx - 0xf            // "isk set to R/W."
+         if (((unsigned) v) <= 0) 
+    loc_0x14001aee3: // orphan
+         rdx = qword [rbp + 0x138]
+         v = rdx - 0xf            // "isk set to R/W." // "isk set to R/W." // "isk set to R/W."
+         if (((unsigned) v) <= 0) 
+    loc_0x14001af79: // orphan
+         rcx = qword [rbp + 0x268]
+         rcx ^= rsp               // (cstr 0x00000000) "Disk set to R/W." // "isk set to R/W."
+         0x1400aa370 ()           // 0x1400aa370(0x0, 0x0, 0x0, 0x178000)
+         r11 = var_390h           // (cstr 0x00000000) "Disk set to R/W."
+         rbx = qword [r11 + 0x58]
+         xmm6 = xmmword [r11 - 0x10]
+         xmm7 = xmmword [r11 - 0x20]
+         rsp = r11                // (cstr 0x00000000) "Disk set to R/W."
+         r15 = pop ()             // (cstr 0x00000000) "Disk set to R/W."
+         r14 = pop ()             // (cstr 0x00000000) "Disk set to R/W."
+         r13 = pop ()             // (cstr 0x00000000) "Disk set to R/W."
+         r12 = pop ()             // (cstr 0x00000000) "Disk set to R/W."
+         rdi = pop ()             // (cstr 0x00000000) "Disk set to R/W."
+         rsi = pop ()             // (cstr 0x00000000) "Disk set to R/W."
+         rbp = pop ()             // (cstr 0x00000000) "Disk set to R/W."
+         return
+
+    loc_0x14001aef4: // orphan
+         rdx++                    // "isk set to R/W."
+         rcx = qword [rbp + 0x120]
+         rax = rcx
+         v = rdx - 0x1000         // "isk set to R/W." // "isk set to R/W."
+         if (((unsigned) v) < 0) 
+    loc_0x14001af0a: // orphan
+         rdx += 0x27              // 39 // "isk set to R/W."
+         rcx = qword [rcx - 8]
+         rax -= rcx               // "isk set to R/W." // "isk set to R/W." // "isk set to R/W."
+         rax -= 8                 // "isk set to R/W." // "isk set to R/W." // "isk set to R/W."
+         v = rax - 0x1f           // 31 // "isk set to R/W." // "isk set to R/W."
+         if (((unsigned) v) <= 0) 
+         goto loc_0x14001af1f;
+    loc_0x14001af1f: // orphan
+         qword [var_20h] = r14
+         r9d = 0                  // "isk set to R/W." // "isk set to R/W."
+         r8d = 0                  // "isk set to R/W." // "isk set to R/W."
+         edx = 0                  // "isk set to R/W." // "isk set to R/W."
+         ecx = 0                  // "isk set to R/W." // "isk set to R/W."
+         qword [sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson] () // [0x1400ad928:8]=0xdf0de reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson(0x0, 0x0, 0x0, 0x0)
+         int3
+
+        return rax;
+    loc_0x14001ae9f: // orphan
+         rdx++                    // "isk set to R/W."
+         rcx = qword [var_390h]
+         rax = rcx
+         v = rdx - 0x1000         // "isk set to R/W." // "isk set to R/W."
+         if (((unsigned) v) < 0) 
+    loc_0x14001aedd: // orphan
+         0x1400aa1f8 ()           // 0x1400aa1f8(0x0, 0x0, 0x0, 0x0)
+
+         goto loc_0x14001aeb2;
+    loc_0x14001aeb2: // orphan
+         rdx += 0x27              // 39 // "isk set to R/W."
+         rcx = qword [rcx - 8]
+         rax -= rcx               // "isk set to R/W." // "isk set to R/W." // "isk set to R/W."
+         rax -= 8                 // "isk set to R/W." // "isk set to R/W." // "isk set to R/W."
+         v = rax - 0x1f           // 31 // "isk set to R/W." // "isk set to R/W."
+         if (((unsigned) v) <= 0) 
+         goto loc_0x14001aec7;
+    loc_0x14001aec7: // orphan
+         qword [var_20h] = r14
+         r9d = 0                  // "isk set to R/W." // "isk set to R/W."
+         r8d = 0                  // "isk set to R/W." // "isk set to R/W."
+         edx = 0                  // "isk set to R/W." // "isk set to R/W."
+         ecx = 0                  // "isk set to R/W." // "isk set to R/W."
+         qword [sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson] () // [0x1400ad928:8]=0xdf0de reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson(0x0, 0x0, 0x0, 0x0)
+         int3
+
+        return rax;
+    loc_0x14001ae4e: // orphan
+         rdx++                    // "isk set to R/W."
+         rcx = qword [rbp + 0x1a0]
+         rax = rcx
+         v = rdx - 0x1000         // "isk set to R/W." // "isk set to R/W."
+         if (((unsigned) v) < 0) 
+    loc_0x14001ae8f: // orphan
+         0x1400aa1f8 ()           // 0x1400aa1f8(0x0, 0x0, 0x0, 0x0)
+
+         goto loc_0x14001ae64;
+    loc_0x14001ae64: // orphan
+         rdx += 0x27              // 39 // "isk set to R/W."
+         rcx = qword [rcx - 8]
+         rax -= rcx               // "isk set to R/W." // "isk set to R/W." // "isk set to R/W."
+         rax -= 8                 // "isk set to R/W." // "isk set to R/W." // "isk set to R/W."
+         v = rax - 0x1f           // 31 // "isk set to R/W." // "isk set to R/W."
+         if (((unsigned) v) <= 0) 
+         goto loc_0x14001ae79;
+    loc_0x14001ae79: // orphan
+         qword [var_20h] = r14
+         r9d = 0                  // "isk set to R/W." // "isk set to R/W."
+         r8d = 0                  // "isk set to R/W." // "isk set to R/W."
+         edx = 0                  // "isk set to R/W." // "isk set to R/W."
+         ecx = 0                  // "isk set to R/W." // "isk set to R/W."
+         qword [sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson] () // [0x1400ad928:8]=0xdf0de reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson(0x0, 0x0, 0x0, 0x0)
+         int3
+
+        return rax;
+    loc_0x14001ac1b: // orphan
+         rdx++                    // "isk set to R/W."
+         rcx = rax
+         v = rdx - 0x1000         // "isk set to R/W." // "isk set to R/W."
+         if (((unsigned) v) < 0) 
+    loc_0x14001ae38: // orphan
+         rcx = rax
+         0x1400aa1f8 ()           // 0x1400aa1f8(0x0, 0x0, 0x0, 0x0)
+
+         goto loc_0x14001ac2e;
+    loc_0x14001ac2e: // orphan
+         rdx += 0x27              // 39 // "isk set to R/W."
+         rax = qword [rax - 8]
+         rcx -= rax               // "isk set to R/W." // "isk set to R/W." // "isk set to R/W."
+         rcx -= 8                 // "isk set to R/W." // "isk set to R/W." // "isk set to R/W."
+         v = rcx - 0x1f           // 31 // "isk set to R/W." // "isk set to R/W."
+         if (((unsigned) v) <= 0) 
+         goto loc_0x14001ac47;
+    loc_0x14001ac47: // orphan
+         qword [var_20h] = r14
+         r9d = 0                  // "isk set to R/W." // "isk set to R/W."
+         r8d = 0                  // "isk set to R/W." // "isk set to R/W."
+         edx = 0                  // "isk set to R/W." // "isk set to R/W."
+         ecx = 0                  // "isk set to R/W." // "isk set to R/W."
+         qword [sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson] () // [0x1400ad928:8]=0xdf0de reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson(0x0, 0x0, 0x0, 0x0)
+
+         goto loc_0x14001ad12;
+    loc_0x14001ad12: // orphan
+         byte [rsi + 0x148] = 1
+         v = rdx - 0xf            // "isk set to R/W." // "isk set to R/W." // "isk set to R/W."
+         if (((unsigned) v) <= 0) 
+    loc_0x14001ad66: // orphan
+         r8 = qword [rbp + 0xd0]
+         v = r8 - 0xf             // "isk set to R/W." // "isk set to R/W." // "isk set to R/W."
+         if (((unsigned) v) <= 0) 
+    loc_0x14001ad86: // orphan
+         qword [rbp + 0xc8] = r14
+         qword [rbp + 0xd0] = 0xf
+         byte [rbp + 0xb8] = 0
+         rax = qword [rbp - 0x40]
+         rcx = dword [rax + 4]
+         qword [rbp + rcx - 0x40] = r15
+         rax = qword [rbp - 0x40]
+         rcx = dword [rax + 4]
+         edx = rcx - 0x90
+         dword [rbp + rcx - 0x44] = edx
+         rcx = rbp - 0x30
+         0x1400180d0 ()           // 0x1400180d0(0x0, 0x0, 0x74657290, 0x177fd0)
+         rcx = rbp - 0x28         // (pstr 0x00000000) "Disk set to R/W."
+         qword [sym.imp.MSVCP140.dll___1__basic_istream_DU__char_traits_D_std___std__UEAA_XZ] () // [0x1400ad4d0:8]=0xde0e0 reloc.MSVCP140.dll___1__basic_istream_DU__char_traits_D_std___std__UEAA_XZ // reloc.MSVCP140.dll___1__basic_istream_DU__char_traits_D_std___std__UEAA_XZ // sym.imp.MSVCP140.dll___1__basic_istream_DU__char_traits_D_std___std__UEAA_XZ(0x0, 0x0, 0x74657290, 0x177fd8)
+         rcx = rbp + 0x50         // (cstr 0x00000000) "Disk set to R/W."
+         qword [sym.imp.MSVCP140.dll___1__basic_ios_DU__char_traits_D_std___std__UEAA_XZ] () // [0x1400ad538:8]=0xddd10 reloc.MSVCP140.dll___1__basic_ios_DU__char_traits_D_std___std__UEAA_XZ // reloc.MSVCP140.dll___1__basic_ios_DU__char_traits_D_std___std__UEAA_XZ // sym.imp.MSVCP140.dll___1__basic_ios_DU__char_traits_D_std___std__UEAA_XZ(0x0, 0x0, 0x74657290, 0x178050)
+         r8 = qword [rbp + 0x118]
+         v = r8 - 0xf             // "isk set to R/W." // "isk set to R/W." // "isk set to R/W."
+         if (((unsigned) v) <= 0) 
+    loc_0x14001adfc: // orphan
+         xmmword [rbp + 0x110] = xmm6
+         byte [rbp + 0x100] = 0
+         rcx = rbp + 0x180        // (cstr 0x00000000) "Disk set to R/W."
+         0x1400010f0 ()           // 0x1400010f0(0x0, 0x0, 0x0, 0x178180)
+         r9 = rip - 0x19d2f       // 0x1400010f0
+         edx = 0x20               // "." // 32
+         r8d = 1                  // "isk set to R/W."
+         rcx = rbp + 0x248        // (cstr 0x00000000) "Disk set to R/W."
+         0x1400aa628 ()           // 0x1400aa628(0x0, 0x0, 0x20, 0x178248)
+         
+         goto loc_0x14001ade9;
+    loc_0x14001ade9: // orphan
+         rdx = qword [rbp + 0x100]
+         rcx = rbp + 0x100        // (cstr 0x00000000) "Disk set to R/W."
+         0x1400016c0 ()           // 0x1400016c0(0x0, 0x0, 0x0, 0x178100)
+
+         goto loc_0x14001ad73;
+    loc_0x14001ad73: // orphan
+         rdx = qword [rbp + 0xb8]
+         rcx = rbp + 0xb8         // (cstr 0x00000000) "Disk set to R/W."
+         0x1400016c0 ()           // 0x1400016c0(0x0, 0x0, 0x0, 0x1780b8)
+
+         goto loc_0x14001ad1f;
+    loc_0x14001ad1f: // orphan
+         rdx++                    // "isk set to R/W."
+         rcx = rax
+         v = rdx - 0x1000         // "isk set to R/W." // "isk set to R/W."
+         if (((unsigned) v) < 0) 
+    loc_0x14001ad5d: // orphan
+         rcx = rax
+         0x1400aa1f8 ()           // 0x1400aa1f8(0x0, 0x0, 0x0, 0x0)
+
+         goto loc_0x14001ad2e;
+    loc_0x14001ad2e: // orphan
+         rdx += 0x27              // 39 // "isk set to R/W."
+         rax = qword [rax - 8]
+         rcx -= rax               // "isk set to R/W." // "isk set to R/W." // "isk set to R/W."
+         rcx -= 8                 // "isk set to R/W." // "isk set to R/W." // "isk set to R/W."
+         v = rcx - 0x1f           // 31 // "isk set to R/W." // "isk set to R/W."
+         if (((unsigned) v) <= 0) 
+         goto loc_0x14001ad43;
+    loc_0x14001ad43: // orphan
+         qword [var_20h] = 0
+         r9d = 0                  // "isk set to R/W." // "isk set to R/W."
+         r8d = 0                  // "isk set to R/W." // "isk set to R/W."
+         edx = 0                  // "isk set to R/W." // "isk set to R/W."
+         ecx = 0                  // "isk set to R/W." // "isk set to R/W."
+         qword [sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson] () // [0x1400ad928:8]=0xdf0de reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson(0x0, 0x0, 0x0, 0x0)
+         int3
+
+        return rax;
+    loc_0x14001acf6: // orphan
+         r8d = 0x30               // '0' // 48
+         rdx = rax
+         0x14002c270 ()           // 0x14002c270(0x0, 0x0, 0x0, 0x0)
+         rdx = qword [rbp + 0x1d8]
+         rax = qword [rbp + 0x1c0]
+
+         goto loc_0x14001abee;
+    loc_0x14001abee: // orphan
+         r8d = 0x10
+         rdx = rax
+         0x14002c270 ()           // 0x14002c270(0x0, 0x0, 0x0, 0x0)
+         rdx = qword [rbp + 0x1f8]
+         rax = qword [rbp + 0x1e0]
+
+         goto loc_0x14001a33e;
+    loc_0x14001a33e: // orphan
+         r14 = qword [r13 + 0x10]
+         rcx = 0x7fffffffffffffff // 9223372036854775807
+         rax = rcx
+         rax -= r14               // "isk set to R/W."
+         v = rax - 0xd
+         if (((unsigned) v) < 0) 
+    loc_0x14001afe0: // orphan
+         0x14002bd80 ()           // 0x14002bd80(0x0, 0x0, 0x0, 0x0)
+         int3
+
+        return rax;
+    loc_0x14001a35c: // orphan
+         r15 = r13
+         v = qword [r13 + 0x18] - 0xf // "isk set to R/W." // "isk set to R/W."
+         if (((unsigned) v) <= 0) 
+    loc_0x14001a36a: // orphan
+         xmm0 ^= xmm0
+         xmmword [rbp + 0x140] = xmm0
+         rsi = r14 + 0xd          // "/W."
+         ebx = 0xf                // "."
+         rdi = rbp + 0x140        // (cstr 0x00000000) "Disk set to R/W."
+         v = rsi - rbx            // "isk set to R/W." // "isk set to R/W." // "isk set to R/W."
+         if (((unsigned) v) <= 0) 
+    loc_0x14001a3ba: // orphan
+         qword [rbp + 0x158] = rbx
+         xmm0 = qword [str.___Updating] // [0x1400af9a8:8]=0x61647055205d2a5b // "[*] Updating"
+         qword [rdi] = xmm0
+         ecx = dword [0x1400af9b0] // [0x1400af9b0:4]=0x676e6974 // "ting "
+         dword [rdi + 8] = ecx
+         ecx = byte [0x1400af9b4] // [0x1400af9b4:1]=32 // " " // "."
+         byte [rdi + 0xc] = cl
+         rcx = rdi + 0xd          // "/W."
+         r8 = r14
+         rdx = r15
+         0x1400ab0c8 ()           // 0x1400ab0c8(0x0, 0x0, 0x0, 0xd)
+         byte [rdi + rsi] = 0
+         r12d |= 0x10
+         rdx = qword [rbp + 0x158]
+         v = rdx - 0xf
+         if (((unsigned) v) <= 0) 
+    loc_0x14001a438: // orphan
+         r8 = r13
+         rdx = rbp + 0x180
+         rcx = qword [var_50h]
+         0x140022540 ()           // 0x140022540(0x0, 0x0, 0x178180, 0x0)
+         xmm0 ^= xmm0
+         xmmword [rbp + 0x100] = xmm0
+         xmmword [rbp + 0x110] = xmm6
+         byte [rbp + 0x100] = 0
+         rdx = qword [rbp + 0x190]
+         rcx = rbp + 0x100
+         0x14002dbe0 ()           // 0x14002dbe0(0x0, 0x0, 0x0, 0x178100)
+         rax = rip + 0x954f0      // 0x1400af970
+         qword [rbp - 0x40] = rax
+         rcx = rbp + 0x50
+         qword [sym.imp.MSVCP140.dll___0__basic_ios_DU__char_traits_D_std___std__IEAA_XZ] () // [0x1400ad508:8]=0xddecc reloc.MSVCP140.dll___0__basic_ios_DU__char_traits_D_std___std__IEAA_XZ // reloc.MSVCP140.dll___0__basic_ios_DU__char_traits_D_std___std__IEAA_XZ // sym.imp.MSVCP140.dll___0__basic_ios_DU__char_traits_D_std___std__IEAA_XZ(0x0, 0x0, 0x0, 0x178050)
+         r12d |= 8                // "ting /W."
+         dword [var_48h] = r12d
+         r9d = 0
+         r8d = 0
+         rdx = rbp - 0x30
+         rcx = rbp - 0x40
+         qword [sym.imp.MSVCP140.dll___0__basic_istream_DU__char_traits_D_std___std__QEAA_PEAV__basic_streambuf_DU__char_traits_D_std___1__N_Z] () // [0x1400ad4d8:8]=0xde074 reloc.MSVCP140.dll___0__basic_istream_DU__char_traits_D_std___std__QEAA_PEAV__basic_streambuf_DU__char_traits_D_std___1__N_Z // "t\xe0\r" // reloc.MSVCP140.dll___0__basic_istream_DU__char_traits_D_std___std__QEAA_PEAV__basic_streambuf_DU__char_traits_D_std___1__N_Z // sym.imp.MSVCP140.dll___0__basic_istream_DU__char_traits_D_std___std__QEAA_PEAV__basic_streambuf_DU__char_traits_D_std___1__N_Z(0x0, 0x0, 0x177fd0, 0x177fc0)
+         rax = qword [rbp - 0x40]
+         rcx = dword [rax + 4]
+         r15 = rip + 0x954ac      // 0x1400af968
+         qword [rbp + rcx - 0x40] = r15
+         rax = qword [rbp - 0x40]
+         rcx = dword [rax + 4]
+         edx = rcx - 0x90
+         dword [rbp + rcx - 0x44] = edx
+         rax = rbp - 0x30
+         qword [rbp + 0xe0] = rax
+         rcx = rbp - 0x30
+         qword [sym.imp.MSVCP140.dll___0__basic_streambuf_DU__char_traits_D_std___std__IEAA_XZ] () // [0x1400ad410:8]=0xdd5e6 reloc.MSVCP140.dll___0__basic_streambuf_DU__char_traits_D_std___std__IEAA_XZ // reloc.MSVCP140.dll___0__basic_streambuf_DU__char_traits_D_std___std__IEAA_XZ // sym.imp.MSVCP140.dll___0__basic_streambuf_DU__char_traits_D_std___std__IEAA_XZ(0x0, 0x0, 0x0, 0x177fd0)
+         rax = rip + 0x953f8      // 0x1400af8e8
+         qword [rbp - 0x30] = rax
+         rdi = qword [rbp + 0x190]
+         rsi = rbp + 0x180
+         v = qword [rbp + 0x198] - 0xf
+         cmova rsi qword [rbp + 0x180]
+         eax = 2
+         v = rdi - 0x7fffffff
+         if (((unsigned) v) > 0) 
+    loc_0x14001afda: // orphan
+         0x1400a90d5 ()           // 0x1400a90d5(0x0, 0x0, 0x0, 0x0)
+
+         goto loc_0x14001a524;
+    loc_0x14001a524: // orphan
+         v = rdi & rdi
+         if (!v) 
+    loc_0x14001a564: // orphan
+         r14d = 0
+         qword [rbp + 0x38] = r14
+
+         goto loc_0x14001aa94;
+    loc_0x14001aa94: // orphan
+         r8 = rbp + 0x100
+         rdx = r13
+         rsi = qword [var_50h]
+         rcx = rsi
+         0x140025b80 ()           // 0x140025b80(0x0, 0x1400af968, 0x0, 0x1400af968)
+         v = al & al
+         if (!v) 
+    loc_0x14001ac8d: // orphan
+         xmm0 ^= xmm0
+         xmmword [rbp + 0x1c0] = xmm0
+         ecx = 0x40               // '@' // 64
+         0x140012c40 ()           // 0x140012c40(0x0, 0x0, 0x0, 0x40)
+         qword [rbp + 0x1c0] = rax
+         qword [rbp + 0x1d0] = 0x30 // '0' // 48
+         edx = 0x3f               // '?' // 63
+         qword [rbp + 0x1d8] = rdx
+         xmm0 = xmmword [str.Failed_to_update_.bstk__run_as_Administrator.] // [0x1400afa08:16]=-1 // "Failed to update .bstk — run as Administrator."
+         xmmword [rax] = xmm0
+         xmm1 = xmmword [0x1400afa18] // [0x1400afa18:16]=-1
+         xmmword [rax + 0x10] = xmm1
+         xmm0 = xmmword [0x1400afa28] // [0x1400afa28:16]=-1 // "s Administrator."
+         xmmword [rax + 0x20] = xmm0
+         byte [rax + 0x30] = 0
+         rcx = rsi + 0x128
+         r8 = rbp + 0x1c0
+         v = rcx - r8             // "ailed to update .bstk \u2014 run as Administrator." // "ailed to update .bstk \u2014 run as Administrator."
+         if (!v) 
+         goto loc_0x14001aab3;
+    loc_0x14001aab3: // orphan
+         r8 = qword [rbp + 0xd0]  // "e .bstk \u2014 run as Administrator."
+         v = r8 - 0xf             // "ailed to update .bstk \u2014 run as Administrator." // "ailed to update .bstk \u2014 run as Administrator."
+         if (((unsigned) v) <= 0) 
+    loc_0x14001aad3: // orphan
+         qword [rbp + 0xc8] = r14
+         qword [rbp + 0xd0] = 0xf
+         byte [rbp + 0xb8] = 0
+         rax = qword [rbp - 0x40]
+         rcx = dword [rax + 4]
+         qword [rbp + rcx - 0x40] = r15
+         rax = qword [rbp - 0x40]
+         rcx = dword [rax + 4]
+         edx = rcx - 0x90
+         dword [rbp + rcx - 0x44] = edx
+         rcx = rbp - 0x30
+         0x1400180d0 ()           // 0x1400180d0(0x0, 0x0, 0x0, 0x177fd0)
+         rcx = rbp - 0x28
+         qword [sym.imp.MSVCP140.dll___1__basic_istream_DU__char_traits_D_std___std__UEAA_XZ] () // [0x1400ad4d0:8]=0xde0e0 reloc.MSVCP140.dll___1__basic_istream_DU__char_traits_D_std___std__UEAA_XZ // reloc.MSVCP140.dll___1__basic_istream_DU__char_traits_D_std___std__UEAA_XZ // sym.imp.MSVCP140.dll___1__basic_istream_DU__char_traits_D_std___std__UEAA_XZ(0x0, 0x0, 0x0, 0x177fd8)
+         rcx = rbp + 0x50         // (cstr 0x00000000) "Failed to update .bstk \u2014 run as Administrator."
+         qword [sym.imp.MSVCP140.dll___1__basic_ios_DU__char_traits_D_std___std__UEAA_XZ] () // [0x1400ad538:8]=0xddd10 reloc.MSVCP140.dll___1__basic_ios_DU__char_traits_D_std___std__UEAA_XZ // reloc.MSVCP140.dll___1__basic_ios_DU__char_traits_D_std___std__UEAA_XZ // sym.imp.MSVCP140.dll___1__basic_ios_DU__char_traits_D_std___std__UEAA_XZ(0x0, 0x0, 0x0, 0x178050)
+         r8 = qword [rbp + 0x118]
+         v = r8 - 0xf             // "ailed to update .bstk \u2014 run as Administrator." // "ailed to update .bstk \u2014 run as Administrator." // "ailed to update .bstk \u2014 run as Administrator."
+         if (((unsigned) v) <= 0) 
+    loc_0x14001ab49: // orphan
+         xmmword [rbp + 0x110] = xmm6
+         byte [rbp + 0x100] = 0
+         rcx = rbp + 0x180        // (cstr 0x00000000) "Failed to update .bstk \u2014 run as Administrator."
+         0x1400010f0 ()           // 0x1400010f0(0x0, 0x0, 0x0, 0x178180)
+         edi = 0x16d              // 365
+
+         goto loc_0x14001ab36;
+    loc_0x14001ab36: // orphan
+         rdx = qword [rbp + 0x100]
+         rcx = rbp + 0x100        // (cstr 0x00000000) "Failed to update .bstk \u2014 run as Administrator."
+         0x1400016c0 ()           // 0x1400016c0(0x0, 0x0, 0x0, 0x178100)
+
+         goto loc_0x14001aac0;
+    loc_0x14001aac0: // orphan
+         rdx = qword [rbp + 0xb8]
+         rcx = rbp + 0xb8         // (cstr 0x00000000) "Failed to update .bstk \u2014 run as Administrator."
+         0x1400016c0 ()           // 0x1400016c0(0x0, 0x0, 0x0, 0x1780b8)
+
+         goto loc_0x14001a5d4;
+    loc_0x14001a5d4: // orphan
+         
+         
+
+         goto loc_0x14001a634;
+    loc_0x14001a634: // orphan
+         rdi = rbp + 0xb8         // (cstr 0x00000000) "Failed to update .bstk \u2014 run as Administrator."
+         v = qword [rbp + 0xd0] - 0xf // "ailed to update .bstk \u2014 run as Administrator." // "ailed to update .bstk \u2014 run as Administrator."
+         cmova rdi qword [rbp + 0xb8]
+         v = rbx - 0x13           // "ailed to update .bstk \u2014 run as Administrator." // "ailed to update .bstk \u2014 run as Administrator." // "ailed to update .bstk \u2014 run as Administrator." // "ailed to update .bstk \u2014 run as Administrator."
+         if (((unsigned) v) < 0) 
+    loc_0x14001a92e: // orphan
+         rcx = 0x7fffffffffffffff // 9223372036854775807
+         rax = rcx
+         rax -= rbx               // "ailed to update .bstk \u2014 run as Administrator."
+         v = rax - 1
+         if (((unsigned) v) < 0) 
+    loc_0x14001afd4: // orphan
+         0x14002bd80 ()           // 0x14002bd80(0x0, 0x0, 0x0, 0x0)
+
+         goto loc_0x14001a948;
+    loc_0x14001a948: // orphan
+         r15 = rbp + 0xb8         // (cstr 0x00000000) "Failed to update .bstk \u2014 run as Administrator."
+         v = qword [rbp + 0xd0] - 0xf // "ailed to update .bstk \u2014 run as Administrator." // "ailed to update .bstk \u2014 run as Administrator."
+         cmova r15 qword [rbp + 0xb8]
+         xmm0 ^= xmm0
+         xmmword [rbp + 0xe0] = xmm0
+         r14 = rbx + 1            // "ailed to update .bstk \u2014 run as Administrator."
+         edi = 0xf                // "e .bstk \u2014 run as Administrator."
+         rsi = rbp + 0xe0         // (cstr 0x00000000) "Failed to update .bstk \u2014 run as Administrator."
+         v = r14 - rdi            // "ailed to update .bstk \u2014 run as Administrator." // "ailed to update .bstk \u2014 run as Administrator." // "ailed to update .bstk \u2014 run as Administrator."
+         if (((unsigned) v) <= 0) 
+    loc_0x14001a9af: // orphan
+         qword [rbp + 0xf0] = r14
+         qword [rbp + 0xf8] = rdi
+         r8 = rbx
+         rdx = r15
+         rcx = rsi
+         0x1400ab0c8 ()           // 0x1400ab0c8(0x0, 0x0, 0x0, 0x0)
+         byte [rbx + rsi] = 0xa
+         byte [rsi + r14] = 0
+         r12d |= 1                // "ailed to update .bstk \u2014 run as Administrator."
+         rdx = rbp + 0xe0
+         v = qword [rbp + 0xf8] - 0xf // "ailed to update .bstk \u2014 run as Administrator." // "ailed to update .bstk \u2014 run as Administrator." // "ailed to update .bstk \u2014 run as Administrator."
+         cmova rdx qword [rbp + 0xe0]
+         r8 = qword [rbp + 0xf0]
+         rcx = rbp + 0x100
+         0x14002be00 ()           // 0x14002be00(0x0, 0x0, 0x1780e0, 0x178100)
+         rdx = qword [rbp + 0xf8]
+         v = rdx - 0xf            // "ailed to update .bstk \u2014 run as Administrator." // "ailed to update .bstk \u2014 run as Administrator." // "ailed to update .bstk \u2014 run as Administrator."
+         if (((unsigned) v) <= 0) 
+    loc_0x14001aa44: // orphan
+         rax = qword [rbp - 0x40]
+         rcx = dword [rax + 4]
+         rax = rbp - 0x40
+         rcx += rax               // "ailed to update .bstk \u2014 run as Administrator."
+         dl = 0xa                 // "update .bstk \u2014 run as Administrator."
+         qword [sym.imp.MSVCP140.dll__widen___basic_ios_DU__char_traits_D_std___std__QEBADD_Z] () // [0x1400ad510:8]=0xdde90 reloc.MSVCP140.dll__widen___basic_ios_DU__char_traits_D_std___std__QEBADD_Z // reloc.MSVCP140.dll__widen___basic_ios_DU__char_traits_D_std___std__QEBADD_Z // sym.imp.MSVCP140.dll__widen___basic_ios_DU__char_traits_D_std___std__QEBADD_Z(0x0, 0x0, 0xa, 0x178050)
+         r8d = al
+         rdx = rbp + 0xb8
+         rcx = rbp - 0x40
+         0x140015f00 ()           // 0x140015f00(0x0, 0x0, 0x1780b8, 0x177fc0)
+         rcx = qword [rax]
+         rcx = dword [rcx + 4]
+         rcx += rax               // "ailed to update .bstk \u2014 run as Administrator."
+         qword [sym.imp.MSVCP140.dll___Bios_base_std__QEBA_NXZ] () // [0x1400ad3e0:8]=0xdd52c reloc.MSVCP140.dll___Bios_base_std__QEBA_NXZ // ",\xd5\r" // reloc.MSVCP140.dll___Bios_base_std__QEBA_NXZ // sym.imp.MSVCP140.dll___Bios_base_std__QEBA_NXZ(0x0, 0x0, 0x1780b8, 0x178050)
+         v = al & al              // "ailed to update .bstk \u2014 run as Administrator." // "ailed to update .bstk \u2014 run as Administrator."
+         r14d = 0
+         if (v) 
+    loc_0x14001a5e0: // orphan
+         rdi = rbp + 0xb8
+         v = qword [rbp + 0xd0] - 0xf // "ailed to update .bstk \u2014 run as Administrator." // "ailed to update .bstk \u2014 run as Administrator."
+         cmova rdi qword [rbp + 0xb8]
+         rbx = qword [rbp + 0xc8]
+         v = rbx - 0x17           // "ailed to update .bstk \u2014 run as Administrator." // "ailed to update .bstk \u2014 run as Administrator." // "ailed to update .bstk \u2014 run as Administrator."
+         if (((unsigned) v) < 0) 
+         goto loc_0x14001aa8d;
+    loc_0x14001aa8d: // orphan
+         r15 = rip + 0x94ed4      // 0x1400af968
+
+         goto loc_0x14001aa10;
+    loc_0x14001aa10: // orphan
+         rdx++                    // "ailed to update .bstk \u2014 run as Administrator."
+         rcx = qword [rbp + 0xe0]
+         rax = rcx
+         v = rdx - 0x1000         // "ailed to update .bstk \u2014 run as Administrator." // "ailed to update .bstk \u2014 run as Administrator."
+         if (((unsigned) v) < 0) 
+    loc_0x14001aa3f: // orphan
+         0x1400aa1f8 ()           // 0x1400aa1f8(0x0, 0x0, 0x0, 0x0)
+
+         goto loc_0x14001aa26;
+    loc_0x14001aa26: // orphan
+         rdx += 0x27              // "istrator." // "ailed to update .bstk \u2014 run as Administrator."
+         rcx = qword [rcx - 8]
+         rax -= rcx               // "ailed to update .bstk \u2014 run as Administrator." // "ailed to update .bstk \u2014 run as Administrator." // "ailed to update .bstk \u2014 run as Administrator."
+         rax -= 8                 // "ailed to update .bstk \u2014 run as Administrator." // "ailed to update .bstk \u2014 run as Administrator." // "ailed to update .bstk \u2014 run as Administrator."
+         v = rax - 0x1f           // "ailed to update .bstk \u2014 run as Administrator." // "ailed to update .bstk \u2014 run as Administrator."
+         if (((unsigned) v) > 0) 
+         goto loc_0x14001a97e;
+    loc_0x14001a97e: // orphan
+         rdi = r14
+         rdi |= 0xf               // "e .bstk \u2014 run as Administrator." // "ailed to update .bstk \u2014 run as Administrator."
+         v = rdi - rcx            // "ailed to update .bstk \u2014 run as Administrator."
+         if (((unsigned) v) <= 0) 
+    loc_0x14001a98f: // orphan
+         v = rdi - 0x16           // "ailed to update .bstk \u2014 run as Administrator." // "ailed to update .bstk \u2014 run as Administrator." // "ailed to update .bstk \u2014 run as Administrator."
+         eax = 0x16               // " \u2014 run as Administrator."
+         cmovb rdi rax            // " \u2014 run as Administrator."
+
+         goto loc_0x14001a98a;
+    loc_0x14001a98a: // orphan
+         rdi = rcx
+         
+    loc_0x14001a99c: // orphan
+         // CODE XREF from fcn.140019f40 @ 0x14001a98d(x)
+         rcx = rdi + 1            // "ailed to update .bstk \u2014 run as Administrator."
+         0x140012c40 ()           // 0x140012c40(0x0, 0x0, 0x0, 0x1)
+         rsi = rax
+         qword [rbp + 0xe0] = rax
+
+         goto loc_0x14001a655;
+    loc_0x14001a655: // orphan
+         rbx += rdi               // "ailed to update .bstk \u2014 run as Administrator." // "ailed to update .bstk \u2014 run as Administrator."
+         r9d = 0x13               // "stk \u2014 run as Administrator."
+         r8 = rip + str.location_Root.vhd_ // 0x1400af9d0 // "location="Root.vhd""
+         rdx = rbx
+         rcx = rdi
+         0x1400a90d0 ()           // 0x1400a90d0(0x0, 0x0, 0x0, 0x0)
+         v = rax - rbx            // "ailed to update .bstk \u2014 run as Administrator." // "ailed to update .bstk \u2014 run as Administrator."
+         if (!v) 
+    loc_0x14001a927: // orphan
+         rbx = qword [rbp + 0xc8]
+
+         goto loc_0x14001a679;
+    loc_0x14001a679: // orphan
+         rax -= rdi               // "ailed to update .bstk \u2014 run as Administrator." // "ailed to update .bstk \u2014 run as Administrator."
+         v = rax - 0xffffffffffffffff // "ailed to update .bstk \u2014 run as Administrator." // "ailed to update .bstk \u2014 run as Administrator."
+         if (!v) 
+         goto loc_0x14001a686;
+    loc_0x14001a686: // orphan
+         rdi = rbp + 0xb8
+         v = qword [rbp + 0xd0] - 0xf // "ailed to update .bstk \u2014 run as Administrator." // "ailed to update .bstk \u2014 run as Administrator."
+         cmova rdi qword [rbp + 0xb8]
+         rbx = qword [rbp + 0xc8]
+         v = rbx - 0xf            // "ailed to update .bstk \u2014 run as Administrator." // "ailed to update .bstk \u2014 run as Administrator." // "ailed to update .bstk \u2014 run as Administrator."
+         if (((unsigned) v) < 0) 
+         goto loc_0x14001a6ae;
+    loc_0x14001a6ae: // orphan
+         rbx += rdi               // "ailed to update .bstk \u2014 run as Administrator." // "ailed to update .bstk \u2014 run as Administrator."
+         r9d = 0xf                // "e .bstk \u2014 run as Administrator."
+         r8 = rip + str.type_Readonly_ // 0x1400af9e8 // "type="Readonly""
+         rdx = rbx
+         rcx = rdi
+         0x1400a90d0 ()           // 0x1400a90d0(0x0, 0x0, 0x0, 0x0)
+         v = rax - rbx            // "ailed to update .bstk \u2014 run as Administrator." // "ailed to update .bstk \u2014 run as Administrator."
+         if (!v) 
+         goto loc_0x14001a6d2;
+    loc_0x14001a6d2: // orphan
+         rax -= rdi               // "ailed to update .bstk \u2014 run as Administrator." // "ailed to update .bstk \u2014 run as Administrator."
+         v = rax - 0xffffffffffffffff // "ailed to update .bstk \u2014 run as Administrator." // "ailed to update .bstk \u2014 run as Administrator."
+         if (!v) 
+         goto loc_0x14001a6df;
+    loc_0x14001a6df: // orphan
+         qword [var_58h] = r14
+         rax = var_60h
+         qword [rbp + 0xe0] = rax
+         cl = 1                   // "ailed to update .bstk \u2014 run as Administrator."
+         0x1400a9f23 ()           // 0x1400a9f23(0x0, 0x0, 0x0, 0x1)
+         qword [var_sp_78h] = rax
+         rcx = var_sp_70h
+         0x140016540 ()           // 0x140016540(0x0, 0x0, 0x0, 0x178068)
+         qword [var_60h] = rax
+         rcx = var_sp_70h
+         0x140016780 ()           // 0x140016780(0x0, 0x0, 0x0, 0x178060)
+         qword [var_sp_68h] = rax
+         r9d = 1                  // "ailed to update .bstk \u2014 run as Administrator."
+         r8 = rip + 0x952d0       // 0x1400af9f7
+         rdx = rip + str.type_Readonly_ // 0x1400af9e8 // "type="Readonly""
+         rcx = var_58h
+         0x140015330 ()           // 0x140015330(0x0, 0x0, 0x1400af9e8, 0x178040)
+         xmm0 ^= xmm0
+         xmmword [rbp + 0x160] = xmm0
+         xmmword [rbp + 0x170] = xmm6
+         byte [rbp + 0x160] = 0
+         r12d |= 2                // "iled to update .bstk \u2014 run as Administrator."
+         dword [var_48h] = r12d
+         xmmword [rbp + 0xe0] = xmm0
+         xmmword [rbp + 0xf0] = xmm7
+         xmm0 = qword [str.type_Normal_] // [0x1400af9f8:8]=0x6f4e223d65707974 // "type="Normal""
+         qword [rbp + 0xe0] = xmm0
+         eax = dword [0x1400afa00] // [0x1400afa00:4]=0x6c616d72
+         dword [rbp + 0xe8] = eax
+         eax = byte [0x1400afa04] // [0x1400afa04:1]=34 // "Administrator."
+         byte [rbp + 0xec] = al
+         byte [rbp + 0xed] = 0
+         r9 = rbp + 0xb8
+         v = qword [rbp + 0xd0] - 0xf // "ailed to update .bstk \u2014 run as Administrator." // "ailed to update .bstk \u2014 run as Administrator."
+         cmova r9 qword [rbp + 0xb8]
+         r9 += qword [rbp + 0xc8] // "ailed to update .bstk \u2014 run as Administrator."
+         r8 = rbp + 0xb8
+         v = qword [rbp + 0xd0] - 0xf // "ailed to update .bstk \u2014 run as Administrator." // "ailed to update .bstk \u2014 run as Administrator."
+         cmova r8 qword [rbp + 0xb8]
+         dword [var_30h] = r14d
+         rcx = rbp + 0xe0
+         qword [var_28h] = rcx
+         rcx = var_58h
+         qword [var_20h] = rcx
+         rdx = rbp + 0x160
+         rcx = rbp + 0xb0
+         0x140014c90 ()           // 0x140014c90(0x0, 0x0, 0x178160, 0x1780b0)
+         rdx = qword [rbp + 0xf8]
+         v = rdx - 0xf            // "ailed to update .bstk \u2014 run as Administrator." // "ailed to update .bstk \u2014 run as Administrator." // "ailed to update .bstk \u2014 run as Administrator."
+         if (((unsigned) v) <= 0) 
+    loc_0x14001a83f: // orphan
+         rdx = qword [rbp + 0xd0] // "e .bstk \u2014 run as Administrator."
+         v = rdx - 0xf            // "ailed to update .bstk \u2014 run as Administrator." // "ailed to update .bstk \u2014 run as Administrator."
+         if (((unsigned) v) <= 0) 
+    loc_0x14001a880: // orphan
+         xmm0 = xmmword [rbp + 0x160]
+         xmmword [rbp + 0xb8] = xmm0
+         xmm1 = xmmword [rbp + 0x170]
+         xmmword [rbp + 0xc8] = xmm1
+         r12d &= 0xfffffffd       // 4294967293 // "ailed to update .bstk \u2014 run as Administrator." // "ailed to update .bstk \u2014 run as Administrator."
+         xmmword [rbp + 0x170] = xmm6
+         byte [rbp + 0x160] = 0
+         rcx = qword [var_58h]
+         v = rcx & rcx            // "ailed to update .bstk \u2014 run as Administrator." // "ailed to update .bstk \u2014 run as Administrator."
+         if (!v) 
+    loc_0x14001a8fc: // orphan
+         qword [var_58h] = r14
+         rcx = qword [var_sp_78h]
+         v = rcx & rcx            // "ailed to update .bstk \u2014 run as Administrator." // "ailed to update .bstk \u2014 run as Administrator."
+         if (!v) 
+         goto loc_0x14001a90b;
+    loc_0x14001a90b: // orphan
+         rax = qword [rcx]
+         qword [rax + 0x10] ()    // 0x10(0x0, 0x0, 0x0, 0x0)
+         v = rax & rax            // "ailed to update .bstk \u2014 run as Administrator."
+         if (!v) 
+         goto loc_0x14001a916;
+    loc_0x14001a916: // orphan
+         rcx = qword [rax]
+         r8 = qword [rcx]
+         edx = 1                  // "ailed to update .bstk \u2014 run as Administrator."
+         rcx = rax
+         r8 ()                    // 0xffffffffffffffff(0x0, 0x0, 0x1, 0x0)
+
+         goto loc_0x14001a8b9;
+    loc_0x14001a8b9: // orphan
+         eax = 0xffffffff         // -1
+         lock xadd dword [rcx + 0x2c] eax
+         v = eax - 1
+         if (v) 
+         goto loc_0x14001a8c8;
+    loc_0x14001a8c8: // orphan
+         rbx = qword [var_58h]
+         v = rbx & rbx            // "ailed to update .bstk \u2014 run as Administrasor." // "ailed to update .bstk \u2014 run as Administrasor."
+         if (!v) 
+         goto loc_0x14001a8d2;
+    loc_0x14001a8d2: // orphan
+         
+         
+
+    loc_0x14001a8e0: // orphan
+         rcx = rbx
+         rax = rbx + 0x10         // " .bstk \u2014 run as Administrasor."
+         rbx = qword [rax]
+         qword [rax] = r14
+         rax = qword [rcx]
+         edx = 1                  // "ailed to update"
+         qword [rax] ()           // 0xffffffffffffffff(0x0, 0x0, 0x1, 0x0)
+         v = rbx & rbx            // "ailed to update"
+         if (v) 
+         goto loc_0x14001a84c;
+    loc_0x14001a84c: // orphan
+         rdx++                    // "ailed to update"
+         rcx = qword [rbp + 0xb8]
+         rax = rcx
+         v = rdx - 0x1000         // "ailed to update" // "ailed to update"
+         if (((unsigned) v) < 0) 
+    loc_0x14001a87b: // orphan
+         0x1400aa1f8 ()           // 0x1400aa1f8(0x0, 0x0, 0x0, 0x0)
+
+         goto loc_0x14001a862;
+    loc_0x14001a862: // orphan
+         rdx += 0x27              // "istrasor." // "ailed to update"
+         rcx = qword [rcx - 8]
+         rax -= rcx               // "ailed to update" // "ailed to update" // "ailed to update"
+         rax -= 8                 // "ailed to update" // "ailed to update" // "ailed to update"
+         v = rax - 0x1f           // "ailed to update" // "ailed to update"
+         if (((unsigned) v) > 0) 
+    loc_0x14001ac77: // orphan
+         qword [var_20h] = r14
+         r9d = 0                  // "ailed to update" // "ailed to update"
+         r8d = 0                  // "ailed to update" // "ailed to update"
+         edx = 0                  // "ailed to update" // "ailed to update"
+         ecx = 0                  // "ailed to update" // "ailed to update"
+         qword [sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson] () // [0x1400ad928:8]=0xdf0de reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson(0x0, 0x0, 0x0, 0x0)
+
+         goto loc_0x14001a80b;
+    loc_0x14001a80b: // orphan
+         rdx++                    // "ailed to update"
+         rcx = qword [rbp + 0xe0]
+         rax = rcx
+         v = rdx - 0x1000         // "ailed to update" // "ailed to update"
+         if (((unsigned) v) < 0) 
+    loc_0x14001a83a: // orphan
+         0x1400aa1f8 ()           // 0x1400aa1f8(0x0, 0x0, 0x0, 0x0)
+
+         goto loc_0x14001a821;
+    loc_0x14001a821: // orphan
+         rdx += 0x27              // "istrasor." // "ailed to update"
+         rcx = qword [rcx - 8]
+         rax -= rcx               // "ailed to update" // "ailed to update" // "ailed to update"
+         rax -= 8                 // "ailed to update" // "ailed to update" // "ailed to update"
+         v = rax - 0x1f           // "ailed to update" // "ailed to update"
+         if (((unsigned) v) > 0) 
+         goto loc_0x14001a604;
+    loc_0x14001a604: // orphan
+         rbx += rdi               // "ailed to update" // "ailed to update"
+         r9d = 0x17
+         r8 = rip + str.location_fastboot.vdi_ // 0x1400af9b8 // "location="fastboot.vdi""
+         rdx = rbx
+         rcx = rdi
+         0x1400a90d0 ()           // 0x1400a90d0(0x0, 0x0, 0x0, 0x0)
+         v = rax - rbx            // "ailed to update" // "ailed to update"
+         if (!v) 
+    loc_0x14001a62d: // orphan
+         rbx = qword [rbp + 0xc8]
+
+         goto loc_0x14001a624;
+    loc_0x14001a624: // orphan
+         rax -= rdi               // "ailed to update" // "ailed to update"
+         v = rax - 0xffffffffffffffff // "ailed to update" // "ailed to update"
+         if (v) 
+         goto loc_0x14001a529;
+    loc_0x14001a529: // orphan
+         rcx = rdi
+         0x140012c40 ()           // 0x140012c40(0x0, 0x0, 0x0, 0x0)
+         rbx = rax
+         r8 = rdi
+         rdx = rsi
+         rcx = rax
+         0x1400ab0c8 ()           // 0x1400ab0c8(0x0, 0x0, 0x0, 0x0)
+         r9 = rdi + rbx
+         qword [rbp + 0x38] = r9
+         r8 = rbx
+         rdx = rbx
+         rcx = rbp - 0x30
+         qword [sym.imp.MSVCP140.dll__setg___basic_streambuf_DU__char_traits_D_std___std__IEAAXPEAD00_Z] () // [0x1400ad478:8]=0xdd946 reloc.MSVCP140.dll__setg___basic_streambuf_DU__char_traits_D_std___std__IEAAXPEAD00_Z // "F\xd9\r" // reloc.MSVCP140.dll__setg___basic_streambuf_DU__char_traits_D_std___std__IEAAXPEAD00_Z // sym.imp.MSVCP140.dll__setg___basic_streambuf_DU__char_traits_D_std___std__IEAAXPEAD00_Z(0x0, 0x0, 0x0, 0x177fd0)
+         eax = 3                  // "led to update"
+         r14d = 0                 // "ailed to update" // "ailed to update"
+         
+    loc_0x14001a56b: // orphan
+         // CODE XREF from fcn.140019f40 @ 0x14001a562(x)
+         dword [rbp + 0x40] = eax
+         xmm0 ^= xmm0
+         xmmword [rbp + 0xb8] = xmm0
+         qword [rbp + 0xc8] = r14
+         qword [rbp + 0xd0] = 0xf
+         byte [rbp + 0xb8] = 0
+         rax = qword [rbp - 0x40]
+         rcx = dword [rax + 4]
+         rax = rbp - 0x40
+         rcx += rax               // "ailed to update"
+         dl = 0xa                 // "update"
+         qword [sym.imp.MSVCP140.dll__widen___basic_ios_DU__char_traits_D_std___std__QEBADD_Z] () // [0x1400ad510:8]=0xdde90 reloc.MSVCP140.dll__widen___basic_ios_DU__char_traits_D_std___std__QEBADD_Z // reloc.MSVCP140.dll__widen___basic_ios_DU__char_traits_D_std___std__QEBADD_Z // sym.imp.MSVCP140.dll__widen___basic_ios_DU__char_traits_D_std___std__QEBADD_Z(0x0, 0x0, 0xa, 0x178050)
+         r8d = al
+         rdx = rbp + 0xb8
+         rcx = rbp - 0x40
+         0x140015f00 ()           // 0x140015f00(0x0, 0x0, 0x1780b8, 0x177fc0)
+         rcx = qword [rax]
+         rcx = dword [rcx + 4]
+         rcx += rax               // "ailed to update"
+         qword [sym.imp.MSVCP140.dll___Bios_base_std__QEBA_NXZ] () // [0x1400ad3e0:8]=0xdd52c reloc.MSVCP140.dll___Bios_base_std__QEBA_NXZ // ",\xd5\r" // reloc.MSVCP140.dll___Bios_base_std__QEBA_NXZ // sym.imp.MSVCP140.dll___Bios_base_std__QEBA_NXZ(0x0, 0x0, 0x1780b8, 0x178050)
+         v = al & al              // "ailed to update" // "ailed to update"
+         if (!v) 
+         goto loc_0x14001a404;
+    loc_0x14001a404: // orphan
+         rdx++                    // "ailed to update"
+         rcx = qword [rbp + 0x140]
+         rax = rcx
+         v = rdx - 0x1000         // "ailed to update" // "ailed to update"
+         if (((unsigned) v) < 0) 
+    loc_0x14001a433: // orphan
+         0x1400aa1f8 ()           // 0x1400aa1f8(0x0, 0x0, 0x0, 0x0)
+
+         goto loc_0x14001a41a;
+    loc_0x14001a41a: // orphan
+         rdx += 0x27              // "istrasor." // "ailed to update"
+         rcx = qword [rcx - 8]
+         rax -= rcx               // "ailed to update" // "ailed to update" // "ailed to update"
+         rax -= 8                 // "ailed to update" // "ailed to update" // "ailed to update"
+         v = rax - 0x1f           // "ailed to update" // "ailed to update"
+         if (((unsigned) v) > 0) 
+    loc_0x14001ac5d: // orphan
+         qword [var_20h] = 0
+         r9d = 0                  // "ailed to update" // "ailed to update"
+         r8d = 0                  // "ailed to update" // "ailed to update"
+         edx = 0                  // "ailed to update" // "ailed to update"
+         ecx = 0                  // "ailed to update" // "ailed to update"
+         qword [sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson] () // [0x1400ad928:8]=0xdf0de reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson(0x0, 0x0, 0x0, 0x0)
+
+         goto loc_0x14001a389;
+    loc_0x14001a389: // orphan
+         rbx = rsi
+         rbx |= 0xf               // "e" // "ailed to update"
+         v = rbx - rcx            // "ailed to update"
+         if (((unsigned) v) <= 0) 
+    loc_0x14001a39a: // orphan
+         v = rbx - 0x16           // "ailed to update" // "ailed to update" // "ailed to update"
+         eax = 0x16
+         cmovb rbx rax
+
+         goto loc_0x14001a395;
+    loc_0x14001a395: // orphan
+         rbx = rcx
+         
+    loc_0x14001a3a7: // orphan
+         // CODE XREF from fcn.140019f40 @ 0x14001a398(x)
+         rcx = rbx + 1            // "ailed to update"
+         0x140012c40 ()           // 0x140012c40(0x0, 0x0, 0x0, 0x1)
+         rdi = rax
+         qword [rbp + 0x140] = rax
+
+         goto loc_0x14001a366;
+    loc_0x14001a366: // orphan
+         r15 = qword [r13]
+
+         goto loc_0x14001a315;
+    loc_0x14001a315: // orphan
+         v = eax - 1              // "ailed to update" // "ailed to update" // "ailed to update" // "ailed to update"
+         bl = v == 0
+         
+         goto loc_0x14001a2ee;
+    loc_0x14001a2ee: // orphan
+         v = edx - 0x10b          // 267 // "ailed to update" // "ailed to update" // "ailed to update" // "ailed to update"
+
+         goto loc_0x14001a2fe;
+    loc_0x14001a2fe: // orphan
+         // CODE XREFS from fcn.140019f40 @ 0x14001a2aa(x), 0x14001a2b9(x), 0x14001a2c7(x)
+         dword [rbp - 0x70] = edx
+         qword [rbp - 0x68] = rbx
+         xmm0 = xmmword [rbp - 0x70]
+         xmmword [rbp + 0xe0] = xmm0
+         v = eax & eax            // "ailed to update" // "ailed to update"
+         if (!v) 
+         goto loc_0x14001a2d8;
+    loc_0x14001a2d8: // orphan
+         if (!v) 
+         goto loc_0x14001a2da;
+    loc_0x14001a2da: // orphan
+         eax -= 2                 // "ailed to update" // "ailed to update" // "ailed to update"
+         if (!v) 
+         goto loc_0x14001a2df;
+    loc_0x14001a2df: // orphan
+         eax -= 1                 // "ailed to update" // "ailed to update" // "ailed to update" // "ailed to update"
+         if (!v) 
+         goto loc_0x14001a2e4;
+    loc_0x14001a2e4: // orphan
+         v = eax - 0x32           // '2' // 50 // "ailed to update" // "ailed to update" // "ailed to update"
+         
+    loc_0x14001a2f4: // orphan
+         // CODE XREF from fcn.140019f40 @ 0x14001a2e7(x)
+         eax = r14d
+         if (v) 
+         goto loc_0x14001a27b;
+    loc_0x14001a27b: // orphan
+         eax = dword [rbp + 0x210] // " Administrasor."
+         v = al & 1
+         ecx = 0x1ff              // 511
+         if (!zf) ecx = edi
+         dword [rbp + 0xe4] = ecx
+         bt eax 0xa
+         jae 0x14001a2bb          // likely
+
+    loc_0x14001a2bb: // orphan
+         eax = al
+         eax &= 0x10              // "ailed to update" // "ailed to update"
+         eax |= 0x20              // "s Administrasor."
+         eax >>>= 4               // "iled to update"
+         
+         goto loc_0x14001a297;
+    loc_0x14001a297: // orphan
+         ecx = dword [rbp + 0x214]
+         v = ecx - 0xa000000c     // '\f' // "ailed to update" // "ailed to update"
+         if (v) 
+    loc_0x14001a2ac: // orphan
+         v = ecx - 0xa0000003     // "ailed to update" // "ailed to update"
+         if (v) 
+         goto loc_0x14001a2b4;
+    loc_0x14001a2b4: // orphan
+         eax = 0xa                // "update"
+         
+         goto loc_0x14001a2a5;
+    loc_0x14001a2a5: // orphan
+         eax = 4                  // "ed to update"
+         
+         goto loc_0x14001a223;
+    loc_0x14001a223: // orphan
+         rax = qword [r13]
+
+         goto loc_0x14001a167;
+    loc_0x14001a167: // orphan
+         rbx = qword [rbx]
+
+         goto loc_0x14001a0bf;
+    loc_0x14001a0bf: // orphan
+         rax = qword [rbx]
+
+         goto loc_0x14001a03a;
+    loc_0x14001a03a: // orphan
+         rax = rbp + 0x120
+         v = r8 - 0xf             // "ailed to update" // "ailed to update" // "ailed to update"
+         cmova rax rdx
+         v = byte [rcx + rax - 1] - 0x5c // '\\' // "ailed to update" // "ailed to update" // "ailed to update"
+         if (!v) 
+}
+

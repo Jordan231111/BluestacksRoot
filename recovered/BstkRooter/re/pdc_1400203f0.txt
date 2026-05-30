@@ -1,0 +1,2318 @@
+// callconv: rax ms (rcx, rdx, r8, r9, stack);
+void fcn.1400203f0 (int64_t arg1, int64_t arg2) {
+        qword [var_18h] = rbx
+        push (rbp)
+        push (rsi)
+        push (rdi)
+        push (r12)
+        push (r13)
+        push (r14)
+        push (r15)
+        rbp = rsp - 0x490
+        rsp -= 0x590
+        rax = qword [0x1400e0140] // [0x1400e0140:8]=0x2b992ddfa232
+        rax ^= rsp
+        qword [var_480h] = rax
+        rdi = rdx    // arg2
+        rbx = rcx    // arg1
+        qword [var_30h] = rcx // arg1
+        dword [var_48h] = 0
+        v = qword [rdx + 0x10] - 0 // arg2
+        if (v) goto loc_0x14002049f // likely
+        goto loc_0x140020439;
+    loc_0x14002049f:
+        ecx = 0x30   // '0' // 48
+        fcn.140012c40 ()
+        rcx = rax
+        xmm0 = xmmword [str.___Killing_emulator_processes...] // [0x1400af2e0:16]=-1 // "[*] Killing emulator processes..."
+        xmmword [rax] = xmm0
+        xmm1 = xmmword [0x1400af2f0] // [0x1400af2f0:16]=-1 // "ator processes..."
+        xmmword [rax + 0x10] = xmm1
+        eax = byte [0x1400af300] // [0x1400af300:1]=46 // "."
+        byte [rcx + 0x20] = al
+        byte [rcx + 0x21] = 0
+        edx = 0x30   // '0' // 48
+        fcn.1400aa1f8 ()
+        rcx = rbx
+        fcn.14001d240 ()
+        ecx = 0x3e8  // 1000
+        qword [sym.imp.KERNEL32.dll_Sleep] () // [0x1400ad260:8]=0xde9de reloc.KERNEL32.dll_Sleep // (pstr 0x00000000) "[*] Killing emulator processes..." // reloc.KERNEL32.dll_Sleep // VOID Sleep(-1)
+        r15 = qword [rdi + 0x10]
+        r13 = 0x7fffffffffffffff // 9223372036854775807
+        rax = r13
+        rax -= r15
+        v = rax - 0xd
+        if (((unsigned) v) < 0) goto 0x14002252a // unlikely
+        goto loc_0x14002050a;
+    loc_0x14002252a:
+        fcn.14002bd80 ()
+        
+    loc_0x140022530:
+        fcn.14002bd80 ()
+        goto loc_0x140020511;
+        return rax;
+    loc_0x140020514: // orphan
+         xmm0 ^= xmm0
+         xmmword [var_2a0h] = xmm0
+         xmm1 ^= xmm1
+         xmmword [var_2b0h] = xmm1
+         r14 = r15 + 0xd          // "r n"
+         r12d = 0xf               // "n"
+         ebx = r12d               // "n"
+         rsi = var_2a0h           // (cstr 0x00000000) "[!] InstallDir n"
+         eax = 0x16
+         v = r14 - rbx            // "!] InstallDir n" // "!] InstallDir n" // "!] InstallDir n"
+         if (((unsigned) v) <= 0) 
+    loc_0x140020571: // orphan
+         qword [var_2b0h] = r14
+         qword [var_2b8h] = rbx
+         r8 = r15
+         rdx = rdi
+         rcx = rsi
+         sub.VCRUNTIME140.dll_memcpy () // void *memcpy(0, 0, 0)
+         xmm0 = qword [str.HD_Player.exe] // [0x1400af1f8:8]=0x6579616c502d4448 // "HD-Player.exe"
+         qword [rsi + r15] = xmm0
+         eax = dword [0x1400af200] // [0x1400af200:4]=0x78652e72 // "r.exe"
+         dword [rsi + r15 + 8] = eax
+         eax = byte [0x1400af204] // [0x1400af204:1]=101 // "e"
+         byte [rsi + r15 + 0xc] = al
+         byte [rsi + r14] = 0
+         r14 = qword [var_2b0h]
+         rax = r13
+         rax -= r14
+         v = rax - 4
+         if (((unsigned) v) < 0) 
+    loc_0x1400205ce: // orphan
+         r15 = var_2a0h
+         v = qword [var_2b8h] - 0xf
+         cmova r15 qword [var_2a0h]
+         xmm0 ^= xmm0
+         xmmword [var_320h] = xmm0
+         xmm1 ^= xmm1
+         xmmword [var_330h] = xmm1
+         rsi = r14 + 4
+         rbx = r12
+         rdi = var_320h
+         v = rsi - rbx
+         if (((unsigned) v) <= 0) 
+    loc_0x14002063e: // orphan
+         qword [var_330h] = rsi
+         qword [var_338h] = rbx
+         r8 = r14
+         rdx = r15
+         rcx = rdi
+         sub.VCRUNTIME140.dll_memcpy () // void *memcpy(0, 0, 0)
+         dword [rdi + r14] = 0x6b61622e // '.bak' // [0x6b61622e:4]=-1
+         byte [rdi + rsi] = 0
+         rax = var_2a0h
+         v = qword [var_2b8h] - 0xf // "bak" // "bak" // "bak"
+         cmova rax qword [var_2a0h]
+         qword [var_2e0h] = rax
+         rax = qword [var_2b0h]
+         qword [var_2e8h] = rax
+         r8d = 0                  // "bak" // "bak"
+         rdx = var_2e0h
+         rcx = var_270h
+         fcn.1400133d0 ()
+         rcx = var_270h
+         v = qword [var_288h] - 7 // "bak" // "bak" // "bak" // "bak"
+         cmova rcx qword [var_270h]
+         r9d = 0xffffffff         // -1
+         r8d = 3                  // "k"
+         rdx = var_2c0h
+         fcn.1400a9928 ()
+         rdi = rip + 0xbf9d1      // 0x1400e00b0
+         v = eax & eax            // "bak" // "bak"
+         if (v) 
+    loc_0x14002071e: // orphan
+         v = eax - 0x40           // '@' // 64 // "bak" // "bak" // "bak"
+         if (((unsigned) v) > 0) 
+    loc_0x140020736: // orphan
+         v = eax - 0x7b           // '{' // 123 // "bak" // "bak" // "bak"
+         if (!v) 
+    loc_0x140020746: // orphan
+         ecx = 1                  // "bak"
+
+         goto loc_0x1400207df;
+    loc_0x1400207df: // orphan
+         ebx = 1                  // "bak"
+         v = eax & eax            // "bak" // "bak"
+         if (v) 
+    loc_0x14002250f: // orphan
+         r8 = var_270h
+         rdx = var_2e0h
+         rcx = rip + str.exists   // 0x1400aee50 // "exists"
+         fcn.14002b610 ()
+
+         goto loc_0x1400207ec;
+    loc_0x1400207ec: // orphan
+         
+    loc_0x140020771: // orphan
+         // CODE XREF from fcn.1400203f0 @ 0x1400207ec(x)
+         rcx = var_270h
+         fcn.14002b920 ()
+         v = bl & bl              // "bak" // "bak"
+         if (!v) 
+    loc_0x14002087c: // orphan
+         rax = var_320h
+         v = qword [var_338h] - 0xf // "bak" // "bak" // "bak"
+         cmova rax qword [var_320h]
+         qword [var_2e0h] = rax
+         rax = qword [var_330h]
+         qword [var_2e8h] = rax
+         r8d = 0                  // "bak" // "bak"
+         rdx = var_2e0h
+         rcx = var_270h
+         fcn.1400133d0 ()
+         eax = 0x27               // '\'' // 39
+         dword [var_48h] = eax
+         rcx = var_270h
+         fcn.14002ce20 ()
+         ebx = al
+         rcx = var_270h
+         fcn.14002b920 ()
+         r15d = 0x2f              // '/' // 47
+         v = bl & bl              // "bak"
+         if (v) 
+    loc_0x140020a9a: // orphan
+         ecx = 0x30               // '0' // 48
+         fcn.140012c40 ()
+         rdx = rax
+         xmm0 = xmmword [str.___Backup_already_exists__skipping_copy.] // [0x1400af358:16]=-1 // "[*] Backup already exists, skipping copy."
+         xmmword [rax] = xmm0
+         xmm1 = xmmword [0x1400af368] // [0x1400af368:16]=-1 // "dy exists, skipping copy."
+         xmmword [rax + 0x10] = xmm1
+         xmm0 = qword [0x1400af378] // [0x1400af378:8]=0x79706f6320676e69 // "ing copy."
+         qword [rax + 0x20] = xmm0
+         eax = byte [0x1400af380] // [0x1400af380:1]=46 // "."
+         byte [rdx + 0x28] = al
+         byte [rdx + 0x29] = 0
+         r8 = r15
+         rcx = var_270h           // (cstr 0x00000000) "[*] Backup already exists, skipp"
+         fcn.1400016c0 ()
+
+         goto loc_0x140020b9b;
+    loc_0x140020b9b: // orphan
+         rdx = var_2c0h           // (cstr 0x00000000) "[*] Backup already exists, skipp"
+         rcx = var_160h           // (cstr 0x00000000) "[*] Backup already exists, skipp"
+         qword [sym.imp.MSVCP140.dll__tellg___basic_istream_DU__char_traits_D_std___std__QEAA_AV__fpos_U_Mbstatet___2_XZ] () // [0x1400ad368:8]=0xde202 reloc.MSVCP140.dll__tellg___basic_istream_DU__char_traits_D_std___std__QEAA_AV__fpos_U_Mbstatet___2_XZ // reloc.MSVCP140.dll__tellg___basic_istream_DU__char_traits_D_std___std__QEAA_AV__fpos_U_Mbstatet___2_XZ // sym.imp.MSVCP140.dll__tellg___basic_istream_DU__char_traits_D_std___std__QEAA_AV__fpos_U_Mbstatet___2_XZ(0x0, 0x0, 0x1782c0, 0x178160)
+         rdx = qword [rax + 8]
+         rdx += qword [rax]       // "*] Backup already exists, skipp" // "*] Backup already exists, skipp" // "*] Backup already exists, skipp"
+         r8 = var_40h             // (cstr 0x00000000) "[*] Backup already exists, skipp"
+         rcx = var_70h            // (cstr 0x00000000) "[*] Backup already exists, skipp"
+         fcn.1400171e0 ()
+         xmm0 ^= xmm0
+         xmmword [var_270h] = xmm0
+         r13d = 0                 // "*] Backup already exists, skipp" // "*] Backup already exists, skipp"
+         qword [var_280h] = r13
+         rdx = var_270h           // (cstr 0x00000000) "[*] Backup already exists, skipp"
+         rcx = var_160h           // (cstr 0x00000000) "[*] Backup already exists, skipp"
+         qword [sym.imp.MSVCP140.dll__seekg___basic_istream_DU__char_traits_D_std___std__QEAAAEAV12_V__fpos_U_Mbstatet___2__Z] () // [0x1400ad4b8:8]=0xde1a6 reloc.MSVCP140.dll__seekg___basic_istream_DU__char_traits_D_std___std__QEAAAEAV12_V__fpos_U_Mbstatet___2__Z // reloc.MSVCP140.dll__seekg___basic_istream_DU__char_traits_D_std___std__QEAAAEAV12_V__fpos_U_Mbstatet___2__Z // sym.imp.MSVCP140.dll__seekg___basic_istream_DU__char_traits_D_std___std__QEAAAEAV12_V__fpos_U_Mbstatet___2__Z(0x0, 0x0, 0x178270, 0x178160)
+         r8 = qword [var_78h]
+         rdx = qword [var_70h]
+         r8 -= rdx                // "*] Backup already exists, skipp" // "*] Backup already exists, skipp"
+         rcx = var_160h           // (cstr 0x00000000) "[*] Backup already exists, skipp"
+         qword [sym.imp.MSVCP140.dll__read___basic_istream_DU__char_traits_D_std___std__QEAAAEAV12_PEAD_J_Z] () // [0x1400ad4c0:8]=0xde15c reloc.MSVCP140.dll__read___basic_istream_DU__char_traits_D_std___std__QEAAAEAV12_PEAD_J_Z // "\\xe1\r" // reloc.MSVCP140.dll__read___basic_istream_DU__char_traits_D_std___std__QEAAAEAV12_PEAD_J_Z // sym.imp.MSVCP140.dll__read___basic_istream_DU__char_traits_D_std___std__QEAAAEAV12_PEAD_J_Z(0x0, 0x0, 0x0, 0x178160)
+         rcx = var_170h           // (cstr 0x00000000) "[*] Backup already exists, skipp"
+         fcn.14002c4d0 ()
+         v = rax & rax            // "*] Backup already exists, skipp" // "*] Backup already exists, skipp"
+         if (v) 
+    loc_0x140020c3d: // orphan
+         r9 = var_2a0h            // (cstr 0x00000000) "[*] Backup already exists, skipp"
+         v = qword [var_2b8h] - 0xf // "*] Backup already exists, skipp" // "*] Backup already exists, skipp" // "*] Backup already exists, skipp"
+         cmova r9 qword [var_2a0h]
+         rax = qword [var_78h]
+         rax -= qword [var_70h]   // "*] Backup already exists, skipp" // "*] Backup already exists, skipp"
+         qword [var_20h] = rax
+         r8 = rip + str.___Loaded__s___zu_bytes_ // 0x1400af3c8 // "[*] Loaded %s (%zu bytes)"
+         edx = 0x100              // 256
+         rcx = var_380h           // (cstr 0x00000000) "[*] Backup already exists, skipp"
+         fcn.14002ee70 ()
+         xmm0 ^= xmm0
+         xmmword [var_270h] = xmm0
+         xmm1 ^= xmm1
+         xmmword [var_280h] = xmm1
+         rcx = var_380h           // (cstr 0x00000000) "[*] Backup already exists, skipp"
+         sub.api_ms_win_crt_string_l1_1_0.dll_strlen () // size_t strlen("")
+         r8 = rax
+         rdx = var_380h           // (cstr 0x00000000) "[*] Backup already exists, skipp"
+         rcx = var_270h           // (cstr 0x00000000) "[*] Backup already exists, skipp"
+         fcn.140013040 ()
+         r8 = qword [var_288h]
+         v = r8 - 0xf             // "*] Backup already exists, skipp" // "*] Backup already exists, skipp" // "*] Backup already exists, skipp"
+         if (((unsigned) v) <= 0) 
+    loc_0x140020cd2: // orphan
+         rax = var_70h            // (cstr 0x00000000) "[*] Backup already exists, skipp"
+         qword [var_bp_40h] = rax
+         r8 = qword [var_78h]
+         r10 = r8
+         rdx = qword [var_70h]
+         r10 -= rdx               // "*] Backup already exists, skipp" // "*] Backup already exists, skipp"
+         v = r10 - 0x40           // '@' // 64 // "*] Backup already exists, skipp" // "*] Backup already exists, skipp" // "*] Backup already exists, skipp"
+         jae 0x140020d3b          // unlikely
+
+    loc_0x140020d3b: // orphan
+         r9d = byte [rdx + 0x3f]
+         r9 <<<= 8                // "*] Backup already exists, skipp"
+         ecx = byte [rdx + 0x3e]
+         r9 |= rcx                // "*] Backup already exists, skipp"
+         r9 <<<= 8                // "*] Backup already exists, skipp"
+         ecx = byte [rdx + 0x3d]
+         r9 |= rcx                // "*] Backup already exists, skipp"
+         r9 <<<= 8                // "*] Backup already exists, skipp"
+         ecx = byte [rdx + 0x3c]
+         r9 |= rcx                // "*] Backup already exists, skipp"
+         rcx = r9 + 0x18
+         v = rcx - r10            // "*] Backup already exists, skipp"
+         jae 0x140022333          // likely
+
+    loc_0x140022333: // orphan
+         qword [var_278h] = r13
+         ecx = 0x20               // (pstr 0x00000000) "[*] Backup already exists, skipp"
+         fcn.140012c40 ()
+         qword [var_270h] = rax
+         xmm0 = xmmword [0x1400b0600] // [0x1400b0600:16]=-1 // "sts, skipp" // "p"
+         xmmword [var_280h] = xmm0
+         xmm0 = xmmword [str.____Invalid_PE_header.] // [0x1400af408:16]=-1 // "[!] Invalid PE header."
+         xmmword [rax] = xmm0
+         ecx = dword [0x1400af418] // [0x1400af418:4]=0x65646165 // "eader."
+         dword [rax + 0x10] = ecx
+         ecx = word [0x1400af41c] // [0x1400af41c:2]=0x2e72 // "r."
+         word [rax + 0x14] = cx
+         byte [rax + 0x16] = r13b
+         rcx = var_270h
+         fcn.1400010f0 ()
+
+         goto loc_0x1400223e4;
+    loc_0x1400223e4: // orphan
+         // CODE XREF from fcn.1400203f0 @ 0x140020b96(x)
+         rax = qword [var_160h]
+         rcx = dword [rax + 4]
+         rax = rip + 0x8cdc2      // 0x1400af1b8
+         qword [rbp + rcx + 0x160] = rax
+         rax = qword [var_160h]
+         rcx = dword [rax + 4]
+         edx = rcx - 0xb0
+         dword [rbp + rcx + 0x15c] = edx
+         rcx = var_170h           // (cstr 0x00000000) "[!] Invalid PE header."
+         fcn.140018010 ()
+         rcx = var_178h           // (cstr 0x00000000) "[!] Invalid PE header."
+         qword [sym.imp.MSVCP140.dll___1__basic_istream_DU__char_traits_D_std___std__UEAA_XZ] () // [0x1400ad4d0:8]=0xde0e0 reloc.MSVCP140.dll___1__basic_istream_DU__char_traits_D_std___std__UEAA_XZ // reloc.MSVCP140.dll___1__basic_istream_DU__char_traits_D_std___std__UEAA_XZ // sym.imp.MSVCP140.dll___1__basic_istream_DU__char_traits_D_std___std__UEAA_XZ(0x0, 0x0, 0x61766d99, 0x178178)
+         rcx = var_210h           // (cstr 0x00000000) "[!] Invalid PE header."
+         qword [sym.imp.MSVCP140.dll___1__basic_ios_DU__char_traits_D_std___std__UEAA_XZ] () // [0x1400ad538:8]=0xddd10 reloc.MSVCP140.dll___1__basic_ios_DU__char_traits_D_std___std__UEAA_XZ // reloc.MSVCP140.dll___1__basic_ios_DU__char_traits_D_std___std__UEAA_XZ // sym.imp.MSVCP140.dll___1__basic_ios_DU__char_traits_D_std___std__UEAA_XZ(0x0, 0x0, 0x61766d99, 0x178210)
+
+         goto loc_0x140022494;
+    loc_0x140022494: // orphan
+         xmm0 = xmmword [0x1400b0590] // [0x1400b0590:16]=-1 // "header."
+         xmmword [var_330h] = xmm0
+         byte [var_320h] = 0
+         rdx = qword [var_2b8h]
+         v = rdx - 0xf            // "header." // "!] Invalid PE header." // "!] Invalid PE header." // "!] Invalid PE header."
+         if (((unsigned) v) <= 0) 
+    loc_0x140020475: // orphan
+         rcx = qword [var_480h]
+         rcx ^= rsp               // (cstr 0x00000000) "[!] Invalid PE header." // "!] Invalid PE header."
+         fcn.1400aa370 ()
+         rbx = qword [var_18h]
+         rsp += 0x590             // (cstr 0x00000000) "[!] Invalid PE header." // "!] Invalid PE header."
+         r15 = pop ()             // (cstr 0x00000000) "[!] Invalid PE header."
+         r14 = pop ()             // (cstr 0x00000000) "[!] Invalid PE header."
+         r13 = pop ()             // (cstr 0x00000000) "[!] Invalid PE header."
+         r12 = pop ()             // (cstr 0x00000000) "[!] Invalid PE header."
+         rdi = pop ()             // (cstr 0x00000000) "[!] Invalid PE header."
+         rsi = pop ()             // (cstr 0x00000000) "[!] Invalid PE header."
+         rbp = pop ()             // (cstr 0x00000000) "[!] Invalid PE header."
+         return
+
+    loc_0x1400224bc: // orphan
+         rdx++                    // "!] Invalid PE header."
+         rcx = qword [var_2a0h]
+         rax = rcx
+         v = rdx - 0x1000         // "!] Invalid PE header." // "!] Invalid PE header."
+         if (((unsigned) v) < 0) 
+    loc_0x140020470: // orphan
+         fcn.1400aa1f8 ()
+
+         goto loc_0x1400224d6;
+    loc_0x1400224d6: // orphan
+         rdx += 0x27              // 39 // "!] Invalid PE header."
+         rcx = qword [rcx - 8]
+         rax -= rcx               // "!] Invalid PE header." // "!] Invalid PE header." // "!] Invalid PE header."
+         rax -= 8                 // "!] Invalid PE header." // "!] Invalid PE header." // "!] Invalid PE header."
+         v = rax - 0x1f           // "!] Invalid PE header." // "!] Invalid PE header."
+         if (((unsigned) v) <= 0) 
+         goto loc_0x1400224ef;
+    loc_0x1400224ef: // orphan
+         qword [var_20h] = 0
+         r9d = 0                  // "!] Invalid PE header." // "!] Invalid PE header."
+         r8d = 0                  // "!] Invalid PE header." // "!] Invalid PE header."
+         edx = 0                  // "!] Invalid PE header." // "!] Invalid PE header."
+         ecx = 0                  // "!] Invalid PE header." // "!] Invalid PE header."
+         qword [sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson] () // [0x1400ad928:8]=0xdf0de reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson(0x0, 0x0, 0x0, 0x0)
+
+         goto loc_0x14002244a;
+    loc_0x14002244a: // orphan
+         rdx++                    // "!] Invalid PE header."
+         rcx = qword [var_320h]
+         rax = rcx
+         v = rdx - 0x1000         // "!] Invalid PE header." // "!] Invalid PE header."
+         if (((unsigned) v) < 0) 
+    loc_0x14002248f: // orphan
+         fcn.1400aa1f8 ()
+
+         goto loc_0x140022460;
+    loc_0x140022460: // orphan
+         rdx += 0x27              // 39 // "!] Invalid PE header."
+         rcx = qword [rcx - 8]
+         rax -= rcx               // "!] Invalid PE header." // "!] Invalid PE header." // "!] Invalid PE header."
+         rax -= 8                 // "!] Invalid PE header." // "!] Invalid PE header." // "!] Invalid PE header."
+         v = rax - 0x1f           // "!] Invalid PE header." // "!] Invalid PE header."
+         if (((unsigned) v) <= 0) 
+         goto loc_0x140022475;
+    loc_0x140022475: // orphan
+         qword [var_20h] = 0
+         r9d = 0                  // "!] Invalid PE header." // "!] Invalid PE header."
+         r8d = 0                  // "!] Invalid PE header." // "!] Invalid PE header."
+         edx = 0                  // "!] Invalid PE header." // "!] Invalid PE header."
+         ecx = 0                  // "!] Invalid PE header." // "!] Invalid PE header."
+         qword [sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson] () // [0x1400ad928:8]=0xdf0de reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson(0x0, 0x0, 0x0, 0x0)
+         int3
+
+        return rax;
+    loc_0x140022394: // orphan
+         rdx = qword [var_80h]
+         rdx -= rcx               // "!] Invalid PE header." // "!] Invalid PE header."
+         rax = rcx
+         v = rdx - 0x1000         // "!] Invalid PE header." // "!] Invalid PE header." // "!] Invalid PE header."
+         if (((unsigned) v) < 0) 
+    loc_0x1400223d2: // orphan
+         fcn.1400aa1f8 ()
+         xmm0 ^= xmm0
+         xmmword [var_70h] = xmm0
+         qword [var_80h] = r13
+
+         goto loc_0x1400223a7;
+    loc_0x1400223a7: // orphan
+         rdx += 0x27              // 39 // "!] Invalid PE header."
+         rcx = qword [rcx - 8]
+         rax -= rcx               // "!] Invalid PE header." // "!] Invalid PE header." // "!] Invalid PE header."
+         rax -= 8                 // "!] Invalid PE header." // "!] Invalid PE header." // "!] Invalid PE header."
+         v = rax - 0x1f           // "!] Invalid PE header." // "!] Invalid PE header."
+         if (((unsigned) v) <= 0) 
+         goto loc_0x1400223bc;
+    loc_0x1400223bc: // orphan
+         qword [var_20h] = r13
+         r9d = 0                  // "!] Invalid PE header." // "!] Invalid PE header."
+         r8d = 0                  // "!] Invalid PE header." // "!] Invalid PE header."
+         edx = 0                  // "!] Invalid PE header." // "!] Invalid PE header."
+         ecx = 0                  // "!] Invalid PE header." // "!] Invalid PE header."
+         qword [sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson] () // [0x1400ad928:8]=0xdf0de reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson(0x0, 0x0, 0x0, 0x0)
+         int3
+
+        return rax;
+    loc_0x140020d6e: // orphan
+         v = byte [rdx + r9] - 0x50 // 'P'
+         if (v) 
+         goto loc_0x140020d79;
+    loc_0x140020d79: // orphan
+         v = byte [rdx + r9 + 1] - 0x45 // 'E' // "!] Invalid PE header." // "!] Invalid PE header." // "!] Invalid PE header."
+         if (v) 
+         goto loc_0x140020d85;
+    loc_0x140020d85: // orphan
+         rcx = r9 + 8             // "lid PE header."
+         v = rcx - r10
+         if (((unsigned) v) <= 0) 
+    loc_0x140020d93: // orphan
+         r14d = byte [r9 + rdx + 7]
+         r14 <<<= 8               // "!] Invalid PE header."
+         ecx = byte [r9 + rdx + 6]
+         r14 |= rcx
+
+         goto loc_0x140020db4;
+    loc_0x140020db4: // orphan
+         r10d = byte [r9 + rdx + 0x15]
+         r10 <<<= 8               // "!] Invalid PE header."
+         ecx = byte [r9 + rdx + 0x14]
+         r10 |= rcx               // "!] Invalid PE header."
+
+         goto loc_0x140020f69;
+    loc_0x140020f69: // orphan
+         qword [var_50h] = r13
+         rdi = qword [var_bp_70h]
+         v = rdi - rbx            // "!] Invalid PE header." // "!] Invalid PE header."
+         if (!v) 
+    loc_0x14002225a: // orphan
+         qword [var_278h] = r13
+         ecx = 0x20               // (pstr 0x00000000) "[!] Invalid PE header."
+         fcn.140012c40 ()
+         qword [var_270h] = rax
+         xmm0 = xmmword [0x1400b0630] // [0x1400b0630:16]=-1 // "kipp" // "p"
+         xmmword [var_280h] = xmm0
+         xmm0 = xmmword [str.____.text_section_not_found.] // [0x1400af428:16]=-1 // "[!] .text section not found."
+         xmmword [rax] = xmm0
+         xmm0 = qword [0x1400af438] // [0x1400af438:8]=0x6f6620746f6e206e // "n not found."
+         qword [rax + 0x10] = xmm0
+         ecx = dword [0x1400af440] // [0x1400af440:4]=0x2e646e75 // "und."
+         dword [rax + 0x18] = ecx
+         byte [rax + 0x1c] = 0
+         rcx = var_270h
+         fcn.1400010f0 ()
+
+         goto loc_0x14002238a;
+    loc_0x14002238a: // orphan
+         // CODE XREFS from fcn.1400203f0 @ 0x140020d36(x), 0x140022331(x)
+         rcx = qword [var_70h]
+         v = rcx & rcx            // "!] .text sectio" // "!] .text sectio"
+         if (!v) 
+         goto loc_0x1400222c0;
+    loc_0x1400222c0: // orphan
+         rcx = qword [var_60h]
+         rcx -= r8                // "!] .text sectio" // "!] .text sectio"
+         rax = 0x4924924924924925
+         rax = rax * rcx
+         rdx >>= 3                // "!] .text sectio" // "!] .text sectio"
+         rax = rdx
+         rax >>>= 0x3f            // "!] .text sectio" // "!] .text sectio"
+         rdx += rax               // "!] .text sectio" // "!] .text sectio"
+         rdx = rdx * 0x1c
+         rax = r8
+         v = rdx - 0x1000         // "!] .text sectio" // "!] .text sectio" // "!] .text sectio"
+         if (((unsigned) v) < 0) 
+    loc_0x14002231d: // orphan
+         rcx = r8
+         fcn.1400aa1f8 ()
+         xmm0 ^= xmm0
+         xmmword [var_bp_70h] = xmm0
+         qword [var_60h] = r13
+         
+         goto loc_0x1400222f2;
+    loc_0x1400222f2: // orphan
+         rdx += 0x27              // 39 // "!] .text sectio"
+         r8 = qword [r8 - 8]
+         rax -= r8                // "!] .text sectio" // "!] .text sectio" // "!] .text sectio"
+         rax -= 8                 // "!] .text sectio" // "!] .text sectio" // "!] .text sectio"
+         v = rax - 0x1f           // "!] .text sectio" // "!] .text sectio"
+         if (((unsigned) v) <= 0) 
+         goto loc_0x140022307;
+    loc_0x140022307: // orphan
+         qword [var_20h] = r13
+         r9d = 0                  // "!] .text sectio" // "!] .text sectio"
+         r8d = 0                  // "!] .text sectio" // "!] .text sectio"
+         edx = 0                  // "!] .text sectio" // "!] .text sectio"
+         ecx = 0                  // "!] .text sectio" // "!] .text sectio"
+         qword [sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson] () // [0x1400ad928:8]=0xdf0de reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson(0x0, 0x0, 0x0, 0x0)
+         int3
+
+        return rax;
+    loc_0x140020f7a: // orphan
+         
+
+         goto loc_0x140020fa9;
+    loc_0x140020fa9: // orphan
+         qword [var_50h] = rdi
+
+         goto loc_0x140020fb6;
+    loc_0x140020fb6: // orphan
+         eax = dword [rdi + 0x14]
+         qword [var_38h] = rax
+         eax = dword [rdi + 0x18]
+         eax += dword [rdi + 0x14]
+         qword [var_58h] = rax
+         rax = var_70h            // (cstr 0x00000000) "[!] .text sectio"
+         qword [var_bp_48h] = rax
+         rax = var_70h            // (cstr 0x00000000) "[!] .text sectio"
+         qword [var_28h] = rax
+         qword [var_sp_50h] = 0xffffffffffffffff
+         dword [var_44h] = r13d
+         xmm0 ^= xmm0
+         xmmword [var_300h] = xmm0
+         qword [var_310h] = r13
+         qword [var_318h] = r12
+         byte [var_300h] = 0
+         rax = var_bp_48h
+         qword [var_bp_20h] = rax
+         rax = var_380h           // (cstr 0x00000000) "[!] .text sectio"
+         qword [var_bp_18h] = rax
+         rax = qword [var_30h]
+         qword [var_10h] = rax
+         rax = var_bp_70h         // (cstr 0x00000000) "[!] .text sectio"
+         qword [var_8h] = rax
+         rax = var_38h
+         qword [rbp] = rax
+         rax = var_58h            // "und."
+         qword [var_8h_2] = rax
+         rax = var_70h            // (cstr 0x00000000) "[!] .text sectio"
+         qword [var_10h_2] = rax
+         rax = var_bp_40h
+         qword [rbp + 0x18] = rax
+         rax = var_50h            // (pstr 0x00000000) "[!] .text sectio"
+         qword [rbp + 0x20] = rax
+         rax = var_28h
+         qword [var_28h_2] = rax
+         rax = var_sp_50h
+         qword [var_30h_2] = rax
+         rax = var_44h            // (pstr 0x00000000) "[!] .text sectio"
+         qword [var_38h_2] = rax
+         rax = var_300h           // (cstr 0x00000000) "[!] .text sectio"
+         qword [rbp + 0x40] = rax
+         ecx = 0x50               // 'P' // 80
+         fcn.140012c40 ()
+         rdx = rax                // (cstr 0x00000000) "[!] .text sectio"
+         xmm0 = xmmword [str.___Strategy_1:_Searching_for__Verified_the_disk_integrity___anchor...] // [0x1400af450:16]=-1 // "[*] Strategy 1: Searching for "Verified the disk integrity!" anchor..."
+         xmmword [rax] = xmm0
+         xmm1 = xmmword [0x1400af460] // [0x1400af460:16]=-1 // "Searching for \"Verified the disk integrity!\" anchor..."
+         xmmword [rax + 0x10] = xmm1
+         xmm0 = xmmword [0x1400af470] // [0x1400af470:16]=-1 // "erified the disk integrity!\" anchor..."
+         xmmword [rax + 0x20] = xmm0
+         xmm1 = xmmword [0x1400af480] // [0x1400af480:16]=-1 // " integrity!\" anchor..."
+         xmmword [rax + 0x30] = xmm1
+         eax = dword [0x1400af490] // [0x1400af490:4]=0x2e726f68 // "hor..."
+         dword [rdx + 0x40] = eax
+         eax = word [0x1400af494] // [0x1400af494:2]=0x2e2e // ".."
+         word [rdx + 0x44] = ax
+         byte [rdx + 0x46] = 0
+         r8d = 0x4f               // 'O' // 79
+         rcx = var_270h
+         fcn.1400016c0 ()
+         dword [var_20h] = 0x50   // 'P' // [0x50:4]=-1 // 80
+         r9 = rip + str.Anchor:__Verified_the_disk_integrity__ // 0x1400af498 // "Anchor: "Verified the disk integrity!""
+         r8d = 1                  // "!] .text sectio"
+         rdx = rip + str.Verified_the_disk_integrity_ // 0x1400af4c0 // "Verified the disk integrity!"
+         rcx = var_bp_20h
+         fcn.140018f80 ()         // fcn.140018f80(0x0)
+         v = al & al              // "!] .text sectio"
+         if (v) 
+    loc_0x140021870: // orphan
+         r14 = 0x7fffffffffffffff // 9223372036854775807
+         
+    loc_0x140021964: // orphan
+         // CODE XREF from fcn.1400203f0 @ 0x14002187a(x)
+         v = qword [var_sp_50h] - 0xffffffffffffffff // "!] .text sectio" // "!] .text sectio"
+         if (v) 
+    loc_0x140021c3f: // orphan
+         r9 = var_300h            // "[*] Strategy 1: Searching for \"Verified the disk integrity!\" an"
+         v = qword [var_318h] - 0xf
+         cmova r9 qword [var_300h]
+         eax = dword [var_44h]
+         dword [var_20h] = eax
+         r8 = rip + str.___Patch_found_via:__s__method__d_ // 0x1400af818 // "[*] Patch found via: %s (method %d)"
+         edx = 0x100              // 256
+         rcx = var_380h           // (cstr 0x00000000) "[!] .text sectio"
+         fcn.14002ee70 ()
+         xmm0 ^= xmm0
+         xmmword [var_270h] = xmm0
+         rcx = var_380h           // (cstr 0x00000000) "[!] .text sectio"
+         sub.api_ms_win_crt_string_l1_1_0.dll_strlen () // size_t strlen("")
+         rsi = rax
+         v = rax - r14            // "!] .text sectio" // "!] .text sectio"
+         if (((unsigned) v) > 0) 
+    loc_0x140022509: // orphan
+         fcn.14002bd80 ()
+
+         goto loc_0x140021c98;
+    loc_0x140021c98: // orphan
+         v = rax - 0xf            // "!] .text sectio" // "!] .text sectio" // "!] .text sectio"
+         if (((unsigned) v) > 0) 
+    loc_0x140021cd7: // orphan
+         rbx = rsi
+         rbx |= 0xf               // "o" // "!] .text sectio"
+         v = rbx - r14            // "!] .text sectio"
+         if (((unsigned) v) <= 0) 
+    loc_0x140021ce8: // orphan
+         v = rbx - 0x16           // "!] .text sectio" // "!] .text sectio" // "!] .text sectio"
+         eax = 0x16
+         cmovb rbx rax
+
+         goto loc_0x140021d4e;
+    loc_0x140021d4e: // orphan
+         r9 = qword [var_sp_50h]
+         rax = qword [var_70h]
+         r8d = byte [rax + r9 + 2] // (pstr 0x00000000) "[!] .text sectio"
+         rdx = rax + r9
+         v = r8b - 0x90           // 144 // "!] .text sectio" // "!] .text sectio" // "!] .text sectio"
+         if (v) 
+    loc_0x140021dde: // orphan
+         eax = byte [rdx + 3]     // (pstr 0x00000000) "[!] .text sectio"
+         r9 += 2                  // "] .text sectio"
+         dword [var_sp_28h] = eax
+         dword [var_20h] = r8d
+         r8 = rip + str.___Patching_at_0x_zX:__02X__02X____90_90 // 0x1400af868 // "[*] Patching at 0x%zX: %02X %02X -> 90 90"
+         edx = 0x100              // 256
+         rcx = var_380h           // (cstr 0x00000000) "[!] .text sectio"
+         fcn.14002ee70 ()
+         xmm0 ^= xmm0
+         xmmword [var_270h] = xmm0
+         rcx = var_380h           // (cstr 0x00000000) "[!] .text sectio"
+         sub.api_ms_win_crt_string_l1_1_0.dll_strlen () // size_t strlen("")
+         rdi = rax                // (pstr 0x00000000) "[!] .text sectio"
+         v = rax - r14
+         if (((unsigned) v) > 0) 
+         goto loc_0x140021e29;
+    loc_0x140021e29: // orphan
+         v = rax - 0xf            // "!] .text sectio" // "!] .text sectio" // "!] .text sectio"
+         if (((unsigned) v) > 0) 
+    loc_0x140021e68: // orphan
+         rax |= 0xf               // "o" // "!] .text sectio"
+         v = rax - r14            // "!] .text sectio"
+         if (((unsigned) v) > 0) 
+    loc_0x140021e81: // orphan
+         rcx = r14 + 1            // "!] .text sectio"
+         fcn.140012c40 ()
+         rbx = rax
+         r8 = rdi
+         rdx = var_380h           // (cstr 0x00000000) "[!] .text sectio"
+         rcx = rax
+         sub.VCRUNTIME140.dll_memcpy () // void *memcpy(0, 0x0000000000000000, 0)
+         byte [rbx + rdi] = 0
+
+         goto loc_0x140021ef0;
+    loc_0x140021ef0: // orphan
+         rcx = qword [var_sp_50h]
+         rax = qword [var_70h]
+         byte [rax + rcx + 2] = 0x90 // [0x90:1]=255 // 144
+         rcx = qword [var_sp_50h]
+         rax = qword [var_70h]
+         byte [rax + rcx + 3] = 0x90 // [0x90:1]=255 // 144
+         rbx = var_2a0h
+         v = qword [var_2b8h] - 0xf
+         cmova rbx qword [var_2a0h]
+         rax = rip + 0x8d2ac      // 0x1400af1d8
+         qword [var_50h_2] = rax
+         rcx = var_f8h
+         qword [sym.imp.MSVCP140.dll___0__basic_ios_DU__char_traits_D_std___std__IEAA_XZ] () // [0x1400ad508:8]=0xddecc reloc.MSVCP140.dll___0__basic_ios_DU__char_traits_D_std___std__IEAA_XZ // reloc.MSVCP140.dll___0__basic_ios_DU__char_traits_D_std___std__IEAA_XZ // sym.imp.MSVCP140.dll___0__basic_ios_DU__char_traits_D_std___std__IEAA_XZ(0x0, 0x0, 0x0, 0x1780f8)
+         dword [var_48h] |= 8
+         r9d = 0
+         r8d = 0
+         rdx = var_58h_2
+         rcx = var_50h_2
+         qword [sym.imp.MSVCP140.dll___0__basic_ostream_DU__char_traits_D_std___std__QEAA_PEAV__basic_streambuf_DU__char_traits_D_std___1__N_Z] () // [0x1400ad500:8]=0xddf02 reloc.MSVCP140.dll___0__basic_ostream_DU__char_traits_D_std___std__QEAA_PEAV__basic_streambuf_DU__char_traits_D_std___1__N_Z // reloc.MSVCP140.dll___0__basic_ostream_DU__char_traits_D_std___std__QEAA_PEAV__basic_streambuf_DU__char_traits_D_std___1__N_Z // sym.imp.MSVCP140.dll___0__basic_ostream_DU__char_traits_D_std___std__QEAA_PEAV__basic_streambuf_DU__char_traits_D_std___1__N_Z(0x0, 0x0, 0x178058, 0x178050)
+         rax = qword [var_50h_2]
+         rcx = dword [rax + 4]
+         rdi = rip + 0x8d269      // 0x1400af1d0
+         qword [rbp + rcx + 0x50] = rdi
+         rax = qword [var_50h_2]
+         rcx = dword [rax + 4]
+         edx = rcx - 0xa8
+         dword [rbp + rcx + 0x4c] = edx
+         rcx = var_58h_2
+         qword [sym.imp.MSVCP140.dll___0__basic_streambuf_DU__char_traits_D_std___std__IEAA_XZ] () // [0x1400ad410:8]=0xdd5e6 reloc.MSVCP140.dll___0__basic_streambuf_DU__char_traits_D_std___std__IEAA_XZ // reloc.MSVCP140.dll___0__basic_streambuf_DU__char_traits_D_std___std__IEAA_XZ // sym.imp.MSVCP140.dll___0__basic_streambuf_DU__char_traits_D_std___std__IEAA_XZ(0x1400af1d0, 0x0, 0x0, 0x178058)
+         rax = rip + 0x8d1a9      // 0x1400af138
+         qword [var_58h_2] = rax
+         byte [var_d4h] = 0
+         byte [var_c9h] = 0
+         rcx = var_58h_2
+         qword [sym.imp.MSVCP140.dll___Init___basic_streambuf_DU__char_traits_D_std___std__IEAAXXZ] () // [0x1400ad558:8]=0xddbf0 reloc.MSVCP140.dll___Init___basic_streambuf_DU__char_traits_D_std___std__IEAAXXZ // reloc.MSVCP140.dll___Init___basic_streambuf_DU__char_traits_D_std___std__IEAAXXZ // sym.imp.MSVCP140.dll___Init___basic_streambuf_DU__char_traits_D_std___std__IEAAXXZ(0x1400af1d0, 0x0, 0x0, 0x178058)
+         r13d = 0
+         qword [var_d8h] = r13
+         rax = qword [0x1400e0a80] // [0x1400e0a80:8]=0
+         qword [var_cch] = rax
+         qword [var_c0h] = r13
+         r9d = 0x40               // '@' // 64
+         r8d = 0x22               // '\"' // 34
+         rdx = rbx
+         rcx = var_58h_2
+         fcn.14002d300 ()
+         v = rax & rax
+         if (v) 
+    loc_0x140022005: // orphan
+         rax = qword [var_50h_2]
+         rcx = dword [rax + 4]
+         qword [rbp + rcx + 0x50] = rdi
+         rax = qword [var_50h_2]
+         rcx = dword [rax + 4]
+         edx = rcx - 0xa8
+         dword [rbp + rcx + 0x4c] = edx
+         rax = qword [var_50h_2]
+         rcx = dword [rax + 4]
+         rax = var_50h_2
+         rcx += rax
+         qword [sym.imp.MSVCP140.dll___7ios_base_std__QEBA_NXZ] () // [0x1400ad3e8:8]=0xdd548 reloc.MSVCP140.dll___7ios_base_std__QEBA_NXZ // "H\xd5\r" // reloc.MSVCP140.dll___7ios_base_std__QEBA_NXZ // sym.imp.MSVCP140.dll___7ios_base_std__QEBA_NXZ(0x0, 0x0, 0x0, 0x1780f8)
+         v = al & al
+         if (v) 
+    loc_0x1400220ff: // orphan
+         xmm0 ^= xmm0
+         xmmword [var_340h] = xmm0
+         ecx = 0x30               // '0' // 48
+         fcn.140012c40 ()
+         rdx = rax
+         qword [var_340h] = rax
+         qword [var_350h] = 0x29  // ')' // 41
+         qword [var_358h] = r15
+         xmm0 = xmmword [str.Failed_to_patch__run_as_Administrator.] // [0x1400af898:16]=-1 // "Failed to patch — run as Administrator."
+         xmmword [rax] = xmm0
+         xmm1 = xmmword [0x1400af8a8] // [0x1400af8a8:16]=-1
+         xmmword [rax + 0x10] = xmm1
+         xmm0 = qword [0x1400af8b8] // [0x1400af8b8:8]=0x726f746172747369 // "istrator."
+         qword [rax + 0x20] = xmm0
+         eax = byte [0x1400af8c0] // [0x1400af8c0:1]=46 // "."
+         byte [rdx + 0x28] = al
+         byte [rdx + 0x29] = 0
+         rbx = qword [var_30h]
+         rcx = rbx + 0x128
+         rax = var_340h
+         v = rcx - rax            // "ailed to patch \u2014 run as Admin" // "ailed to patch \u2014 run as Admin" // "ailed to patch \u2014 run as Admin"
+         if (!v) 
+    loc_0x14002218f: // orphan
+         byte [rbx + 0x148] = 1
+         v = r15 - 0xf            // "ailed to patch \u2014 run as Admin" // "ailed to patch \u2014 run as Admin" // "ailed to patch \u2014 run as Admin"
+         if (((unsigned) v) <= 0) 
+    loc_0x1400221ac: // orphan
+         // CODE XREF from fcn.1400203f0 @ 0x1400220fa(x)
+         rax = qword [var_50h_2]
+         rcx = dword [rax + 4]
+         qword [rbp + rcx + 0x50] = rdi
+         rax = qword [var_50h_2]
+         rcx = dword [rax + 4]
+         edx = rcx - 0xa8
+         dword [rbp + rcx + 0x4c] = edx
+         rcx = var_58h_2
+         fcn.140018010 ()
+         rcx = var_60h_2          // (cstr 0x00000000) "Failed to patch \u2014 run as Admin"
+         qword [sym.imp.MSVCP140.dll___1__basic_ostream_DU__char_traits_D_std___std__UEAA_XZ] () // [0x1400ad4f8:8]=0xddf6e reloc.MSVCP140.dll___1__basic_ostream_DU__char_traits_D_std___std__UEAA_XZ // "n\xdf\r" // reloc.MSVCP140.dll___1__basic_ostream_DU__char_traits_D_std___std__UEAA_XZ // sym.imp.MSVCP140.dll___1__basic_ostream_DU__char_traits_D_std___std__UEAA_XZ(0x0, 0x0, 0x0, 0x178060)
+         rcx = var_f8h            // (cstr 0x00000000) "Failed to patch \u2014 run as Admin"
+         qword [sym.imp.MSVCP140.dll___1__basic_ios_DU__char_traits_D_std___std__UEAA_XZ] () // [0x1400ad538:8]=0xddd10 reloc.MSVCP140.dll___1__basic_ios_DU__char_traits_D_std___std__UEAA_XZ // reloc.MSVCP140.dll___1__basic_ios_DU__char_traits_D_std___std__UEAA_XZ // sym.imp.MSVCP140.dll___1__basic_ios_DU__char_traits_D_std___std__UEAA_XZ(0x0, 0x0, 0x0, 0x1780f8)
+
+         goto loc_0x14002223f;
+    loc_0x14002223f: // orphan
+         qword [var_310h] = r13
+         qword [var_318h] = 0xf
+         byte [var_300h] = 0
+         
+    loc_0x1400222b3: // orphan
+         // CODE XREF from fcn.1400203f0 @ 0x140022258(x)
+         r8 = qword [var_bp_70h]
+         v = r8 & r8              // "ailed to patch \u2014 run as Admin" // "ailed to patch \u2014 run as Admin"
+         if (!v) 
+         goto loc_0x1400221f9;
+    loc_0x1400221f9: // orphan
+         rdx++                    // "ailed to patch \u2014 run as Admin"
+         rcx = qword [var_300h]
+         rax = rcx
+         v = rdx - 0x1000         // "ailed to patch \u2014 run as Admin" // "ailed to patch \u2014 run as Admin"
+         if (((unsigned) v) < 0) 
+    loc_0x14002223a: // orphan
+         fcn.1400aa1f8 ()
+
+         goto loc_0x14002220f;
+    loc_0x14002220f: // orphan
+         rdx += 0x27              // 39 // "ailed to patch \u2014 run as Admin"
+         rcx = qword [rcx - 8]
+         rax -= rcx               // "ailed to patch \u2014 run as Admin" // "ailed to patch \u2014 run as Admin" // "ailed to patch \u2014 run as Admin"
+         rax -= 8                 // "ailed to patch \u2014 run as Admin" // "ailed to patch \u2014 run as Admin" // "ailed to patch \u2014 run as Admin"
+         v = rax - 0x1f           // "ailed to patch \u2014 run as Admin" // "ailed to patch \u2014 run as Admin"
+         if (((unsigned) v) <= 0) 
+         goto loc_0x140022224;
+    loc_0x140022224: // orphan
+         qword [var_20h] = r13
+         r9d = 0                  // "ailed to patch \u2014 run as Admin" // "ailed to patch \u2014 run as Admin"
+         r8d = 0                  // "ailed to patch \u2014 run as Admin" // "ailed to patch \u2014 run as Admin"
+         edx = 0                  // "ailed to patch \u2014 run as Admin" // "ailed to patch \u2014 run as Admin"
+         ecx = 0                  // "ailed to patch \u2014 run as Admin" // "ailed to patch \u2014 run as Admin"
+         qword [sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson] () // [0x1400ad928:8]=0xdf0de reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson(0x0, 0x0, 0x0, 0x0)
+         int3
+
+        return rax;
+    loc_0x14002219c: // orphan
+         r8 = r15
+         rcx = var_340h
+         fcn.1400016c0 ()
+
+         goto loc_0x140022176;
+    loc_0x140022176: // orphan
+         r8d = 0x29               // ')' // 41
+         fcn.14002c270 ()
+         r15 = qword [var_358h]
+         rdx = qword [var_340h]
+
+         goto loc_0x140022041;
+    loc_0x140022041: // orphan
+         rdx = qword [var_70h]
+         r8 = qword [var_78h]
+         r8 -= rdx                // "ailed to patch \u2014 run as Admin" // "ailed to patch \u2014 run as Admin"
+         rcx = var_50h_2
+         qword [sym.imp.MSVCP140.dll__write___basic_ostream_DU__char_traits_D_std___std__QEAAAEAV12_PEBD_J_Z] () // [0x1400ad4e8:8]=0xddfe6 reloc.MSVCP140.dll__write___basic_ostream_DU__char_traits_D_std___std__QEAAAEAV12_PEBD_J_Z // reloc.MSVCP140.dll__write___basic_ostream_DU__char_traits_D_std___std__QEAAAEAV12_PEBD_J_Z // sym.imp.MSVCP140.dll__write___basic_ostream_DU__char_traits_D_std___std__QEAAAEAV12_PEBD_J_Z(0x0, 0x0, 0x0, 0x178050)
+         rcx = qword [rax]
+         rcx = dword [rcx + 4]
+         rcx += rax               // "ailed to patch \u2014 run as Admin" // "ailed to patch \u2014 run as Admin"
+         qword [sym.imp.MSVCP140.dll___7ios_base_std__QEBA_NXZ] () // [0x1400ad3e8:8]=0xdd548 reloc.MSVCP140.dll___7ios_base_std__QEBA_NXZ // "H\xd5\r" // reloc.MSVCP140.dll___7ios_base_std__QEBA_NXZ // sym.imp.MSVCP140.dll___7ios_base_std__QEBA_NXZ(0x0, 0x0, 0x0, -1)
+         v = al & al              // "ailed to patch \u2014 run as Admin" // "ailed to patch \u2014 run as Admin"
+         if (v) 
+         goto loc_0x140022070;
+    loc_0x140022070: // orphan
+         xmm0 ^= xmm0
+         xmmword [var_360h] = xmm0
+         ecx = 0x20               // (pstr 0x00000000) "Failed to patch \u2014 run as Admin"
+         fcn.140012c40 ()
+         rdx = rax
+         qword [var_360h] = rax
+         qword [var_370h] = 0x15
+         qword [var_378h] = 0x1f
+         xmm0 = xmmword [str.Patched_successfully_] // [0x1400af8c8:16]=-1 // "Patched successfully!"
+         xmmword [rax] = xmm0
+         eax = dword [0x1400af8d8] // [0x1400af8d8:4]=0x796c6c75 // "ully!"
+         dword [rdx + 0x10] = eax
+         eax = byte [0x1400af8dc] // [0x1400af8dc:1]=33 // (pstr 0x00000000) "Patched successfullyrun as Admin"
+         byte [rdx + 0x14] = al
+         byte [rdx + 0x15] = 0
+         rbx = qword [var_30h]
+         rcx = rbx + 0x128
+         rax = var_360h
+         v = rcx - rax            // "atched successfully!" // "atched successfully!"
+         if (!v) 
+    loc_0x1400220e7: // orphan
+         byte [rbx + 0x148] = 0
+         rcx = var_360h
+         fcn.1400010f0 ()
+         
+         goto loc_0x1400220dc;
+    loc_0x1400220dc: // orphan
+         r8d = 0x15
+         fcn.14002c270 ()
+
+         goto loc_0x140021fe7;
+    loc_0x140021fe7: // orphan
+         rax = qword [var_50h_2]
+         rcx = dword [rax + 4]
+         rax = var_50h_2
+         rcx += rax               // (cstr 0x00000000) "Patched successfully!"
+         r8d = 0                  // "atched successfully!" // "atched successfully!"
+         edx = 2                  // "tched successfully!"
+         qword [sym.imp.MSVCP140.dll__setstate___basic_ios_DU__char_traits_D_std___std__QEAAXH_N_Z] () // [0x1400ad530:8]=0xddd46 reloc.MSVCP140.dll__setstate___basic_ios_DU__char_traits_D_std___std__QEAAXH_N_Z // "F\xdd\r" // reloc.MSVCP140.dll__setstate___basic_ios_DU__char_traits_D_std___std__QEAAXH_N_Z // sym.imp.MSVCP140.dll__setstate___basic_ios_DU__char_traits_D_std___std__QEAAXH_N_Z(0x0, 0x0, 0x2, 0x1780f8)
+
+         goto loc_0x140021ea9;
+    loc_0x140021ea9: // orphan
+         rdx = r14 + 1            // "atched successfully!"
+         rax = rbx
+         v = rdx - 0x1000         // "atched successfully!" // "atched successfully!"
+         if (((unsigned) v) < 0) 
+    loc_0x140021ee8: // orphan
+         rcx = rbx
+         fcn.1400aa1f8 ()
+
+         goto loc_0x140021eb9;
+    loc_0x140021eb9: // orphan
+         rdx += 0x27              // 39 // "atched successfully!"
+         rbx = qword [rbx - 8]
+         rax -= rbx               // "atched successfully!" // "atched successfully!" // "atched successfully!"
+         rax -= 8                 // "atched successfully!" // "atched successfully!" // "atched successfully!"
+         v = rax - 0x1f           // "atched successfully!" // "atched successfully!"
+         if (((unsigned) v) <= 0) 
+         goto loc_0x140021ece;
+    loc_0x140021ece: // orphan
+         qword [var_20h] = 0
+         r9d = 0                  // "atched successfully!" // "atched successfully!"
+         r8d = 0                  // "atched successfully!" // "atched successfully!"
+         edx = 0                  // "atched successfully!" // "atched successfully!"
+         ecx = 0                  // "atched successfully!" // "atched successfully!"
+         qword [sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson] () // [0x1400ad928:8]=0xdf0de reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson(0x0, 0x0, 0x0, 0x0)
+         int3
+
+        return rax;
+    loc_0x140021e71: // orphan
+         r14 = rax
+         v = rax - 0x16           // "atched successfully!" // "atched successfully!" // "atched successfully!"
+         eax = 0x16               // "n as Admin"
+         cmovb r14 rax            // "n as Admin"
+
+         goto loc_0x140021e2f;
+    loc_0x140021e2f: // orphan
+         qword [var_288h] = 0xf   // "fully!"
+         r8 = rax
+         rdx = var_380h           // (cstr 0x00000000) "Patched successfully!"
+         rcx = var_270h           // (cstr 0x0000001c) "dmin"
+         sub.VCRUNTIME140.dll_memcpy () // void *memcpy(0x0000000000000000, 0x0000000000000000, 0)
+         byte [rbp + rdi + 0x270] = 0
+         r14 = qword [var_288h]   // "fully!"
+         rbx = qword [var_270h]
+         
+    loc_0x140021ea3: // orphan
+         // CODE XREF from fcn.1400203f0 @ 0x140021e66(x)
+         v = r14 - 0xf            // "fully!" // "atched successfully!" // "atched successfully!" // "atched successfully!"
+         if (((unsigned) v) <= 0) 
+         goto loc_0x140021d68;
+    loc_0x140021d68: // orphan
+         v = byte [rdx + 3] - r8b // "atched successfully!"
+         if (v) 
+         goto loc_0x140021d6e;
+    loc_0x140021d6e: // orphan
+         xmm0 ^= xmm0
+         xmmword [var_270h] = xmm0
+         ecx = 0x30               // '0' // 48
+         fcn.140012c40 ()
+         rdx = rax
+         qword [var_270h] = rax
+         xmm0 = xmmword [0x1400b0650] // [0x1400b0650:16]=-1 // (pstr 0x00000000) "Patched successfully!"
+         xmmword [var_280h] = xmm0
+         xmm0 = xmmword [str.____Already_patched._Nothing_to_do.] // [0x1400af840:16]=-1 // "[~] Already patched. Nothing to do."
+         xmmword [rax] = xmm0
+         xmm1 = xmmword [0x1400af850] // [0x1400af850:16]=-1 // "hed. Nothing to do."
+         xmmword [rax + 0x10] = xmm1
+         ecx = word [0x1400af860] // [0x1400af860:2]=0x6f64 // "do."
+         word [rax + 0x20] = cx
+         eax = byte [0x1400af862] // [0x1400af862:1]=46 // "."
+         byte [rdx + 0x22] = al
+         byte [rdx + 0x23] = 0
+         rcx = var_270h
+         fcn.1400010f0 ()
+         r13d = 0                 // "~] Already patched. Nothing to do." // "~] Already patched. Nothing to do."
+         
+    loc_0x1400221ec: // orphan
+         // CODE XREFS from fcn.1400203f0 @ 0x1400219c1(x), 0x140021dd9(x)
+         rdx = qword [var_318h]   // "ched. Nothing to do."
+         v = rdx - 0xf            // "ched. Nothing to do." // "~] Already patched. Nothing to do." // "~] Already patched. Nothing to do."
+         if (((unsigned) v) <= 0) 
+         goto loc_0x140021d1d;
+    loc_0x140021d1d: // orphan
+         rdx = rbx + 1            // "~] Already patched. Nothing to do."
+         rax = rdi
+         v = rdx - 0x1000         // "~] Already patched. Nothing to do." // "~] Already patched. Nothing to do."
+         if (((unsigned) v) < 0) 
+    loc_0x140021d46: // orphan
+         rcx = rdi
+         fcn.1400aa1f8 ()
+
+         goto loc_0x140021d2d;
+    loc_0x140021d2d: // orphan
+         rdx += 0x27              // 39 // "~] Already patched. Nothing to do."
+         rdi = qword [rdi - 8]
+         rax -= rdi               // "~] Already patched. Nothing to do." // "~] Already patched. Nothing to do." // "~] Already patched. Nothing to do."
+         rax -= 8                 // "~] Already patched. Nothing to do." // "~] Already patched. Nothing to do." // "~] Already patched. Nothing to do."
+         v = rax - 0x1f           // "~] Already patched. Nothing to do." // "~] Already patched. Nothing to do."
+         if (((unsigned) v) > 0) 
+         goto loc_0x140021ce3;
+    loc_0x140021ce3: // orphan
+         rbx = r14
+         
+    loc_0x140021cf5: // orphan
+         // CODE XREF from fcn.1400203f0 @ 0x140021ce6(x)
+         rcx = rbx + 1            // "~] Already patched. Nothing to do."
+         fcn.140012c40 ()
+         rdi = rax
+         r8 = rsi
+         rdx = var_380h           // (cstr 0x00000000) "[~] Already patched. Nothing to do."
+         rcx = rax
+         sub.VCRUNTIME140.dll_memcpy () // void *memcpy(0, 0x0000000000000000, 0)
+         byte [rdi + rsi] = 0
+
+         goto loc_0x140021c9e;
+    loc_0x140021c9e: // orphan
+         qword [var_288h] = 0xf   // "ched. Nothing to do."
+         r8 = rax
+         rdx = var_380h
+         rcx = var_270h
+         sub.VCRUNTIME140.dll_memcpy () // void *memcpy(0x0000000000000000, 0x0000000000000000, 0)
+         byte [rbp + rsi + 0x270] = 0
+         rbx = qword [var_288h]   // "ched. Nothing to do."
+         rdi = qword [var_270h]
+         
+    loc_0x140021d17: // orphan
+         // CODE XREF from fcn.1400203f0 @ 0x140021cd5(x)
+         v = rbx - 0xf            // "ched. Nothing to do." // "~] Already patched. Nothing to do." // "~] Already patched. Nothing to do." // "~] Already patched. Nothing to do."
+         if (((unsigned) v) <= 0) 
+         goto loc_0x140021970;
+    loc_0x140021970: // orphan
+         ecx = 0x40               // '@' // 64
+         fcn.140012c40 ()
+         rcx = rax
+         xmm0 = xmmword [str.____All_strategies_exhausted____patch_site_not_found.] // [0x1400af7e0:16]=-1 // "[!] All strategies exhausted -- patch site not found."
+         xmmword [rax] = xmm0
+         xmm1 = xmmword [0x1400af7f0] // [0x1400af7f0:16]=-1 // "es exhausted -- patch site not found."
+         xmmword [rax + 0x10] = xmm1
+         xmm0 = xmmword [0x1400af800] // [0x1400af800:16]=-1 // "patch site not found."
+         xmmword [rax + 0x20] = xmm0
+         eax = dword [0x1400af810] // [0x1400af810:4]=0x646e756f // "ound."
+         dword [rcx + 0x30] = eax
+         eax = byte [0x1400af814] // [0x1400af814:1]=46 // "."
+         byte [rcx + 0x34] = al
+         byte [rcx + 0x35] = 0
+         edx = 0x40               // '@' // 64
+         fcn.1400aa1f8 ()
+         r13d = 0                 // "!] All strategies exhausted -- patch site not found." // "!] All strategies exhausted -- patch site not found."
+         
+         goto loc_0x140021106;
+    loc_0x140021106: // orphan
+         qword [var_278h] = r13
+         ecx = 0x20               // "patch site not found."
+         fcn.140012c40 ()
+         qword [var_270h] = rax
+         xmm0 = xmmword [0x1400b0620] // [0x1400b0620:16]=-1 // "sted -- patch site not found." // " patch site not found."
+         xmmword [var_280h] = xmm0
+         xmm0 = xmmword [str.______Strategy_1_failed.] // [0x1400af4e0:16]=-1 // "[~]   Strategy 1 failed."
+         xmmword [rax] = xmm0
+         xmm0 = qword [0x1400af4f0] // [0x1400af4f0:8]=0x2e64656c69616620 // " failed."
+         qword [rax + 0x10] = xmm0
+         byte [rax + 0x18] = 0
+         rcx = var_270h
+         fcn.1400010f0 ()
+         qword [var_278h] = r13
+         ecx = 0x50               // 'P' // 80
+         fcn.140012c40 ()
+         rcx = rax
+         qword [var_270h] = rax
+         xmm0 = xmmword [0x1400b0690] // [0x1400b0690:16]=-1
+         xmmword [var_280h] = xmm0
+         xmm0 = xmmword [str.___Strategy_2:_Searching_for__plrDiskCheckThreadEntry__anchor...] // [0x1400af500:16]=-1 // "[*] Strategy 2: Searching for "plrDiskCheckThreadEntry" anchor..."
+         xmmword [rax] = xmm0
+         xmm1 = xmmword [0x1400af510] // [0x1400af510:16]=-1 // "Searching for \"plrDiskCheckThreadEntry\" anchor..."
+         xmmword [rax + 0x10] = xmm1
+         xmm0 = xmmword [0x1400af520] // [0x1400af520:16]=-1 // "lrDiskCheckThreadEntry\" anchor..."
+         xmmword [rax + 0x20] = xmm0
+         xmm1 = xmmword [0x1400af530] // [0x1400af530:16]=-1 // "dEntry\" anchor..."
+         xmmword [rax + 0x30] = xmm1
+         eax = byte [0x1400af540] // [0x1400af540:1]=46 // "."
+         byte [rcx + 0x40] = al
+         byte [rcx + 0x41] = 0
+         rcx = var_270h
+         fcn.1400010f0 ()
+         dword [var_20h] = 0x700  // [0x700:4]=-1 // 1792
+         r9 = rip + str.Anchor:__plrDiskCheckThreadEntry_ // 0x1400af548 // "Anchor: "plrDiskCheckThreadEntry""
+         r8d = 2                  // "] Strategy 2: Searching for \"plrDiskCheckThreadEntry\" anchor..."
+         rdx = rip + str.plrDiskCheckThreadEntry // 0x1400af570 // "plrDiskCheckThreadEntry"
+         rcx = var_bp_20h
+         fcn.140018f80 ()         // fcn.140018f80(0x0)
+         v = al & al              // "*] Strategy 2: Searching for \"plrDiskCheckThreadEntry\" anchor.."
+         if (v) 
+         goto loc_0x1400211f2;
+    loc_0x1400211f2: // orphan
+         qword [var_278h] = r13
+         ecx = 0x20               // "lrDiskCheckThreadEntry\" anchor..."
+         fcn.140012c40 ()
+         qword [var_270h] = rax
+         xmm0 = xmmword [0x1400b0620] // [0x1400b0620:16]=-1 // "g for \"plrDiskCheckThreadEntry\" anchor..." // "plrDiskCheckThreadEntry\" anchor..."
+         xmmword [var_280h] = xmm0
+         xmm0 = xmmword [str.______Strategy_2_failed.] // [0x1400af588:16]=-1 // "[~]   Strategy 2 failed."
+         xmmword [rax] = xmm0
+         xmm0 = qword [0x1400af598] // [0x1400af598:8]=0x2e64656c69616620 // " failed."
+         qword [rax + 0x10] = xmm0
+         byte [rax + 0x18] = 0
+         rcx = var_270h
+         fcn.1400010f0 ()
+         ecx = 0x40               // '@' // 64 // "."
+         fcn.140012c40 ()
+         rdx = rax
+         xmm0 = xmmword [str.___Strategy_3:_Searching_for_shutdown_tamper_message_anchor...] // [0x1400af5b0:16]=-1 // "[*] Strategy 3: Searching for shutdown tamper message anchor..."
+         xmmword [rax] = xmm0
+         xmm1 = xmmword [0x1400af5c0] // [0x1400af5c0:16]=-1 // "Searching for shutdown tamper message anchor..."
+         xmmword [rax + 0x10] = xmm1
+         xmm0 = xmmword [0x1400af5d0] // [0x1400af5d0:16]=-1 // "utdown tamper message anchor..."
+         xmmword [rax + 0x20] = xmm0
+         xmm0 = qword [0x1400af5e0] // [0x1400af5e0:8]=0x6e61206567617373 // "ssage anchor..."
+         qword [rax + 0x30] = xmm0
+         eax = dword [0x1400af5e8] // [0x1400af5e8:4]=0x726f6863 // "chor..."
+         dword [rdx + 0x38] = eax
+         eax = word [0x1400af5ec] // [0x1400af5ec:2]=0x2e2e // "..."
+         word [rdx + 0x3c] = ax
+         eax = byte [0x1400af5ee] // [0x1400af5ee:1]=46 // "." // "me"
+         byte [rdx + 0x3e] = al
+         byte [rdx + 0x3f] = 0
+         r8d = 0x3f               // '?' // 63
+         rcx = var_270h           // (cstr 0x00000018) "g for shutdown tamper me"
+         fcn.1400016c0 ()
+         dword [var_20h] = 0x700  // [0x700:4]=-1 // 1792
+         r9 = rip + str.Anchor:_shutdown_tamper_message // 0x1400af5f0 // "Anchor: shutdown tamper message"
+         r8d = 3                  // " Strategy 3: Searching for shutdown tamper me"
+         rdx = rip + str.Shutting_down:_disk_file_have_been_illegally_tampered_with_ // 0x1400af610 // "Shutting down: disk file have been illegally tampered with!"
+         rcx = var_bp_20h
+         fcn.140018f80 ()         // fcn.140018f80(0x0)
+         v = al & al              // "*] Strategy 3: Searching for shutdown tamper me"
+         if (v) 
+         goto loc_0x1400212dc;
+    loc_0x1400212dc: // orphan
+         ecx = 0x20               // "utdown tamper me"
+         fcn.140012c40 ()
+         xmm0 = xmmword [str.______Strategy_3_failed.] // [0x1400af650:16]=-1 // "[~]   Strategy 3 failed."
+         xmmword [rax] = xmm0
+         xmm0 = qword [0x1400af660] // [0x1400af660:8]=0x2e64656c69616620 // " failed."
+         qword [rax + 0x10] = xmm0
+         byte [rax + 0x18] = 0
+         r8d = 0x1f               // "hutdown tamper me"
+         rdx = rax
+         rcx = var_270h
+         fcn.1400016c0 ()
+         qword [var_278h] = r13
+         ecx = 0x40               // '@' // 64 // "."
+         fcn.140012c40 ()
+         rcx = rax
+         qword [var_270h] = rax
+         xmm0 = xmmword [0x1400b0680] // [0x1400b0680:16]=-1 // "r..."
+         xmmword [var_280h] = xmm0
+         xmm0 = xmmword [str.___Strategy_4:_Full_.text_scan_for_CALLtestjz_pattern...] // [0x1400af670:16]=-1 // "[*] Strategy 4: Full .text scan for CALL+test+jz pattern..."
+         xmmword [rax] = xmm0
+         xmm1 = xmmword [0x1400af680] // [0x1400af680:16]=-1 // "Full .text scan for CALL+test+jz pattern..."
+         xmmword [rax + 0x10] = xmm1
+         xmm0 = xmmword [0x1400af690] // [0x1400af690:16]=-1 // "for CALL+test+jz pattern..."
+         xmmword [rax + 0x20] = xmm0
+         xmm0 = qword [0x1400af6a0] // [0x1400af6a0:8]=0x6e72657474617020 // " pattern..."
+         qword [rax + 0x30] = xmm0
+         eax = word [0x1400af6a8] // [0x1400af6a8:2]=0x2e2e // "..."
+         word [rcx + 0x38] = ax
+         eax = byte [0x1400af6aa] // [0x1400af6aa:1]=46 // "." // "jz"
+         byte [rcx + 0x3a] = al
+         byte [rcx + 0x3b] = 0
+         rcx = var_270h
+         fcn.1400010f0 ()
+         xmm0 ^= xmm0
+         xmmword [var_sp_58h] = xmm0
+         qword [var_sp_68h] = r13
+         rdx = qword [var_38h]
+         rdx += 5                 // "trategy 4: Full .text scan for CALL+test+jz" // "*] Strategy 4: Full .text scan for CALL+test+jz"
+         qword [var_bp_78h] = rdx
+         rax = rdx + 4            // "egy 4: Full .text scan for CALL+test+jz"
+         r9 = qword [var_sp_60h]
+         v = rax - qword [var_58h] // "*] Strategy 4: Full .text scan for CALL+test+jz" // "*] Strategy 4: Full .text scan for CALL+test+jz" // "*] Strategy 4: Full .text scan for CALL+test+jz"
+         if (((unsigned) v) > 0) 
+    loc_0x14002145b: // orphan
+         r9 -= qword [var_sp_58h] // "*] Strategy 4: Full .text scan for CALL+test+jz" // "*] Strategy 4: Full .text scan for CALL+test+jz"
+         r9 >>= 3                 // "*] Strategy 4: Full .text scan for CALL+test+jz"
+         r8 = rip + str._____Found__zu_candidate_s_ // 0x1400af6b0 // "[*]   Found %zu candidate(s)"
+         edx = 0x100              // 256
+         rcx = var_380h           // (cstr 0x00000000) "[*] Strategy 4: Full .text scan for CALL+test+jz"
+         fcn.14002ee70 ()
+         xmm0 ^= xmm0
+         xmmword [var_270h] = xmm0
+         xmm1 ^= xmm1
+         xmmword [var_280h] = xmm1
+         rcx = var_380h           // (cstr 0x00000000) "[*] Strategy 4: Full .text scan for CALL+test+jz"
+         sub.api_ms_win_crt_string_l1_1_0.dll_strlen () // size_t strlen("")
+         r8 = rax
+         rdx = var_380h           // (cstr 0x00000000) "[*] Strategy 4: Full .text scan for CALL+test+jz"
+         rcx = var_270h           // (cstr 0x00000000) "[*] Strategy 4: Full .text scan for CALL+test+jz"
+         fcn.140013040 ()
+         rcx = var_270h           // (cstr 0x00000000) "[*] Strategy 4: Full .text scan for CALL+test+jz"
+         fcn.1400010f0 ()
+         rax = qword [var_sp_60h]
+         rdx = qword [var_sp_58h]
+         rax -= rdx               // "*] Strategy 4: Full .text scan for CALL+test+jz" // "*] Strategy 4: Full .text scan for CALL+test+jz"
+         rax >>= 3                // "*] Strategy 4: Full .text scan for CALL+test+jz" // "*] Strategy 4: Full .text scan for CALL+test+jz"
+         v = rax - 1              // "*] Strategy 4: Full .text scan for CALL+test+jz"
+         if (v) 
+    loc_0x1400215ae: // orphan
+         if (((unsigned) v) <= 0) 
+    loc_0x140021855: // orphan
+         v = rdx & rdx            // "*] Strategy 4: Full .text scan for CALL+test+jz" // "*] Strategy 4: Full .text scan for CALL+test+jz"
+         if (!v) 
+         goto loc_0x14002185a;
+    loc_0x14002185a: // orphan
+         r8 = qword [var_sp_68h]
+         r8 -= rdx                // "*] Strategy 4: Full .text scan for CALL+test+jz" // "*] Strategy 4: Full .text scan for CALL+test+jz"
+         r8 >>= 3                 // "*] Strategy 4: Full .text scan for CALL+test+jz" // "*] Strategy 4: Full .text scan for CALL+test+jz"
+         rcx = var_sp_58h
+         fcn.14002c860 ()
+
+         goto loc_0x1400215b4;
+    loc_0x1400215b4: // orphan
+         qword [var_20h] = 0xffffffffffffffff
+         r9d = 0                  // "*] Strategy 4: Full .text scan for CALL+test+jz" // "*] Strategy 4: Full .text scan for CALL+test+jz"
+         r8 = rip + str.Verified_the_disk_integrity_ // 0x1400af4c0 // "Verified the disk integrity!"
+         rdx = var_270h           // (cstr 0x00000000) "[*] Strategy 4: Full .text scan for CALL+test+jz"
+         rcx = var_bp_48h
+         fcn.140019450 ()         // fcn.140019450(0x0)
+         qword [var_20h] = 0xffffffffffffffff
+         r9d = 0                  // "*] Strategy 4: Full .text scan for CALL+test+jz" // "*] Strategy 4: Full .text scan for CALL+test+jz"
+         r8 = rip + str.Failed_to_verify_the_disk_integrity_ // 0x1400af730 // "Failed to verify the disk integrity!"
+         rdx = var_2c0h           // (cstr 0x00000000) "[*] Strategy 4: Full .text scan for CALL+test+jz"
+         rcx = var_bp_48h
+         fcn.140019450 ()         // fcn.140019450(0x0)
+         rcx = qword [var_sp_58h]
+         qword [var_bp_78h] = rcx
+         v = rcx - qword [var_sp_60h] // "*] Strategy 4: Full .text scan for CALL+test+jz" // "*] Strategy 4: Full .text scan for CALL+test+jz" // "*] Strategy 4: Full .text scan for CALL+test+jz"
+         if (!v) 
+    loc_0x1400217a4: // orphan
+         ecx = 0x30               // '0' // (pstr 0x00000000) "[*] Strategy 4: Full .text scan for CALL+test+jz"
+         fcn.140012c40 ()
+         rdx = rax
+         xmm0 = xmmword [str.______Multiple_candidates__none_validated.] // [0x1400af7b0:16]=-1 // "[~]   Multiple candidates, none validated."
+         xmmword [rax] = xmm0
+         xmm1 = xmmword [0x1400af7c0] // [0x1400af7c0:16]=-1 // "andidates, none validated."
+         xmmword [rax + 0x10] = xmm1
+         xmm0 = qword [0x1400af7d0] // [0x1400af7d0:8]=0x65746164696c6176 // "validated."
+         qword [rax + 0x20] = xmm0
+         eax = word [0x1400af7d8] // [0x1400af7d8:2]=0x2e64 // "d."
+         word [rdx + 0x28] = ax
+         byte [rdx + 0x2a] = 0
+         r8 = r15
+         rcx = var_2e0h           // (pstr 0x00178320) "erified the disk integrity!\" anc"
+         fcn.1400016c0 ()
+         rdx = qword [var_2c0h]
+         v = rdx & rdx            // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         if (!v) 
+    loc_0x14002182a: // orphan
+         rdx = qword [var_270h]
+         v = rdx & rdx            // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         if (!v) 
+    loc_0x140021850: // orphan
+         // CODE XREF from fcn.1400203f0 @ 0x1400215a9(x)
+         rdx = qword [var_sp_58h]
+
+         goto loc_0x140021836;
+    loc_0x140021836: // orphan
+         r8 = qword [var_280h]
+         r8 -= rdx                // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         r8 >>= 3                 // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         rcx = var_270h           // (cstr 0x00000000) "[~]   Multiple candidates, none "
+         fcn.14002c860 ()
+
+         goto loc_0x1400217fe;
+    loc_0x1400217fe: // orphan
+         r8 = qword [var_2d0h]
+         r8 -= rdx                // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         r8 >>= 3                 // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         rcx = var_2c0h           // (cstr 0x00000000) "[~]   Multiple candidates, none "
+         fcn.14002c860 ()
+         xmm0 ^= xmm0
+         xmmword [var_2c0h] = xmm0
+         qword [var_2d0h] = r13
+
+         goto loc_0x140021610;
+    loc_0x140021610: // orphan
+         rax = qword [var_bp_40h] // (cstr 0x00000000) "[~]   Multiple candidates, none "
+         rsi = qword [var_68h]
+         rbx = qword [var_278h]
+         rdi = qword [var_2c8h]
+
+         goto loc_0x140021784;
+    loc_0x140021784: // orphan
+         rcx = qword [var_bp_78h]
+         rcx += 8                 // "ltiple candidates, none "
+         qword [var_bp_78h] = rcx
+         v = rcx - qword [var_sp_60h]
+         if (v) 
+    loc_0x140021630: // orphan
+         rcx = qword [rcx]
+         qword [var_2e0h] = rcx
+         r14 = rcx
+         r12 = rcx + 0xc8
+         v = rcx - r12            // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         jae 0x140021784          // unlikely
+
+         goto loc_0x14002179b;
+    loc_0x14002179b: // orphan
+         r15d = 0x2f              // '/' // "z"
+         r13d = 0                 // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+
+         goto loc_0x14002164d;
+    loc_0x14002164d: // orphan
+         rdx = qword [var_70h]
+         r11 = rdx + 2            // "]   Multiple candidates, none "
+         r11 += rcx               // "]   Multiple candidates, none "
+         r15d = 5                 // " Multiple candidates, none "
+         r15 -= rdx               // " Multiple candidates, none " // "~]   Multiple candidates, none "
+         r13d = 1                 // "~]   Multiple candidates, none "
+         r13 -= rdx               // "~]   Multiple candidates, none "
+
+         goto loc_0x14002167e;
+    loc_0x14002167e: // orphan
+         ecx = byte [r11 - 2]
+         cl -= 0x48               // 72 // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         v = cl & 0xfb            // 251 // "~]   Multiple candidates, none "
+         if (v) 
+    loc_0x140021775: // orphan
+         r14++                    // "~]   Multiple candidates, none "
+         r11++                    // "~]   Multiple candidates, none "
+         v = r14 - r12
+         if (((unsigned) v) < 0) 
+    loc_0x140021670: // orphan
+         r8 = r15 + r11
+         v = r8 - qword [var_58h] // "~]   Multiple candidates, none " // "~]   Multiple candidates, none " // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         if (((unsigned) v) > 0) 
+         goto loc_0x14002168f;
+    loc_0x14002168f: // orphan
+         v = byte [r11 - 1] - 0x8d
+         if (v) 
+         goto loc_0x14002169a;
+    loc_0x14002169a: // orphan
+         ecx = byte [r11]
+         cl &= 0xc7               // 199
+         v = cl - 5               // " Multiple candidates, none " // "~]   Multiple candidates, none "
+         if (v) 
+         goto loc_0x1400216aa;
+    loc_0x1400216aa: // orphan
+         rdx = qword [rax]
+         rcx = qword [rax + 8]
+         rcx -= rdx               // "~]   Multiple candidates, none " // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         v = r8 - rcx             // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         if (((unsigned) v) <= 0) 
+    loc_0x1400216be: // orphan
+         rdx += r13               // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         rdx += r11               // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         r8d = byte [rdx + 3]     // (pstr 0x00000000) "[~]   Multiple candidates, none "
+         r8d <<<= 8               // "~]   Multiple candidates, none "
+         ecx = byte [rdx + 2]
+         r8d |= ecx
+         r8d <<<= 8               // "~]   Multiple candidates, none "
+         ecx = byte [rdx + 1]
+         r8d |= ecx               // "~]   Multiple candidates, none "
+         r8d <<<= 8               // "~]   Multiple candidates, none "
+         ecx = byte [rdx]
+         r8d |= ecx
+
+         goto loc_0x140021732;
+    loc_0x140021732: // orphan
+         r8 = 0xffffffffffffffff
+
+         goto loc_0x140021757;
+    loc_0x140021757: // orphan
+         rcx = qword [var_2c0h]
+         v = rcx - rdi            // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         if (!v) 
+         goto loc_0x140021763;
+    loc_0x140021763: // orphan
+         v = r8 - qword [rcx]     // "~]   Multiple candidates, none " // "~]   Multiple candidates, none " // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         if (!v) 
+    loc_0x1400219c6: // orphan
+         rax = qword [var_2e0h]
+         qword [var_sp_50h] = rax
+         dword [var_44h] = 4
+         rdi = qword [var_318h]   // "candidates, none "
+         v = rdi - 0x27           // '\'' // "~]   Multiple candidates, none " // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         if (((unsigned) v) < 0) 
+    loc_0x140021a2d: // orphan
+         rcx = rdi
+         rcx >>>= 1               // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         r14 = 0x7fffffffffffffff // 9223372036854775807
+         rax = r14
+         rax -= rcx               // "~]   Multiple candidates, none "
+         v = rdi - rax            // "~]   Multiple candidates, none " // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         if (((unsigned) v) <= 0) 
+    loc_0x140021a4d: // orphan
+         rax = rdi + rcx
+         esi = 0x2f               // '/' // "z"
+         v = rax - rsi            // "~]   Multiple candidates, none " // "~]   Multiple candidates, none " // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         cmova rsi rax
+
+         goto loc_0x140021b03;
+    loc_0x140021b03: // orphan
+         qword [var_300h] = rbx
+
+         goto loc_0x140021b7a;
+    loc_0x140021b7a: // orphan
+         ebx = 0                  // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+
+         goto loc_0x140021be4;
+    loc_0x140021be4: // orphan
+         rcx = qword [var_sp_58h]
+         v = rcx & rcx
+         if (!v) 
+    loc_0x14002195e: // orphan
+         // CODE XREF from fcn.1400203f0 @ 0x140021c3a(x)
+         r15d = 0x2f              // '/' // "z"
+
+         goto loc_0x140021bf2;
+    loc_0x140021bf2: // orphan
+         rdx = qword [var_sp_68h]
+         rdx -= rcx               // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         rdx &= 0xfffffffffffffff8 // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         rax = rcx
+         v = rdx - 0x1000         // "~]   Multiple candidates, none " // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         if (((unsigned) v) < 0) 
+    loc_0x140021c35: // orphan
+         fcn.1400aa1f8 ()
+         
+         goto loc_0x140021c0a;
+    loc_0x140021c0a: // orphan
+         rdx += 0x27              // "~]   Multiple candidates, none "
+         rcx = qword [rcx - 8]
+         rax -= rcx               // "~]   Multiple candidates, none " // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         rax -= 8                 // "~]   Multiple candidates, none " // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         v = rax - 0x1f           // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         if (((unsigned) v) <= 0) 
+         goto loc_0x140021c1f;
+    loc_0x140021c1f: // orphan
+         qword [var_20h] = rbx
+         r9d = 0                  // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         r8d = 0                  // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         edx = 0                  // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         ecx = 0                  // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         qword [sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson] () // [0x1400ad928:8]=0xdf0de reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson(0x0, 0x0, 0x0, 0x0)
+         int3
+
+        return rax;
+    loc_0x140021b88: // orphan
+         rdx = qword [var_280h]
+         rdx -= rcx               // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         rdx &= 0xfffffffffffffff8 // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         rax = rcx
+         v = rdx - 0x1000         // "~]   Multiple candidates, none " // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         if (((unsigned) v) < 0) 
+    loc_0x140021bcd: // orphan
+         fcn.1400aa1f8 ()
+         xmm0 ^= xmm0
+         xmmword [var_270h] = xmm0
+         qword [var_280h] = rbx
+
+         goto loc_0x140021ba2;
+    loc_0x140021ba2: // orphan
+         rdx += 0x27              // "~]   Multiple candidates, none "
+         rcx = qword [rcx - 8]
+         rax -= rcx               // "~]   Multiple candidates, none " // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         rax -= 8                 // "~]   Multiple candidates, none " // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         v = rax - 0x1f           // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         if (((unsigned) v) <= 0) 
+         goto loc_0x140021bb7;
+    loc_0x140021bb7: // orphan
+         qword [var_20h] = rbx
+         r9d = 0                  // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         r8d = 0                  // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         edx = 0                  // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         ecx = 0                  // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         qword [sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson] () // [0x1400ad928:8]=0xdf0de reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson(0x0, 0x0, 0x0, 0x0)
+         int3
+
+        return rax;
+    loc_0x140021b16: // orphan
+         rdx = qword [var_2d0h]
+         rdx -= rcx               // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         rdx &= 0xfffffffffffffff8 // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         rax = rcx
+         v = rdx - 0x1000         // "~]   Multiple candidates, none " // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         if (((unsigned) v) < 0) 
+    loc_0x140021b5f: // orphan
+         fcn.1400aa1f8 ()
+         xmm0 ^= xmm0
+         xmmword [var_2c0h] = xmm0
+         ebx = 0                  // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         qword [var_2d0h] = rbx
+         
+    loc_0x140021b7c: // orphan
+         // CODE XREF from fcn.1400203f0 @ 0x140021b78(x)
+         rcx = qword [var_270h]
+         v = rcx & rcx            // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         if (!v) 
+         goto loc_0x140021b30;
+    loc_0x140021b30: // orphan
+         rdx += 0x27              // "~]   Multiple candidates, none "
+         rcx = qword [rcx - 8]
+         rax -= rcx               // "~]   Multiple candidates, none " // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         rax -= 8                 // "~]   Multiple candidates, none " // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         v = rax - 0x1f           // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         if (((unsigned) v) <= 0) 
+         goto loc_0x140021b45;
+    loc_0x140021b45: // orphan
+         qword [var_20h] = 0
+         r9d = 0                  // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         r8d = 0                  // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         edx = 0                  // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         ecx = 0                  // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         qword [sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson] () // [0x1400ad928:8]=0xdf0de reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson(0x0, 0x0, 0x0, 0x0)
+         int3
+
+        return rax;
+    loc_0x140021ab8: // orphan
+         rdx = rdi + 1            // "~]   Multiple candidates, none "
+         rcx = qword [var_300h]
+         rax = rcx
+         v = rdx - 0x1000         // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         if (((unsigned) v) < 0) 
+    loc_0x140021afe: // orphan
+         fcn.1400aa1f8 ()
+
+         goto loc_0x140021acf;
+    loc_0x140021acf: // orphan
+         rdx += 0x27              // "~]   Multiple candidates, none "
+         rcx = qword [rcx - 8]
+         rax -= rcx               // "~]   Multiple candidates, none " // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         rax -= 8                 // "~]   Multiple candidates, none " // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         v = rax - 0x1f           // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         if (((unsigned) v) <= 0) 
+         goto loc_0x140021ae4;
+    loc_0x140021ae4: // orphan
+         qword [var_20h] = 0
+         r9d = 0                  // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         r8d = 0                  // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         edx = 0                  // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         ecx = 0                  // "~]   Multiple candidates, none " // "~]   Multiple candidates, none "
+         qword [sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson] () // [0x1400ad928:8]=0xdf0de reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson(0x0, 0x0, 0x0, 0x0)
+         int3
+
+        return rax;
+    loc_0x140021a48: // orphan
+         rsi = r14
+         
+    loc_0x140021a5d: // orphan
+         // CODE XREF from fcn.1400203f0 @ 0x140021a4b(x)
+         rcx = rsi + 1            // "~]   Multiple candidates, none "
+         fcn.140012c40 ()
+         rbx = rax
+         qword [var_310h] = 0x27  // '\''
+         qword [var_318h] = rsi
+         xmm0 = xmmword [str..text_scan__validated_with_fail_string_] // [0x1400af788:16]=-1 // ".text scan (validated with fail string)"
+         xmmword [rax] = xmm0
+         xmm1 = xmmword [0x1400af798] // [0x1400af798:16]=-1 // "dated with fail string)"
+         xmmword [rax + 0x10] = xmm1
+         ecx = dword [0x1400af7a8] // [0x1400af7a8:4]=0x69727473 // "string)"
+         dword [rax + 0x20] = ecx
+         ecx = word [0x1400af7ac] // [0x1400af7ac:2]=0x676e // "ng)"
+         word [rax + 0x24] = cx
+         eax = byte [0x1400af7ae] // [0x1400af7ae:1]=41 // ")" // "."
+         byte [rbx + 0x26] = al
+         byte [rbx + 0x27] = 0
+         v = rdi - 0xf            // "idated with fail string)" // "text scan (validated with fail string)" // "text scan (validated with fail string)" // "text scan (validated with fail string)"
+         if (((unsigned) v) <= 0) 
+         goto loc_0x1400219e7;
+    loc_0x1400219e7: // orphan
+         rbx = var_300h           // (pstr 0x00000000) ".text scan (validated with fail string)"
+         v = rdi - 0xf            // "idated with fail string)" // "text scan (validated with fail string)" // "text scan (validated with fail string)" // "text scan (validated with fail string)"
+         cmova rbx qword [var_300h]
+         qword [var_310h] = 0x27  // '\''
+         r8d = 0x27               // '\''
+         rdx = rip + str..text_scan__validated_with_fail_string_ // 0x1400af788 // ".text scan (validated with fail string)"
+         rcx = rbx                // (pstr 0x00000000) ".text scan (validated with fail string)"
+         sub.VCRUNTIME140.dll_memmove () // void *memmove(0x0000000000000000, 0x637320747865742e, 0x002e6400)
+         byte [rbx + 0x27] = 0
+         r14 = 0x7fffffffffffffff // 9223372036854775807
+         
+    loc_0x140021b0a: // orphan
+         // CODE XREF from fcn.1400203f0 @ 0x140021a28(x)
+         rcx = qword [var_2c0h]
+         v = rcx & rcx            // "text scan (validated with fail string)" // "text scan (validated with fail string)"
+         if (!v) 
+         goto loc_0x14002176c;
+    loc_0x14002176c: // orphan
+         rcx += 8                 // "an (validated with fail string)"
+         v = rcx - rdi
+         if (v) 
+         goto loc_0x140021745;
+    loc_0x140021745: // orphan
+         v = r8 - qword [rcx]     // "text scan (validated with fail string)" // "text scan (validated with fail string)" // "text scan (validated with fail string)" // "text scan (validated with fail string)"
+         if (!v) 
+    loc_0x14002188e: // orphan
+         rax = qword [var_2e0h]
+         qword [var_sp_50h] = rax
+         dword [var_44h] = 4
+         r8d = 0x29               // ')' // "."
+         rdx = rip + str..text_scan__validated_with_verify_string_ // 0x1400af758 // ".text scan (validated with verify string)"
+         rcx = var_300h           // (pstr 0x00000000) ".text scan (validated with fail string)"
+         fcn.14002c270 ()
+         rdx = qword [var_2c0h]
+         v = rdx & rdx            // "text scan (validated with fail string)" // "text scan (validated with fail string)"
+         if (!v) 
+    loc_0x1400218f8: // orphan
+         rdx = qword [var_270h]
+         v = rdx & rdx            // "text scan (validated with fail string)" // "text scan (validated with fail string)"
+         if (!v) 
+    loc_0x140021934: // orphan
+         rdx = qword [var_sp_58h]
+         v = rdx & rdx
+         if (!v) 
+    loc_0x140021954: // orphan
+         r14 = 0x7fffffffffffffff // 9223372036854775807
+
+         goto loc_0x14002193e;
+    loc_0x14002193e: // orphan
+         r8 = qword [var_sp_68h]
+         r8 -= rdx                // "text scan (validated with fail string)" // "text scan (validated with fail string)"
+         r8 >>= 3                 // "text scan (validated with fail string)" // "text scan (validated with fail string)"
+         rcx = var_sp_58h
+         fcn.14002c860 ()
+
+         goto loc_0x140021904;
+    loc_0x140021904: // orphan
+         r8 = qword [var_280h]
+         r8 -= rdx                // "text scan (validated with fail string)" // "text scan (validated with fail string)"
+         r8 >>= 3                 // "text scan (validated with fail string)" // "text scan (validated with fail string)"
+         rcx = var_270h           // (cstr 0x00000000) ".text scan (validated with fail string)"
+         fcn.14002c860 ()
+         xmm0 ^= xmm0
+         xmmword [var_270h] = xmm0
+         qword [var_280h] = 0
+
+         goto loc_0x1400218c8;
+    loc_0x1400218c8: // orphan
+         r8 = qword [var_2d0h]
+         r8 -= rdx                // "text scan (validated with fail string)" // "text scan (validated with fail string)"
+         r8 >>= 3                 // "text scan (validated with fail string)" // "text scan (validated with fail string)"
+         rcx = var_2c0h           // (cstr 0x00000000) ".text scan (validated with fail string)"
+         fcn.14002c860 ()
+         xmm0 ^= xmm0
+         xmmword [var_2c0h] = xmm0
+         qword [var_2d0h] = 0
+
+         goto loc_0x14002174e;
+    loc_0x14002174e: // orphan
+         rcx += 8                 // "an (validated with fail string)"
+         v = rcx - rbx
+         if (v) 
+         goto loc_0x140021708;
+    loc_0x140021708: // orphan
+         
+
+         goto loc_0x140021729;
+    loc_0x140021729: // orphan
+         rcx += 0x1c              // "ail string)"
+         v = rcx - rsi
+         if (v) 
+    loc_0x140021710: // orphan
+         r9d = dword [rcx + 0xc]
+         v = r10d - r9d           // "text scan (validated with fail string)" // "text scan (validated with fail string)" // "text scan (validated with fail string)"
+         if (((unsigned) v) < 0) 
+         goto loc_0x140021719;
+    loc_0x140021719: // orphan
+         r8d = dword [rcx + 0x10]
+         r8d += r9d
+         v = r10d - r8d           // "text scan (validated with fail string)" // "text scan (validated with fail string)" // "text scan (validated with fail string)" // "text scan (validated with fail string)"
+         if (((unsigned) v) < 0) 
+    loc_0x14002187f: // orphan
+         r8d = dword [rcx + 0x14]
+         r8d -= r9d
+         r8d += r10d
+         
+    loc_0x140021739: // orphan
+         // CODE XREF from fcn.1400203f0 @ 0x140021889(x)
+         rcx = qword [var_270h]
+         v = rcx - rbx            // "text scan (validated with fail string)" // "text scan (validated with fail string)"
+         if (!v) 
+         goto loc_0x1400216b9;
+    loc_0x1400216b9: // orphan
+         r8d = 0                  // "text scan (validated with fail string)" // "text scan (validated with fail string)"
+         
+    loc_0x1400216e9: // orphan
+         // CODE XREF from fcn.1400203f0 @ 0x1400216bc(x)
+         r8d -= dword [var_38h]   // "text scan (validated with fail string)" // "text scan (validated with fail string)"
+         r8d += r14d              // "text scan (validated with fail string)" // "text scan (validated with fail string)"
+         rcx = qword [var_50h]
+         r10d = dword [rcx + 0xc]
+         r10d += 7                // "text scan (validated with fail string)"
+         r10d += r8d              // "text scan (validated with fail string)"
+         rcx = qword [var_bp_70h]
+         v = rcx - rsi            // "text scan (validated with fail string)" // "text scan (validated with fail string)"
+         if (!v) 
+         goto loc_0x1400214da;
+    loc_0x1400214da: // orphan
+         rax = qword [rdx]
+         qword [var_sp_50h] = rax
+         dword [var_44h] = 4
+         r8d = 0x19               // "h fail string)"
+         rdx = rip + str..text_scan__unique_match_ // 0x1400af6d0 // ".text scan (unique match)"
+         rcx = var_300h           // (pstr 0x00000000) ".text scan (validated with fail string)"
+         fcn.14002c270 ()
+         r9 = qword [var_sp_50h]
+         rax = qword [var_70h]
+         ecx = byte [rax + r9 + 3]
+         edx = byte [rax + r9 + 2]
+         r8d = byte [rax + r9 + 1]
+         r10d = byte [rax + r9]   // "jz"
+         dword [var_sp_38h] = ecx
+         dword [var_sp_30h] = edx
+         dword [var_sp_28h] = r8d
+         dword [var_20h] = r10d
+         r8 = rip + str._____FOUND_unique_patch_site_at_0x_zX:__02X__02X__02X__02X // 0x1400af6f0 // "[+]   FOUND unique patch site at 0x%zX: %02X %02X %02X %02X"
+         edx = 0x100              // 256
+         rcx = var_380h           // (cstr 0x00000000) ".text scan (validated with fail string)"
+         fcn.14002ee70 ()
+         xmm0 ^= xmm0
+         xmmword [var_270h] = xmm0
+         xmm1 ^= xmm1
+         xmmword [var_280h] = xmm1
+         rcx = var_380h           // (cstr 0x00000000) ".text scan (validated with fail string)"
+         sub.api_ms_win_crt_string_l1_1_0.dll_strlen () // size_t strlen("")
+         r8 = rax
+         rdx = var_380h           // (cstr 0x00000000) ".text scan (validated with fail string)"
+         rcx = var_270h           // (cstr 0x00000000) ".text scan (validated with fail string)"
+         fcn.140013040 ()
+         r8 = qword [var_288h]
+         v = r8 - 0xf             // "idated with fail string)" // "text scan (validated with fail string)" // "text scan (validated with fail string)" // "text scan (validated with fail string)"
+         if (((unsigned) v) <= 0) 
+         goto loc_0x140021596;
+    loc_0x140021596: // orphan
+         rdx = qword [var_270h]
+         rcx = var_270h           // (cstr 0x00000000) ".text scan (validated with fail string)"
+         fcn.1400016c0 ()
+         
+         goto loc_0x1400213c0;
+    loc_0x1400213c0: // orphan
+         r8 = rdx
+         r11 = rdx
+
+         goto loc_0x140021440;
+    loc_0x140021440: // orphan
+         // CODE XREF from fcn.1400203f0 @ 0x140021424(x)
+         rdx++                    // "text scan (validated with fail string)"
+         qword [var_bp_78h] = rdx
+         r8 = rdx                 // "text scan (validated with fail string)"
+         r11 = rdx                // "text scan (validated with fail string)"
+         rax = rdx + 4            // " scan (validated with fail string)"
+         v = rax - qword [var_58h] // "text scan (validated with fail string)" // "text scan (validated with fail string)" // "text scan (validated with fail string)"
+         if (((unsigned) v) <= 0) 
+    loc_0x1400213d0: // orphan
+         rax = qword [var_28h]
+         r10 = qword [rax]
+         rcx = qword [rax + 8]
+         rcx -= r10               // "text scan (validated with fail string)" // "text scan (validated with fail string)"
+         rax = r8 + 4             // "t scan (validated with fail string)"
+         v = rax - rcx            // "text scan (validated with fail string)" // "text scan (validated with fail string)" // "text scan (validated with fail string)" // "text scan (validated with fail string)"
+         if (((unsigned) v) > 0) 
+         goto loc_0x1400213e7;
+    loc_0x1400213e7: // orphan
+         v = byte [r10 + r11] - 0x84 // "text scan (validated with fail string)" // "text scan (validated with fail string)" // "text scan (validated with fail string)" // "text scan (validated with fail string)"
+         if (v) 
+         goto loc_0x1400213ee;
+    loc_0x1400213ee: // orphan
+         v = byte [r10 + r11 + 1] - 0xc0 // "text scan (validated with fail string)" // "text scan (validated with fail string)" // "text scan (validated with fail string)" // "text scan (validated with fail string)"
+         if (v) 
+         goto loc_0x1400213f6;
+    loc_0x1400213f6: // orphan
+         v = byte [r10 + r11 + 2] - 0x74 // 't' // "text scan (validated with fail string)" // "text scan (validated with fail string)"
+         if (v) 
+         goto loc_0x1400213fe;
+    loc_0x1400213fe: // orphan
+         v = rdx - 5              // " scan (validated with fail string)" // "text scan (validated with fail string)" // "text scan (validated with fail string)" // "text scan (validated with fail string)"
+         if (((unsigned) v) < 0) 
+         goto loc_0x140021404;
+    loc_0x140021404: // orphan
+         v = byte [r10 + r11 - 5] - 0xe8 // "text scan (validated with fail string)"
+         if (v) 
+         goto loc_0x14002140c;
+    loc_0x14002140c: // orphan
+         v = r9 - qword [var_sp_68h] // "text scan (validated with fail string)" // "text scan (validated with fail string)"
+         if (!v) 
+    loc_0x140021426: // orphan
+         r8 = var_bp_78h          // (pstr 0x00000001) "text scan (validated with fail string)"
+         rdx = r9
+         rcx = var_sp_58h
+         fcn.140013dc0 ()
+         r9 = qword [var_sp_60h]
+         rdx = qword [var_bp_78h] // "text scan (validated with fail string)"
+
+         goto loc_0x140021413;
+    loc_0x140021413: // orphan
+         qword [r9] = rdx
+         r9 = qword [var_sp_60h]
+         r9 += 8                  // "an (validated with fail string)"
+         qword [var_sp_60h] = r9
+         
+         goto loc_0x140020f9a;
+    loc_0x140020f9a: // orphan
+         rdi += 0x1c              // "ail string)"
+         v = rdi - rbx
+         if (v) 
+    loc_0x140020f80: // orphan
+         r8d = 5
+         rdx = rip + str..text    // 0x1400af420 // ".text"
+         rcx = rdi
+         qword [sym.imp.api_ms_win_crt_string_l1_1_0.dll_strncmp] () // [0x1400ada50:8]=0xdf0f0 reloc.api_ms_win_crt_string_l1_1_0.dll_strncmp // reloc.api_ms_win_crt_string_l1_1_0.dll_strncmp // int strncmp(0, ".text", 0x61000000)
+         v = eax & eax
+         if (!v) 
+         goto loc_0x140020fa3;
+    loc_0x140020fa3: // orphan
+         rdi = qword [var_50h]
+         
+    loc_0x140020fad: // orphan
+         // CODE XREF from fcn.1400203f0 @ 0x140020fa7(x)
+         v = rdi & rdi
+         if (!v) 
+         goto loc_0x140020de7;
+    loc_0x140020de7: // orphan
+         rsi = r13
+         rdi += r9
+
+         goto loc_0x140020e00;
+    loc_0x140020e00: // orphan
+         rcx = qword [rdx + rdi - 0x10]
+         qword [var_270h] = rcx
+         byte [var_278h] = 0
+         r8 = qword [rax]
+         rdx = qword [rax + 8]
+         rdx -= r8
+         r9 = rdi - 4
+         v = r9 - rdx
+         if (((unsigned) v) <= 0) 
+    loc_0x140020e2b: // orphan
+         ecx = byte [r8 + rdi - 5]
+         ecx <<<= 8
+         eax = byte [r8 + rdi - 6]
+         ecx |= eax
+         ecx <<<= 8
+         eax = byte [r8 + rdi - 7]
+         ecx |= eax
+         ecx <<<= 8
+         eax = byte [r8 + rdi - 8]
+         ecx |= eax
+
+         goto loc_0x140020e62;
+    loc_0x140020e62: // orphan
+         ecx = byte [r9 + r8 + 3]
+         ecx <<<= 8
+         eax = byte [r9 + r8 + 2]
+         ecx |= eax
+         ecx <<<= 8
+         eax = byte [r9 + r8 + 1]
+         ecx |= eax
+         ecx <<<= 8
+         eax = byte [r9 + r8]
+         ecx |= eax
+
+         goto loc_0x140020e9c;
+    loc_0x140020e9c: // orphan
+         ecx = byte [r8 + rdi + 3]
+         ecx <<<= 8
+         eax = byte [r8 + rdi + 2]
+         ecx |= eax
+         ecx <<<= 8
+         eax = byte [r8 + rdi + 1]
+         ecx |= eax
+         ecx <<<= 8
+         eax = byte [r8 + rdi]
+         ecx |= eax
+
+         goto loc_0x140020ed6;
+    loc_0x140020ed6: // orphan
+         edx = byte [r8 + r9 + 3]
+         edx <<<= 8
+         eax = byte [r8 + r9 + 2]
+         edx |= eax
+         edx <<<= 8
+         eax = byte [r8 + r9 + 1]
+         edx |= eax
+         edx <<<= 8
+         eax = byte [r8 + r9]
+         edx |= eax
+
+         goto loc_0x140020f2f;
+    loc_0x140020f2f: // orphan
+         r8 = var_270h
+         rdx = rbx
+         rcx = var_bp_70h
+         fcn.140013be0 ()
+         rbx = qword [var_68h]
+
+         goto loc_0x140020f52;
+    loc_0x140020f52: // orphan
+         r8 = qword [var_78h]
+         rdx = qword [var_70h]
+         rax = qword [var_bp_40h]
+         r10 = qword [var_60h]
+         
+    loc_0x140020df0: // orphan
+         // CODE XREF from fcn.1400203f0 @ 0x140020f64(x)
+         r8 -= rdx
+         rcx = rdi + 0x18         // "th fail string)"
+         v = rcx - r8
+         if (((unsigned) v) > 0) 
+         goto loc_0x140020f07;
+    loc_0x140020f07: // orphan
+         xmm0 = xmmword [var_270h]
+         xmmword [rbx] = xmm0
+         xmm1 = qword [var_280h]
+         qword [rbx + 0x10] = xmm1
+         dword [rbx + 0x18] = ecx
+         rbx = qword [var_68h]
+         rbx += 0x1c              // "ail string)"
+         qword [var_68h] = rbx
+         
+    loc_0x140020f46: // orphan
+         // CODE XREF from fcn.1400203f0 @ 0x140020f2d(x)
+         rsi++
+         rdi += 0x28              // "d."
+         v = rsi - r14
+         if (v >= 0) 
+         goto loc_0x140020ed1;
+    loc_0x140020ed1: // orphan
+         edx = r13d
+         
+    loc_0x140020efc: // orphan
+         // CODE XREF from fcn.1400203f0 @ 0x140020ed4(x)
+         dword [var_284h] = edx
+         v = rbx - r10
+         if (!v) 
+         goto loc_0x140020e97;
+    loc_0x140020e97: // orphan
+         ecx = r13d
+         
+    loc_0x140020ec2: // orphan
+         // CODE XREF from fcn.1400203f0 @ 0x140020e9a(x)
+         dword [var_288h] = ecx
+         rax = rdi + 8
+         v = rax - rdx
+         if (((unsigned) v) <= 0) 
+         goto loc_0x140020e5d;
+    loc_0x140020e5d: // orphan
+         ecx = r13d
+         
+    loc_0x140020e88: // orphan
+         // CODE XREF from fcn.1400203f0 @ 0x140020e60(x)
+         dword [var_27ch] = ecx
+         r9 = rdi + 4
+         v = r9 - rdx
+         if (((unsigned) v) <= 0) 
+         goto loc_0x140020e26;
+    loc_0x140020e26: // orphan
+         ecx = r13d
+         
+    loc_0x140020e52: // orphan
+         // CODE XREF from fcn.1400203f0 @ 0x140020e29(x)
+         dword [var_280h] = ecx
+         v = rdi - rdx
+         if (((unsigned) v) <= 0) 
+         goto loc_0x140020daf;
+    loc_0x140020daf: // orphan
+         r10 = r13
+         
+    loc_0x140020dc7: // orphan
+         // CODE XREF from fcn.1400203f0 @ 0x140020db2(x)
+         rdi = r10 + 0x28         // "d."
+         xmm0 ^= xmm0
+         xmmword [var_bp_70h] = xmm0
+         r10 = r13
+         qword [var_60h] = r13
+         rbx = qword [var_68h]
+         v = r14 & r14
+         if (!v) 
+         goto loc_0x140020d8e;
+    loc_0x140020d8e: // orphan
+         r14 = r13
+         
+    loc_0x140020da6: // orphan
+         // CODE XREF from fcn.1400203f0 @ 0x140020d91(x)
+         rcx = r9 + 0x16
+         v = rcx - r10
+         if (((unsigned) v) <= 0) 
+         goto loc_0x140020cf1;
+    loc_0x140020cf1: // orphan
+         ecx = 0x20               // "string)"
+         fcn.140012c40 ()
+         rdx = rax
+         xmm0 = xmmword [str.____File_too_small_for_PE.] // [0x1400af3e8:16]=-1 // "[!] File too small for PE."
+         xmmword [rax] = xmm0
+         xmm0 = qword [0x1400af3f8] // [0x1400af3f8:8]=0x5020726f66206c6c // "ll for PE."
+         qword [rax + 0x10] = xmm0
+         eax = word [0x1400af400] // [0x1400af400:2]=0x2e45 // "E."
+         word [rdx + 0x18] = ax
+         byte [rdx + 0x1a] = r13b
+         r8d = 0x1f               // " string)"
+         rcx = var_270h
+         fcn.1400016c0 ()
+         
+         goto loc_0x140020cbf;
+    loc_0x140020cbf: // orphan
+         rdx = qword [var_270h]
+         rcx = var_270h
+         fcn.1400016c0 ()
+
+         goto loc_0x140020c1a;
+    loc_0x140020c1a: // orphan
+         rax = qword [var_160h]
+         rcx = dword [rax + 4]
+         rax = var_160h           // (cstr 0x00000000) "[!] File too sma"
+         rcx += rax               // "!] File too sma"
+         r8d = 0                  // "!] File too sma" // "!] File too sma"
+         edx = 2                  // "] File too sma"
+         qword [sym.imp.MSVCP140.dll__setstate___basic_ios_DU__char_traits_D_std___std__QEAAXH_N_Z] () // [0x1400ad530:8]=0xddd46 reloc.MSVCP140.dll__setstate___basic_ios_DU__char_traits_D_std___std__QEAAXH_N_Z // "F\xdd\r" // reloc.MSVCP140.dll__setstate___basic_ios_DU__char_traits_D_std___std__QEAAXH_N_Z // sym.imp.MSVCP140.dll__setstate___basic_ios_DU__char_traits_D_std___std__QEAAXH_N_Z(0x0, 0x0, 0x2, 0x6583eaa6)
+
+         goto loc_0x140020b2d;
+    loc_0x140020b2d: // orphan
+         qword [var_278h] = 0
+         ecx = 0x40               // '@' // 64 // "."
+         fcn.140012c40 ()
+         qword [var_270h] = rax
+         xmm0 = xmmword [0x1400b0670] // [0x1400b0670:16]=-1 // "..."
+         xmmword [var_280h] = xmm0
+         xmm0 = xmmword [str.____Cannot_open_HD_Player.exe._Close_the_emulator_first.] // [0x1400af388:16]=-1 // "[!] Cannot open HD-Player.exe. Close the emulator first."
+         xmmword [rax] = xmm0
+         xmm1 = xmmword [0x1400af398] // [0x1400af398:16]=-1 // "HD-Player.exe. Close the emulator first."
+         xmmword [rax + 0x10] = xmm1
+         xmm0 = xmmword [0x1400af3a8] // [0x1400af3a8:16]=-1 // "lose the emulator first."
+         xmmword [rax + 0x20] = xmm0
+         xmm0 = qword [0x1400af3b8] // [0x1400af3b8:8]=0x2e74737269662072 // "r first."
+         qword [rax + 0x30] = xmm0
+         byte [rax + 0x38] = 0
+         rcx = var_270h
+         fcn.1400010f0 ()
+         
+         goto loc_0x1400208f0;
+    loc_0x1400208f0: // orphan
+         rax = var_320h           // "erified"
+         v = qword [var_338h] - 0xf // "!] Cannot open HD-Player.exe. Close the emulato" // "!] Cannot open HD-Player.exe. Close the emulato"
+         cmova rax qword [var_320h]
+         qword [var_2e0h] = rax
+         rax = qword [var_330h]
+         qword [var_2e8h] = rax
+         r8d = 0                  // "!] Cannot open HD-Player.exe. Close the emulato" // "!] Cannot open HD-Player.exe. Close the emulato"
+         rdx = var_2e0h           // "erified"
+         rcx = var_2c0h           // (cstr 0x00000000) "[!] Cannot open HD-Player.exe. Close the emulato"
+         fcn.1400133d0 ()
+         rax = var_2a0h           // (cstr 0x00000000) "[!] Cannot open HD-Player.exe. Close the emulato"
+         v = qword [var_2b8h] - 0xf // "!] Cannot open HD-Player.exe. Close the emulato" // "!] Cannot open HD-Player.exe. Close the emulato" // "!] Cannot open HD-Player.exe. Close the emulato"
+         cmova rax qword [var_2a0h]
+         qword [var_2e0h] = rax
+         rax = qword [var_2b0h]
+         qword [var_2e8h] = rax
+         r8d = 0                  // "!] Cannot open HD-Player.exe. Close the emulato" // "!] Cannot open HD-Player.exe. Close the emulato"
+         rdx = var_2e0h
+         rcx = var_270h
+         fcn.1400133d0 ()
+         rdx = var_2c0h           // (cstr 0x00000000) "[!] Cannot open HD-Player.exe. Close the emulato"
+         v = qword [var_2d8h] - 7 // "!] Cannot open HD-Player.exe. Close the emulato" // "!] Cannot open HD-Player.exe. Close the emulato" // "!] Cannot open HD-Player.exe. Close the emulato" // "!] Cannot open HD-Player.exe. Close the emulato"
+         cmova rdx qword [var_2c0h]
+         rcx = var_270h
+         v = qword [var_288h] - 7
+         cmova rcx qword [var_270h]
+         r8d = 0                  // "!] Cannot open HD-Player.exe. Close the emulato" // "!] Cannot open HD-Player.exe. Close the emulato"
+         fcn.1400a95cc ()
+         rbx = rax
+         rbx >>>= 0x20            // "!] Cannot open HD-Player.exe. Close the emulato" // "!] Cannot open HD-Player.exe. Close the emulato"
+         rcx = var_270h
+         fcn.14002b920 ()
+         rcx = var_2c0h           // (cstr 0x00000000) "[!] Cannot open HD-Player.exe. Close the emulato"
+         fcn.14002b920 ()
+         v = ebx & ebx            // "!] Cannot open HD-Player.exe. Close the emulato" // "!] Cannot open HD-Player.exe. Close the emulato"
+         if (!v) 
+    loc_0x140020a23: // orphan
+         rax = r13
+         rcx = qword [var_330h]
+         rax -= rcx               // "!] Cannot open HD-Player.exe. Close the emulato" // "!] Cannot open HD-Player.exe. Close the emulato"
+         v = rax - 0x14           // "layer.exe. Close the emulato" // "!] Cannot open HD-Player.exe. Close the emulato" // "!] Cannot open HD-Player.exe. Close the emulato" // "!] Cannot open HD-Player.exe. Close the emulato"
+         if (((unsigned) v) < 0) 
+    loc_0x140022536: // orphan
+         fcn.14002bd80 ()
+         int3
+
+        return rax;
+    loc_0x140020a3a: // orphan
+         rax = var_320h           // "erified"
+         v = qword [var_338h] - 0xf // "!] Cannot open HD-Player.exe. Close the emulato" // "!] Cannot open HD-Player.exe. Close the emulato"
+         cmova rax qword [var_320h]
+         qword [var_sp_30h] = rcx
+         qword [var_sp_28h] = rax
+         qword [var_20h] = 0x14   // [0x14:8]=0x78652e726579616c // "layer.exe. Close the emulato"
+         r9 = rip + str.___Backup_created: // 0x1400af340 // "[*] Backup created:"
+         r8 = var_320h            // "erified"
+         edx = byte [var_40h]
+         rcx = var_270h
+         fcn.140017020 ()         // fcn.140017020(0x0, 0x0, 0x0)
+         eax = 0x2e7              // 743
+         dword [var_48h] = eax
+         rcx = var_270h
+         fcn.1400010f0 ()
+         
+    loc_0x140020ae6: // orphan
+         // CODE XREF from fcn.1400203f0 @ 0x140020a98(x)
+         dword [var_20h] = 1
+         r9d = 0x40               // '@' // 64 // "."
+         r8d = 0x24               // '$' // " the emulato"
+         rdx = var_2a0h           // (cstr 0x00000000) "[!] Cannot open HD-Player.exe. Close the emulato"
+         rcx = var_160h           // (cstr 0x00000000) "[!] Cannot open HD-Player.exe. Close the emulato"
+         fcn.140016b20 ()         // fcn.140016b20(0x0)
+         rax = qword [var_160h]
+         rdx = dword [rax + 4]
+         rcx = var_160h           // (cstr 0x00000000) "[!] Cannot open HD-Player.exe. Close the emulato"
+         rcx += rdx               // "!] Cannot open HD-Player.exe. Close the emulato"
+         qword [sym.imp.MSVCP140.dll___7ios_base_std__QEBA_NXZ] () // [0x1400ad3e8:8]=0xdd548 reloc.MSVCP140.dll___7ios_base_std__QEBA_NXZ // "H\xd5\r" // reloc.MSVCP140.dll___7ios_base_std__QEBA_NXZ // sym.imp.MSVCP140.dll___7ios_base_std__QEBA_NXZ(0x0, 0x0, 0x6e6e6143, 0x6e85e2a3)
+         v = al & al              // "!] Cannot open HD-Player.exe. Close the emulato" // "!] Cannot open HD-Player.exe. Close the emulato"
+         if (!v) 
+         goto loc_0x1400209cf;
+    loc_0x1400209cf: // orphan
+         rdx = qword [0x1400e00b0] // [0x1400e00b0:8]=0x1400aed60
+         r9 = qword [rdx + 0x10]
+         r8d = ebx
+         rdx = var_270h
+         rcx = rdi
+         r9 ()                    // 0x14002d0a0(0x0, 0x0, 0x178270, 0x0)
+         r8 = var_270h
+         rdx = rip + str.____Backup_failed: // 0x1400af328 // "[!] Backup failed:"
+         rcx = var_2c0h           // (cstr 0x00000000) "[!] Cannot open HD-Player.exe. Close the emulato"
+         fcn.140012a40 ()
+         rcx = var_2c0h           // (cstr 0x00000000) "[!] Cannot open HD-Player.exe. Close the emulato"
+         fcn.1400010f0 ()
+         rcx = var_270h
+         fcn.1400010f0 ()
+         
+    loc_0x14002243d: // orphan
+         // CODE XREFS from fcn.1400203f0 @ 0x140020877(x), 0x140020a1e(x)
+         rdx = qword [var_338h]
+         v = rdx - 0xf            // " HD-Player.exe. Close the emulato" // "!] Cannot open HD-Player.exe. Close the emulato" // "!] Cannot open HD-Player.exe. Close the emulato"
+         if (((unsigned) v) <= 0) 
+         goto loc_0x140020785;
+    loc_0x140020785: // orphan
+         rdi = qword [var_2b0h]
+         rax = r13
+         rax -= rdi               // "!] Cannot open HD-Player.exe. Close the emulato" // "!] Cannot open HD-Player.exe. Close the emulato"
+         v = rax - 0x1d           // ". Close the emulato" // "!] Cannot open HD-Player.exe. Close the emulato" // "!] Cannot open HD-Player.exe. Close the emulato" // "!] Cannot open HD-Player.exe. Close the emulato"
+         if (((unsigned) v) < 0) 
+         goto loc_0x14002079c;
+    loc_0x14002079c: // orphan
+         r14 = var_2a0h           // (cstr 0x00000000) "[!] Cannot open HD-Player.exe. Close the emulato"
+         v = qword [var_2b8h] - 0xf // "!] Cannot open HD-Player.exe. Close the emulato" // "!] Cannot open HD-Player.exe. Close the emulato" // "!] Cannot open HD-Player.exe. Close the emulato"
+         cmova r14 qword [var_2a0h]
+         xmm0 ^= xmm0
+         xmmword [var_270h] = xmm0
+         rsi = rdi + 0x1d         // ". Close the emulato"
+         rbx = var_270h
+         v = rsi - 0xf            // " HD-Player.exe. Close the emulato" // "!] Cannot open HD-Player.exe. Close the emulato"
+         if (((unsigned) v) <= 0) 
+    loc_0x14002080f: // orphan
+         qword [var_288h] = r12
+         xmm0 = xmmword [str.____HD_Player.exe_not_found:] // [0x1400af308:16]=-1 // "[!] HD-Player.exe not found:"
+         xmmword [rbx] = xmm0
+         xmm0 = qword [0x1400af318] // [0x1400af318:8]=0x6f6620746f6e2065 // "e not found: "
+         qword [rbx + 0x10] = xmm0
+         ecx = dword [0x1400af320] // [0x1400af320:4]=0x3a646e75 // "und: "
+         dword [rbx + 0x18] = ecx
+         eax = byte [0x1400af324] // [0x1400af324:1]=32 // "lose the emulato"
+         byte [rbx + 0x1c] = al
+         rcx = rbx + 0x1d         // ". Close the emulato"
+         r8 = rdi
+         rdx = r14
+         sub.VCRUNTIME140.dll_memcpy () // void *memcpy(0x2065736f6c43202e, 0, 0)
+         byte [rbx + rsi] = 0
+         r8 = qword [var_288h]
+         v = r8 - 0xf             // "!] HD-Player.ex" // "!] HD-Player.ex" // "!] HD-Player.ex"
+         if (((unsigned) v) <= 0) 
+         goto loc_0x140020864;
+    loc_0x140020864: // orphan
+         rdx = qword [var_270h]
+         rcx = var_270h
+         fcn.1400016c0 ()
+         
+         goto loc_0x1400207ce;
+    loc_0x1400207ce: // orphan
+         r12 = rsi
+         r12 |= 0xf               // "x" // "!] HD-Player.ex"
+         v = r12 - r13            // "!] HD-Player.ex"
+         if (((unsigned) v) <= 0) 
+    loc_0x1400207ee: // orphan
+         v = r12 - 0x16           // "!] HD-Player.ex" // "!] HD-Player.ex" // "!] HD-Player.ex"
+         eax = 0x16
+         cmovb r12 rax
+
+         goto loc_0x1400207da;
+    loc_0x1400207da: // orphan
+         r12 = r13
+         
+    loc_0x1400207fb: // orphan
+         // CODE XREF from fcn.1400203f0 @ 0x1400207dd(x)
+         rcx = r12 + 1            // "!] HD-Player.ex"
+         fcn.140012c40 ()
+         rbx = rax
+         qword [var_270h] = rax
+
+         goto loc_0x14002076b;
+    loc_0x14002076b: // orphan
+         // CODE XREFS from fcn.1400203f0 @ 0x140020702(x), 0x140020711(x)
+         v = ecx - 1              // "!] HD-Player.ex"
+         bl = v == 0
+
+         goto loc_0x14002073b;
+    loc_0x14002073b: // orphan
+         v = eax - 0x10b          // 267 // "!] HD-Player.ex" // "!] HD-Player.ex" // "!] HD-Player.ex" // "!] HD-Player.ex"
+
+         goto loc_0x140020742;
+    loc_0x140020742: // orphan
+         ecx = 0                  // "!] HD-Player.ex" // "!] HD-Player.ex"
+         
+    loc_0x14002074b: // orphan
+         // CODE XREFS from fcn.1400203f0 @ 0x14002071c(x), 0x140020744(x)
+         dword [var_2e0h] = eax
+         qword [var_2e8h] = rdi
+         xmm0 = xmmword [var_2e0h]
+         xmmword [var_2e0h] = xmm0
+         v = ecx & ecx            // "!] HD-Player.ex" // "!] HD-Player.ex"
+         if (!v) 
+         goto loc_0x140020723;
+    loc_0x140020723: // orphan
+         if (!v) 
+         goto loc_0x140020725;
+    loc_0x140020725: // orphan
+         ecx = eax
+         ecx -= 2                 // "!] HD-Player.ex" // "!] HD-Player.ex" // "!] HD-Player.ex"
+         if (!v) 
+         goto loc_0x14002072c;
+    loc_0x14002072c: // orphan
+         ecx -= 1                 // "!] HD-Player.ex" // "!] HD-Player.ex" // "!] HD-Player.ex" // "!] HD-Player.ex"
+         if (!v) 
+         goto loc_0x140020731;
+    loc_0x140020731: // orphan
+         v = ecx - 0x32           // '2' // "!] HD-Player.ex" // "!] HD-Player.ex" // "!] HD-Player.ex"
+         
+    loc_0x140020740: // orphan
+         // CODE XREF from fcn.1400203f0 @ 0x140020734(x)
+         if (!v) 
+         goto loc_0x1400206e3;
+    loc_0x1400206e3: // orphan
+         ecx = dword [var_2d0h]
+         bt ecx 0xa
+         jae 0x140020713          // likely
+
+    loc_0x140020713: // orphan
+         ecx &= 0x10              // "!] HD-Player.ex" // "!] HD-Player.ex"
+         ecx |= 0x20              // "lose the emulato"
+         ecx >>>= 4               // "] HD-Player.ex"
+         
+         goto loc_0x1400206ef;
+    loc_0x1400206ef: // orphan
+         edx = dword [var_2d4h]
+         v = edx - 0xa000000c     // '\f' // "!] HD-Player.ex" // "!] HD-Player.ex"
+         if (v) 
+    loc_0x140020704: // orphan
+         v = edx - 0xa0000003     // "!] HD-Player.ex" // "!] HD-Player.ex"
+         if (v) 
+         goto loc_0x14002070c;
+    loc_0x14002070c: // orphan
+         ecx = 0xa                // "yer.ex"
+         
+         goto loc_0x1400206fd;
+    loc_0x1400206fd: // orphan
+         ecx = 4                  // "HD-Player.ex"
+         
+         goto loc_0x14002060d;
+    loc_0x14002060d: // orphan
+         rbx = rsi
+         rbx |= 0xf               // "x" // "!] HD-Player.ex"
+         v = rbx - r13            // "!] HD-Player.ex"
+         if (((unsigned) v) <= 0) 
+    loc_0x14002061e: // orphan
+         v = rbx - 0x16           // "!] HD-Player.ex" // "!] HD-Player.ex" // "!] HD-Player.ex"
+         eax = 0x16
+         cmovb rbx rax
+
+         goto loc_0x140020619;
+    loc_0x140020619: // orphan
+         rbx = r13
+         
+    loc_0x14002062b: // orphan
+         // CODE XREF from fcn.1400203f0 @ 0x14002061c(x)
+         rcx = rbx + 1            // "!] HD-Player.ex"
+         fcn.140012c40 ()
+         rdi = rax
+         qword [var_320h] = rax
+
+         goto loc_0x140020547;
+    loc_0x140020547: // orphan
+         rbx = r14
+         rbx |= r12               // "!] HD-Player.ex" // "!] HD-Player.ex"
+         v = rbx - r13            // "!] HD-Player.ex" // "!] HD-Player.ex"
+         if (((unsigned) v) <= 0) 
+    loc_0x140020557: // orphan
+         v = rbx - rax            // "!] HD-Player.ex" // "!] HD-Player.ex"
+         cmovb rbx rax
+
+         goto loc_0x140020552;
+    loc_0x140020552: // orphan
+         rbx = r13
+         
+    loc_0x14002055e: // orphan
+         // CODE XREF from fcn.1400203f0 @ 0x140020555(x)
+         rcx = rbx + 1            // "!] HD-Player.ex"
+         fcn.140012c40 ()
+         rsi = rax
+         qword [var_2a0h] = rax
+
+         goto loc_0x140020511;
+    loc_0x140020511: // orphan
+         rdi = qword [rdi]
+
+         goto loc_0x140020439;
+    loc_0x140020439: // orphan
+         ecx = 0x20               // "lose the emulato"
+         fcn.140012c40 ()
+         rcx = rax
+         xmm0 = xmmword [str.____InstallDir_not_found.] // [0x1400af2c0:16]=-1 // "[!] InstallDir not found."
+         xmmword [rax] = xmm0
+         xmm0 = qword [0x1400af2d0] // [0x1400af2d0:8]=0x646e756f6620746f // "ot found."
+         qword [rax + 0x10] = xmm0
+         eax = byte [0x1400af2d8] // [0x1400af2d8:1]=46 // "." // "to"
+         byte [rcx + 0x18] = al
+         byte [rcx + 0x19] = 0
+         edx = 0x20               // "lose the emulato"
+
+}
+

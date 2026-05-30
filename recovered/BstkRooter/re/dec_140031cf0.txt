@@ -1,0 +1,304 @@
+/* r2dec pseudo code output (r2 6.1.4) */
+/* /Users/jordan/Downloads/new @ 0x140031cf0 */
+#include <stdint.h>
+ 
+#define SWAP64(val) ((uint64_t) (((val & 0x00000000000000ffull) << 56) | \
+                                 ((val & 0x000000000000ff00ull) << 40) | \
+                                 ((val & 0x0000000000ff0000ull) << 24) | \
+                                 ((val & 0x00000000ff000000ull) <<  8) | \
+                                 ((val & 0x000000ff00000000ull) >>  8) | \
+                                 ((val & 0x0000ff0000000000ull) >> 24) | \
+                                 ((val & 0x00ff000000000000ull) >> 40) | \
+                                 ((val & 0xff00000000000000ull) >> 56)))
+#define SWAP32(n) ((uint32_t) (((n & 0x000000ff) << 24) | \
+                               ((n & 0x0000ff00) <<  8) | \
+                               ((n & 0x00ff0000) >>  8) | \
+                               ((n & 0xff000000) >> 24)))
+ 
+int64_t fcn_140031cf0 (int64_t arg1) {
+    int64_t var_160h;
+    int64_t var_170h;
+    int64_t var_17ch;
+    int64_t var_180h;
+    int64_t var_560h;
+    int64_t var_bp_70h;
+    int64_t var_64h;
+    int64_t var_20h_2;
+    int64_t var_30h;
+    int64_t var_38h;
+    int64_t var_40h;
+    int64_t var_50h;
+    int64_t var_58h;
+    int64_t var_60h;
+    int64_t var_70h;
+    int64_t var_670h;
+    int64_t var_10h;
+    int64_t var_18h;
+    int64_t var_20h;
+    rcx = arg1;
+    *((rsp + 0x10)) = rbx;
+    rbp = rsp - 0x570;
+    rax = *(0x1400e0140);
+    rax ^= rsp;
+    *((rbp + 0x560)) = rax;
+    rdi = rcx;
+    r9d = 0;
+    r8d = 0;
+    edx = 0;
+    rcx = *(rcx);
+    SetFilePointer (rsi);
+    ebx = 0;
+    r9 = rsp + 0x30;
+    r8d = 0x200;
+    rdx = rsp + 0x60;
+    rcx = *(rdi);
+    eax = ReadFile (rbx);
+    if (eax == 0) {
+        __asm ("xorps xmm0, xmm0");
+        __asm ("movups xmmword [rsp + 0x40], xmm0");
+        ecx = 0x20;
+        rax = void (*0x140012c40)() ();
+        __asm ("movdqa xmm0, xmmword [0x1400b0b10]");
+        __asm ("movdqu xmmword [rsp + 0x50], xmm0");
+        __asm ("movups xmm0, xmmword [str.Failed_to_read_file]");
+        __asm ("movups xmmword [rax], xmm0");
+        ecx = *(0x1400b08a8);
+        *((rax + 0x10)) = cx;
+        ecx = *(0x1400b08aa);
+        *((rax + 0x12)) = cl;
+        *((rax + 0x13)) = bl;
+        rcx = rdi + 0x28;
+        rdx = rsp + 0x40;
+        void (*0x140018810)(uint64_t) (rax);
+        rdx = *((rsp + 0x58));
+        if (rdx > 0xf) {
+            rdx++;
+            rcx = *((rsp + 0x40));
+            rax = *((rsp + 0x40));
+            if (rdx >= 0x1000) {
+                rdx += 0x27;
+                rcx = *((rcx - 8));
+                rax -= rcx;
+                rax -= 8;
+                if (rax > 0x1f) {
+                    goto label_0;
+                }
+            }
+            al = void (*0x1400aa1f8)() ();
+        }
+        al = 0;
+        goto label_1;
+    }
+    esi = 8;
+    r8d = 8;
+    rdx = "conectix";
+    rcx = rsp + 0x60;
+    eax = void (*0x1400ab0fe)() ();
+    if (eax != 0) {
+        goto label_2;
+    }
+    rdx = *((rsp + 0x70));
+    rdx = SWAP64 (rdx);
+    rcx = *((rbp - 0x70));
+    rcx = SWAP64 (rcx);
+    eax = *((rbp - 0x64));
+    eax = SWAP32 (eax);
+    if (eax != 3) {
+        goto label_3;
+    }
+    *(0x1400e0a90) = 1;
+    *(0x1400e0aa8) = rcx;
+    r9d = 0;
+    r8d = 0;
+    rcx = *(rdi);
+    SetFilePointerEx ();
+    r9 = rsp + 0x30;
+    r8d = 0x400;
+    rdx = rbp + 0x160;
+    rcx = *(rdi);
+    ReadFile (rbx);
+    r8d = esi;
+    rdx = "cxsparse";
+    rcx = rbp + 0x160;
+    eax = void (*0x1400ab0fe)() ();
+    if (eax != 0) {
+        goto label_3;
+    }
+    rax = *((rbp + 0x170));
+    rax = SWAP64 (rax);
+    *(0x1400e0aa0) = rax;
+    ecx = *((rbp + 0x17c));
+    ecx = SWAP32 (ecx);
+    *(0x1400e0a98) = ecx;
+    eax = *((rbp + 0x180));
+    eax = SWAP32 (eax);
+    *(0x1400e0a94) = eax;
+    eax = 4;
+    rdx:rax = rax * rcx;
+    rcx = 0xffffffffffffffff;
+    if (eax < 0) {
+        rax = rcx;
+    }
+    rcx = rax;
+    rax = void (*0x1400aa758)() ();
+    *(0x1400e0ab0) = rax;
+    r9d = 0;
+    r8d = 0;
+    rdx = *(0x1400e0aa0);
+    rcx = *(rdi);
+    SetFilePointerEx ();
+    r8d = *(0x1400e0a98);
+    r8d = r8*4;
+    r9 = rsp + 0x30;
+    rdx = *(0x1400e0ab0);
+    rcx = *(rdi);
+    rax = ReadFile (rbx);
+    edx = *(0x1400e0a98);
+    if (edx == 0) {
+        goto label_3;
+    }
+    r8 = *(0x1400e0ab0);
+    if (edx < 2) {
+        goto label_4;
+    }
+    if (*(0x1400e00f8) < 2) {
+        goto label_4;
+    }
+    __asm ("movdqa xmm1, xmmword [0x1400b0b50]");
+    if (edx < 0x10) {
+        goto label_5;
+    }
+    r9d = edx;
+    r9d &= 0xf;
+    r10d = edx;
+    r10d -= r9d;
+    do {
+        eax = ebx;
+        __asm ("movdqu xmm0, xmmword [r8 + rax*4]");
+        __asm ("pshufb xmm0, xmm1");
+        __asm ("movdqu xmmword [r8 + rax*4], xmm0");
+        eax = rsi - 4;
+        __asm ("movdqu xmm0, xmmword [r8 + rax*4]");
+        __asm ("pshufb xmm0, xmm1");
+        __asm ("movdqu xmmword [r8 + rax*4], xmm0");
+        eax = esi;
+        __asm ("movdqu xmm0, xmmword [r8 + rax*4]");
+        __asm ("pshufb xmm0, xmm1");
+        __asm ("movdqu xmmword [r8 + rax*4], xmm0");
+        eax = rsi + 4;
+        __asm ("movdqu xmm0, xmmword [r8 + rax*4]");
+        __asm ("pshufb xmm0, xmm1");
+        __asm ("movdqu xmmword [r8 + rax*4], xmm0");
+        ebx += 0x10;
+        esi += 0x10;
+    } while (ebx < r10d);
+    if (r9d < 2) {
+        goto label_4;
+    }
+label_5:
+    eax = edx;
+    eax &= 1;
+    ecx = edx;
+    ecx -= eax;
+    do {
+        eax = ebx;
+        xmm0 = *((r8 + rax*4));
+        __asm ("pshufb xmm0, xmm1");
+        *((r8 + rax*4)) = xmm0;
+        ebx += 2;
+    } while (ebx < ecx);
+label_4:
+    if (ebx >= edx) {
+        goto label_3;
+    }
+    eax = ebx;
+    rcx = r8 + rax*4;
+    edx -= ebx;
+    r8d = edx;
+    do {
+        eax = *(rcx);
+        eax = SWAP32 (eax);
+        *(rcx) = eax;
+        rcx = rcx + 4;
+        r8--;
+    } while (r8 != 0);
+    goto label_3;
+label_2:
+    rdx = rsp + 0x38;
+    rcx = *(rdi);
+    GetFileSizeEx ();
+    rdx = *((rsp + 0x38));
+    rdx += 0xfffffffffffffe00;
+    r9d = 0;
+    r8d = 0;
+    rcx = *(rdi);
+    SetFilePointerEx ();
+    r9 = rsp + 0x30;
+    r8d = 0x200;
+    rdx = rsp + 0x60;
+    rcx = *(rdi);
+    ReadFile (rbx);
+    r8 = rsi;
+    rdx = "conectix";
+    rcx = rsp + 0x60;
+    eax = void (*0x1400ab0fe)() ();
+    if (eax != 0) {
+        __asm ("xorps xmm0, xmm0");
+        __asm ("movups xmmword [rsp + 0x40], xmm0");
+        ecx = 0x30;
+        rax = void (*0x140012c40)() ();
+        rcx = rax;
+        __asm ("movdqa xmm0, xmmword [0x1400b0b40]");
+        __asm ("movdqu xmmword [rsp + 0x50], xmm0");
+        __asm ("movups xmm0, xmmword [str.No_VHD_footer_found___treating_as_raw_image]");
+        __asm ("movups xmmword [rax], xmm0");
+        __asm ("movups xmm1, xmmword [0x1400b08e0]");
+        __asm ("movups xmmword [rax + 0x10], xmm1");
+        xmm0 = *(0x1400b08f0);
+        *((rax + 0x20)) = xmm0;
+        eax = *(0x1400b08f8);
+        *((rcx + 0x28)) = ax;
+        eax = *(0x1400b08fa);
+        *((rcx + 0x2a)) = al;
+        *((rcx + 0x2b)) = bl;
+        rcx = rdi + 0x28;
+        rdx = rsp + 0x40;
+        void (*0x140018810)(uint64_t) (rax);
+        rdx = *((rsp + 0x58));
+        if (rdx <= 0xf) {
+            goto label_3;
+        }
+        rdx++;
+        rcx = *((rsp + 0x40));
+        rax = *((rsp + 0x40));
+        if (rdx >= 0x1000) {
+            rdx += 0x27;
+            rcx = *((rcx - 8));
+            rax -= rcx;
+            rax -= 8;
+            if (rax <= 0x1f) {
+                goto label_6;
+            }
+label_0:
+            r9d = 0;
+            r8d = 0;
+            edx = 0;
+            ecx = 0;
+            _invoke_watson (rbx);
+            __asm ("int3");
+        }
+label_6:
+        void (*0x1400aa1f8)() ();
+    }
+label_3:
+    al = 1;
+label_1:
+    rcx = *((rbp + 0x560));
+    rcx ^= rsp;
+    void (*0x1400aa370)() ();
+    r11 = rsp + 0x670;
+    rbx = *((r11 + 0x18));
+    rsi = *((r11 + 0x20));
+    rdi = *((r11 + 0x28));
+    return rax;
+}

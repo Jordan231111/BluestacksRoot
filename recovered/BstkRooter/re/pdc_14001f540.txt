@@ -1,0 +1,1176 @@
+// callconv: rax ms (rcx, rdx, r8, r9, stack);
+void fcn.14001f540 (int64_t arg1, int64_t arg2, int64_t arg3) {
+        rax = rsp
+        qword [rax + 0x20] = rbx
+        push (rbp)
+        push (rsi)
+        push (rdi)
+        push (r12)
+        push (r13)
+        push (r14)
+        push (r15)
+        rbp = rax - 0x1a8
+        rsp -= 0x270
+        xmmword [rax - 0x48] = xmm6
+        xmmword [rax - 0x58] = xmm7
+        rax = qword [0x1400e0140] // [0x1400e0140:8]=0x2b992ddfa232
+        rax ^= rsp
+        qword [rbp + 0x140] = rax
+        r15 = rdx    // arg2
+        rbx = rcx    // arg1
+        qword [var_58h] = rcx // arg1
+        edi = 0
+        v = qword [rdx + 0x10] - rdi // arg2
+        if (!v) goto loc_0x140020335 // unlikely
+        goto loc_0x14001f590;
+    loc_0x140020335:
+        ecx = 0x30   // '0' // 48
+        0x140012c40 () // 0x140012c40(0x0, 0x0, 0x0, 0x30)
+        rcx = rax
+        xmm0 = xmmword [str.____DataDir_or_instance_name_is_empty.] // [0x1400af978:16]=-1 // "[!] DataDir or instance name is empty."
+        xmmword [rax] = xmm0
+        xmm1 = xmmword [0x1400af988] // [0x1400af988:16]=-1 // "nstance name is empty."
+        xmmword [rax + 0x10] = xmm1
+        eax = dword [0x1400af998] // [0x1400af998:4]=0x74706d65 // "empty."
+        dword [rcx + 0x20] = eax
+        eax = word [0x1400af99c] // [0x1400af99c:2]=0x2e79 // "y."
+        word [rcx + 0x24] = ax
+        byte [rcx + 0x26] = dil
+        edx = 0x30   // '0' // 48
+        
+    loc_0x140020374:
+        0x1400aa1f8 () // 0x1400aa1f8(0x0, 0x0, 0x0, 0x0)
+        goto loc_0x14001f59a;
+        return rax;
+    loc_0x14001f59a:
+        rdx = rbp + 0x70 // (cstr 0x00000000) "[!] DataDir or instance name is empty."
+        0x14001c760 () // 0x14001c760(0x0, 0x0, 0x178070, 0x0)
+        ecx = 0x30   // '0' // 48
+        0x140012c40 () // 0x140012c40(0x0, 0x0, 0x178070, 0x30)
+        rcx = rax
+        xmm0 = xmmword [str.___Killing_emulator_processes...] // [0x1400af2e0:16]=-1 // "[*] Killing emulator processes..."
+        xmmword [rax] = xmm0
+        xmm1 = xmmword [0x1400af2f0] // [0x1400af2f0:16]=-1 // "ator processes..."
+        xmmword [rax + 0x10] = xmm1
+        eax = byte [0x1400af300] // [0x1400af300:1]=46 // "."
+        byte [rcx + 0x20] = al
+        byte [rcx + 0x21] = dil
+        edx = 0x30   // '0' // 48
+        0x1400aa1f8 () // 0x1400aa1f8(0x0, 0x0, 0x30, 0x0)
+        rcx = rbx
+        0x14001d240 () // 0x14001d240(0x0, 0x0, 0x30, 0x0)
+        ecx = 0x3e8  // 1000
+        qword [sym.imp.KERNEL32.dll_Sleep] () // [0x1400ad260:8]=0xde9de reloc.KERNEL32.dll_Sleep // (pstr 0x00000000) "[*] Killing emulator processes..." // reloc.KERNEL32.dll_Sleep // VOID Sleep(-1)
+        xmm0 ^= xmm0
+        xmmword [rbp - 0x10] = xmm0
+        qword [rbp] = rdi
+        qword [rbp + 8] = rdi
+        rbx = qword [r15 + 0x10]
+        v = qword [r15 + 0x18] - 0xf // "*] Killing emulator processes..."
+        if (((unsigned) v) <= 0) goto 0x14001f60e // unlikely
+        goto loc_0x14001f60b;
+    loc_0x14001f60e:
+        rdi = 0x7fffffffffffffff // 9223372036854775807
+        v = rbx - rdi // "*] Killing emulator processes..." // "*] Killing emulator processes..." // "*] Killing emulator processes..."
+        if (((unsigned) v) > 0) goto 0x1400203c8 // unlikely
+        goto loc_0x14001f621;
+    loc_0x1400203c8:
+        0x14002bd80 () // 0x14002bd80(0x0, 0x0, 0x0, 0x0)
+        
+    loc_0x1400203ce:
+        0x14002bd80 () // 0x14002bd80(0x0, 0x0, 0x0, 0x0)
+        goto loc_0x14001f631;
+        return rax;
+    loc_0x14001f621: // orphan
+         eax = 0x16               // "rocesses..."
+         r14d = 0xf               // "lator processes..."
+         v = rbx - r14            // "*] Killing emulator processes..." // "*] Killing emulator processes..." // "*] Killing emulator processes..."
+         if (((unsigned) v) > 0) 
+    loc_0x14001f64e: // orphan
+         rsi = rbx
+         rsi |= r14               // "*] Killing emulator processes..." // "*] Killing emulator processes..."
+         v = rsi - rdi            // "*] Killing emulator processes..." // "*] Killing emulator processes..."
+         if (((unsigned) v) <= 0) 
+    loc_0x14001f65e: // orphan
+         v = rsi - rax            // "*] Killing emulator processes..." // "*] Killing emulator processes..."
+         cmovb rsi rax
+
+         goto loc_0x14001f6d2;
+    loc_0x14001f6d2: // orphan
+         rax = rdi
+         rax -= r12               // "*] Killing emulator processes..." // "*] Killing emulator processes..."
+         rcx = qword [rbp + 0x80]
+         v = rax - rcx            // "*] Killing emulator processes..." // "*] Killing emulator processes..."
+         if (((unsigned) v) < 0) 
+    loc_0x14001f6e8: // orphan
+         rax = rbp - 0x10         // (pstr 0x00000000) "[*] Killing emulator processes..."
+         v = rsi - 0xf            // "lator processes..." // "*] Killing emulator processes..." // "*] Killing emulator processes..." // "*] Killing emulator processes..."
+         cmova rax r13
+         qword [var_50h] = rax
+         rax = rbp + 0x70         // (cstr 0x00000000) "[*] Killing emulator processes..."
+         v = qword [rbp + 0x88] - 0xf // "*] Killing emulator processes..." // "*] Killing emulator processes..." // "*] Killing emulator processes..."
+         cmova rax qword [rbp + 0x70]
+         qword [rbp - 0x50] = rax
+         xmm0 ^= xmm0
+         xmmword [rbp - 0x70] = xmm0
+         xmm1 ^= xmm1
+         xmmword [var_270h] = xmm1
+         rax = rcx + r12
+         qword [var_40h] = rax
+         rbx = r14
+         r15 = rbp - 0x70         // (cstr 0x00000000) "[*] Killing emulator processes..."
+         v = rax - rbx            // "*] Killing emulator processes..." // "*] Killing emulator processes..."
+         if (((unsigned) v) <= 0) 
+    loc_0x14001f765: // orphan
+         qword [var_270h] = rax
+         qword [rbp - 0x58] = rbx
+         r8 = r12
+         rdx = qword [var_50h]    // (pstr 0x00000000) "[*] Killing emulator processes..."
+         rcx = r15
+         0x1400ab0c8 ()           // 0x1400ab0c8(0x0, 0x0, 0x177ff0, 0x0)
+         rcx = r12 + r15
+         r8 = qword [rbp + 0x80]
+         rdx = qword [rbp - 0x50] // (cstr 0x00000000) "[*] Killing emulator processes..."
+         0x1400ab0c8 ()           // 0x1400ab0c8(0x0, 0x0, 0x178070, 0x0)
+         rax = qword [var_40h]
+         byte [r15 + rax] = 0
+         r15d = 1                 // "*] Killing emulator processes..."
+         r8d = r15d               // "*] Killing emulator processes..."
+         rdx = rip + 0x901f5      // "\" // 0x1400af9a0
+         rcx = rbp - 0x70
+         0x14002be00 ()           // 0x14002be00(0x0, 0x0, 0x1400af9a0, 0x177f90)
+         xmm7 = xmmword [rax]
+         xmmword [var_sp_70h] = xmm7
+         xmm6 = xmmword [rax + 0x10]
+         xmmword [rbp - 0x80] = xmm6
+         r8d = 0                  // "*] Killing emulator processes..." // "*] Killing emulator processes..."
+         qword [rax + 0x10] = r8
+         qword [rax + 0x18] = r14
+         byte [rax] = r8b
+         rdx = qword [rbp - 0x58]
+         v = rdx - 0xf            // "*] Killing emul" // "*] Killing emul" // "*] Killing emul"
+         if (((unsigned) v) <= 0) 
+    loc_0x14001f81c: // orphan
+         xmm0 = xmmword [0x1400b0590] // [0x1400b0590:16]=-1 // "l"
+         xmmword [var_270h] = xmm0
+         byte [rbp - 0x70] = 0
+         rax = rdi
+         rcx = xmm6
+         qword [var_40h] = rcx
+         rax -= rcx               // "*] Killing emul" // "*] Killing emul"
+         v = rax - 8              // "ing emul" // "*] Killing emul" // "*] Killing emul"
+         if (((unsigned) v) < 0) 
+    loc_0x1400203d4: // orphan
+         0x14002bd80 ()           // 0x14002bd80(0x0, 0x0, 0x0, 0x0)
+
+         goto loc_0x14001f847;
+    loc_0x14001f847: // orphan
+         rax = var_sp_70h
+         rdx = xmm7
+         qword [var_68h] = rdx
+         psrldq xmm6 8
+         r8 = xmm6
+         qword [var_60h] = r8
+         v = r8 - 0xf             // "*] Killing emul" // "*] Killing emul" // "*] Killing emul"
+         cmova rax rdx
+         qword [var_50h] = rax
+         xmm0 ^= xmm0
+         xmmword [rbp - 0x30] = xmm0
+         xmm1 ^= xmm1
+         xmmword [rbp - 0x20] = xmm1
+         rax = rcx + 8            // "ing emul"
+         qword [rbp - 0x50] = rax
+         rbx = r14
+         r12 = rbp - 0x30
+         v = rax - rbx
+         if (((unsigned) v) <= 0) 
+    loc_0x14001f8cc: // orphan
+         qword [rbp - 0x20] = rax
+         qword [rbp - 0x18] = rbx
+         r8 = rcx
+         rdx = qword [var_50h]
+         rcx = r12
+         0x1400ab0c8 ()           // 0x1400ab0c8(0x0, 0x0, 0x178070, 0x0)
+         rcx = 0x6468762e746f6f52 // 'Root.vhd'
+         rax = qword [var_40h]
+         qword [rax + r12] = rcx
+         byte [r12 + rax + 8] = 0
+         rax = rbp - 0x30         // (cstr 0x00000000) "Root.vhd"
+         v = qword [rbp - 0x18] - 0xf // "oot.vhd" // "oot.vhd" // "oot.vhd"
+         cmova rax qword [rbp - 0x30]
+         qword [rbp - 0x50] = rax
+         rax = qword [rbp - 0x20]
+         qword [rbp - 0x48] = rax
+         r8d = 0                  // "oot.vhd" // "oot.vhd"
+         rdx = rbp - 0x50
+         rcx = rbp - 0x70         // (cstr 0x00000000) "Root.vhd"
+         0x1400133d0 ()           // 0x1400133d0(0x0, 0x0, 0x177fb0, 0x177f90)
+         rcx = rbp - 0x70         // (cstr 0x00000000) "Root.vhd"
+         v = qword [rbp - 0x58] - 7
+         cmova rcx qword [rbp - 0x70]
+         r9d = 0xffffffff         // -1
+         r8d = 3                  // "t.vhd"
+         rdx = rbp - 0x50
+         0x1400a9928 ()           // 0x1400a9928(0x0, 0x0, 0x177fb0, 0x0)
+         v = eax & eax            // "oot.vhd" // "oot.vhd"
+         if (v) 
+    loc_0x14001f984: // orphan
+         v = eax - 0x40           // '@' // 64 // "oot.vhd" // "oot.vhd" // "oot.vhd"
+         if (((unsigned) v) > 0) 
+    loc_0x14001f99c: // orphan
+         v = eax - 0x7b           // '{' // 123 // "oot.vhd" // "oot.vhd" // "oot.vhd"
+         if (!v) 
+    loc_0x14001f9ac: // orphan
+         ecx = r15d
+
+         goto loc_0x14001fa2f;
+    loc_0x14001fa2f: // orphan
+         v = eax & eax            // "oot.vhd" // "oot.vhd"
+         if (v) 
+    loc_0x1400203b3: // orphan
+         r8 = rbp - 0x70          // (cstr 0x00000000) "Root.vhd"
+         rdx = rbp - 0x50
+         rcx = rip + str.exists   // 0x1400aee50 // "exists"
+         0x14002b610 ()           // 0x14002b610(0x0, 0x0, 0x177fb0, 0x1400aee50)
+
+         goto loc_0x14001fa37;
+    loc_0x14001fa37: // orphan
+         
+    loc_0x14001f9d1: // orphan
+         // CODE XREF from fcn.14001f540 @ 0x14001fa37(x)
+         rcx = rbp - 0x70         // (cstr 0x00000000) "Root.vhd"
+         0x14002b920 ()           // 0x14002b920(0x0, 0x0, 0x0, 0x177f90)
+         rax = rdi
+         v = r15b & r15b          // "oot.vhd" // "oot.vhd"
+         if (!v) 
+    loc_0x14001facd: // orphan
+         r12 = qword [rbp - 0x20]
+         rax -= r12               // "oot.vhd" // "oot.vhd"
+         v = rax - 0x14           // "oot.vhd" // "oot.vhd" // "oot.vhd"
+         if (((unsigned) v) < 0) 
+    loc_0x1400203da: // orphan
+         0x14002bd80 ()           // 0x14002bd80(0x0, 0x0, 0x0, 0x0)
+
+         goto loc_0x14001fade;
+    loc_0x14001fade: // orphan
+         rax = rbp - 0x30         // (cstr 0x00000000) "Root.vhd"
+         v = qword [rbp - 0x18] - 0xf // "oot.vhd" // "oot.vhd"
+         cmova rax qword [rbp - 0x30]
+         qword [rbp - 0x50] = rax
+         xmm0 ^= xmm0
+         xmmword [rbp - 0x70] = xmm0
+         rax = r12 + 0x14         // (pstr 0x00000000) "Root.vhd"
+         rbx = r14
+         r15 = rbp - 0x70         // (cstr 0x00000000) "Root.vhd"
+         v = rax - rbx            // "oot.vhd"
+         if (((unsigned) v) <= 0) 
+    loc_0x14001fb36: // orphan
+         qword [rbp - 0x58] = rbx
+         xmm0 = xmmword [str.___Found_Root.vhd:] // [0x1400afaa8:16]=-1 // "[*] Found Root.vhd:"
+         xmmword [r15] = xmm0
+         ecx = dword [0x1400afab8] // [0x1400afab8:4]=0x203a6468 // "hd: "
+         dword [r15 + 0x10] = ecx
+         rcx = r15 + 0x14         // (pstr 0x00000000) "[*] Found Root.vhd: "
+         r8 = r12
+         rdx = qword [rbp - 0x50]
+         0x1400ab0c8 ()           // 0x1400ab0c8(0x0, 0x0, 0x0, 0x14)
+         byte [r15 + r12 + 0x14] = 0
+         rdx = qword [rbp - 0x58]
+         v = rdx - 0xf            // "vhd: " // "*] Found Root.vhd: " // "*] Found Root.vhd: " // "*] Found Root.vhd: "
+         if (((unsigned) v) <= 0) 
+    loc_0x14001fbb6: // orphan
+         rcx = rbp + 0x90         // (cstr 0x00000000) "[*] Found Root.vhd: "
+         0x14002f200 ()           // 0x14002f200(0x0, 0x0, 0x0, 0x178090)
+         ecx = 0x20               // "." // 32
+         0x140012c40 ()           // 0x140012c40(0x0, 0x0, 0x0, 0x20)
+         rcx = rax
+         xmm0 = xmmword [str.___Opening_VHD...] // [0x1400afba8:16]=-1 // "[*] Opening VHD..."
+         xmmword [rax] = xmm0
+         eax = word [0x1400afbb8] // [0x1400afbb8:2]=0x2e2e // ".."
+         word [rcx + 0x10] = ax
+         byte [rcx + 0x12] = 0
+         edx = 0x20               // "." // 32
+         0x1400aa1f8 ()           // 0x1400aa1f8(0x0, 0x0, 0x20, 0x0)
+         rdx = rbp - 0x30         // (cstr 0x00000000) "[*] Opening VHD..."
+         rcx = rbp + 0x90         // (cstr 0x00000000) "[*] Opening VHD..."
+         0x140030b00 ()           // 0x140030b00(0x0, 0x0, 0x177fd0, 0x178090)
+         v = al & al              // "*] Opening VHD..."
+         if (v) 
+    loc_0x14001fc44: // orphan
+         ebx = 0xffffffff         // -1
+         rdx = qword [rbp + 0xe0]
+         rcx = qword [rbp + 0xd8]
+         rdx -= rcx               // "*] Opening VHD..." // "*] Opening VHD..."
+         rdx >>= 5                // "*] Opening VHD..." // "*] Opening VHD..."
+         eax = 0                  // "*] Opening VHD..." // "*] Opening VHD..."
+         v = rdx & rdx            // "*] Opening VHD..." // "*] Opening VHD..."
+         if (!v) 
+    loc_0x14002017e: // orphan
+         ecx = 0x30               // '0' // 48
+         0x140012c40 ()           // 0x140012c40(0x0, 0x0, 0x0, 0x30)
+         rcx = rax
+         xmm0 = xmmword [str.____No_ext4_partition_found_in_VHD.] // [0x1400afc60:16]=-1 // "[!] No ext4 partition found in VHD."
+         xmmword [rax] = xmm0
+         xmm1 = xmmword [0x1400afc70] // [0x1400afc70:16]=-1 // "ition found in VHD."
+         xmmword [rax + 0x10] = xmm1
+         eax = word [0x1400afc80] // [0x1400afc80:2]=0x4448 // "HD."
+         word [rcx + 0x20] = ax
+         eax = byte [0x1400afc82] // [0x1400afc82:1]=46 // "."
+         byte [rcx + 0x22] = al
+         byte [rcx + 0x23] = 0
+         edx = 0x30               // '0' // 48
+         0x1400aa1f8 ()           // 0x1400aa1f8(0x0, 0x0, 0x30, 0x0)
+
+         goto loc_0x14002022e;
+    loc_0x14002022e: // orphan
+         xmm0 = xmmword [0x1400b0590] // [0x1400b0590:16]=-1 // "tition found in VHD."
+         xmmword [rbp - 0x20] = xmm0
+         byte [rbp - 0x30] = 0
+         rdx = qword [var_60h]
+         v = rdx - 0xf            // "tition found in VHD." // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         if (((unsigned) v) <= 0) 
+    loc_0x140020293: // orphan
+         v = rsi - 0xf            // "tition found in VHD." // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         if (((unsigned) v) <= 0) 
+    loc_0x1400202e1: // orphan
+         rax = qword [rbp + 0x88]
+         v = rax - 0xf            // "tition found in VHD." // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         if (((unsigned) v) <= 0) 
+    loc_0x140020379: // orphan
+         rcx = qword [rbp + 0x140]
+         rcx ^= rsp               // (cstr 0x00000000) "[!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         0x1400aa370 ()           // 0x1400aa370(0x0, 0x0, 0x0, 0x178000)
+         r11 = var_270h           // (cstr 0x00000000) "[!] No ext4 partition found in VHD."
+         rbx = qword [r11 + 0x58]
+         xmm6 = xmmword [r11 - 0x10]
+         xmm7 = xmmword [r11 - 0x20]
+         rsp = r11                // (cstr 0x00000000) "[!] No ext4 partition found in VHD."
+         r15 = pop ()             // (cstr 0x00000000) "[!] No ext4 partition found in VHD."
+         r14 = pop ()             // (cstr 0x00000000) "[!] No ext4 partition found in VHD."
+         r13 = pop ()             // (cstr 0x00000000) "[!] No ext4 partition found in VHD."
+         r12 = pop ()             // (cstr 0x00000000) "[!] No ext4 partition found in VHD."
+         rdi = pop ()             // (cstr 0x00000000) "[!] No ext4 partition found in VHD."
+         rsi = pop ()             // (cstr 0x00000000) "[!] No ext4 partition found in VHD."
+         rbp = pop ()             // (cstr 0x00000000) "[!] No ext4 partition found in VHD."
+         return
+
+    loc_0x1400202f2: // orphan
+         rdx = rax + 1            // "!] No ext4 partition found in VHD."
+         rcx = qword [rbp + 0x70]
+         rax = rcx
+         v = rdx - 0x1000         // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         if (((unsigned) v) < 0) 
+    loc_0x140020306: // orphan
+         rdx += 0x27              // 39 // "!] No ext4 partition found in VHD."
+         rcx = qword [rcx - 8]
+         rax -= rcx               // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         rax -= 8                 // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         v = rax - 0x1f           // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         if (((unsigned) v) <= 0) 
+         goto loc_0x14002031b;
+    loc_0x14002031b: // orphan
+         qword [var_sp_20h] = 0
+         r9d = 0                  // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         r8d = 0                  // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         edx = 0                  // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         ecx = 0                  // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         qword [sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson] () // [0x1400ad928:8]=0xdf0de reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson(0x0, 0x0, 0x0, 0x0)
+         int3
+
+        return rax;
+    loc_0x140020299: // orphan
+         rdx = rsi + 1            // "!] No ext4 partition found in VHD."
+         rax = r13
+         v = rdx - 0x1000         // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         if (((unsigned) v) < 0) 
+    loc_0x1400202d8: // orphan
+         rcx = r13
+         0x1400aa1f8 ()           // 0x1400aa1f8(0x0, 0x0, 0x0, 0x0)
+
+         goto loc_0x1400202a9;
+    loc_0x1400202a9: // orphan
+         rdx += 0x27              // 39 // "!] No ext4 partition found in VHD."
+         r13 = qword [r13 - 8]
+         rax -= r13               // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         rax -= 8                 // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         v = rax - 0x1f           // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         if (((unsigned) v) <= 0) 
+         goto loc_0x1400202be;
+    loc_0x1400202be: // orphan
+         qword [var_sp_20h] = 0
+         r9d = 0                  // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         r8d = 0                  // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         edx = 0                  // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         ecx = 0                  // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         qword [sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson] () // [0x1400ad928:8]=0xdf0de reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson(0x0, 0x0, 0x0, 0x0)
+         int3
+
+        return rax;
+    loc_0x14002024a: // orphan
+         rdx++                    // "!] No ext4 partition found in VHD."
+         rcx = qword [var_68h]
+         rax = rcx
+         v = rdx - 0x1000         // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         if (((unsigned) v) < 0) 
+    loc_0x14002028d: // orphan
+         0x1400aa1f8 ()           // 0x1400aa1f8(0x0, 0x0, 0x0, 0x0)
+
+         goto loc_0x14002025e;
+    loc_0x14002025e: // orphan
+         rdx += 0x27              // 39 // "!] No ext4 partition found in VHD."
+         rcx = qword [rcx - 8]
+         rax -= rcx               // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         rax -= 8                 // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         v = rax - 0x1f           // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         if (((unsigned) v) <= 0) 
+         goto loc_0x140020273;
+    loc_0x140020273: // orphan
+         qword [var_sp_20h] = 0
+         r9d = 0                  // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         r8d = 0                  // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         edx = 0                  // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         ecx = 0                  // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         qword [sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson] () // [0x1400ad928:8]=0xdf0de reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson(0x0, 0x0, 0x0, 0x0)
+         int3
+
+        return rax;
+    loc_0x1400201e7: // orphan
+         rdx++                    // "!] No ext4 partition found in VHD."
+         rcx = qword [rbp - 0x30]
+         rax = rcx
+         v = rdx - 0x1000         // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         if (((unsigned) v) < 0) 
+    loc_0x140020229: // orphan
+         0x1400aa1f8 ()           // 0x1400aa1f8(0x0, 0x0, 0x0, 0x0)
+
+         goto loc_0x1400201fa;
+    loc_0x1400201fa: // orphan
+         rdx += 0x27              // 39 // "!] No ext4 partition found in VHD."
+         rcx = qword [rcx - 8]
+         rax -= rcx               // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         rax -= 8                 // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         v = rax - 0x1f           // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         if (((unsigned) v) <= 0) 
+         goto loc_0x14002020f;
+    loc_0x14002020f: // orphan
+         qword [var_sp_20h] = 0
+         r9d = 0                  // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         r8d = 0                  // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         edx = 0                  // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         ecx = 0                  // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         qword [sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson] () // [0x1400ad928:8]=0xdf0de reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson(0x0, 0x0, 0x0, 0x0)
+         int3
+
+        return rax;
+    loc_0x14001fc69: // orphan
+         rcx += 0x18              // "und in VHD." // "!] No ext4 partition found in VHD."
+
+         goto loc_0x14001fc7a;
+    loc_0x14001fc7a: // orphan
+         rax++                    // "!] No ext4 partition found in VHD."
+         rcx += 0x20              // "HD."
+         v = rax - rdx
+         if (((unsigned) v) < 0) 
+    loc_0x14001fc70: // orphan
+         v = byte [rcx] - 0
+         if (!v) 
+         goto loc_0x14001fc86;
+    loc_0x14001fc86: // orphan
+         v = ebx & ebx            // "!] No ext4 partition found in VHD." // "!] No ext4 partition found in VHD."
+         js 0x14002017e           // unlikely
+
+         goto loc_0x14001fc8e;
+    loc_0x14001fc8e: // orphan
+         ecx = 0x20               // "HD."
+         0x140012c40 ()           // 0x140012c40(0x0, 0x0, 0x0, 0x20)
+         rcx = rax
+         xmm0 = xmmword [str.___Mounting_ext4_partition...] // [0x1400affa8:16]=-1 // "[*] Mounting ext4 partition..."
+         xmmword [rax] = xmm0
+         xmm0 = qword [0x1400affb8] // [0x1400affb8:8]=0x7469747261702034 // "4 partition..."
+         qword [rax + 0x10] = xmm0
+         eax = dword [0x1400affc0] // [0x1400affc0:4]=0x2e6e6f69 // "ion..."
+         dword [rcx + 0x18] = eax
+         eax = word [0x1400affc4] // [0x1400affc4:2]=0x2e2e // ".."
+         word [rcx + 0x1c] = ax
+         byte [rcx + 0x1e] = 0
+         edx = 0x20               // "HD."
+         0x1400aa1f8 ()           // 0x1400aa1f8(0x0, 0x0, 0x20, 0x0)
+         edx = ebx
+         rcx = rbp + 0x90         // (cstr 0x00000000) "[*] Mounting ext"
+         0x1400304a0 ()           // 0x1400304a0(0x0, 0x0, 0x0, 0x178090)
+         v = al & al              // "*] Mounting ext"
+         if (v) 
+    loc_0x14001fd23: // orphan
+         ecx = 0x20               // "HD."
+         0x140012c40 ()           // 0x140012c40(0x0, 0x0, 0x0, 0x20)
+         rdx = rax
+         xmm0 = xmmword [str.___ext4_partition_mounted.] // [0x1400afcc8:16]=-1 // "[+] ext4 partition mounted."
+         xmmword [rax] = xmm0
+         xmm0 = qword [0x1400afcd8] // [0x1400afcd8:8]=0x746e756f6d206e6f // "on mounted."
+         qword [rax + 0x10] = xmm0
+         eax = word [0x1400afce0] // [0x1400afce0:2]=0x6465 // "ed."
+         word [rdx + 0x18] = ax
+         eax = byte [0x1400afce2] // [0x1400afce2:1]=46
+         byte [rdx + 0x1a] = al
+         byte [rdx + 0x1b] = 0
+         r12d = 0x1f              // "VHD."
+         r8d = r12d               // "VHD."
+         rcx = rbp - 0x70         // (cstr 0x00000000) "[+] ext4 partiti"
+         0x1400016c0 ()           // 0x1400016c0(0x0, 0x0, 0x0, 0x177f90)
+         xmm0 ^= xmm0
+         xmmword [rbp + 0x10] = xmm0
+         xmm1 ^= xmm1
+         xmmword [rbp + 0x20] = xmm1
+         ecx = 0x20               // "HD."
+         0x140012c40 ()           // 0x140012c40(0x0, 0x0, 0x0, 0x20)
+         rdx = rax
+         qword [rbp + 0x10] = rax
+         xmm0 = xmmword [0x1400b0610] // [0x1400b0610:16]=-1 // "VHD."
+         xmmword [rbp + 0x20] = xmm0
+         xmm0 = xmmword [str._android_system_xbin_su] // [0x1400afd78:16]=-1 // "/android/system/xbin/su"
+         xmmword [rax] = xmm0
+         ecx = dword [0x1400afd88] // [0x1400afd88:4]=0x6e696278 // "xbin/su"
+         dword [rax + 0x10] = ecx
+         ecx = word [0x1400afd8c] // [0x1400afd8c:2]=0x732f // "/su"
+         word [rax + 0x14] = cx
+         eax = byte [0x1400afd8e] // [0x1400afd8e:1]=117 // "u"
+         byte [rdx + 0x16] = al
+         byte [rdx + 0x17] = 0
+         rdx = rbp + 0x10         // (pstr 0x0000002e) "/android/system/xbin/su"
+         rcx = rbp + 0x90         // (cstr 0x00000000) "[+] ext4 partiti"
+         0x1400300d0 ()           // 0x1400300d0(0x0, 0x0, 0x178010, 0x178090)
+         rcx = qword [rbp + 0x20]
+         v = al & al
+         if (!v) 
+    loc_0x14001ff39: // orphan
+         qword [var_50h] = rcx
+         rax = rdi
+         rax -= rcx               // "+] ext4 partiti" // "+] ext4 partiti"
+         v = rax - 0x1b           // "+] ext4 partiti" // "+] ext4 partiti" // "+] ext4 partiti"
+         if (((unsigned) v) < 0) 
+    loc_0x1400203ad: // orphan
+         0x14002bd80 ()           // 0x14002bd80(0x0, 0x0, 0x0, 0x0)
+
+         goto loc_0x14001ff4e;
+    loc_0x14001ff4e: // orphan
+         rax = rbp + 0x10         // (pstr 0x0000002e) "/android/system/xbin/su"
+         v = qword [rbp + 0x28] - 0xf
+         cmova rax qword [rbp + 0x10] // "/android/system/xbin/su"
+         qword [var_40h] = rax
+         xmm0 ^= xmm0
+         xmmword [rbp - 0x70] = xmm0
+         xmm1 ^= xmm1
+         xmmword [var_270h] = xmm1
+         rax = rcx + 0x1b
+         qword [rbp - 0x50] = rax
+         rbx = r14
+         r15 = rbp - 0x70         // (cstr 0x00000000) "[+] ext4 partiti"
+         v = rax - rbx            // "+] ext4 partiti"
+         if (((unsigned) v) <= 0) 
+    loc_0x14001ffb6: // orphan
+         qword [var_270h] = rax
+         qword [rbp - 0x58] = rbx
+         xmm0 = xmmword [str.____su_binary_not_found_at] // [0x1400b0010:16]=-1 // "[~] su binary not found at"
+         xmmword [r15] = xmm0
+         xmm0 = qword [0x1400b0020] // [0x1400b0020:8]=0x20646e756f662074 // "t found at "
+         qword [r15 + 0x10] = xmm0
+         eax = word [0x1400b0028] // [0x1400b0028:2]=0x7461 // "at "
+         word [r15 + 0x18] = ax
+         eax = byte [0x1400b002a] // [0x1400b002a:1]=32 // " " // "HD."
+         byte [r15 + 0x1a] = al
+         rcx = r15 + 0x1b
+         rbx = qword [var_50h]
+         r8 = rbx
+         rdx = qword [var_40h]    // "/android/system/xbin/su"
+         0x1400ab0c8 ()           // 0x1400ab0c8(0x0, 0x0, 0x2e, 0x1b)
+         byte [r15 + rbx + 0x1b] = 0
+         r8d = 0x16
+         rdx = rip + str.__already_unrooted. // 0x1400afff8 // " — already unrooted."
+         rcx = rbp - 0x70         // (cstr 0x00000000) "[~] su binary no"
+         0x14002be00 ()           // 0x14002be00(0x0, 0x0, 0x1400afff8, 0x177f90)
+         xmm1 = xmmword [rax]
+         xmm0 = xmmword [rax + 0x10]
+         qword [rax + 0x10] = 0
+         qword [rax + 0x18] = r14
+         byte [rax] = 0
+         psrldq xmm0 8
+         r8 = xmm0
+         v = r8 - 0xf             // "~] su binary no" // "~] su binary no"
+         if (((unsigned) v) <= 0) 
+    loc_0x140020055: // orphan
+         r8 = qword [rbp - 0x58]
+         v = r8 - 0xf             // "~] su binary no" // "~] su binary no" // "~] su binary no"
+         if (((unsigned) v) <= 0) 
+    loc_0x14002006c: // orphan
+         rbx = qword [var_58h]
+
+         goto loc_0x140020159;
+    loc_0x140020159: // orphan
+         byte [rbx + 0x148] = 0
+         v = r12 - 0xf            // "~] su binary no" // "~] su binary no" // "~] su binary no"
+         if (((unsigned) v) <= 0) 
+    loc_0x140020173: // orphan
+         rcx = rbp + 0x10         // (pstr 0x0000002e) "/a"
+         0x1400010f0 ()           // 0x1400010f0(0x0, 0x0, 0x0, 0x178010)
+         
+    loc_0x1400201d0: // orphan
+         // CODE XREFS from fcn.14001f540 @ 0x14001fc3f(x), 0x14002017c(x)
+         rcx = rbp + 0x90         // (cstr 0x00000000) "[~] su binary no"
+         0x14002f2f0 ()           // 0x14002f2f0(0x0, 0x0, 0x0, 0x178090)
+
+         goto loc_0x140020166;
+    loc_0x140020166: // orphan
+         r8 = r12
+         rcx = rbp + 0x50         // (pstr 0x00000000) "[~] su binary no"
+         0x1400016c0 ()           // 0x1400016c0(0x0, 0x0, 0x0, 0x178050)
+
+         goto loc_0x14002014c;
+    loc_0x14002014c: // orphan
+         0x14002c270 ()           // 0x14002c270(0x0, 0x0, 0x0, 0x0)
+         r12 = qword [rbp + 0x68]
+         rdx = qword [rbp + 0x50]
+
+         goto loc_0x14002005f;
+    loc_0x14002005f: // orphan
+         rdx = qword [rbp - 0x70]
+         rcx = rbp - 0x70         // (cstr 0x00000000) "[~] su binary no"
+         0x1400016c0 ()           // 0x1400016c0(0x0, 0x0, 0x0, 0x177f90)
+
+         goto loc_0x140020046;
+    loc_0x140020046: // orphan
+         rdx = xmm1
+         rcx = rbp - 0x50
+         0x1400016c0 ()           // 0x1400016c0(0x0, 0x0, 0x0, 0x177fb0)
+
+         goto loc_0x14001ff84;
+    loc_0x14001ff84: // orphan
+         rbx = rax
+         rbx |= 0xf               // "o" // "~] su binary no"
+         v = rbx - rdi            // "~] su binary no"
+         if (((unsigned) v) <= 0) 
+    loc_0x14001ff95: // orphan
+         v = rbx - 0x16           // "~] su binary no" // "~] su binary no" // "~] su binary no"
+         eax = 0x16
+         cmovb rbx rax
+
+         goto loc_0x14001ff90;
+    loc_0x14001ff90: // orphan
+         rbx = rdi
+         
+    loc_0x14001ffa2: // orphan
+         // CODE XREF from fcn.14001f540 @ 0x14001ff93(x)
+         rcx = rbx + 1            // "~] su binary no"
+         0x140012c40 ()           // 0x140012c40(0x0, 0x0, 0x0, 0x1)
+         r15 = rax
+         qword [rbp - 0x70] = rax
+         rax = qword [rbp - 0x50]
+
+         goto loc_0x14001fde7;
+    loc_0x14001fde7: // orphan
+         rdi -= rcx               // "~] su binary no" // "~] su binary no"
+         v = rdi - 0xd            // " no" // "~] su binary no" // "~] su binary no" // "~] su binary no" // "~] su binary no"
+         if (((unsigned) v) < 0) 
+    loc_0x1400203e0: // orphan
+         0x14002bd80 ()           // 0x14002bd80(0x0, 0x0, 0x0, 0x0)
+         int3
+
+        return rax;
+    loc_0x14001fdf4: // orphan
+         rax = rbp + 0x10         // (pstr 0x0000002e) "/a"
+         v = qword [rbp + 0x28] - 0xf
+         cmova rax qword [rbp + 0x10] // "/a"
+         qword [var_sp_30h] = rcx
+         qword [var_28h] = rax
+         qword [var_sp_20h] = 0xd // [0xd:8]=0x6f6e20 // " no"
+         r9 = rip + str.___Deleting // 0x1400affc8 // "[*] Deleting"
+         r8 = rbp + 0x10          // (pstr 0x0000002e) "/a"
+         edx = byte [var_sp_48h]
+         rcx = rbp - 0x70         // (cstr 0x00000000) "[~] su binary no"
+         0x140017020 ()           // 0x140017020(0x0, 0x0, 0x0, 0x177f90)
+         r8d = 3                  // " su binary no"
+         rdx = rip + 0x8fe48      // "..." // 0x1400afc84
+         rcx = rbp - 0x70         // (cstr 0x00000000) "[~] su binary no"
+         0x14002be00 ()           // 0x14002be00(0x0, 0x0, 0x1400afc84, 0x177f90)
+         xmm1 = xmmword [rax]
+         xmm0 = xmmword [rax + 0x10]
+         qword [rax + 0x10] = 0
+         qword [rax + 0x18] = r14
+         byte [rax] = 0
+         psrldq xmm0 8
+         r8 = xmm0
+         v = r8 - 0xf             // "~] su binary no" // "~] su binary no"
+         if (((unsigned) v) <= 0) 
+    loc_0x14001fe7a: // orphan
+         rcx = rbp - 0x70         // (cstr 0x00000000) "[~] su binary no"
+         0x1400010f0 ()           // 0x1400010f0(0x0, 0x0, 0x0, 0x177f90)
+         rdx = rbp + 0x10
+         rcx = rbp + 0x90         // (cstr 0x00000000) "[~] su binary no"
+         0x14002fe90 ()           // 0x14002fe90(0x0, 0x0, 0x178010, 0x178090)
+         v = al & al              // "~] su binary no" // "~] su binary no"
+         if (v) 
+         goto loc_0x14001fe9b;
+    loc_0x14001fe9b: // orphan
+         xmm0 ^= xmm0
+         xmmword [rbp + 0x30] = xmm0
+         ecx = 0x20
+         0x140012c40 ()           // 0x140012c40(0x0, 0x0, 0x0, 0x20)
+         rdx = rax
+         qword [rbp + 0x30] = rax
+         qword [rbp + 0x40] = 0x1b
+         r8 = r12
+         qword [rbp + 0x48] = r12
+         xmm0 = xmmword [str.Failed_to_remove_su_binary.] // [0x1400affd8:16]=-1 // "Failed to remove su binary."
+         xmmword [rax] = xmm0
+         xmm0 = qword [0x1400affe8] // [0x1400affe8:8]=0x616e696220757320 // " su binary."
+         qword [rax + 0x10] = xmm0
+         eax = word [0x1400afff0] // [0x1400afff0:2]=0x7972 // "ry."
+         word [rdx + 0x18] = ax
+         eax = byte [0x1400afff2] // [0x1400afff2:1]=46 // "."
+         byte [rdx + 0x1a] = al
+         byte [rdx + 0x1b] = 0
+         rbx = qword [var_58h]
+         rcx = rbx + 0x128
+         rax = rbp + 0x30
+         v = rcx - rax            // "ailed to remove" // "ailed to remove"
+         if (!v) 
+    loc_0x14001ff1a: // orphan
+         byte [rbx + 0x148] = 1
+         v = r8 - 0xf             // "ailed to remove" // "ailed to remove" // "ailed to remove"
+         if (((unsigned) v) <= 0) 
+    loc_0x140020071: // orphan
+         // CODE XREF from fcn.14001f540 @ 0x14001ff34(x)
+         ecx = 0x20
+         0x140012c40 ()           // 0x140012c40(0x0, 0x0, 0x0, 0x20)
+         rcx = rax
+         xmm0 = xmmword [str.___Unmounting_ext4...] // [0x1400afea8:16]=-1 // "[*] Unmounting ext4..."
+         xmmword [rax] = xmm0
+         eax = dword [0x1400afeb8] // [0x1400afeb8:4]=0x2e347478 // "xt4..."
+         dword [rcx + 0x10] = eax
+         eax = word [0x1400afebc] // [0x1400afebc:2]=0x2e2e // ".."
+         word [rcx + 0x14] = ax
+         byte [rcx + 0x16] = 0
+         edx = 0x20
+         0x1400aa1f8 ()           // 0x1400aa1f8(0x0, 0x0, 0x20, 0x0)
+         rcx = rbp + 0x90         // (cstr 0x00000000) "[*] Unmounting ext4..."
+         0x140032600 ()           // 0x140032600(0x0, 0x0, 0x20, 0x178090)
+         ecx = 0x20
+         0x140012c40 ()           // 0x140012c40(0x0, 0x0, 0x20, 0x20)
+         rdx = rax
+         xmm0 = xmmword [str.___Closing_VHD...] // [0x1400afec0:16]=-1 // "[*] Closing VHD..."
+         xmmword [rax] = xmm0
+         eax = word [0x1400afed0] // [0x1400afed0:2]=0x2e2e // ".."
+         word [rdx + 0x10] = ax
+         byte [rdx + 0x12] = 0
+         r8 = r12
+         rcx = rbp - 0x70         // (cstr 0x00000000) "[*] Unmounting ext4..."
+         0x1400016c0 ()           // 0x1400016c0(0x0, 0x0, 0x2e2e, 0x177f90)
+         rcx = rbp + 0x90         // (cstr 0x00000000) "[*] Unmounting ext4..."
+         0x14002f960 ()           // 0x14002f960(0x0, 0x0, 0x2e2e, 0x178090)
+         xmm0 ^= xmm0
+         xmmword [rbp + 0x50] = xmm0
+         ecx = 0x20
+         0x140012c40 ()           // 0x140012c40(0x0, 0x0, 0x2e2e, 0x20)
+         rdx = rax                // "[*] Closing VHD..."
+         qword [rbp + 0x50] = rax
+         r8d = 0x16
+         qword [rbp + 0x60] = r8
+         qword [rbp + 0x68] = r12
+         xmm0 = xmmword [str.Unrooted_successfully_] // [0x1400b0030:16]=-1 // "Unrooted successfully!"
+         xmmword [rax] = xmm0
+         eax = dword [0x1400b0040] // [0x1400b0040:4]=0x6c6c7566 // "fully!"
+         dword [rdx + 0x10] = eax
+         eax = word [0x1400b0044] // [0x1400b0044:2]=0x2179 // "y!"
+         word [rdx + 0x14] = ax
+         byte [rdx + 0x16] = 0
+         rcx = rbx + 0x128
+         rax = rbp + 0x50         // (pstr 0x00002e2e) "Unrooted successfully!"
+         v = rcx - rax            // "*] Unmounting ext4..." // "*] Unmounting ext4..." // "*] Unmounting ext4..."
+         if (!v) 
+         goto loc_0x14001ff2b;
+    loc_0x14001ff2b: // orphan
+         rcx = rbp + 0x30
+         0x1400016c0 ()           // 0x1400016c0(0x0, 0x0, 0x0, 0x178030)
+         
+         goto loc_0x14001ff07;
+    loc_0x14001ff07: // orphan
+         r8d = 0x1b
+         0x14002c270 ()           // 0x14002c270(0x0, 0x0, 0x0, 0x0)
+         r8 = qword [rbp + 0x48]
+         rdx = qword [rbp + 0x30]
+
+         goto loc_0x14001fe6b;
+    loc_0x14001fe6b: // orphan
+         rdx = xmm1
+         rcx = rbp - 0x50
+         0x1400016c0 ()           // 0x1400016c0(0x0, 0x0, 0x0, 0x177fb0)
+
+         goto loc_0x14001fce6;
+    loc_0x14001fce6: // orphan
+         rdx = rbp + 0xb8         // (cstr 0x00000000) "[*] Unmounting ext4..."
+         rcx = rbp - 0x70         // (cstr 0x00000000) "[*] Unmounting ext4..."
+         0x140016f10 ()           // 0x140016f10(0x0, 0x0, 0x1780b8, 0x177f90)
+         r8 = rbp - 0x70          // (cstr 0x00000000) "[*] Unmounting ext4..."
+         rdx = rip + str.____Failed_to_mount_ext4: // 0x1400afca8 // "[!] Failed to mount ext4:"
+         rcx = rbp - 0x50
+         0x140012a40 ()           // 0x140012a40(0x0, 0x0, 0x1400afca8, 0x177fb0)
+         rcx = rbp - 0x50
+         0x1400010f0 ()           // 0x1400010f0(0x0, 0x0, 0x1400afca8, 0x177fb0)
+         rcx = rbp - 0x70         // (cstr 0x00000000) "[*] Unmounting ext4..."
+         0x1400010f0 ()           // 0x1400010f0(0x0, 0x0, 0x1400afca8, 0x177f90)
+         
+    loc_0x1400201c3: // orphan
+         // CODE XREF from fcn.14001f540 @ 0x14001fd1e(x)
+         rcx = rbp + 0x90         // (cstr 0x00000000) "[*] Unmounting ext4..."
+         0x14002f960 ()           // 0x14002f960(0x0, 0x0, 0x0, 0x178090)
+
+         goto loc_0x14001fc75;
+    loc_0x14001fc75: // orphan
+         v = ebx & ebx            // "*] Unmounting ext4..." // "*] Unmounting ext4..."
+         cmovs ebx eax
+
+         goto loc_0x14001fc07;
+    loc_0x14001fc07: // orphan
+         rdx = rbp + 0xb8         // (cstr 0x00000000) "[*] Unmounting ext4..."
+         rcx = rbp - 0x70         // (cstr 0x00000000) "[*] Unmounting ext4..."
+         0x140016f10 ()           // 0x140016f10(0x0, 0x0, 0x1780b8, 0x177f90)
+         r8 = rbp - 0x70          // (cstr 0x00000000) "[*] Unmounting ext4..."
+         rdx = rip + str.____Failed_to_open_VHD: // 0x1400afbc0 // "[!] Failed to open VHD:"
+         rcx = rbp - 0x50
+         0x140012a40 ()           // 0x140012a40(0x0, 0x0, 0x1400afbc0, 0x177fb0)
+         rcx = rbp - 0x50
+         0x1400010f0 ()           // 0x1400010f0(0x0, 0x0, 0x1400afbc0, 0x177fb0)
+         rcx = rbp - 0x70         // (cstr 0x00000000) "[*] Unmounting ext4..."
+         0x1400010f0 ()           // 0x1400010f0(0x0, 0x0, 0x1400afbc0, 0x177f90)
+         
+         goto loc_0x14001fb6f;
+    loc_0x14001fb6f: // orphan
+         rdx++                    // "*] Unmounting ext4..."
+         rcx = qword [rbp - 0x70]
+         rax = rcx
+         v = rdx - 0x1000         // "*] Unmounting ext4..." // "*] Unmounting ext4..."
+         if (((unsigned) v) < 0) 
+    loc_0x14001fbb1: // orphan
+         0x1400aa1f8 ()           // 0x1400aa1f8(0x0, 0x0, 0x0, 0x0)
+
+         goto loc_0x14001fb82;
+    loc_0x14001fb82: // orphan
+         rdx += 0x27              // "*] Unmounting ext4..."
+         rcx = qword [rcx - 8]
+         rax -= rcx               // "*] Unmounting ext4..." // "*] Unmounting ext4..." // "*] Unmounting ext4..."
+         rax -= 8                 // "*] Unmounting ext4..." // "*] Unmounting ext4..." // "*] Unmounting ext4..."
+         v = rax - 0x1f           // "*] Unmounting ext4..." // "*] Unmounting ext4..."
+         if (((unsigned) v) <= 0) 
+         goto loc_0x14001fb97;
+    loc_0x14001fb97: // orphan
+         qword [var_sp_20h] = 0
+         r9d = 0                  // "*] Unmounting ext4..." // "*] Unmounting ext4..."
+         r8d = 0                  // "*] Unmounting ext4..." // "*] Unmounting ext4..."
+         edx = 0                  // "*] Unmounting ext4..." // "*] Unmounting ext4..."
+         ecx = 0                  // "*] Unmounting ext4..." // "*] Unmounting ext4..."
+         qword [sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson] () // [0x1400ad928:8]=0xdf0de reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson(0x0, 0x0, 0x0, 0x0)
+         int3
+
+        return rax;
+    loc_0x14001fb08: // orphan
+         rbx = rax
+         rbx |= 0xf               // "ext4..." // "*] Unmounting ext4..."
+         v = rbx - rdi            // "*] Unmounting ext4..."
+         if (((unsigned) v) <= 0) 
+    loc_0x14001fb19: // orphan
+         v = rbx - 0x16           // "*] Unmounting ext4..." // "*] Unmounting ext4..." // "*] Unmounting ext4..."
+         eax = 0x16
+         cmovb rbx rax
+
+         goto loc_0x14001fb14;
+    loc_0x14001fb14: // orphan
+         rbx = rdi
+         
+    loc_0x14001fb26: // orphan
+         // CODE XREF from fcn.14001f540 @ 0x14001fb17(x)
+         rcx = rbx + 1            // "*] Unmounting ext4..."
+         0x140012c40 ()           // 0x140012c40(0x0, 0x0, 0x0, 0x1)
+         r15 = rax
+         qword [rbp - 0x70] = rax
+
+         goto loc_0x14001f9e6;
+    loc_0x14001f9e6: // orphan
+         r15 = qword [rbp - 0x20]
+         rax -= r15               // "*] Unmounting ext4..." // "*] Unmounting ext4..." // "*] Unmounting ext4..."
+         v = rax - 0x18           // "ry." // "*] Unmounting ext4..." // "*] Unmounting ext4..."
+         if (((unsigned) v) < 0) 
+         goto loc_0x14001f9f7;
+    loc_0x14001f9f7: // orphan
+         rax = rbp - 0x30
+         v = qword [rbp - 0x18] - 0xf // "*] Unmounting ext4..."
+         cmova rax qword [rbp - 0x30]
+         qword [rbp - 0x50] = rax
+         xmm0 ^= xmm0
+         xmmword [rbp - 0x70] = xmm0
+         r12 = r15 + 0x18         // "ry."
+         rbx = rbp - 0x70         // (cstr 0x00000000) "[*] Unmounting ext4..."
+         v = r12 - 0xf            // "*] Unmounting ext4..." // "*] Unmounting ext4..."
+         if (((unsigned) v) <= 0) 
+    loc_0x14001fa5a: // orphan
+         qword [rbp - 0x58] = r14
+         xmm0 = xmmword [str.____Root.vhd_not_found:] // [0x1400afa88:16]=-1 // "[!] Root.vhd not found:"
+         xmmword [rbx] = xmm0
+         xmm0 = qword [0x1400afa98] // [0x1400afa98:8]=0x203a646e756f6620 // " found: "
+         qword [rbx + 0x10] = xmm0
+         rcx = rbx + 0x18         // "ry."
+         r8 = r15
+         rdx = rax
+         0x1400ab0c8 ()           // 0x1400ab0c8(0x0, 0x0, 0x0, 0x18)
+         byte [rbx + r12] = 0
+         rdx = qword [rbp - 0x58]
+         v = rdx - 0xf            // "!] Root.vhd not" // "!] Root.vhd not" // "!] Root.vhd not"
+         if (((unsigned) v) <= 0) 
+    loc_0x1400201dd: // orphan
+         // CODE XREF from fcn.14001f540 @ 0x14001fac8(x)
+         rdx = qword [rbp - 0x18]
+         v = rdx - 0xf            // "!] Root.vhd not"
+         if (((unsigned) v) <= 0) 
+         goto loc_0x14001fa97;
+    loc_0x14001fa97: // orphan
+         rdx++                    // "!] Root.vhd not"
+         rcx = qword [rbp - 0x70]
+         rax = rcx
+         v = rdx - 0x1000         // "!] Root.vhd not" // "!] Root.vhd not"
+         if (((unsigned) v) < 0) 
+    loc_0x14001fac3: // orphan
+         0x1400aa1f8 ()           // 0x1400aa1f8(0x0, 0x0, 0x0, 0x0)
+         
+         goto loc_0x14001faaa;
+    loc_0x14001faaa: // orphan
+         rdx += 0x27              // "!] Root.vhd not"
+         rcx = qword [rcx - 8]
+         rax -= rcx               // "!] Root.vhd not" // "!] Root.vhd not" // "!] Root.vhd not"
+         rax -= 8                 // "!] Root.vhd not" // "!] Root.vhd not" // "!] Root.vhd not"
+         v = rax - 0x1f           // "!] Root.vhd not" // "!] Root.vhd not"
+         if (((unsigned) v) > 0) 
+         goto loc_0x14001fa1e;
+    loc_0x14001fa1e: // orphan
+         r14 = r12
+         r14 |= 0xf               // "t" // "!] Root.vhd not"
+         v = r14 - rdi            // "!] Root.vhd not"
+         if (((unsigned) v) <= 0) 
+    loc_0x14001fa39: // orphan
+         v = r14 - 0x16           // "!] Root.vhd not" // "!] Root.vhd not" // "!] Root.vhd not"
+         eax = 0x16
+         cmovb r14 rax
+
+         goto loc_0x14001fa2a;
+    loc_0x14001fa2a: // orphan
+         r14 = rdi
+         
+    loc_0x14001fa46: // orphan
+         // CODE XREF from fcn.14001f540 @ 0x14001fa2d(x)
+         rcx = r14 + 1            // "!] Root.vhd not"
+         0x140012c40 ()           // 0x140012c40(0x0, 0x0, 0x0, 0x1)
+         rbx = rax
+         qword [rbp - 0x70] = rax
+         rax = qword [rbp - 0x50]
+
+         goto loc_0x14001f9ca;
+    loc_0x14001f9ca: // orphan
+         // CODE XREFS from fcn.14001f540 @ 0x14001f968(x), 0x14001f977(x)
+         v = ecx - 1              // "!] Root.vhd not"
+         r15b = v == 0
+
+         goto loc_0x14001f9a1;
+    loc_0x14001f9a1: // orphan
+         v = eax - 0x10b          // 267 // "!] Root.vhd not" // "!] Root.vhd not" // "!] Root.vhd not" // "!] Root.vhd not"
+
+         goto loc_0x14001f9a8;
+    loc_0x14001f9a8: // orphan
+         ecx = 0                  // "!] Root.vhd not" // "!] Root.vhd not"
+         
+    loc_0x14001f9af: // orphan
+         // CODE XREFS from fcn.14001f540 @ 0x14001f982(x), 0x14001f9aa(x)
+         dword [rbp - 0x50] = eax
+         rdx = rip + 0xc06f7      // 0x1400e00b0
+         qword [rbp - 0x48] = rdx
+         xmm0 = xmmword [rbp - 0x50]
+         xmmword [rbp - 0x50] = xmm0
+         v = ecx & ecx            // "!] Root.vhd not" // "!] Root.vhd not"
+         if (!v) 
+         goto loc_0x14001f989;
+    loc_0x14001f989: // orphan
+         if (!v) 
+         goto loc_0x14001f98b;
+    loc_0x14001f98b: // orphan
+         ecx = eax
+         ecx -= 2                 // "!] Root.vhd not" // "!] Root.vhd not" // "!] Root.vhd not"
+         if (!v) 
+         goto loc_0x14001f992;
+    loc_0x14001f992: // orphan
+         ecx -= 1                 // "!] Root.vhd not" // "!] Root.vhd not" // "!] Root.vhd not" // "!] Root.vhd not"
+         if (!v) 
+         goto loc_0x14001f997;
+    loc_0x14001f997: // orphan
+         v = ecx - 0x32           // '2' // "!] Root.vhd not" // "!] Root.vhd not" // "!] Root.vhd not"
+         
+    loc_0x14001f9a6: // orphan
+         // CODE XREF from fcn.14001f540 @ 0x14001f99a(x)
+         if (!v) 
+         goto loc_0x14001f94f;
+    loc_0x14001f94f: // orphan
+         ecx = dword [rbp - 0x40]
+         bt ecx 0xa
+         jae 0x14001f979          // likely
+
+    loc_0x14001f979: // orphan
+         ecx &= 0x10              // "!] Root.vhd not" // "!] Root.vhd not"
+         ecx |= 0x20
+         ecx >>>= 4               // "] Root.vhd not"
+         
+         goto loc_0x14001f958;
+    loc_0x14001f958: // orphan
+         edx = dword [rbp - 0x3c]
+         v = edx - 0xa000000c     // '\f' // "!] Root.vhd not" // "!] Root.vhd not"
+         if (v) 
+    loc_0x14001f96a: // orphan
+         v = edx - 0xa0000003     // "!] Root.vhd not" // "!] Root.vhd not"
+         if (v) 
+         goto loc_0x14001f972;
+    loc_0x14001f972: // orphan
+         ecx = 0xa                // "hd not"
+         
+         goto loc_0x14001f963;
+    loc_0x14001f963: // orphan
+         ecx = 4                  // "Root.vhd not"
+         
+         goto loc_0x14001f895;
+    loc_0x14001f895: // orphan
+         rbx = rax
+         rbx |= 0xf               // "t" // "!] Root.vhd not"
+         v = rbx - rdi            // "!] Root.vhd not"
+         if (((unsigned) v) <= 0) 
+    loc_0x14001f8a6: // orphan
+         v = rbx - 0x16           // "!] Root.vhd not" // "!] Root.vhd not" // "!] Root.vhd not"
+         eax = 0x16
+         cmovb rbx rax
+
+         goto loc_0x14001f8a1;
+    loc_0x14001f8a1: // orphan
+         rbx = rdi
+         
+    loc_0x14001f8b3: // orphan
+         // CODE XREF from fcn.14001f540 @ 0x14001f8a4(x)
+         rcx = rbx + 1            // "!] Root.vhd not"
+         0x140012c40 ()           // 0x140012c40(0x0, 0x0, 0x0, 0x1)
+         r12 = rax
+         qword [rbp - 0x30] = rax
+         rcx = qword [var_40h]
+         rax = qword [rbp - 0x50]
+
+         goto loc_0x14001f7dc;
+    loc_0x14001f7dc: // orphan
+         rdx++                    // "!] Root.vhd not"
+         rcx = qword [rbp - 0x70]
+         rax = rcx
+         v = rdx - 0x1000         // "!] Root.vhd not" // "!] Root.vhd not"
+         if (((unsigned) v) < 0) 
+    loc_0x14001f817: // orphan
+         0x1400aa1f8 ()           // 0x1400aa1f8(0x0, 0x0, 0x0, 0x0)
+
+         goto loc_0x14001f7ef;
+    loc_0x14001f7ef: // orphan
+         rdx += 0x27              // "!] Root.vhd not"
+         rcx = qword [rcx - 8]
+         rax -= rcx               // "!] Root.vhd not" // "!] Root.vhd not" // "!] Root.vhd not"
+         rax -= 8                 // "!] Root.vhd not" // "!] Root.vhd not" // "!] Root.vhd not"
+         v = rax - 0x1f           // "!] Root.vhd not" // "!] Root.vhd not"
+         if (((unsigned) v) <= 0) 
+         goto loc_0x14001f804;
+    loc_0x14001f804: // orphan
+         qword [var_sp_20h] = r8
+         r9d = 0                  // "!] Root.vhd not" // "!] Root.vhd not"
+         edx = 0                  // "!] Root.vhd not" // "!] Root.vhd not"
+         ecx = 0                  // "!] Root.vhd not" // "!] Root.vhd not"
+         qword [sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson] () // [0x1400ad928:8]=0xdf0de reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // reloc.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson // sym.imp.api_ms_win_crt_runtime_l1_1_0.dll__invoke_watson(0x0, 0x0, 0x0, 0x0)
+         int3
+
+        return rax;
+    loc_0x14001f732: // orphan
+         rbx = rax
+         rbx |= 0xf               // "t" // "!] Root.vhd not"
+         v = rbx - rdi            // "!] Root.vhd not"
+         if (((unsigned) v) <= 0) 
+    loc_0x14001f743: // orphan
+         v = rbx - 0x16           // "!] Root.vhd not" // "!] Root.vhd not" // "!] Root.vhd not"
+         eax = 0x16
+         cmovb rbx rax
+
+         goto loc_0x14001f73e;
+    loc_0x14001f73e: // orphan
+         rbx = rdi
+         
+    loc_0x14001f750: // orphan
+         // CODE XREF from fcn.14001f540 @ 0x14001f741(x)
+         rcx = rbx + 1            // "!] Root.vhd not"
+         0x140012c40 ()           // 0x140012c40(0x0, 0x0, 0x0, 0x1)
+         r15 = rax
+         qword [rbp - 0x70] = rax
+         rax = qword [var_40h]
+
+         goto loc_0x14001f695;
+    loc_0x14001f695: // orphan
+         rax = rbp - 0x10
+         v = rsi - 0xf            // "!] Root.vhd not" // "!] Root.vhd not" // "!] Root.vhd not"
+         cmova rax r13
+         v = byte [rbx + rax - 1] - 0x5c // '\\' // "!] Root.vhd not" // "!] Root.vhd not" // "!] Root.vhd not"
+         if (!v) 
+         goto loc_0x14001f6a8;
+    loc_0x14001f6a8: // orphan
+         rax = rbp - 0x10
+         v = rsi - 0xf            // "!] Root.vhd not" // "!] Root.vhd not" // "!] Root.vhd not"
+         cmova rax r13
+         v = byte [rax + rbx - 1] - 0x2f // '/' // "!] Root.vhd not" // "!] Root.vhd not" // "!] Root.vhd not" // "!] Root.vhd not"
+         if (!v) 
+         goto loc_0x14001f6bb;
+    loc_0x14001f6bb: // orphan
+         dl = 0x5c                // '\\' // 92
+         rcx = rbp - 0x10
+         0x14002d920 ()           // 0x14002d920(0x0, 0x0, 0x5c, 0x177ff0)
+         rsi = qword [rbp + 8]
+         r12 = qword [rbp]
+         r13 = qword [rbp - 0x10]
+
+         goto loc_0x14001f659;
+    loc_0x14001f659: // orphan
+         rsi = rdi
+         
+    loc_0x14001f665: // orphan
+         // CODE XREF from fcn.14001f540 @ 0x14001f65c(x)
+         rcx = rsi + 1            // "!] Root.vhd not"
+         0x140012c40 ()           // 0x140012c40(0x0, 0x0, 0x0, 0x1)
+         r13 = rax
+         qword [rbp - 0x10] = rax
+         r12 = rbx
+         qword [rbp] = rbx
+         qword [rbp + 8] = rsi
+         r8 = rbx + 1             // "!] Root.vhd not"
+         rdx = r15
+         rcx = rax
+         0x1400ab0c8 ()           // 0x1400ab0c8(0x0, 0x0, 0x0, 0x0)
+
+         goto loc_0x14001f631;
+    loc_0x14001f631: // orphan
+         r12 = rbx
+         qword [rbp] = rbx
+         esi = r14d
+         qword [rbp + 8] = r14
+         xmm0 = xmmword [r15]
+         xmmword [rbp - 0x10] = xmm0
+         r13 = xmm0
+         
+    loc_0x14001f690: // orphan
+         // CODE XREF from fcn.14001f540 @ 0x14001f64c(x)
+         v = rbx & rbx            // "!] Root.vhd not" // "!] Root.vhd not"
+         if (!v) 
+         goto loc_0x14001f60b;
+    loc_0x14001f60b: // orphan
+         r15 = qword [r15]
+
+}
+
