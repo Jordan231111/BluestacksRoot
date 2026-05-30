@@ -4,7 +4,7 @@
 > ready-to-paste **pure batch + PowerShell** reimplementations of every operation.
 > Goal: you can rebuild the tool on Windows with **zero re-analysis**.
 >
-> Source binary: `/Users/jordan/Downloads/new root/BstkRooter.exe`
+> Source binary: `BstkRooter.exe` (this folder)
 > SHA-256 `cb8718999aa96c134a9f7cf0af3b633a8f8c32344b724fa3a5a2dbec3c50d187`
 > Compiler: MSVC C++ (native x64), Dear ImGui 1.92.7 + D3D11 GUI, `requireAdministrator`.
 > PDB: `G:\Git\bstk_re\BSTKRooter\build\BstkRooter.pdb`. lwext4 sources under `K:\Git\bstk_re\root_tool\lwext4\`.
