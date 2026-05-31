@@ -31,6 +31,13 @@
       transient `emulator-XXXX` (which adb drops mid-run); `Boot-And-Wait` now stabilizes (3 consecutive
       reachable shells) before returning, and shell/su/push go through reconnect-on-drop retries — fixes
       first-boot "device '127.0.0.1:5555' not found" on a fresh instance
+- [x] **fast start-up + new front-end:** the start-up path no longer does the ~20 MB self-read or the
+      `BaseDir` PowerShell call (engine is extracted lazily via `:ensure_engine`; DataDir display is a cheap
+      batch `\Engine` strip), cutting time-to-menu from ~2.4 s to <1 s.  `:draw_menu` is one width-aware
+      renderer: full ASCII art >=93 cols, boxed title 50-92, compact <50; two-column menu >=62 cols, single
+      column below; coloured via PowerShell `Write-Host` so box-drawing renders regardless of code page.
+      Typos re-prompt instantly (`:prompt`) instead of a full redraw.  (Menu lives in the batch portion, so
+      no re-embed is needed for these changes.)
 
 ## Open / nice-to-have
 - [ ] optional: dedicated per-instance Root.vhd (separate VHD + UUID) for a *bit-pristine* `/system` on

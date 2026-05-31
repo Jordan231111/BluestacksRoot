@@ -24,6 +24,14 @@ All three were proven **end-to-end to `VERIFY PASS`**: Magisk is the sole root, 
 ### Changed
 - **Menu**: `1/2/3` root Android 9 / 11 / 13, `4/5/6` undo each (per-instance, multi-instance safe),
   `7` full host scrub, `8` set a custom BlueStacks folder, `0` exit.
+- **Much faster start-up.** The menu used to wait on two PowerShell cold-starts and a ~20 MB self-read
+  before it appeared (~2.4 s of "nothing happening"); the embedded engine is now extracted **lazily**
+  (only when you actually root/unroot) and the start-up path no longer reads the whole file, cutting
+  time-to-menu to roughly a third.
+- **New width-aware UI.** A single, fast renderer draws a coloured ASCII banner that scales to the window:
+  full art on wide consoles, a boxed title at ~80 columns, and a compact title on narrow ones; the menu
+  itself switches between two columns and one column to stay readable at any size. Typos re-prompt
+  instantly instead of redrawing the whole screen.
 - **No hardcoded install/data paths** — they are resolved from the registry (`BlueStacks_nxt` then
   `BlueStacks_msi5`, in the native and `WOW6432Node` views), so a custom BlueStacks install location is
   honoured by the `.cmd`, the engine, and the Magisk orchestrator alike.
