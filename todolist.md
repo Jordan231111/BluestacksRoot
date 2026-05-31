@@ -38,6 +38,12 @@
       column below; coloured via PowerShell `Write-Host` so box-drawing renders regardless of code page.
       Typos re-prompt instantly (`:prompt`) instead of a full redraw.  (Menu lives in the batch portion, so
       no re-embed is needed for these changes.)
+- [x] **CI replaced:** dropped the bogus `Compile and Release` workflow (it `g++`-compiled a since-deleted
+      `Magisk.cpp` -- always failing -- and its release step would have clobbered hand-cut releases with
+      nonexistent `magisk.exe`/`NewblueStacksRoot.cmd`).  New `.github/workflows/tests.yml` runs on push/PR
+      to `main`: `tests/Run-Tests.ps1` (28) + `tests/Run-Resolve-Tests.ps1` (22) on windows-latest, plus a
+      new `tests/Check-Embedded-Sync.ps1` guarding that the embedded engine/orchestrator still match
+      `tools\bsr_engine.ps1`/`bsr_magisk.ps1`.  No auto-compile, no auto-release (releases are cut by hand).
 
 ## Open / nice-to-have
 - [ ] optional: dedicated per-instance Root.vhd (separate VHD + UUID) for a *bit-pristine* `/system` on

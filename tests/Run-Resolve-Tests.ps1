@@ -29,6 +29,18 @@ function Eq([string]$name, $expected, $actual) { Ok $name ("$expected" -eq "$act
 # Run the engine as a child process (exactly how blueStackRoot.cmd calls it).
 function Eng([string[]]$a) { & powershell -NoProfile -ExecutionPolicy Bypass -File $Engine @a 2>&1 }
 
+# Expand any 8.3 short path component (e.g. CI's C:\Users\RUNNER~1\... for 'runneradmin') to its long
+# form. The engine resolves the on-disk Root.vhd, so it returns the long path; without this the expected
+# string (built from $env:TEMP, which the runner reports short) would mismatch purely on 8.3 vs long.
+Add-Type -ErrorAction SilentlyContinue -Name Native -Namespace BSR -MemberDefinition '
+[System.Runtime.InteropServices.DllImport("kernel32.dll", CharSet = System.Runtime.InteropServices.CharSet.Unicode)]
+public static extern uint GetLongPathName(string lpszShortPath, System.Text.StringBuilder lpszLongPath, uint cchBuffer);'
+function Long([string]$p) {
+    if (-not $p) { return $p }
+    try { $sb = New-Object System.Text.StringBuilder 1024; $n = [BSR.Native]::GetLongPathName($p, $sb, 1024); if ($n -gt 0 -and $n -lt 1024) { return $sb.ToString() } } catch { }
+    return $p
+}
+
 # ---------------------------------------------------------------------------
 # Build a throwaway BlueStacks-shaped DataDir at a NON-default (custom) location.
 # ---------------------------------------------------------------------------
@@ -47,7 +59,7 @@ function New-FakeData([string]$instance, [hashtable]$confKeys, [string]$tag = 'r
             '<HardDisk format="VHD" location="Root.vhd" type="Readonly"/></HardDisks></MediaRegistry></Machine></VirtualBox>'
     [IO.File]::WriteAllText((Join-Path $eng "$instance.bstk"), $bstk)
     [IO.File]::WriteAllBytes((Join-Path $eng 'Root.vhd'), (New-Object byte[] 64))
-    return $root
+    return (Long $root)   # long-path form so expected paths match the engine's disk-resolved VHD path
 }
 function Resolve-Map([string]$dataDir, [string]$base) {
     $out = Eng @('-Action', 'Resolve', '-DataDir', $dataDir, '-Base', $base)

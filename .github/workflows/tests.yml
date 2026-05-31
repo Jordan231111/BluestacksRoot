@@ -1,0 +1,49 @@
+name: tests
+
+# Runs the PowerShell unit/integration tests on Windows and verifies the single-file build is in
+# sync. No compiling, no auto-releasing -- releases are cut by hand. Replaces the old
+# "Compile and Release" workflow, which built a since-deleted Magisk.cpp and could clobber releases.
+
+on:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'archive/**'
+      - 'recovered/**'
+      - 'LICENSE'
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Windows PowerShell tests
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      # The .cmd ships the engine + orchestrator embedded; make sure they match tools\*.ps1.
+      - name: Embedded build in sync with tools/
+        shell: cmd
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File tests\Check-Embedded-Sync.ps1
+
+      # Core engine: integrity patch, .bstk disk-mode, conf root flags, su round-trip, bootstrap.
+      # (Invoked via powershell.exe -File exactly as blueStackRoot.cmd does, i.e. Windows PowerShell 5.1.)
+      - name: Engine unit / integration tests
+        shell: cmd
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File tests\Run-Tests.ps1
+
+      # Nothing-hardcoded guarantees: custom install/data paths + adb port (5555 is not assumed).
+      - name: Path + adb-port resolution tests
+        shell: cmd
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File tests\Run-Resolve-Tests.ps1
