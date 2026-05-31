@@ -1,0 +1,113 @@
+<#
+  Run-Resolve-Tests.ps1 -- unit tests for PATH + ADB-PORT resolution (no BlueStacks, no admin).
+
+  These cover the "nothing hardcoded" guarantees: a custom install/data location (resolved from the
+  registry or passed in) and a non-default adb port (5555 is NOT assumed -- clones use 5585/5595/...).
+  They exercise BOTH scripts so they stay consistent:
+    * engine  bsr_engine.ps1   -Action BaseDir / Resolve   (run as a child process, like the .cmd does)
+    * magisk  bsr_magisk.ps1   Get-AdbPortCandidates / Get-DataRoot   (dot-sourced; the dispatch guard
+                                                                       keeps the pipeline from running)
+
+  Usage:  powershell -NoProfile -ExecutionPolicy Bypass -File tests\Run-Resolve-Tests.ps1
+#>
+[CmdletBinding()]
+param(
+    [string]$Engine,
+    [string]$Magisk
+)
+$ErrorActionPreference = 'Stop'
+$Here = if ($PSScriptRoot) { $PSScriptRoot } else { Split-Path -Parent $MyInvocation.MyCommand.Path }
+if (-not $Engine) { $Engine = (Resolve-Path (Join-Path $Here '..\tools\bsr_engine.ps1')).Path }
+if (-not $Magisk) { $Magisk = (Resolve-Path (Join-Path $Here '..\tools\bsr_magisk.ps1')).Path }
+$script:pass = 0; $script:fail = 0
+function Ok([string]$name, [bool]$cond, [string]$detail = '') {
+    if ($cond) { $script:pass++; Write-Host "  [PASS] $name" -ForegroundColor Green }
+    else { $script:fail++; Write-Host "  [FAIL] $name $detail" -ForegroundColor Red }
+}
+function Eq([string]$name, $expected, $actual) { Ok $name ("$expected" -eq "$actual") "(expected '$expected', got '$actual')" }
+
+# Run the engine as a child process (exactly how blueStackRoot.cmd calls it).
+function Eng([string[]]$a) { & powershell -NoProfile -ExecutionPolicy Bypass -File $Engine @a 2>&1 }
+
+# ---------------------------------------------------------------------------
+# Build a throwaway BlueStacks-shaped DataDir at a NON-default (custom) location.
+# ---------------------------------------------------------------------------
+$script:Made = New-Object System.Collections.Generic.List[string]
+function New-FakeData([string]$instance, [hashtable]$confKeys, [string]$tag = 'rtest') {
+    $root = Join-Path $env:TEMP ("bsr_${tag}_" + [guid]::NewGuid().ToString('N').Substring(0, 8))
+    $eng = Join-Path $root "Engine\$instance"
+    New-Item -ItemType Directory -Path $eng -Force | Out-Null
+    $ud = Join-Path $root 'UserData'; New-Item -ItemType Directory -Path $ud -Force | Out-Null
+    $script:Made.Add($root)
+    $lines = @('bst.feature.rooting="0"', 'bst.enable_adb_access="1"')
+    foreach ($k in $confKeys.Keys) { $lines += ('bst.instance.' + $instance + '.' + $k + '="' + $confKeys[$k] + '"') }
+    [IO.File]::WriteAllText((Join-Path $root 'bluestacks.conf'), (($lines -join "`r`n") + "`r`n"), (New-Object Text.UTF8Encoding($false)))
+    [IO.File]::WriteAllText((Join-Path $ud 'MimMetaData.json'), ('{"Instances":[{"InstanceName":"' + $instance + '"}]}'))
+    $bstk = '<?xml version="1.0"?><VirtualBox><Machine name="' + $instance + '"><MediaRegistry><HardDisks>' +
+            '<HardDisk format="VHD" location="Root.vhd" type="Readonly"/></HardDisks></MediaRegistry></Machine></VirtualBox>'
+    [IO.File]::WriteAllText((Join-Path $eng "$instance.bstk"), $bstk)
+    [IO.File]::WriteAllBytes((Join-Path $eng 'Root.vhd'), (New-Object byte[] 64))
+    return $root
+}
+function Resolve-Map([string]$dataDir, [string]$base) {
+    $out = Eng @('-Action', 'Resolve', '-DataDir', $dataDir, '-Base', $base)
+    $h = @{}; foreach ($l in $out) { if ("$l" -match '^(BSR_[A-Z]+)=(.*)$') { $h[$Matches[1]] = $Matches[2] } }
+    return $h
+}
+
+Write-Host "`n=== PATH resolution (engine BaseDir / Resolve) ===" -ForegroundColor Cyan
+
+# 1) custom data location, normal layout
+$d1 = New-FakeData 'Pie64' @{ 'status.adb_port' = '5555' }
+Eq 'BaseDir returns the custom data root (not a hardcoded ProgramData path)' $d1 (Eng @('-Action', 'BaseDir', '-DataDir', $d1) | Select-Object -Last 1)
+
+# 2) DataDir reported as ...\Engine (newer BlueStacks) is normalized to the base
+Eq 'BaseDir strips a trailing \Engine to the base folder' $d1 (Eng @('-Action', 'BaseDir', '-DataDir', (Join-Path $d1 'Engine')) | Select-Object -Last 1)
+
+# 3) trailing backslash is tolerated
+Eq 'BaseDir tolerates a trailing backslash' $d1 (Eng @('-Action', 'BaseDir', '-DataDir', ($d1 + '\')) | Select-Object -Last 1)
+
+# 4) full Resolve maps conf/bstk/vhd under the custom location
+$m1 = Resolve-Map $d1 'Pie64'
+Eq 'Resolve: instance'  'Pie64' $m1['BSR_INSTANCE']
+Eq 'Resolve: master'    'Pie64' $m1['BSR_MASTER']
+Eq 'Resolve: conf path' (Join-Path $d1 'bluestacks.conf') $m1['BSR_CONF']
+Eq 'Resolve: vhd path'  (Join-Path $d1 'Engine\Pie64\Root.vhd') $m1['BSR_VHD']
+Ok 'Resolve: bstk under custom root' ($m1['BSR_BSTK'] -eq (Join-Path $d1 'Engine\Pie64\Pie64.bstk'))
+
+# 5) a clone instance resolves its master (Rvc64_3 -> Rvc64) and keeps its own bstk/vhd
+$m2 = Resolve-Map (New-FakeData 'Rvc64_3' @{ 'status.adb_port' = '5585' }) 'Rvc64'
+Eq 'Resolve(clone): instance' 'Rvc64_3' $m2['BSR_INSTANCE']
+Eq 'Resolve(clone): master'   'Rvc64'   $m2['BSR_MASTER']
+
+Write-Host "`n=== ADB PORT resolution (engine Resolve -- NOT hardcoded 5555) ===" -ForegroundColor Cyan
+Eq 'engine: status.adb_port wins'                  '5585' (Resolve-Map (New-FakeData 'Rvc64' @{ 'status.adb_port' = '5585' } 'p') 'Rvc64')['BSR_ADBPORT']
+Eq 'engine: falls back to adb_port if no status'   '5595' (Resolve-Map (New-FakeData 'Rvc64' @{ 'adb_port' = '5595' } 'p') 'Rvc64')['BSR_ADBPORT']
+Eq 'engine: defaults to 5555 when neither present' '5555' (Resolve-Map (New-FakeData 'Rvc64' @{} 'p') 'Rvc64')['BSR_ADBPORT']
+
+Write-Host "`n=== ADB PORT candidates (orchestrator, dot-sourced) ===" -ForegroundColor Cyan
+. $Magisk   # dispatch guard => nothing boots; functions become available
+function Cands([string]$dataDir, [string]$inst) {
+    $script:Conf = Join-Path $dataDir 'bluestacks.conf'
+    $script:Instance = $inst
+    , (Get-AdbPortCandidates)
+}
+Eq 'cands: single 5555 (deduped against fallback)' '5555'      ((Cands (New-FakeData 'Pie64' @{ 'status.adb_port' = '5555' } 'c') 'Pie64') -join ',')
+Eq 'cands: non-5555 first, 5555 fallback'          '5585,5555' ((Cands (New-FakeData 'Rvc64_3' @{ 'status.adb_port' = '5585' } 'c') 'Rvc64_3') -join ',')
+Eq 'cands: adb_port used when status absent'        '5595,5555' ((Cands (New-FakeData 'Rvc64' @{ 'adb_port' = '5595' } 'c') 'Rvc64') -join ',')
+# stale-status case (Rvc64_4 in the wild: status=5555 stale, adb_port=5595 real) -> BOTH tried
+Eq 'cands: stale status + real adb_port both tried' '5555,5595' ((Cands (New-FakeData 'Rvc64_4' @{ 'status.adb_port' = '5555'; 'adb_port' = '5595' } 'c') 'Rvc64_4') -join ',')
+Eq 'cands: no keys -> just the 5555 fallback'       '5555'      ((Cands (New-FakeData 'Foo' @{} 'c') 'Foo') -join ',')
+
+Write-Host "`n=== DataRoot resolution (orchestrator Get-DataRoot, custom/registry) ===" -ForegroundColor Cyan
+Eq 'DataRoot: ...\Engine is normalized to base'      'X:\Custom\BS'   (Get-DataRoot ([pscustomobject]@{ DataDir = 'X:\Custom\BS\Engine'; UserDefinedDir = $null }))
+Eq 'DataRoot: plain data dir kept as-is'             'X:\Custom\Data' (Get-DataRoot ([pscustomobject]@{ DataDir = 'X:\Custom\Data'; UserDefinedDir = $null }))
+Eq 'DataRoot: UserDefinedDir used when DataDir empty' 'D:\BS'         (Get-DataRoot ([pscustomobject]@{ DataDir = $null; UserDefinedDir = 'D:\BS' }))
+Ok 'DataRoot: null registry -> env ProgramData fallback (no hardcoded C: literal)' ((Get-DataRoot $null) -eq (Join-Path $env:ProgramData 'BlueStacks_nxt'))
+
+# ---- cleanup ----
+foreach ($d in $script:Made) { try { Remove-Item -LiteralPath $d -Recurse -Force -ErrorAction SilentlyContinue } catch { } }
+
+Write-Host ""
+Write-Host ("RESULT: {0} passed, {1} failed" -f $script:pass, $script:fail) -ForegroundColor $(if ($script:fail) { 'Red' } else { 'Green' })
+exit ([int]($script:fail -gt 0))
