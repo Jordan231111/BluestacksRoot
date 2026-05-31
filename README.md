@@ -1,4 +1,4 @@
-# blueStackRoot
+# Root BlueStacks 5 with Magisk — blueStackRoot (Android 9, 11 & 13)
 
 <p align="center">
   <a href="https://github.com/Jordan231111/BluestacksRoot/stargazers"><img alt="Stars" src="https://img.shields.io/github/stars/Jordan231111/BluestacksRoot?style=flat&logo=github"></a>
@@ -172,3 +172,9 @@ If this saved you time, a coffee is hugely appreciated — it keeps the last ope
 ## 📄 License
 Licensed under the Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License.
 See [LICENSE](./LICENSE) or visit http://creativecommons.org/licenses/by-nc-nd/4.0/.
+
+---
+
+<sub>Keywords: root BlueStacks, BlueStacks root, root BlueStacks 5, how to root BlueStacks, BlueStacks
+Magisk, Magisk Delta BlueStacks, Kitsune Magisk, BlueStacks Zygisk, root BlueStacks 5.22, BlueStacks 5 root
+2026, root Android emulator, BlueStacks rooted, MSI App Player root, install unsigned APK on BlueStacks.</sub>
