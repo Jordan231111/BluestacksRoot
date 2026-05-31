@@ -101,6 +101,20 @@ BlueStacks and carries binaries inside it. Heuristic scanners flag that pattern.
 
 ---
 
+## ❓ "Android system has been illegally tampered with" — instance shuts down after rooting?
+
+If BlueStacks shows **"the Android system has been illegally tampered with and does not meet security
+requirements"** (or **"Android system doesn't meet security and will be shutdown"**) and your **instance
+keeps closing** the moment you enable root, that's the **disk-integrity / anti-tamper check** added in
+**BlueStacks 5.22+**. Almost every other guide tells you to **downgrade to 5.22.130.1019** — **you don't
+have to.**
+
+`blueStackRoot` applies a **one-byte HD-Player anti-tamper patch** that bypasses the disk-integrity check,
+so you can **root the *latest* BlueStacks (5.22.169) without downgrading** — and it installs **real Magisk**
+with **no traces**, not a detectable classic `su`. If `bst.feature.rooting` keeps **reverting to `0`** on
+launch, that's the same anti-tamper system, and this tool handles it for you. Full technical breakdown:
+[`docs/BLUESTACKS_ROOTING_DEEP_DIVE.md`](docs/BLUESTACKS_ROOTING_DEEP_DIVE.md) §2 (the single-byte patch).
+
 ## 🔧 How the Magisk path works (the hard part)
 
 <details>
@@ -177,4 +191,7 @@ See [LICENSE](./LICENSE) or visit http://creativecommons.org/licenses/by-nc-nd/4
 
 <sub>Keywords: root BlueStacks, BlueStacks root, root BlueStacks 5, how to root BlueStacks, BlueStacks
 Magisk, Magisk Delta BlueStacks, Kitsune Magisk, BlueStacks Zygisk, root BlueStacks 5.22, BlueStacks 5 root
-2026, root Android emulator, BlueStacks rooted, MSI App Player root, install unsigned APK on BlueStacks.</sub>
+2026, root Android emulator, BlueStacks rooted, MSI App Player root, install unsigned APK on BlueStacks,
+BlueStacks illegally tampered, Android system doesn't meet security requirements, BlueStacks tampering
+detected, BlueStacks instance keeps closing after root, BlueStacks disk integrity check bypass, root latest
+BlueStacks without downgrading, fix illegally tampered BlueStacks, bst.feature.rooting reverts to 0.</sub>
