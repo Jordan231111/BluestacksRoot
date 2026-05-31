@@ -1,60 +1,174 @@
-# Roots Bluestacks instantly with cmd script
+# blueStackRoot
 
+<p align="center">
+  <a href="https://github.com/Jordan231111/BluestacksRoot/stargazers"><img alt="Stars" src="https://img.shields.io/github/stars/Jordan231111/BluestacksRoot?style=flat&logo=github"></a>
+  <a href="https://github.com/Jordan231111/BluestacksRoot/network/members"><img alt="Forks" src="https://img.shields.io/github/forks/Jordan231111/BluestacksRoot?style=flat&logo=github"></a>
+  <img alt="BlueStacks" src="https://img.shields.io/badge/BlueStacks%205-5.22.169%20%E2%9C%93-blue">
+  <img alt="Magisk" src="https://img.shields.io/badge/Magisk-Delta%20v27.2--kitsune--4-brightgreen">
+  <a href="./LICENSE"><img alt="License" src="https://img.shields.io/badge/license-CC%20BY--NC--ND%204.0-lightgrey"></a>
+</p>
 
-## How to Use
+**Root BlueStacks 5 / MSI App Player with real Magisk — from one file, with no traces left behind.**
+Download **`blueStackRoot.cmd`**, run it as administrator, pick your Android version, and you're rooted.
+No other files, nothing to install, works on the latest BlueStacks (5.22.169).
 
-1. Download `blueStackRoot.cmd` `split.cmd`, `rootjunction.cmd`, and `norootjunction.cmd` in [releases](https://github.com/Jordan231111/BluestacksRoot/releases)
+---
 
-2. Launch bluestacks once if you just installed it. Note on Rooting: BlueStacks versions 5.22.150.1014 and higher now enforce integrity checks that detect system changes. We recommend using BlueStacks 5.22.130.1019 or lower if you plan to root. [Click here for List of old versions](https://www.andnixsh.com/2025/12/bluestacks-older-versions-offline.html)
+## ⚡ Quick Start
 
-3. Exit all BlueStacks instances or Multi-Instance Manager.
+Works on the 64-bit BlueStacks instances — **Android 9, 11, and 13**. Just three steps:
 
-4. Skip to step 10 if you want to **ONLY HAVE ROOTED INSTANCES** and 0 unrooted instances across all versions.
+1. **Close** BlueStacks completely (including the Multi-Instance Manager).
+2. **Right-click `blueStackRoot.cmd` → Run as administrator.** (If Windows shows a blue **"Windows
+   protected your PC"** box, click **More info → Run anyway** — see
+   [Is this safe?](#-is-this-safe-will-my-antivirus-flag-it) below.)
+3. A small menu opens. **Find your instance's Android version below, type that number, and press Enter:**
 
-5. Run the `split.cmd` file once (grant admin permissions when prompted). Should delete `split.cmd` after you run it successfully once. **ONLY DO THIS STEP ONCE!**
-   
-6. Run `rootjunction.cmd` and multiinstance manager should appear.
+   | If your instance is… | Type | What happens |
+   |---|:---:|---|
+   | **Android 9** (Pie64) | **1** | Magisk is installed and set up **automatically** — just wait for **`VERIFY PASS`** ✅ |
+   | **Android 11** (Rvc64) | **2** | Magisk is installed and set up **automatically** — just wait for **`VERIFY PASS`** ✅ |
+   | **Android 13** (Tiramisu64) | **3** | Magisk is installed and set up **automatically** — just wait for **`VERIFY PASS`** ✅ |
 
-7. If the following popup appears, click "More info" and then "Run anyway" (Windows blocks ALL .cmd files by default):
-Microsoft Defender SmartScreen prevented an unrecognized app from starting
+That's it — every version installs **Magisk** as the final root, fully automatically. Open the **Magisk
+app** to confirm it shows **Installed**, then grant root to any app you like. BlueStacks' own "root access"
+toggle is safely turned back **off**, and no leftover files are left behind for games to detect.
 
-8. create many temporary instances and **DELETE** them afterwards. I recommend 50 to avoid conflicts. Note that you must create and delete more temporary instance than the number of unrooted instances you wish to have. **ONLY DO THIS STEP ONCE!**
+> **💡 Not sure which Android version your instance is?** It's shown next to each instance in the
+> BlueStacks **Multi-Instance Manager** (or open the instance → **Settings → About phone**).
 
-9. Label the master instance Do Not Launch and now create the rooted instances. If you want 5, create 5 new instances right now. You can modify it later by creating more.
+> **💡 Seeing "Ramdisk: No" in Magisk?** That's totally fine and expected on BlueStacks — root works
+> perfectly without it. Don't go looking for a "ramdisk fix".
 
-10. For each instance INDIVIDUALLY install magisk, then run `blueStackRoot.cmd`
+<details>
+<summary><b>How do I undo / unroot? (click here)</b></summary>
 
-11. Wait for the rooting process to complete in the command prompt window. Then install magisk delta to system partition
-**Important:** DO NOT unroot until Magisk says it's installed and you get the SU conflict message in the Magisk app.
-You must turn off and on the emulator after script has complete **at least confirm you got the SU conflict message** for each instance
+&nbsp;
 
-12. Go back to script and apply final undo root option. **Only now can you launch multiple Unrooted or Rooted instances at the same time**
+Every Android version has its **own** undo number, so unrooting only ever affects the instance you pick —
+there's no single "undo everything" button. In the menu:
 
-13. For convenience, Magisk Kitsune is provided in this repository.
+| Your instance's Android version | To root | To undo |
+|---|:---:|:---:|
+| Android 9 (Pie64) | 1 | **4** |
+| Android 11 (Rvc64) | 2 | **5** |
+| Android 13 (Tiramisu64) | 3 | **6** |
 
-14. To switch to noroot run `norootjunction.cmd` and now you can launch your UnRooted instances, do not modify these or use the tool in here **ALL Modification must be done in `rootjunction.cmd`
+The undo options are **per-instance** and multi-instance safe: they remove Magisk from just that one
+instance and leave any other rooted instances working. The menu also has **7** for a *full host scrub*
+(restore the master `Root.vhd` to factory **and** un-patch `HD-Player.exe` — unroots every instance of the
+chosen version), **8** to point the tool at a custom BlueStacks folder, and **0** to exit.
 
-## Video tutorial here
-[YoutubeLink](https://youtu.be/LOhKGxuhLrU)
+</details>
 
-## Support/Donation
+### Run a rooted *and* an unrooted Android instance side by side
+Root each Android instance you want — every instance you *don't* root stays 100% clean on its own (no
+root, no Magisk app, nothing for games to detect). Then **launch them together from the Multi-Instance
+Manager** and they run side by side. Want to unroot just one later? Undo that single instance
+all the others keep working, untouched.
+
+📖 Full walkthrough & rollback: **[`docs/RUNBOOK.md`](docs/RUNBOOK.md)** · Deep technical writeup:
+**[`docs/BLUESTACKS_ROOTING_DEEP_DIVE.md`](docs/BLUESTACKS_ROOTING_DEEP_DIVE.md)**
+
+---
+
+## 🛡️ Is this safe? Will my antivirus flag it?
+
+**Short answer: yes, it's safe — and yes, your antivirus or SmartScreen might warn you anyway.** That's a
+*false positive* common to **every** rooting/emulator tool: the file is an unsigned `.cmd` that modifies
+BlueStacks and carries binaries inside it. Heuristic scanners flag that pattern. Here's why you can trust it:
+
+- **100% open source.** Every line of logic is plain, readable PowerShell and batch — right here in this
+  repo. Read [`tools/bsr_magisk.ps1`](tools/bsr_magisk.ps1) and
+  [`tools/bsr_engine.ps1`](tools/bsr_engine.ps1); those are the *exact* scripts embedded in the `.cmd`.
+  Nothing is obfuscated or "encrypted" — unlike the closed-source rooter binaries floating around.
+- **The big base64 blocks are not a virus — they're just files, bundled so you only download one thing.**
+  The `.cmd` carries five things between clearly-labelled `__BSR_*__` markers:
+
+  | Embedded blob | What it actually is | How to verify |
+  |---|---|---|
+  | `__BSR_ENGINE__` / `__BSR_MAGISK__` | The two PowerShell scripts above (plain text) | Diff against `tools/*.ps1` in this repo |
+  | `__BSR_DFS__` | `debugfs` from the standard Cygwin **e2fsprogs** suite | Standard open-source ext4 tool |
+  | `__BSR_SU__` / `__BSR_BSRSU__` | Tiny `su` binaries used only *during* install, then **erased** | Source in [`tools/su_src/`](tools/su_src) |
+  | `__BSR_APK__` | The **official, unmodified Magisk Delta (Kitsune Mask)** APK | SHA-256 below |
+
+- **The Magisk APK is the real one.** Its SHA-256 is
+  `818cfa02783ddae573cc953450fbc39ec3e5164b66e517c657ba11cf90963a89` (12,770,643 bytes) — the genuine
+  [Magisk Delta build by HuskyDG](https://github.com/HuskyDG/magisk-files). You're trusting Magisk, not me.
+- **Verify it yourself in 30 seconds.** Scan the file on [VirusTotal](https://www.virustotal.com/), or
+  extract any embedded blob and check its hash — open the `.cmd` in any text editor and the `__BSR_*__`
+  markers are right there. The whole point of this project is that you *don't* have to trust a black box.
+
+---
+
+## 🔧 How the Magisk path works (the hard part)
+
+<details>
+<summary><b>Click to expand the technical deep-dive</b></summary>
+
+The same automated pipeline roots Android 9, 11, and 13 (it's been run end-to-end on all three).
+BlueStacks 5.22 defeats the classic "inject `su` into the disk" trick: it overmounts `/system/xbin` from
+`/data`, ships a host-gated daemon-su, and resets `bst.feature.rooting`. The Magisk app's *Install to
+System* button also leaves `/data/adb/magisk` **empty**, so the daemon aborts with "environment
+incomplete". This tool solves all of that:
+
+1. **One-byte patch** on `HD-Player.exe` (NOP the disk-integrity `JZ`, `74 5B → 90 90`) so a modified
+   `Root.vhd` is accepted and a tampered `/system` boots. It's a version-proof byte-scan; verified on 5.22.169.
+2. **Offline write:** using the embedded `debugfs`, it writes Magisk's `/system` payload + a **gated**
+   `bootanim.rc` directly into `Root.vhd` — no Windows ext4 driver needed.
+3. **The breakthrough:** it boots once with a tiny **bootstrap su** to populate **`/data/adb/magisk`** (the
+   step the Magisk app can't finish on BlueStacks) and set the grant policy, then **completely removes the
+   bootstrap su** and restores the stock files.
+4. **Per-instance gate:** all instances share one master `Root.vhd`, so the boot hooks live on the master
+   and would otherwise run everywhere. Instead, `bootanim.rc` calls `bsr_boot.sh`, which **no-ops unless
+   that instance carries `/data/adb/.bsr_root`** on its own `/data`. Result: only flagged instances get
+   Magisk; the rest get **no daemon, no su, no app** — and the master stays `Readonly` so every instance
+   can run at once.
+
+**What persists vs. what's erased.** Only four things change from factory: the 2-byte `HD-Player.exe`
+patch, the `enable_root_access` conf flag (flipped on for install, back off after), Magisk's `/system`
+files, and `/data/adb/magisk`. The bootstrap su and hijacked `bindmount` are added *then fully erased*.
+Net new su on the device: **only Magisk's.**
+
+</details>
+
+## 💻 Requirements
+Windows + BlueStacks 5 (nxt) or MSI App Player, run as Administrator. **Nothing to download** — PowerShell
+5.1 (built into Windows) runs the embedded engine, and `HD-Adb.exe` ships with BlueStacks.
+
+## 🎥 Video tutorial
+[Watch on YouTube](https://youtu.be/LOhKGxuhLrU) *(covers the earlier junction-based flow; the Magisk
+path above is now a single automated option for every supported version — Android 9, 11, and 13).*
+
+## 🧰 For developers (build & tests)
+The `.cmd` embeds `tools/bsr_engine.ps1` + `tools/bsr_magisk.ps1` + `tools/debugfs/` + `tools/su_src/bsr_su`
++ the Magisk APK between marker lines. Proven dev/test scripts live in [`tests/`](tests) (e.g.
+`test-magiskprep-offline.ps1` byte-verifies the offline `/system` write; `gate-magisk.ps1`,
+`remove-bsr-su.ps1`). `tools/build.ps1` is the legacy assembler for the classic-su build. Retired
+approaches (junctions, the integrity-bypass scripts, etc.) are kept for reference in
+[`archive/`](archive). The fully reverse-engineered closed-source predecessor lives in `recovered/BstkRooter/`.
+
+## ☕ Support / Donation
+If this saved you time, a coffee is hugely appreciated — it keeps the last open-source BlueStacks rooter alive:
 - https://ko-fi.com/yejordan
 - https://buymeacoffee.com/yejordan
 
-## Other Important Information
-- Please create a PR for contribution with a clear explanation and images if applicable of the changes and edits
-- Report any issues with clear steps to reproduce the issue and a video if possible.
-- For BlueStacks instances running Android 11, please use my uploaded Magisk or the Magisk version available at: [https://github.com/HuskyDG/magisk-files/releases/tag/1707294287](https://github.com/HuskyDG/magisk-files/releases/tag/1707294287)
+## 📌 Other information
+- **Contributing:** open a PR with a clear explanation (and screenshots if relevant). Report issues with
+  clear steps to reproduce and a video if possible.
+- **Supported instances (Android 9 / 11 / 13):** the tool uses my bundled Magisk Delta (Kitsune), or the
+  build at [HuskyDG/magisk-files](https://github.com/HuskyDG/magisk-files/releases/tag/1707294287). The
+  Android-9 (Pie64), 11 (Rvc64), and 13 (Tiramisu64) paths are identical and fully automated — all three
+  have been run end-to-end to a clean `VERIFY PASS`.
+- **Android 7 (Nougat32) is not supported.** It is a 32-bit instance, and every binary this tool bundles
+  (the `su` and all Magisk binaries) is 64-bit `x86_64`, so root cannot run there. If you need root,
+  recreate the instance as a 64-bit Android (9/11/13) in the Multi-Instance Manager.
+- **Old/legacy files** are archived [here](https://mega.nz/folder/SQBRHSZQ#pEgMXysWkkTm5Z8dxsNaNQ).
+- **Manual method** this is based on:
+  [XDA forums](https://xdaforums.com/t/bluestacks-tweaker-6-tool-for-modifing-bluestacks-2-3-3n-4-5.3622681/post-89306676).
+  Note that the manual method may **not** work anymore due to hidden services that must be killed — this
+  script handles that for you.
 
-- BlueStacks instances running Android 7 and possibly 9 are only supported by Magisk version 25.2. Please note that using this outdated version is at your own risk, as it may contain unpatched vulnerabilities or compatibility issues. It is highly recommended to upgrade your BlueStacks instance to a newer version of Android for better stability and security.
-However, I cannot reproduce the issue and the latest magisk with zygisk is working though u may need to install to system in magisk app twice. Do not undo root until you are satisified it is working
-![image](https://github.com/Jordan231111/BluestacksRoot/assets/79342877/7d8da465-2d0c-492d-920b-78bae89828ea)
-
-- You can find such old files [here](https://mega.nz/folder/SQBRHSZQ#pEgMXysWkkTm5Z8dxsNaNQ)
-   
-- Manual root method my code is mainly based off this method [here](https://xdaforums.com/t/bluestacks-tweaker-6-tool-for-modifing-bluestacks-2-3-3n-4-5.3622681/post-89306676)
-- Due to changes that manual method may NOT even work due to hidden services unless manually killed as well so recommend to use this script instead.
-
-## License
-
-This work is licensed under the Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-nd/4.0/ or see the [LICENSE](./LICENSE) file.
+## 📄 License
+Licensed under the Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License.
+See [LICENSE](./LICENSE) or visit http://creativecommons.org/licenses/by-nc-nd/4.0/.

@@ -1,0 +1,43 @@
+#!/system/bin/sh
+# This script helps in rooting/unrooting the app-player by bindmounting/unmounting the .xb folder and xbin.
+
+#================ ROOT/UNROOT =====================#
+
+MAXSIZE=100000
+MARKER_FILE="/data/downloads/.bm"
+to_mount=$(getprop bst.config.bindmount)
+echo "to_mount=$to_mount" > /dev/kmsg
+
+mounted=`mountpoint -q /system/xbin && echo "1" || echo "0"`
+echo "mounted=$mounted" > /dev/kmsg
+
+# Get marker file size
+FILESIZE=$(stat -c%s "$MARKER_FILE")
+# Checkpoint
+echo "Size of $MARKER_FILE = $FILESIZE bytes." > /dev/kmsg
+
+if (( FILESIZE > MAXSIZE )); then
+    echo "Removing and creating new $MARKER_FILE" > /dev/kmsg
+    rm $MARKER_FILE
+    touch $MARKER_FILE
+fi
+
+if [ $to_mount -gt 0 ] && [ $mounted -le 0 ] && [ -d /data/downloads/.xb ]; then
+    echo "Bind mounting..." > /dev/kmsg
+    mount -o bind /data/downloads/.xb/ /system/xbin/ > /dev/kmsg
+    echo "`date` bindmount" >> $MARKER_FILE
+    /system/xbin/su --auto-daemon &
+elif [ $to_mount -le 0 ] && [ $mounted -gt 0 ]; then
+    echo "Bind Unmounting..." > /dev/kmsg
+    for pid in `pgrep daemonsu`
+    do
+        echo "Killing Process $pid" > /dev/kmsg
+        kill -9 $pid
+    done
+    sleep 3
+    echo "`date` unbindmount" >> $MARKER_FILE
+    umount /system/xbin/ > /dev/kmsg
+    if [ "$?" -ne 0 ]; then
+        echo "Unmount failed..." > /dev/kmsg
+    fi
+fi

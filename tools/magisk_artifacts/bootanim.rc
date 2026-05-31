@@ -1,0 +1,28 @@
+service bootanim /system/bin/bootanimation
+    class core animation
+    user graphics
+    group graphics audio
+    disabled
+    oneshot
+    ioprio rt 0
+    task_profiles MaxPerformance
+on post-fs-data
+    start logd
+    exec u:r:su:s0 root root -- /system/etc/init/magisk/magiskpolicy --live --magisk
+    exec u:r:magisk:s0 root root -- /system/etc/init/magisk/magiskpolicy --live --magisk
+    exec u:r:update_engine:s0 root root -- /system/etc/init/magisk/magiskpolicy --live --magisk
+    exec u:r:su:s0 root root -- /system/etc/init/magisk/magisk64 --auto-selinux --setup-sbin /system/etc/init/magisk /sbin
+    exec u:r:su:s0 root root -- /sbin/magisk --auto-selinux --post-fs-data
+on nonencrypted
+    exec u:r:su:s0 root root -- /sbin/magisk --auto-selinux --service
+on property:vold.decrypt=trigger_restart_framework
+    exec u:r:su:s0 root root -- /sbin/magisk --auto-selinux --service
+on property:sys.boot_completed=1
+    mkdir /data/adb/magisk 755
+    exec u:r:su:s0 root root -- /sbin/magisk --auto-selinux --boot-complete
+   
+on property:init.svc.zygote=restarting
+    exec u:r:su:s0 root root -- /sbin/magisk --auto-selinux --zygote-restart
+   
+on property:init.svc.zygote=stopped
+    exec u:r:su:s0 root root -- /sbin/magisk --auto-selinux --zygote-restart
