@@ -30,7 +30,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # The .cmd ships the engine + orchestrator embedded; make sure they match tools\*.ps1.
       - name: Embedded build in sync with tools/
