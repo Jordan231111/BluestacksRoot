@@ -20,7 +20,7 @@ Works on the 64-bit BlueStacks instances — **Android 9, 11, and 13**.
 
 **⬇️ [Download `blueStackRoot.cmd`](https://github.com/Jordan231111/BluestacksRoot/raw/main/blueStackRoot.cmd)** — one file (~20 MB), nothing else to install. *(All versions: [Releases page](https://github.com/Jordan231111/BluestacksRoot/releases).)*
 
-1. **First, open the instance you want to root at least once** — launch it from the Multi-Instance Manager so BlueStacks finishes creating it — then **close BlueStacks completely** (including the Multi-Instance Manager and the system-tray icon).
+1. **First, open the instance you want to root at least once** — launch it from the Multi-Instance Manager so BlueStacks finishes creating it.
 2. **Right-click `blueStackRoot.cmd` → Run as administrator.** (If Windows shows a blue **"Windows
    protected your PC"** box, click **More info → Run anyway** — see
    [Is this safe?](#-is-this-safe-will-my-antivirus-flag-it) below.)
