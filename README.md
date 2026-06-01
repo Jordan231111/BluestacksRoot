@@ -10,7 +10,8 @@
 
 **Root BlueStacks 5 / MSI App Player with real Magisk — from one file, with no traces left behind.**
 **Run `blueStackRoot.cmd` as administrator, pick your Android version, and you're rooted.**
-No other files, nothing to install, works on the latest BlueStacks (5.22.169).
+**The genuine Magisk Delta (Kitsune) APK is now bundled inside the `.cmd` itself** — no separate Magisk
+download, no other files, nothing to install. Works on the latest BlueStacks (5.22.169).
 
 ---
 
@@ -18,7 +19,7 @@ No other files, nothing to install, works on the latest BlueStacks (5.22.169).
 
 Works on the 64-bit BlueStacks instances — **Android 9, 11, and 13**.
 
-**⬇️ [Download `blueStackRoot.cmd`](https://github.com/Jordan231111/BluestacksRoot/releases/download/v7/blueStackRoot.cmd)** — one file (~20 MB), nothing else to install. *(All versions: [Releases page](https://github.com/Jordan231111/BluestacksRoot/releases).)*
+**⬇️ [Download `blueStackRoot.cmd`](https://github.com/Jordan231111/BluestacksRoot/releases/download/v7/blueStackRoot.cmd)** — one file (~20 MB) with the **real Magisk APK embedded inside** — nothing else to download. *(All versions: [Releases page](https://github.com/Jordan231111/BluestacksRoot/releases).)*
 
 1. **First, open the instance you want to root at least once** — launch it from the Multi-Instance Manager so BlueStacks finishes creating it.
 2. **Right-click `blueStackRoot.cmd` → Run as administrator.** (If Windows shows a blue **"Windows
@@ -184,8 +185,10 @@ Windows + BlueStacks 5 (nxt) or MSI App Player, run as Administrator. **Nothing 
 5.1 (built into Windows) runs the embedded engine, and `HD-Adb.exe` ships with BlueStacks.
 
 ## 🎥 Video tutorial
-[Watch on YouTube](https://youtu.be/LOhKGxuhLrU) *(covers the earlier junction-based flow; the Magisk
-path above is now a single automated option for every supported version — Android 9, 11, and 13).*
+▶ **[Watch the walkthrough on YouTube](https://www.youtube.com/watch?v=BfxGGTDiESg)** — the current
+one-file Magisk flow (Android 9 / 11 / 13).
+
+<sub>Earlier junction-based method (legacy BlueStacks ≤ 5.21.x): [older video](https://youtu.be/LOhKGxuhLrU).</sub>
 
 ## 🧰 For developers (build & tests)
 The `.cmd` embeds `tools/bsr_engine.ps1` + `tools/bsr_magisk.ps1` + `tools/debugfs/` + `tools/su_src/bsr_su`

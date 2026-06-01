@@ -45,9 +45,12 @@ all 64-bit: `su -c id → uid=0`, `/system/bin/su → ./magisk`, the Magisk app 
   new su on the device: **only Magisk's** — the app's "Abnormal State / su not from Magisk" warning clears.
 
 ### The tool — one self-verifying pipeline
-- **One file.** `blueStackRoot.cmd` (~20 MB) embeds the engine, `debugfs`, the bootstrap su, the
-  orchestrator, and the **Magisk APK** — nothing to download, no internet. Drop a different `Magisk*.apk`
-  next to it to use that build instead.
+- **One truly self-contained file — the Magisk APK is now embedded.** `blueStackRoot.cmd` (~20 MB)
+  bundles the engine, `debugfs`, the bootstrap su, the orchestrator **and the genuine Magisk Delta
+  (Kitsune) v27.2-kitsune-4 APK** between marker lines, so there is **nothing else to download** — no
+  internet and no separately-installed Magisk, unlike the legacy releases that shipped Magisk as a
+  standalone file you had to install yourself. (Drop a different `Magisk*.apk` next to the `.cmd` to use
+  that build instead.)
 - **Phased, self-verifying flow:** `Prep` (offline: patch + conf + write Magisk `/system`) → `Data`
   (online: boot, `adb install`, populate `/data/adb/magisk`, set grant policy) → `Clean` (offline: remove
   bootstrap, restore stock `bindmount`) → `Finalize` (`enable_root_access=0`) → `Verify` (cold-boot checks)
