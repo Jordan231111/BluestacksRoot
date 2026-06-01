@@ -40,7 +40,27 @@ foreach ($p in @(@('ENGINE', 'tools\bsr_engine.ps1'), @('MAGISK', 'tools\bsr_mag
     }
 }
 
+# --- embedded Magisk APK: decode the base64 blob and verify its SHA-256 (guards against APK drift;
+#     the APK is re-embedded by tools\reembed-apk.ps1, which round-trips this same hash). ---
+$ApkSha256 = 'e01648059a412fd9946a99801260dfde81c99def2512f161657faf404a280e05'
+try {
+    $apkB64 = (Extract 'APK') -replace '[^A-Za-z0-9+/=]', ''
+    $apkBytes = [Convert]::FromBase64String($apkB64)
+    $apkSha = (([System.Security.Cryptography.SHA256]::Create().ComputeHash($apkBytes) | ForEach-Object { $_.ToString('x2') }) -join '')
+    if ($apkSha -ceq $ApkSha256) {
+        Write-Host ("  [PASS] {0,-7} embedded APK sha256 == {1} ({2:N0} bytes)" -f 'APK', $ApkSha256, $apkBytes.Length) -ForegroundColor Green
+    }
+    else {
+        Write-Host ("  [FAIL] {0,-7} embedded APK sha256 {1} != expected -- re-run tools\reembed-apk.ps1" -f 'APK', $apkSha) -ForegroundColor Red
+        $fail++
+    }
+}
+catch {
+    Write-Host ("  [FAIL] {0,-7} could not decode embedded APK: {1}" -f 'APK', $_.Exception.Message) -ForegroundColor Red
+    $fail++
+}
+
 Write-Host ""
-if ($fail) { Write-Host "RESULT: embedded blocks OUT OF SYNC ($fail) -- re-run tools\reembed.ps1 and commit blueStackRoot.cmd" -ForegroundColor Red; exit 1 }
+if ($fail) { Write-Host "RESULT: embedded blocks OUT OF SYNC ($fail) -- re-run tools\reembed.ps1 / reembed-apk.ps1 and commit blueStackRoot.cmd" -ForegroundColor Red; exit 1 }
 Write-Host "RESULT: embedded blocks in sync with tools\ sources" -ForegroundColor Green
 exit 0

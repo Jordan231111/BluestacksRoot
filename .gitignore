@@ -1,2 +1,6 @@
 # Local editor workspace settings
 .vscode/
+
+# MCP tool cache + local E2E run logs (not part of the release)
+.playwright-mcp/
+e2e-*.log

@@ -4,7 +4,7 @@
   <a href="https://github.com/Jordan231111/BluestacksRoot/stargazers"><img alt="Stars" src="https://img.shields.io/github/stars/Jordan231111/BluestacksRoot?style=flat&logo=github"></a>
   <a href="https://github.com/Jordan231111/BluestacksRoot/network/members"><img alt="Forks" src="https://img.shields.io/github/forks/Jordan231111/BluestacksRoot?style=flat&logo=github"></a>
   <img alt="BlueStacks" src="https://img.shields.io/badge/BlueStacks%205-5.22.169%20%E2%9C%93-blue">
-  <img alt="Magisk" src="https://img.shields.io/badge/Magisk-Delta%20v27.2--kitsune--4-brightgreen">
+  <img alt="Magisk" src="https://img.shields.io/badge/Magisk-Kitsune%20Mask%20v31-brightgreen">
   <a href="./LICENSE"><img alt="License" src="https://img.shields.io/badge/license-CC%20BY--NC--ND%204.0-lightgrey"></a>
 </p>
 
@@ -19,7 +19,7 @@ download, no other files, nothing to install. Works on the latest BlueStacks (5.
 
 Works on the 64-bit BlueStacks instances — **Android 9, 11, and 13**.
 
-**⬇️ [Download `blueStackRoot.cmd`](https://github.com/Jordan231111/BluestacksRoot/releases/download/v7/blueStackRoot.cmd)** — one file (~20 MB) with the **real Magisk APK embedded inside** — nothing else to download. *(All versions: [Releases page](https://github.com/Jordan231111/BluestacksRoot/releases).)*
+**⬇️ [Download `blueStackRoot.cmd`](https://github.com/Jordan231111/BluestacksRoot/releases/download/v8/blueStackRoot.cmd)** — one file (~20 MB) with the **real Magisk APK embedded inside** — nothing else to download. *(All versions: [Releases page](https://github.com/Jordan231111/BluestacksRoot/releases).)*
 
 1. **First, open the exact instance you want to root** — launch it from the Multi-Instance Manager and let
    it boot once. The tool roots the instance of your chosen Android version that you **opened most
@@ -96,11 +96,12 @@ BlueStacks and carries binaries inside it. Heuristic scanners flag that pattern.
   | `__BSR_ENGINE__` / `__BSR_MAGISK__` | The two PowerShell scripts above (plain text) | Diff against `tools/*.ps1` in this repo |
   | `__BSR_DFS__` | `debugfs` from the standard Cygwin **e2fsprogs** suite | Standard open-source ext4 tool |
   | `__BSR_SU__` / `__BSR_BSRSU__` | Tiny `su` binaries used only *during* install, then **erased** | Source in [`tools/su_src/`](tools/su_src) |
-  | `__BSR_APK__` | The **official, unmodified Magisk Delta (Kitsune Mask)** APK | SHA-256 below |
+  | `__BSR_APK__` | The **official, unmodified Kitsune Mask (Magisk Delta) v31** APK | SHA-256 below |
 
 - **The Magisk APK is the real one.** Its SHA-256 is
-  `818cfa02783ddae573cc953450fbc39ec3e5164b66e517c657ba11cf90963a89` (12,770,643 bytes) — the genuine
-  [Magisk Delta build by HuskyDG](https://github.com/HuskyDG/magisk-files). You're trusting Magisk, not me.
+  `e01648059a412fd9946a99801260dfde81c99def2512f161657faf404a280e05` (12,570,028 bytes) — the genuine
+  [Kitsune Mask v31 build](https://github.com/1q23lyc45/KitsuneMagisk/releases) (`magisk -c` → `2ef8f002`,
+  versionCode 29999). You're trusting Magisk, not me.
 - **Verify it yourself in 30 seconds.** Scan the file on [VirusTotal](https://www.virustotal.com/), or
   extract any embedded blob and check its hash — open the `.cmd` in any text editor and the `__BSR_*__`
   markers are right there. The whole point of this project is that you *don't* have to trust a black box.
@@ -195,9 +196,13 @@ one-file Magisk flow (Android 9 / 11 / 13).
 
 ## 🧰 For developers (build & tests)
 The `.cmd` embeds `tools/bsr_engine.ps1` + `tools/bsr_magisk.ps1` + `tools/debugfs/` + `tools/su_src/bsr_su`
-+ the Magisk APK between marker lines. Proven dev/test scripts live in [`tests/`](tests) (e.g.
++ the Magisk APK between marker lines. To update them, edit the `tools/*.ps1` and run `tools/reembed.ps1`
+(re-splices the engine + orchestrator); swap the bundled Magisk with `tools/reembed-apk.ps1 -Apk <new.apk>`
+(byte-level splice + SHA-256 round-trip verify), then refresh the reference set with
+`tools/extract-databin.ps1 -Apk <new.apk>`. Proven dev/test scripts live in [`tests/`](tests) (e.g.
 `test-magiskprep-offline.ps1` byte-verifies the offline `/system` write; `gate-magisk.ps1`,
-`remove-bsr-su.ps1`). `tools/build.ps1` is the legacy assembler for the classic-su build. Retired
+`remove-bsr-su.ps1`; `Check-Embedded-Sync.ps1` asserts the embedded engine/orchestrator/APK match their
+sources). `tools/build.ps1` is the legacy assembler for the classic-su build. Retired
 approaches (junctions, the integrity-bypass scripts, etc.) are kept for reference in
 [`archive/`](archive). The fully reverse-engineered closed-source predecessor lives in `recovered/BstkRooter/`.
 
@@ -209,8 +214,8 @@ If this saved you time, a coffee is hugely appreciated — it keeps the last ope
 ## 📌 Other information
 - **Contributing:** open a PR with a clear explanation (and screenshots if relevant). Report issues with
   clear steps to reproduce and a video if possible.
-- **Supported instances (Android 9 / 11 / 13):** the tool uses my bundled Magisk Delta (Kitsune), or the
-  build at [HuskyDG/magisk-files](https://github.com/HuskyDG/magisk-files/releases/tag/1707294287). The
+- **Supported instances (Android 9 / 11 / 13):** the tool uses my bundled Kitsune Mask (Magisk Delta), or
+  the build at [1q23lyc45/KitsuneMagisk](https://github.com/1q23lyc45/KitsuneMagisk/releases). The
   Android-9 (Pie64), 11 (Rvc64), and 13 (Tiramisu64) paths are identical and fully automated — all three
   have been run end-to-end to a clean `VERIFY PASS`.
 - **Android 7 (Nougat32) is not supported.** It is a 32-bit instance, and every binary this tool bundles

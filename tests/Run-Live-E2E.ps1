@@ -65,7 +65,7 @@ if (-not $InstallDir) { $InstallDir = 'C:\Program Files\BlueStacks_nxt' }
 if (-not $Adb) { $Adb = Join-Path $InstallDir 'HD-Adb.exe' }
 if (-not $Player) { $Player = Join-Path $InstallDir 'HD-Player.exe' }
 if (-not $Magisk) {
-    foreach ($m in @((Join-Path $repo 'magiskkitsune.apk'), (Join-Path $repo 'Working Example & Fix\Magisk-27.2-kitsune-4.apk'))) {
+    foreach ($m in @((Join-Path $repo 'magiskkitsune.apk'), (Join-Path $repo 'Working Example & Fix\KitsuneMagisk-v31.apk'))) {
         if (Test-Path -LiteralPath $m) { $Magisk = $m; break }
     }
 }

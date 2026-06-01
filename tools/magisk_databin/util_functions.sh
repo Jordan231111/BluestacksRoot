@@ -2,8 +2,8 @@
 # Magisk General Utility Functions
 ############################################
 
-MAGISK_VER='v27.2-kitsune-4'
-MAGISK_VER_CODE=27002
+MAGISK_VER='2ef8f002'
+MAGISK_VER_CODE=29999
 
 ###################
 # Global Variables

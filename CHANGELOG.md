@@ -5,6 +5,22 @@ Player — from one file, fully automatically. Releases are grouped by the BlueS
 
 ---
 
+## v8 — Kitsune Mask v31 · 2026-06-01
+
+Updates the bundled Magisk to **Kitsune Mask v31** (the `1q23lyc45/KitsuneMagisk` fork; `magisk -c` →
+`2ef8f002`, versionCode 29999), replacing Magisk Delta v27.2-kitsune-4 (HuskyDG).
+
+- 📦 **New embedded APK.** SHA-256 `e01648059a412fd9946a99801260dfde81c99def2512f161657faf404a280e05`
+  (12,570,028 bytes); the `.cmd` shrinks ~261 KB of base64 text accordingly (the new APK is ~200 KB smaller).
+- 🔁 **No pipeline logic changes.** The package id is unchanged (`io.github.huskydg.magisk`) and the APK's
+  internal `lib/$ABI` + `assets/*.sh` layout is identical, so the version-agnostic extract/install/undo
+  path roots exactly as before. (E2E `VERIFY PASS` should be re-confirmed on a live instance.)
+- 🛠️ **New tooling.** `tools/reembed-apk.ps1` swaps the embedded APK at the byte level and verifies it
+  round-trips by SHA-256; `tools/extract-databin.ps1` refreshes the `tools/magisk_databin/` reference set;
+  `tests/Check-Embedded-Sync.ps1` now also asserts the embedded APK's SHA-256 (CI-enforced).
+
+---
+
 ## v7 — BlueStacks 5.22.169 · Android 9 / 11 / 13 · 2026-05-31
 
 A ground-up rewrite: the old junction / integrity-bypass method is gone. One self-contained

@@ -1,7 +1,7 @@
 # RUNBOOK — Make Magisk the sole root on BlueStacks 5 (Android 9 / 11 / 13), no traces
 
 This is the full, do‑it‑yourself runthrough. It takes a clean (or messy) BlueStacks instance to the
-**proven end state**: Magisk v27.2‑kitsune‑4 is the only working root (`su → magisk`, `uid=0`), the app
+**proven end state**: Kitsune Mask v31 is the only working root (`su → magisk`, `uid=0`), the app
 shows **Installed** with no warning, emulator root is OFF, and there is **zero trace** of any bootstrap su.
 
 > The steps below are written for `Rvc64` (Android 11), but the pipeline is **version‑agnostic** and the
@@ -17,7 +17,7 @@ Everything here is built from steps proven on this machine; the one offline step
 
 - **Run as Administrator** (offline VHD editing needs it).
 - **Matching Magisk APK present.** Use the same build you want installed, e.g.
-  `Working Example & Fix\Magisk-27.2-kitsune-4.apk`. This single file provides both the manager app
+  `Working Example & Fix\KitsuneMagisk-v31.apk`. This single file provides both the manager app
   and every Magisk binary. (A different Magisk version → pass that APK; nothing else changes.)
 - **Know your instance name** (default `Rvc64`) and paths:
   - Root.vhd: `C:\ProgramData\BlueStacks_nxt\Engine\<Instance>\Root.vhd`
@@ -46,7 +46,7 @@ No other files, no internet. (If you drop a different `Magisk*.apk` next to the 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File tools\bsr_magisk.ps1 `
     -Action Auto -Instance Rvc64 `
-    -MagiskApk "Working Example & Fix\Magisk-27.2-kitsune-4.apk"
+    -MagiskApk "Working Example & Fix\KitsuneMagisk-v31.apk"
 ```
 
 Either way, the pipeline runs and ends with a self‑verify:
@@ -69,7 +69,7 @@ Total wall time ≈ 8–12 min (two cold boots + two carves). When it prints
 Run the same script one phase at a time (lets you inspect between steps):
 
 ```powershell
-$apk = "Working Example & Fix\Magisk-27.2-kitsune-4.apk"
+$apk = "Working Example & Fix\KitsuneMagisk-v31.apk"
 powershell -NoProfile -ExecutionPolicy Bypass -File tools\bsr_magisk.ps1 -Action Prep     -Instance Rvc64 -MagiskApk $apk
 powershell -NoProfile -ExecutionPolicy Bypass -File tools\bsr_magisk.ps1 -Action Data     -Instance Rvc64 -MagiskApk $apk
 powershell -NoProfile -ExecutionPolicy Bypass -File tools\bsr_magisk.ps1 -Action Clean    -Instance Rvc64
@@ -97,10 +97,10 @@ S=$("$ADB" devices | awk '/device$/{print $1;exit}')
 "$ADB" -s $S shell 'su -c "ls /system/xbin/su"'     # -> No such file or directory  (good)
 "$ADB" -s $S shell 'getprop bst.instance.Rvc64.enable_root_access'   # -> 0
 # Magisk daemon + app:
-"$ADB" -s $S shell 'su -c "magisk -c"'              # -> v27.2-kitsune-4 ...
+"$ADB" -s $S shell 'su -c "magisk -c"'              # -> 2ef8f002 ...
 ```
 
-In the Magisk app: **Magisk → Installed v27.2‑kitsune‑4**, no warning dialog. (Grant Superuser to apps
+In the Magisk app: **Magisk → Installed — Kitsune Mask v31**, no warning dialog. (Grant Superuser to apps
 from the app's Superuser tab as usual; `adb shell` is already allowed by the policy.)
 
 ---

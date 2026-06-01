@@ -1,6 +1,11 @@
 # Todo List
 
 ## Done
+- [x] **bumped bundled Magisk → Kitsune Mask v31** (`1q23lyc45` fork; `magisk -c` 2ef8f002 / 29999) via new
+      `tools/reembed-apk.ps1` (byte-level splice + SHA-256 round-trip); refreshed `tools/magisk_databin/`
+      (`tools/extract-databin.ps1`); `tests/Check-Embedded-Sync.ps1` now guards the embedded APK SHA. No
+      pipeline logic change (same package id `io.github.huskydg.magisk` + identical APK layout); live-instance
+      E2E re-confirm pending.
 - [x] kill processes with one scoped call  (now a single PowerShell match on `^(HD-|Bstk|BlueStacks)` — comprehensive, no overkill; no BlueStacks Windows service to fight)
 - [x] fix up unused commands/comments  (blueStackRoot.cmd is a clean single-file orchestrator)
 - [x] bypass newest security  (version-proof HD-Player integrity bypass; verified on 5.22.169)
@@ -48,14 +53,18 @@
 ## Open / nice-to-have
 - [ ] optional: dedicated per-instance Root.vhd (separate VHD + UUID) for a *bit-pristine* `/system` on
       unrooted instances (the gate already makes them functionally clean; this only removes inert files)
-- [ ] update `tools/build.ps1` to assemble the current Magisk build (it predates the Magisk pipeline; the
-      `.cmd` is currently maintained by editing `tools/bsr_magisk.ps1` + re-embedding its block)
+- [ ] update `tools/build.ps1` to assemble the current Magisk build end-to-end (it predates the Magisk
+      pipeline). Re-embedding is now scripted piecewise — `tools/reembed.ps1` (engine + orchestrator) and
+      `tools/reembed-apk.ps1` (the Magisk APK) — so the remaining gap is a single full-assemble entry point.
 
 ## Notes
 - The `.cmd` embeds, between marker lines: the engine (`tools/bsr_engine.ps1`), the orchestrator
   (`tools/bsr_magisk.ps1`, `__BSR_MAGISK_*`), `debugfs` (`__BSR_DFS_*`), bootstrap su (`__BSR_BSRSU_*`),
   and the Magisk APK (`__BSR_APK_*`). To iterate: edit `tools/bsr_magisk.ps1` (or `bsr_engine.ps1`), then
-  run `tools/reembed.ps1` to re-sync the embedded blocks into the `.cmd` (byte-level splice + verify).
+  run `tools/reembed.ps1` to re-sync the engine/orchestrator blocks into the `.cmd` (byte-level splice +
+  verify). To swap the bundled Magisk, run `tools/reembed-apk.ps1 -Apk <new.apk>` (byte-level splice +
+  SHA-256 round-trip) and `tools/extract-databin.ps1 -Apk <new.apk>` to refresh the reference set;
+  `tests/Check-Embedded-Sync.ps1` (CI) asserts the engine, orchestrator, and APK all match.
 - Per-instance root = presence of `/data/adb/.bsr_root` on that instance's own `/data`. The shared
   master `Root.vhd` must stay `type="Readonly"` so instances can run concurrently.
 - Legacy junction/integrity scripts moved to `archive/` (kept for reference, not used).
