@@ -148,6 +148,37 @@ Net new su on the device: **only Magisk's.**
 
 </details>
 
+## 🧩 Optional: Zygisk + LSPosed + CorePatch (in [`modules/`](modules))
+
+Once an instance is rooted with Magisk (above), you can optionally add the **Zygisk → LSPosed → CorePatch**
+stack to run Xposed modules and sideload **modified / unsigned APKs**. Compatible builds are bundled in
+[`modules/`](modules) so you don't have to hunt for versions that work together on Magisk Delta:
+
+| File | What it is | How to install |
+|---|---|---|
+| [`NeoZygisk-v2.3-275-release.zip`](modules/NeoZygisk-v2.3-275-release.zip) | **Zygisk** implementation ([JingMatrix/NeoZygisk](https://github.com/JingMatrix/NeoZygisk)) — provides the Zygote injection that LSPosed needs on Magisk Delta | Magisk app → **Modules → Install from storage** → reboot |
+| [`Vector-v2.0-3021-Release.zip`](modules/Vector-v2.0-3021-Release.zip) | **LSPosed** Zygisk build ([JingMatrix/LSPosed](https://github.com/JingMatrix/LSPosed), released as "Vector") — the Xposed framework | Flash in Magisk **after** NeoZygisk → reboot |
+| [`CorePatch-4.9.apk`](modules/CorePatch-4.9.apk) | **CorePatch** ([LSPosed/CorePatch](https://github.com/LSPosed/CorePatch)) — lets you install **unsigned / modified APKs** by disabling signature verification | Install the APK → enable it in **LSPosed → Modules** → reboot |
+
+**Order matters:** root with Magisk → flash **NeoZygisk** (turn Zygisk on) → flash **Vector / LSPosed** →
+install **CorePatch** and enable it in LSPosed. Confirm each step works (Magisk shows the module active /
+LSPosed shows "Active") before moving to the next, and reboot the instance between flashes.
+
+<details>
+<summary><b>Verify the downloads (SHA-256)</b></summary>
+
+&nbsp;
+
+```
+5c84df9f962c04855b3523a3a75022cf5e4f3ad3dfd94794ed92b43e911f3b9a  NeoZygisk-v2.3-275-release.zip
+d5e39669c02c2c699ab948eb8f3639b348eefb7749553224a9c62fa4a2f2dc18  Vector-v2.0-3021-Release.zip
+1bdc47d5b48afffd37948a9f5638ae6a5f3d4d02ca01ae36143588284b979996  CorePatch-4.9.apk
+```
+
+These are the genuine upstream release builds — cross-check the hashes against each project's Releases page.
+
+</details>
+
 ## 💻 Requirements
 Windows + BlueStacks 5 (nxt) or MSI App Player, run as Administrator. **Nothing to download** — PowerShell
 5.1 (built into Windows) runs the embedded engine, and `HD-Adb.exe` ships with BlueStacks.
