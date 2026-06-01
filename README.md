@@ -9,7 +9,7 @@
 </p>
 
 **Root BlueStacks 5 / MSI App Player with real Magisk — from one file, with no traces left behind.**
-**⬇️ [Download `blueStackRoot.cmd`](https://github.com/Jordan231111/BluestacksRoot/raw/main/blueStackRoot.cmd)**, run it as administrator, pick your Android version, and you're rooted.
+**Run `blueStackRoot.cmd` as administrator, pick your Android version, and you're rooted.**
 No other files, nothing to install, works on the latest BlueStacks (5.22.169).
 
 ---
@@ -18,7 +18,7 @@ No other files, nothing to install, works on the latest BlueStacks (5.22.169).
 
 Works on the 64-bit BlueStacks instances — **Android 9, 11, and 13**.
 
-**⬇️ [Download `blueStackRoot.cmd`](https://github.com/Jordan231111/BluestacksRoot/raw/main/blueStackRoot.cmd)** — one file (~20 MB), nothing else to install. *(All versions: [Releases page](https://github.com/Jordan231111/BluestacksRoot/releases).)*
+**⬇️ [Download `blueStackRoot.cmd`](https://github.com/Jordan231111/BluestacksRoot/releases/download/v7/blueStackRoot.cmd)** — one file (~20 MB), nothing else to install. *(All versions: [Releases page](https://github.com/Jordan231111/BluestacksRoot/releases).)*
 
 1. **First, open the instance you want to root at least once** — launch it from the Multi-Instance Manager so BlueStacks finishes creating it.
 2. **Right-click `blueStackRoot.cmd` → Run as administrator.** (If Windows shows a blue **"Windows
