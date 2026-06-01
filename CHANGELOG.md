@@ -29,6 +29,10 @@ Proven end-to-end (`VERIFY PASS`) on Android **9 / 11 / 13**: `su → uid=0`, th
 **Menu:** `1/2/3` root Android 9 / 11 / 13 · `4/5/6` undo each · `7` full host scrub · `8` custom folder ·
 `0` exit.
 
+> **Each option roots _one_ instance — the one of that Android type you opened most recently** (resolved
+> from `Player.log`). So launch the exact instance you want **first**; with several clones of the same
+> type it targets the last one you opened, not all of them.
+
 **Removed:** Android 7 (32-bit — can't run the 64-bit binaries) and the entire legacy junction / `DiskRW`
 method.
 

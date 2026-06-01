@@ -21,7 +21,10 @@ Works on the 64-bit BlueStacks instances — **Android 9, 11, and 13**.
 
 **⬇️ [Download `blueStackRoot.cmd`](https://github.com/Jordan231111/BluestacksRoot/releases/download/v7/blueStackRoot.cmd)** — one file (~20 MB) with the **real Magisk APK embedded inside** — nothing else to download. *(All versions: [Releases page](https://github.com/Jordan231111/BluestacksRoot/releases).)*
 
-1. **First, open the instance you want to root at least once** — launch it from the Multi-Instance Manager so BlueStacks finishes creating it.
+1. **First, open the exact instance you want to root** — launch it from the Multi-Instance Manager and let
+   it boot once. The tool roots the instance of your chosen Android version that you **opened most
+   recently**, so if you keep several of the same type, open the one you want *last* (this also finishes
+   creating a brand-new instance).
 2. **Right-click `blueStackRoot.cmd` → Run as administrator.** (If Windows shows a blue **"Windows
    protected your PC"** box, click **More info → Run anyway** — see
    [Is this safe?](#-is-this-safe-will-my-antivirus-flag-it) below.)
