@@ -145,6 +145,16 @@ $script:AdbServerPortProbe = $null
 Remove-Item Env:\ANDROID_ADB_SERVER_PORT -ErrorAction SilentlyContinue
 if ($savedPort) { $env:ANDROID_ADB_SERVER_PORT = $savedPort }
 
+Write-Host "`n=== competing-su detection (Find-StraySu -- what Verify fails on) ===" -ForegroundColor Cyan
+# Magisk's own su are symlinks to magisk; anything else is a competing root (Magisk "Abnormal State").
+Eq 'stray: clean Magisk (all -> magisk) = none'         '' (((Find-StraySu "/system/bin/su|link|./magisk`n/sbin/su|link|./magisk")) -join ',')
+Eq 'stray: the engine-su leak at /system/xbin/su'        '/system/xbin/su' (((Find-StraySu "/system/bin/su|link|./magisk`n/system/xbin/su|file|")) -join ',')
+Eq 'stray: a symlink NOT to magisk is competing'         '/system/xbin/su' (((Find-StraySu "/system/xbin/su|link|/data/local/tmp/su")) -join ',')
+Eq 'stray: real su in two dirs (both flagged)'           '/system/xbin/su,/vendor/bin/su' (((Find-StraySu "/system/bin/su|link|/system/bin/magisk`n/system/xbin/su|file|`n/vendor/bin/su|file|")) -join ',')
+Eq 'stray: empty inventory = none'                       '' (((Find-StraySu '')) -join ',')
+Eq 'stray: malformed lines ignored'                      '' (((Find-StraySu "garbage`n|||`n/system/bin/su|link|./magisk")) -join ',')
+Eq 'stray: magisk in a deep path target = ours'          '' (((Find-StraySu "/system/bin/su|link|/sbin/.magisk/busybox/magisk")) -join ',')
+
 Write-Host "`n=== DataRoot resolution (orchestrator Get-DataRoot, custom/registry) ===" -ForegroundColor Cyan
 Eq 'DataRoot: ...\Engine is normalized to base'      'X:\Custom\BS'   (Get-DataRoot ([pscustomobject]@{ DataDir = 'X:\Custom\BS\Engine'; UserDefinedDir = $null }))
 Eq 'DataRoot: plain data dir kept as-is'             'X:\Custom\Data' (Get-DataRoot ([pscustomobject]@{ DataDir = 'X:\Custom\Data'; UserDefinedDir = $null }))

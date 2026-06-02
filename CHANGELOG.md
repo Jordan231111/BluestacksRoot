@@ -5,6 +5,32 @@ Player — from one file, fully automatically. Releases are grouped by the BlueS
 
 ---
 
+## v12 — Magisk is the SOLE root: scrub any competing su + Verify fails on one · 2026-06-02
+
+Fixes Magisk reporting **"Abnormal State — a su binary not from Magisk has been detected"** on an instance
+whose shared master `Root.vhd` still carried a **classic/engine `su`** at `/system/xbin/su` (the old
+non-Magisk root method — e.g. left behind by the legacy live-E2E harness). The Magisk pipeline scrubbed
+its own *bootstrap* su but never removed a pre-existing `/system/xbin/su`, and **Verify only swept for the
+bootstrap su's hash**, so a competing su passed silently. (Git shows **no commit ever changed su handling**;
+the v11 adb fix simply let the pipeline *complete*, so Magisk finally booted and flagged the leftover.)
+
+- 🧹 **Prep + Clean now scrub `/system/xbin/su`** (and `daemonsu`) from the master, so Magisk's own su
+  (`/system/bin/su` → magisk, `/sbin/su` → magisk) is the only one. **Re-running Clean repairs an
+  already-rooted instance** — verified live: the stray su was removed and the instance returned to a clean
+  state.
+- 🔎 **Verify now FAILS on ANY competing su.** It enumerates every su in the standard PATH dirs and flags
+  anything that isn't a symlink to magisk (new pure, unit-tested `Find-StraySu`). No more silent PASS with
+  a foreign su present.
+- 🧪 **Live-E2E rewritten + de-footgunned.** `tests/Run-Live-E2E.ps1` used to root via the engine's
+  **legacy classic-su path** (`-Action AdbRoot`) — which *installs* a competing `/system/xbin/su` and is
+  not what the tool ships. It now drives the real `bsr_magisk.ps1 -Action Auto` pipeline, **asserts VERIFY
+  PASS + no competing su** (across a reboot), uses the correct package `io.github.huskydg.magisk`, and
+  reverts via Magisk **Undo**.
+- ✅ **Tests:** `Run-Resolve-Tests.ps1` +7 `Find-StraySu` cases (38 total); `Run-Tests.ps1` (28) and
+  `Check-Embedded-Sync.ps1` green; re-embedded into `blueStackRoot.cmd`.
+
+---
+
 ## v11 — adb robustness: immune to adb-version conflicts + live-bound port detection · 2026-06-02
 
 Fixes a report where a **fully-booted** instance (Home visible, Magisk installed) still failed with
