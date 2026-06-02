@@ -155,6 +155,7 @@ device after completion: **only Magisk's**. No DiskRW, no engine‑su, no daemon
 | Magisk app: *Abnormal State — su not from Magisk* | a stray `/system/xbin/su` (old engine `Root`) | `bsr_engine.ps1 -Action Unroot -Vhd <Root.vhd>` (or re‑run **Clean**) |
 | `su` returns nothing / `uid=2000` after Finalize | shell took BlueStacks' gated su; Magisk daemon down | check `/cache/magisk.log`; ensure `/data/adb/magisk/busybox` exists |
 | Instance won't boot after edits | HD‑Player patch missing | restore `HD-Player.exe.bak`, re‑apply patch, retry |
+| `instance '<x>' did not boot / become adb‑reachable within N s` — **but the instance is up** (Home visible, Magisk installed) | a **system `adb` of a different version** (e.g. Android SDK platform‑tools **v1.0.41**) keeps killing BlueStacks' **HD‑Adb v1.0.36** server on the shared port 5037 — *"adb server version doesn't match this client; killing…"* — so `getprop` calls fail | **fixed in v11**: the tool pins HD‑Adb to its own server port (`ANDROID_ADB_SERVER_PORT=15037`) so the two never collide, and also tries the **live‑bound** adb port, not just `bluestacks.conf`. Update the tool. (Diagnose: compare `adb version` on `PATH` vs `"…\BlueStacks_nxt\HD-Adb.exe" version`.) |
 
 ---
 

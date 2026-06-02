@@ -3,7 +3,7 @@
 <p align="center">
   <a href="https://github.com/Jordan231111/BluestacksRoot/stargazers"><img alt="Stars" src="https://img.shields.io/github/stars/Jordan231111/BluestacksRoot?style=flat&logo=github"></a>
   <a href="https://github.com/Jordan231111/BluestacksRoot/network/members"><img alt="Forks" src="https://img.shields.io/github/forks/Jordan231111/BluestacksRoot?style=flat&logo=github"></a>
-  <img alt="BlueStacks" src="https://img.shields.io/badge/BlueStacks%205-5.22.169%20%E2%9C%93-blue">
+  <img alt="BlueStacks" src="https://img.shields.io/badge/BlueStacks%205-5.22.210%20%E2%9C%93-blue">
   <img alt="Magisk" src="https://img.shields.io/badge/Magisk-Kitsune%20Mask%20v31-brightgreen">
   <a href="./LICENSE"><img alt="License" src="https://img.shields.io/badge/license-CC%20BY--NC--ND%204.0-lightgrey"></a>
 </p>
@@ -11,7 +11,7 @@
 **Root BlueStacks 5 / MSI App Player with real Magisk — from one file, with no traces left behind.**
 **Run `blueStackRoot.cmd` as administrator, pick your Android version, and you're rooted.**
 **A Magisk Delta (Kitsune v31) build is now bundled inside the `.cmd` itself** — no separate Magisk
-download, no other files, nothing to install. Works on the latest BlueStacks (5.22.169).
+download, no other files, nothing to install. Works on the latest BlueStacks (5.22.210).
 
 ---
 
@@ -19,7 +19,7 @@ download, no other files, nothing to install. Works on the latest BlueStacks (5.
 
 Works on the 64-bit BlueStacks instances — **Android 9, 11, and 13**.
 
-**⬇️ [Download `blueStackRoot.cmd`](https://github.com/Jordan231111/BluestacksRoot/releases/download/v9/blueStackRoot.cmd)** — one file (~20 MB) with the **real Magisk APK embedded inside** — nothing else to download. *(All versions: [Releases page](https://github.com/Jordan231111/BluestacksRoot/releases).)*
+**⬇️ [Download `blueStackRoot.cmd`](https://github.com/Jordan231111/BluestacksRoot/releases/download/v11/blueStackRoot.cmd)** — one file (~20 MB) with the **real Magisk APK embedded inside** — nothing else to download. *(All versions: [Releases page](https://github.com/Jordan231111/BluestacksRoot/releases).)*
 
 1. **First, open the exact instance you want to root** — launch it from the Multi-Instance Manager and let
    it boot once. The tool roots the instance of your chosen Android version that you **opened most
@@ -123,7 +123,7 @@ keeps closing** the moment you enable root, that's the **disk-integrity / anti-t
 have to.**
 
 `blueStackRoot` applies a **one-byte HD-Player anti-tamper patch** that bypasses the disk-integrity check,
-so you can **root the *latest* BlueStacks (5.22.169) without downgrading** — and it installs **real Magisk**
+so you can **root the *latest* BlueStacks (5.22.210) without downgrading** — and it installs **real Magisk**
 with **no traces**, not a detectable classic `su`. If `bst.feature.rooting` keeps **reverting to `0`** on
 launch, that's the same anti-tamper system, and this tool handles it for you. Full technical breakdown:
 [`docs/BLUESTACKS_ROOTING_DEEP_DIVE.md`](docs/BLUESTACKS_ROOTING_DEEP_DIVE.md) §2 (the single-byte patch).
@@ -140,7 +140,7 @@ System* button also leaves `/data/adb/magisk` **empty**, so the daemon aborts wi
 incomplete". This tool solves all of that:
 
 1. **One-byte patch** on `HD-Player.exe` (NOP the disk-integrity `JZ`, `74 5B → 90 90`) so a modified
-   `Root.vhd` is accepted and a tampered `/system` boots. It's a version-proof byte-scan; verified on 5.22.169.
+   `Root.vhd` is accepted and a tampered `/system` boots. It's a **version-proof byte-scan**, so it tracks new BlueStacks builds — run on 5.22.169 and the current **5.22.210**.
 2. **Offline write:** using the embedded `debugfs`, it writes Magisk's `/system` payload + a **gated**
    `bootanim.rc` directly into `Root.vhd` — no Windows ext4 driver needed.
 3. **The breakthrough:** it boots once with a tiny **bootstrap su** to populate **`/data/adb/magisk`** (the
@@ -246,4 +246,4 @@ BlueStacks illegally tampered, Android system doesn't meet security requirements
 detected, BlueStacks instance keeps closing after root, BlueStacks disk integrity check bypass, root latest
 BlueStacks without downgrading, fix illegally tampered BlueStacks, bst.feature.rooting reverts to 0,
 "disk file have been illegally tampered with", Verified the disk integrity, BlueStacks disk integrity check,
-root BlueStacks 5.22.169, root BlueStacks latest version 2026.</sub>
+root BlueStacks 5.22.169, root BlueStacks 5.22.210, root BlueStacks latest version 2026.</sub>

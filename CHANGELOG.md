@@ -5,6 +5,40 @@ Player — from one file, fully automatically. Releases are grouped by the BlueS
 
 ---
 
+## v11 — adb robustness: immune to adb-version conflicts + live-bound port detection · 2026-06-02
+
+Fixes a report where a **fully-booted** instance (Home visible, Magisk installed) still failed with
+`instance '<name>' did not boot / become adb-reachable within 300 s`. Root cause was **not** the instance:
+a **system `adb` of a different version** on the host (Android SDK platform-tools **v1.0.41**) and
+BlueStacks' bundled **HD-Adb v1.0.36** were killing each other's adb **server** on the shared default port
+5037 (*"adb server version doesn't match this client; killing…"*), so the tool's `getprop sys.boot_completed`
+calls failed forever and `Boot-And-Wait` timed out.
+
+- 🛡️ **Version-conflict immunity.** The tool now pins BlueStacks' HD-Adb onto its **own private adb server
+  port** and only ever uses `HD-Adb.exe` (never a system `adb.exe`). A foreign-version adb on 5037 can no
+  longer touch our server. *Proven on this machine:* with a v41 server deliberately running on 5037, HD-Adb
+  `getprop` on the private port succeeded **30/30**; on the shared 5037 port it failed **0/12** with the
+  exact reporter error; the full `Boot-And-Wait` then booted the instance end-to-end despite the v41
+  competitor.
+- 🔌 **Free-port selection (no new collisions).** The private port is **chosen free** from `15037–15057`:
+  if something already holds `15037` before the run — a non-adb app *or* a foreign-version adb — the tool
+  steps to the next free port instead of colliding with it (and reuses its own HD-Adb server if one is
+  already up). An explicit `ANDROID_ADB_SERVER_PORT` always wins. *Verified live:* a non-adb listener on
+  15037 → tool picks 15038; its own server on 15037 → reused. The private server is **released when the
+  tool exits** (`kill-server` in a `finally`), so nothing of ours lingers on the port.
+- 🎯 **Port detection hardened.** `Get-AdbPortCandidates` now also consults the **actually-bound listening
+  port** (`Get-NetTCPConnection`, band 5550-5900), merged *after* the `bluestacks.conf`
+  `status.adb_port`/`adb_port` values (which stay authoritative). This rescues the boot wait when the conf
+  is stale — verified live: conf said `status.adb_port=5646` while the instance was really on **5645**, and
+  the live scan found 5645 on **20/20** runs.
+- 🧪 **Tests.** `tests/Run-Resolve-Tests.ps1` gains a deterministic seam + 3 new cases for the conf+live
+  merge/dedup order (25 checks); `Run-Tests.ps1` (28) and `Check-Embedded-Sync.ps1` still pass. Re-embedded
+  into `blueStackRoot.cmd` (engine + orchestrator back in sync).
+- 📄 **No** change to the rooting pipeline, the embedded Magisk APK, or any on-disk format — purely
+  host-side adb plumbing in `tools/bsr_magisk.ps1` (+ a one-line mirror in `tools/bsr_engine.ps1`).
+
+---
+
 ## v10 — Custom Kitsune build: the in-app DenyList now works with ReZygisk · 2026-06-02
 
 Swaps the bundled Magisk for a **custom build of Kitsune Mask v31** (still `31.0-kitsune`, versionCode
