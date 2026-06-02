@@ -126,6 +126,25 @@ $script:LiveAdbPortProbe = { @('5645', '5646') }
 Eq 'cands: dedup live vs conf (5645 not repeated)'   '5645,5646,5555' ((Cands (New-FakeData 'Rvc64_9' @{ 'status.adb_port' = '5645' } 'c') 'Rvc64_9') -join ',')
 $script:LiveAdbPortProbe = { @() }   # reset so later sections are unaffected
 
+Write-Host "`n=== adb server port: free-port probe (handles a port already in use) ===" -ForegroundColor Cyan
+$savedPort = $env:ANDROID_ADB_SERVER_PORT
+Remove-Item Env:\ANDROID_ADB_SERVER_PORT -ErrorAction SilentlyContinue
+$script:AdbServerPortProbe = { @{} }                                   # nothing listening -> base port
+Eq 'adb-port: all free -> base 15037'                 '15037' (Resolve-AdbServerPort)
+$script:AdbServerPortProbe = { @{ 15037 = 'other' } }                  # a stranger holds 15037
+Eq 'adb-port: 15037 taken by a stranger -> 15038'     '15038' (Resolve-AdbServerPort)
+$script:AdbServerPortProbe = { @{ 15037 = 'other'; 15038 = 'other' } } # two strangers -> skip both
+Eq 'adb-port: skips two taken ports -> 15039'         '15039' (Resolve-AdbServerPort)
+$script:AdbServerPortProbe = { @{ 15037 = 'ours' } }                   # our own HD-Adb server -> reuse it
+Eq 'adb-port: our own HD-Adb server -> reuse 15037'   '15037' (Resolve-AdbServerPort)
+$script:AdbServerPortProbe = { @{ 15037 = 'other'; 15039 = 'ours' } }  # first FREE wins over a later reusable
+Eq 'adb-port: stranger on 15037 -> first free 15038'  '15038' (Resolve-AdbServerPort)
+$env:ANDROID_ADB_SERVER_PORT = '5037'                                  # explicit override is honoured
+Eq 'adb-port: explicit env override is respected'     '5037'  (Resolve-AdbServerPort)
+$script:AdbServerPortProbe = $null
+Remove-Item Env:\ANDROID_ADB_SERVER_PORT -ErrorAction SilentlyContinue
+if ($savedPort) { $env:ANDROID_ADB_SERVER_PORT = $savedPort }
+
 Write-Host "`n=== DataRoot resolution (orchestrator Get-DataRoot, custom/registry) ===" -ForegroundColor Cyan
 Eq 'DataRoot: ...\Engine is normalized to base'      'X:\Custom\BS'   (Get-DataRoot ([pscustomobject]@{ DataDir = 'X:\Custom\BS\Engine'; UserDefinedDir = $null }))
 Eq 'DataRoot: plain data dir kept as-is'             'X:\Custom\Data' (Get-DataRoot ([pscustomobject]@{ DataDir = 'X:\Custom\Data'; UserDefinedDir = $null }))

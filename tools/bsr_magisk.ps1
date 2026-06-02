@@ -389,15 +389,42 @@ function Set-ConfKey($key,$val){
 # ---- adb helpers ----
 function Adb([string[]]$a){ (& $Adb @a 2>&1 | Out-String) }
 
-# Force HD-Adb onto its OWN private server port so a DIFFERENT-version system adb on the default 5037
-# (e.g. Android SDK platform-tools, which is v1.0.41 vs BlueStacks' HD-Adb v1.0.36) can't kill our
-# server mid-run. That version clash ("server version doesn't match; killing...") silently breaks
-# getprop/shell calls -- which is exactly how a fully-booted instance still trips Boot-And-Wait's
-# "did not become adb-reachable" throw. A private port ALSO gives us a clean transport table (no stale
-# 'offline' devices left by other adb sessions). HD-Adb v1.0.36 honours ANDROID_ADB_SERVER_PORT.
+# --- adb server isolation + private-port selection (version-conflict immunity) ---
 $Script:AdbServerInit = $false
+# Test seam: tests set this to a scriptblock returning @{ <port> = 'ours'|'other' } (absent key = free).
+$Script:AdbServerPortProbe = $null
+# Map listening ports in our private band to 'ours' (an HD-Adb.exe server we can safely reuse) or
+# 'other' (anything else -- a non-adb app, OR a foreign-version adb we must NOT fight). Absent = free.
+function Get-AdbServerPortState{
+    $state=@{}
+    try{
+        foreach($c in (Get-NetTCPConnection -State Listen -ErrorAction Stop)){
+            $p=[int]$c.LocalPort; if($p -lt 15037 -or $p -gt 15057){ continue }
+            $path=$null; try{ $path=(Get-Process -Id $c.OwningProcess -ErrorAction SilentlyContinue).Path }catch{}
+            $state[$p] = if($path -and ((Split-Path -Leaf $path) -ieq 'HD-Adb.exe')){ 'ours' } else { 'other' }
+        }
+    }catch{   # no NetTCPIP module: fall back to netstat (owner unknown -> treat any listener as 'other')
+        try{ foreach($ln in (netstat -ano -p tcp 2>$null)){ if($ln -match 'LISTENING' -and $ln -match ':(\d{4,5})\b'){ $p=[int]$Matches[1]; if($p -ge 15037 -and $p -le 15057 -and -not $state.ContainsKey($p)){ $state[$p]='other' } } } }catch{}
+    }
+    return $state
+}
+# Pick a private adb-server port that is FREE (or already hosts our own HD-Adb server). THIS is what
+# handles "something is already using 15037 before my session": a non-adb app or a foreign-version adb
+# on a candidate port is skipped, so we never collide with it and never kill it. An explicitly-set
+# ANDROID_ADB_SERVER_PORT always wins (escape hatch). 15037..15057 gives 21 ports of headroom.
+function Resolve-AdbServerPort{
+    if($env:ANDROID_ADB_SERVER_PORT){ return $env:ANDROID_ADB_SERVER_PORT }
+    $state = if($Script:AdbServerPortProbe){ & $Script:AdbServerPortProbe } else { Get-AdbServerPortState }
+    foreach($p in 15037..15057){ $s=$state[$p]; if(-not $s -or $s -eq 'ours'){ return "$p" } }
+    return '15037'   # band fully occupied (extreme) -- proceed; a later adb error would surface it clearly
+}
+# Force HD-Adb onto our resolved private server port so a DIFFERENT-version system adb on the default
+# 5037 (Android SDK platform-tools v1.0.41 vs HD-Adb v1.0.36) can't kill our server mid-run. The clash
+# ("server version doesn't match; killing...") silently breaks getprop/shell calls -- exactly how a
+# fully-booted instance still trips Boot-And-Wait's "did not become adb-reachable" throw. A private
+# port also gives us a clean transport table (no stale 'offline' devices). HD-Adb honours the env var.
 function Initialize-AdbServer{
-    if(-not $env:ANDROID_ADB_SERVER_PORT){ $env:ANDROID_ADB_SERVER_PORT = '15037' }
+    if(-not $env:ANDROID_ADB_SERVER_PORT){ $env:ANDROID_ADB_SERVER_PORT = (Resolve-AdbServerPort) }
     if(-not (Test-Path -LiteralPath $Adb)){ return }
     if(-not $Script:AdbServerInit){ & $Adb @('kill-server') *>$null; $Script:AdbServerInit=$true }  # clean slate on OUR port
     & $Adb @('start-server') *>$null   # idempotent; also revives the server after Kill-BlueStacks nukes HD-Adb
@@ -742,13 +769,20 @@ function Do-Undo {
 # Only dispatch when run normally (-File / &). When DOT-SOURCED (. bsr_magisk.ps1) -- e.g. by the test
 # suite to unit-test the resolver functions -- skip the pipeline so nothing boots or writes.
 if ($MyInvocation.InvocationName -ne '.') {
-    switch($Action){
-        'Prep'     { Do-Prep }
-        'Data'     { Do-Data }
-        'Clean'    { Do-Clean }
-        'Finalize' { Do-Finalize }
-        'Verify'   { Do-Verify }
-        'Auto'     { Do-Prep; Do-Data; Do-Clean; Do-Finalize; Do-Verify }
-        'Undo'     { Do-Undo }
+    try {
+        switch($Action){
+            'Prep'     { Do-Prep }
+            'Data'     { Do-Data }
+            'Clean'    { Do-Clean }
+            'Finalize' { Do-Finalize }
+            'Verify'   { Do-Verify }
+            'Auto'     { Do-Prep; Do-Data; Do-Clean; Do-Finalize; Do-Verify }
+            'Undo'     { Do-Undo }
+        }
+    } finally {
+        # Free our private adb-server port on the way out. adb normally leaves its server running
+        # forever; we only ever started one if Initialize-AdbServer ran (an online action), so tidy it
+        # up so nothing of ours lingers on the port after the tool exits. (runs even if an action threw)
+        if ($Script:AdbServerInit -and (Test-Path -LiteralPath $Adb)) { & $Adb @('kill-server') *>$null }
     }
 }

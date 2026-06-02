@@ -883,6 +883,30 @@ function AdbRaw([string[]]$a) {
 function AdbS([string[]]$a) { return AdbRaw (@('-s', $Script:Serial) + $a) }
 function AdbShell([string]$cmd) { return AdbS @('shell', $cmd) }
 
+# Map listening ports in our private band to 'ours' (a reusable HD-Adb.exe server) or 'other' (a non-adb
+# app, or a foreign-version adb we must not fight). Absent = free. (Mirrors tools\bsr_magisk.ps1.)
+function Get-AdbServerPortState {
+    $state = @{}
+    try {
+        foreach ($c in (Get-NetTCPConnection -State Listen -ErrorAction Stop)) {
+            $p = [int]$c.LocalPort; if ($p -lt 15037 -or $p -gt 15057) { continue }
+            $path = $null; try { $path = (Get-Process -Id $c.OwningProcess -ErrorAction SilentlyContinue).Path } catch { }
+            $state[$p] = if ($path -and ((Split-Path -Leaf $path) -ieq 'HD-Adb.exe')) { 'ours' } else { 'other' }
+        }
+    } catch {
+        try { foreach ($ln in (netstat -ano -p tcp 2>$null)) { if ($ln -match 'LISTENING' -and $ln -match ':(\d{4,5})\b') { $p = [int]$Matches[1]; if ($p -ge 15037 -and $p -le 15057 -and -not $state.ContainsKey($p)) { $state[$p] = 'other' } } } } catch { }
+    }
+    return $state
+}
+# Pick a private adb-server port that is FREE (or already hosts our own HD-Adb server), so we never
+# collide with something already using 15037 before this run. Explicit env override wins.
+function Resolve-AdbServerPort {
+    if ($env:ANDROID_ADB_SERVER_PORT) { return $env:ANDROID_ADB_SERVER_PORT }
+    $state = Get-AdbServerPortState
+    foreach ($p in 15037..15057) { $s = $state[$p]; if (-not $s -or $s -eq 'ours') { return "$p" } }
+    return '15037'
+}
+
 # Connect to the instance's adb endpoint and wait until Android finishes booting.
 function Connect-WaitBoot([int]$timeoutSec) {
     $port = if ($AdbPort) { $AdbPort } else { '5555' }
@@ -890,7 +914,7 @@ function Connect-WaitBoot([int]$timeoutSec) {
     # Isolate HD-Adb on its own server port so a different-version system adb (e.g. Android SDK
     # platform-tools) on the default 5037 can't kill our server mid-run (the version-mismatch churn
     # that makes getprop/shell calls fail and a booted instance look "not adb-reachable").
-    if (-not $env:ANDROID_ADB_SERVER_PORT) { $env:ANDROID_ADB_SERVER_PORT = '15037' }
+    if (-not $env:ANDROID_ADB_SERVER_PORT) { $env:ANDROID_ADB_SERVER_PORT = (Resolve-AdbServerPort) }
     AdbRaw @('start-server') | Out-Null
     $sw = [System.Diagnostics.Stopwatch]::StartNew()
     $connected = $false

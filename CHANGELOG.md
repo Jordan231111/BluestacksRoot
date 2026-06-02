@@ -15,11 +15,17 @@ BlueStacks' bundled **HD-Adb v1.0.36** were killing each other's adb **server** 
 calls failed forever and `Boot-And-Wait` timed out.
 
 - 🛡️ **Version-conflict immunity.** The tool now pins BlueStacks' HD-Adb onto its **own private adb server
-  port** (`ANDROID_ADB_SERVER_PORT=15037`) and only ever uses `HD-Adb.exe` (never a system `adb.exe`). A
-  foreign-version adb on 5037 can no longer touch our server. *Proven on this machine:* with a v41 server
-  deliberately running on 5037, HD-Adb `getprop` on 15037 succeeded **30/30**; on the shared 5037 port it
-  failed **0/12** with the exact reporter error; the full `Boot-And-Wait` then booted the instance
-  end-to-end despite the v41 competitor.
+  port** and only ever uses `HD-Adb.exe` (never a system `adb.exe`). A foreign-version adb on 5037 can no
+  longer touch our server. *Proven on this machine:* with a v41 server deliberately running on 5037, HD-Adb
+  `getprop` on the private port succeeded **30/30**; on the shared 5037 port it failed **0/12** with the
+  exact reporter error; the full `Boot-And-Wait` then booted the instance end-to-end despite the v41
+  competitor.
+- 🔌 **Free-port selection (no new collisions).** The private port is **chosen free** from `15037–15057`:
+  if something already holds `15037` before the run — a non-adb app *or* a foreign-version adb — the tool
+  steps to the next free port instead of colliding with it (and reuses its own HD-Adb server if one is
+  already up). An explicit `ANDROID_ADB_SERVER_PORT` always wins. *Verified live:* a non-adb listener on
+  15037 → tool picks 15038; its own server on 15037 → reused. The private server is **released when the
+  tool exits** (`kill-server` in a `finally`), so nothing of ours lingers on the port.
 - 🎯 **Port detection hardened.** `Get-AdbPortCandidates` now also consults the **actually-bound listening
   port** (`Get-NetTCPConnection`, band 5550-5900), merged *after* the `bluestacks.conf`
   `status.adb_port`/`adb_port` values (which stay authoritative). This rescues the boot wait when the conf
