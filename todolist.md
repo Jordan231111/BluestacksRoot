@@ -1,6 +1,15 @@
 # Todo List
 
 ## Done
+- [x] **Magisk is the SOLE root: scrub any competing su + Verify catches it** — an instance could show
+      "Abnormal State — su not from Magisk" when the shared master still carried a classic/engine
+      `/system/xbin/su` (old non-Magisk root / the **legacy classic-su live-E2E**, which injected one).
+      Git shows no commit changed su handling; the v11 adb fix just let the pipeline complete so Magisk
+      booted and flagged the leftover. Fix: **Prep + Clean now scrub `/system/xbin/su`** (+daemonsu);
+      **Verify enumerates every su and FAILS on any non-Magisk one** (pure `Find-StraySu`, +7 unit tests
+      → 38). Rewrote `tests/Run-Live-E2E.ps1` to drive the real Magisk pipeline (`-Action Auto`) and
+      assert no competing su across a reboot (it previously ran the classic-su path and planted the su).
+      Live-verified on Tiramisu64_9: stray su scrubbed → **VERIFY PASS**. Re-embedded; all suites green (28+38).
 - [x] **adb robustness: immune to adb-version conflicts + live-bound port detection** — `Boot-And-Wait`
       was timing out ("did not become adb-reachable") on hosts that also have a *different-version* system
       `adb` (Android SDK v1.0.41 vs BlueStacks HD-Adb v1.0.36) fighting over the default server port 5037

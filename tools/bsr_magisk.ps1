@@ -603,8 +603,13 @@ function Do-Prep {
         $cmds += @('cd /android/system/etc','rm bsr_su',"write $(Fwd $BsrSu) bsr_su",'sif bsr_su mode 0106755','sif bsr_su uid 0','sif bsr_su gid 0','sif bsr_su links_count 1')
         # hijacked bindmount
         $cmds += @('cd /android/system/bin','rm bindmount',"write $(Fwd (Join-Path $tmpDir 'bindmount')) bindmount",'sif bindmount mode 0100755','sif bindmount uid 0','sif bindmount gid 0','sif bindmount links_count 1')
+        # scrub any pre-existing CLASSIC/engine su from the shared master. An older non-Magisk root
+        # (engine Root/AdbRoot -- e.g. the legacy live-E2E) leaves a setuid /system/xbin/su, which makes
+        # Magisk report "Abnormal State -- a su binary not from Magisk has been detected". Magisk's own su
+        # live at /system/bin/su -> magisk and /sbin/su -> magisk, so /system/xbin/su is never ours.
+        $cmds += @('cd /android/system/xbin','rm su','rm daemonsu')
         # verify
-        $cmds += @('stat /android/system/etc/init/magisk/magisk64','stat /android/system/etc/init/bootanim.rc','stat /android/system/etc/bsr_su','stat /android/system/bin/bindmount')
+        $cmds += @('stat /android/system/etc/init/magisk/magisk64','stat /android/system/etc/init/bootanim.rc','stat /android/system/etc/bsr_su','stat /android/system/bin/bindmount','stat /android/system/xbin/su')
         $out = Invoke-Debugfs $img $cmds
         Say $out DarkGray
         $good = ($out -match '(?s)bsr_su.*?Inode:\s*\d') -and ($out -match '(?s)bootanim\.rc.*?Inode:\s*\d') -and ($out -match '(?s)magisk64.*?Inode:\s*\d')
@@ -685,15 +690,19 @@ function Do-Clean {
             'cd /android/system/etc','rm bsr_su',
             'cd /android/system/bin','rm bindmount',"write $(Fwd (Join-Path $tmpDir 'bindmount.orig')) bindmount",
             'sif bindmount mode 0100775','sif bindmount uid 1000','sif bindmount gid 1000','sif bindmount links_count 1',
-            'stat /android/system/bin/bindmount','stat /android/system/etc/bsr_su'
+            # also scrub any leftover CLASSIC/engine su so Magisk is the SOLE root (no "Abnormal State")
+            'cd /android/system/xbin','rm su','rm daemonsu',
+            'stat /android/system/bin/bindmount','stat /android/system/etc/bsr_su','stat /android/system/xbin/su'
         )
         $out = Invoke-Debugfs $img $cmds
         Say $out DarkGray
         # stock bindmount is ~1339B; accept the byte-exact range (template is 1339, tolerate +/-2)
         $bmOk = ($out -match '(?s)/android/system/bin/bindmount[\s\S]*?Size:\s*(133[0-9]|134[01])')
-        $suGone = ($out -match 'bsr_su:\s*File not found') -or ($out -match 'File not found by ext2_lookup')
+        $suGone = ($out -match '(?im)bsr_su:?\s*File not found')
+        $xbinSuGone = ($out -match '(?im)xbin/su:?\s*File not found') -or ($out -match '(?im)/android/system/xbin/su[^\n]*not found')
         if(-not $bmOk){ Say '[!] stock bindmount not detected after restore' Red }
-        return ($bmOk -and $suGone)
+        if(-not $xbinSuGone){ Say '[!] /system/xbin/su still present after scrub' Red }
+        return ($bmOk -and $suGone -and $xbinSuGone)
     } $true
     if(-not $ok){ throw "Clean failed." }
     Say '[+] CLEAN complete (bsr_su removed, stock bindmount restored).' Green
@@ -716,19 +725,60 @@ function Do-Finalize {
     Say '[+] FINALIZE complete.' Green
 }
 
+# Classify a device su inventory (lines "<path>|link|<target>" or "<path>|file|") and return the
+# NON-Magisk su paths. Magisk's own su are symlinks whose target contains 'magisk'; a real su binary
+# (or a symlink pointing elsewhere) is a COMPETING root -- that is exactly what trips Magisk's
+# "Abnormal State -- a su binary not from Magisk has been detected". Pure/string-only => unit-testable.
+function Find-StraySu([string]$scan){
+    $stray=@()
+    foreach($line in ($scan -split "`n")){
+        $line=$line.Trim(); if(-not $line){ continue }
+        $p=$line.Split('|')
+        if($p.Count -lt 2){ continue }
+        $path=$p[0].Trim(); $kind=$p[1].Trim(); $target= if($p.Count -ge 3){ $p[2].Trim() } else { '' }
+        if(-not $path){ continue }
+        if($kind -eq 'link'){ if($target -notmatch 'magisk'){ $stray+=$path } }
+        elseif($kind -eq 'file'){ $stray+=$path }
+    }
+    ,$stray
+}
+
 function Do-Verify {
     Say '==== VERIFY (cold boot) ====' Cyan
     $serial = Boot-And-Wait
     $id  = (& $Adb @('-s',$serial,'shell','su -c id') 2>&1 | Out-String).Trim()
     $whi = (& $Adb @('-s',$serial,'shell','readlink /system/bin/su') 2>&1 | Out-String).Trim()
-    $xb  = (& $Adb @('-s',$serial,'shell','su -c "ls /system/xbin/su 2>&1"') 2>&1 | Out-String).Trim()
+    # Enumerate EVERY su in the standard PATH dirs and classify each: a symlink to magisk is ours,
+    # anything else is a competing root (the cause of Magisk's "Abnormal State"). Pushed as a script
+    # file (not inline su -c '...') because the loop's semicolons don't survive PS -> adb -> device quoting.
+    $scanSh = @'
+for f in /system/bin/su /system/xbin/su /sbin/su /vendor/bin/su /odm/bin/su /system_ext/bin/su /product/bin/su /debug_ramdisk/su; do
+  if [ -L "$f" ]; then echo "$f|link|$(readlink "$f")"
+  elif [ -e "$f" ]; then echo "$f|file|"
+  fi
+done
+'@ -replace "`r`n","`n"
+    $scanFile = Join-Path $env:TEMP 'bsr_work\bsr_suscan.sh'
+    New-Item -ItemType Directory -Path (Split-Path $scanFile) -Force | Out-Null
+    [System.IO.File]::WriteAllText($scanFile,$scanSh,(New-Object System.Text.UTF8Encoding($false)))
+    AdbTry @('-s',$serial,'push',(Fwd $scanFile),'/data/local/tmp/bsr_suscan.sh') | Out-Null
+    $scan = (& $Adb @('-s',$serial,'shell','su -c "sh /data/local/tmp/bsr_suscan.sh"') 2>&1 | Out-String)
+    & $Adb @('-s',$serial,'shell','rm -f /data/local/tmp/bsr_suscan.sh') *>$null
+    $stray = Find-StraySu $scan
     $sweep = (& $Adb @('-s',$serial,'shell',"su -c `"find /system /data/adb /data/downloads -type f -size 4968c 2>/dev/null | while read f; do [ \`"`$(sha256sum `$f|cut -d' ' -f1)\`" = '$BSR_SU_SHA' ] && echo TRACE:`$f; done; echo SWEEPDONE`"") 2>&1 | Out-String)
     Say ("  su -c id            : {0}" -f $id) $(if($id -match 'uid=0'){'Green'}else{'Red'})
     Say ("  /system/bin/su ->   : {0}" -f $whi)
-    Say ("  /system/xbin/su     : {0}  (want: not found)" -f $xb)
+    Say  "  su inventory        :"
+    foreach($l in ($scan -split "`n")){ $l=$l.Trim(); if($l){ Say "      $l" DarkGray } }
+    if($stray.Count){ Say ("  competing su        : {0}  <-- NOT from Magisk" -f ($stray -join ', ')) Red }
+    else            { Say  "  competing su        : none (good)" Green }
     Say ("  bsr_su sweep        : {0}" -f ($sweep -replace "`r?`n",' ').Trim())
-    if($id -match 'uid=0' -and $whi -match 'magisk' -and $sweep -notmatch 'TRACE:'){ Say '[+] VERIFY PASS: Magisk is the sole root; no bsr_su traces.' Green }
-    else { Say '[!] VERIFY: review the above.' Yellow }
+    if($id -match 'uid=0' -and $whi -match 'magisk' -and $stray.Count -eq 0 -and $sweep -notmatch 'TRACE:'){
+        Say '[+] VERIFY PASS: Magisk is the sole root; no competing su, no bsr_su traces.' Green
+    } else {
+        Say '[!] VERIFY FAIL: review the above.' Red
+        if($stray.Count){ Say '    -> a competing su is present; re-run Clean (it now scrubs /system/xbin/su) then reboot.' Yellow }
+    }
 }
 
 function Do-Undo {

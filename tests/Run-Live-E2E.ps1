@@ -1,57 +1,56 @@
 <#
-  Run-Live-E2E.ps1  --  REAL end-to-end proof against a LIVE BlueStacks instance.
+  Run-Live-E2E.ps1  --  REAL end-to-end proof against a LIVE BlueStacks instance, through the
+  SHIPPED Magisk pipeline (the same `-Action Auto` the .cmd runs). It proves Magisk ends up as the
+  SOLE root with NO competing su -- i.e. it would FAIL on the "Abnormal State -- a su binary not from
+  Magisk has been detected" regression -- and that this survives a reboot.
 
-  This actually roots an instance and proves Magisk works across a reboot, the way
-  a human would, but scripted + screenshotted so the result is visible and checkable.
+  !!  THIS MODIFIES A REAL INSTANCE.  Use a THROWAWAY CLONE you created in the Multi-Instance Manager.
+  !!  Do NOT point it at an instance you care about.  Run with -Revert afterwards (Magisk Undo).
 
-  !!  THIS MODIFIES A REAL INSTANCE.  Use a THROWAWAY CLONE you created in the
-  !!  Multi-Instance Manager.  Do NOT point it at an instance you care about.
-  !!  (Pass -Revert afterwards, or use the cmd's Undo, to put it back.)
+  History note: a previous version of this harness rooted via the engine's *legacy classic-su* path
+  (`-Action AdbRoot`), which installs a setuid /system/xbin/su -- a competing root that makes Magisk
+  report "Abnormal State". That was the wrong thing to test (it is not what the tool ships) and it
+  left that su behind on the shared master. This version drives the actual Magisk pipeline and asserts
+  the no-competing-su invariant instead.
 
-  What it does, in order (Action = Root, the default):
-    1. kill emulator procs, resolve paths for -Instance
-    2. .bstk -> Normal,  conf root/adb flags -> 1,  HD-Player integrity bypass
-    3. boot the instance, wait for Android, push the embedded su over HD-Adb
-       (engine Action AdbRoot) and prove `su -c id` => uid=0
-    4. adb install the Magisk APK, launch it, screenshot the app
-    5. adb reboot, wait for boot, prove su STILL gives uid=0, read `magisk -V`,
-       screenshot the Magisk app again
-  Screenshots land in -Shots (default tests\live-shots\).  Read them to SEE the
-  Magisk "Installed" state before/after reboot.
-
-  After you have visually confirmed Magisk's "Direct Install to system" + the
-  SU-conflict message, run with -Revert to undo (or use the .cmd Undo menu).
+  What it does (default):
+    1. resolve paths for -Instance (engine Resolve)
+    2. run  bsr_magisk.ps1 -Action Auto  (Prep -> Data -> Clean -> Finalize -> Verify), self-extracting
+       the embedded debugfs / bootstrap su / Magisk APK from the .cmd -- exactly the shipped path
+    3. ASSERT the pipeline reached "VERIFY PASS" and reported NO competing su
+    4. independently re-check over adb: uid=0, /system/bin/su -> magisk, NO /system/xbin/su,
+       `magisk -c` is the kitsune build, the manager package is installed; screenshot the app
+    5. reboot and re-assert uid=0 + still NO /system/xbin/su (persistence)
 
   Usage (Administrator):
-    powershell -NoProfile -ExecutionPolicy Bypass -File tests\Run-Live-E2E.ps1 -Instance Rvc64_2
-    ...                                                                        -Revert -Instance Rvc64_2
+    powershell -NoProfile -ExecutionPolicy Bypass -File tests\Run-Live-E2E.ps1 -Instance Tiramisu64_9
+    ...                                                                        -Revert -Instance Tiramisu64_9
 #>
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true)][string]$Instance,
-    [string]$Engine,
     [string]$Cmd,
+    [string]$Engine,
     [string]$Adb,
     [string]$Player,
     [string]$InstallDir,
     [string]$DataDir,
-    [string]$Magisk,
     [string]$Shots,
     [int]$BootTimeout = 300,
-    [switch]$Revert,
-    [switch]$SkipMagisk,
-    [switch]$Unattended   # don't pause for the manual Magisk "Direct Install" GUI tap
+    [switch]$Revert
 )
 $ErrorActionPreference = 'Stop'
 $here = if ($PSScriptRoot) { $PSScriptRoot } elseif ($PSCommandPath) { Split-Path -Parent $PSCommandPath } else { (Get-Location).Path }
 $repo = Split-Path -Parent $here
-if (-not $Engine) { $Engine = Join-Path $repo 'tools\bsr_engine.ps1' }
 if (-not $Cmd) { $Cmd = Join-Path $repo 'blueStackRoot.cmd' }
+if (-not $Engine) { $Engine = Join-Path $repo 'tools\bsr_engine.ps1' }
+$Magisk = Join-Path $repo 'tools\bsr_magisk.ps1'
 if (-not $Shots) { $Shots = Join-Path $here 'live-shots' }
 if (-not (Test-Path $Shots)) { New-Item -ItemType Directory -Path $Shots -Force | Out-Null }
+$PKG = 'io.github.huskydg.magisk'   # the bundled Kitsune Mask package (NOT com.topjohnwu.magisk)
 
 # ---- registry discovery (nxt then msi5) ----
-function Reg1($key, $name) { try { (Get-ItemProperty -Path $key -Name $name -EA Stop).$name } catch { $null } }
+function Reg1($k, $n) { try { (Get-ItemProperty -Path $k -Name $n -EA Stop).$n } catch { $null } }
 if (-not $InstallDir -or -not $DataDir) {
     foreach ($k in @('HKLM:\SOFTWARE\BlueStacks_nxt', 'HKLM:\SOFTWARE\BlueStacks_msi5')) {
         if (Test-Path $k) {
@@ -62,17 +61,11 @@ if (-not $InstallDir -or -not $DataDir) {
     }
 }
 if (-not $InstallDir) { $InstallDir = 'C:\Program Files\BlueStacks_nxt' }
+if (-not $DataDir) { $DataDir = Join-Path $env:ProgramData 'BlueStacks_nxt' }
 if (-not $Adb) { $Adb = Join-Path $InstallDir 'HD-Adb.exe' }
 if (-not $Player) { $Player = Join-Path $InstallDir 'HD-Player.exe' }
-if (-not $Magisk) {
-    foreach ($m in @((Join-Path $repo 'magiskkitsune.apk'), (Join-Path $repo 'Working Example & Fix\MagiskMyStableBuild.apk'))) {
-        if (Test-Path -LiteralPath $m) { $Magisk = $m; break }
-    }
-}
-foreach ($f in @($Engine, $Adb, $Player)) { if (-not (Test-Path -LiteralPath $f)) { throw "missing: $f" } }
-
-$isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)
-if (-not $isAdmin) { throw "Run elevated (Administrator)." }
+foreach ($f in @($Cmd, $Engine, $Magisk, $Adb)) { if (-not (Test-Path -LiteralPath $f)) { throw "missing: $f" } }
+if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)) { throw 'Run elevated (Administrator).' }
 
 $pass = 0; $fail = 0
 function Ok($m) { Write-Host "  [PASS] $m" -ForegroundColor Green; $script:pass++ }
@@ -80,147 +73,95 @@ function No($m) { Write-Host "  [FAIL] $m" -ForegroundColor Red; $script:fail++ 
 function Info($m) { Write-Host "  [..] $m" -ForegroundColor DarkGray }
 function Step($m) { Write-Host "`n=== $m ===" -ForegroundColor Cyan }
 
-# child PS with the engine, env-driven, capturing exit + text (stderr won't throw here)
-function Eng([hashtable]$envv, [string[]]$a, [string]$label) {
-    foreach ($k in $envv.Keys) { Set-Item -Path "Env:$k" -Value $envv[$k] }
-    $old = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
-    try { $o = & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $Engine @a 2>&1 | Out-String }
-    finally { $ErrorActionPreference = $old }
-    if ($label) { Write-Host ("--- {0} (rc={1}) ---" -f $label, $LASTEXITCODE) -ForegroundColor DarkGray; Write-Host $o.Trim() }
-    return [pscustomobject]@{ Code = $LASTEXITCODE; Out = $o }
-}
-function Adb([string[]]$a) {
-    $old = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
-    try { return (& $Adb @a 2>&1 | Out-String) } finally { $ErrorActionPreference = $old }
-}
+# isolate HD-Adb on its own server port (immune to a different-version system adb on 5037)
+if (-not $env:ANDROID_ADB_SERVER_PORT) { $env:ANDROID_ADB_SERVER_PORT = '15037' }
+function Adb([string[]]$a) { $o = $ErrorActionPreference; $ErrorActionPreference = 'Continue'; try { (& $Adb @a 2>&1 | Out-String) } finally { $ErrorActionPreference = $o } }
+function Ps([string[]]$a) { $o = $ErrorActionPreference; $ErrorActionPreference = 'Continue'; try { & powershell.exe -NoProfile -ExecutionPolicy Bypass -File @a 2>&1 | Out-String } finally { $ErrorActionPreference = $o } }
 
-# resolve instance paths via the engine (master/.bstk/conf/vhd/adbport)
+# resolve instance paths via the engine
 $base = $Instance -replace '_\d+$', ''
-$res = Eng @{ BSR_DATADIR = $DataDir; BSR_BASE = $base } @('-Action', 'Resolve') ''
-$paths = @{}
-foreach ($l in ($res.Out -split "`r?`n")) { if ($l -match '^(BSR_\w+)=(.*)$') { $paths[$Matches[1]] = $Matches[2] } }
-$dataBase = $paths['BSR_DATADIR']
-$bstk = Join-Path $dataBase "Engine\$Instance\$Instance.bstk"
-$conf = Join-Path $dataBase 'bluestacks.conf'
+$res = Ps @($Engine, '-Action', 'Resolve', '-DataDir', $DataDir, '-Base', $base)
+$paths = @{}; foreach ($l in ($res -split "`r?`n")) { if ("$l" -match '^(BSR_\w+)=(.*)$') { $paths[$Matches[1]] = $Matches[2] } }
+$conf = if ($paths['BSR_CONF']) { $paths['BSR_CONF'] } else { Join-Path $DataDir 'bluestacks.conf' }
 $vhd = $paths['BSR_VHD']
-$adbPort = if ($paths['BSR_ADBPORT']) { $paths['BSR_ADBPORT'] } else { '5555' }
-# Resolve matches the base (may pick a clone) -- read the EXACT instance's port from conf
+# the EXACT instance's adb port from conf (Resolve matches the base, which may be a different clone)
+$adbPort = '5555'
 if (Test-Path -LiteralPath $conf) {
-    try {
-        $ct = Get-Content -Raw -LiteralPath $conf
-        $esc = [regex]::Escape($Instance)
-        $m = [regex]::Match($ct, '(?im)^\s*bst\.instance\.' + $esc + '\.status\.adb_port\s*=\s*"?(\d+)"?')
-        if (-not $m.Success) { $m = [regex]::Match($ct, '(?im)^\s*bst\.instance\.' + $esc + '\.adb_port\s*=\s*"?(\d+)"?') }
-        if ($m.Success) { $adbPort = $m.Groups[1].Value }
-    }
-    catch { }
+    $ct = [IO.File]::ReadAllText($conf); $esc = [regex]::Escape($Instance)
+    $m = [regex]::Match($ct, '(?im)^\s*bst\.instance\.' + $esc + '\.status\.adb_port\s*=\s*"?(\d+)"?')
+    if (-not $m.Success) { $m = [regex]::Match($ct, '(?im)^\s*bst\.instance\.' + $esc + '\.adb_port\s*=\s*"?(\d+)"?') }
+    if ($m.Success) { $adbPort = $m.Groups[1].Value }
 }
-# rooting the master writes its OWN Root.vhd
-$vhd = Join-Path $dataBase "Engine\$($Instance -replace '_\d+$','')\Root.vhd"
-Write-Host "instance=$Instance  bstk=$bstk  vhd=$vhd  adb=127.0.0.1:$adbPort" -ForegroundColor DarkGray
-if (-not (Test-Path -LiteralPath $bstk)) { throw ".bstk not found for '$Instance': $bstk  (create the throwaway clone first)" }
+$script:serial = "127.0.0.1:$adbPort"
+Write-Host "instance=$Instance  master.vhd=$vhd  adb=$script:serial  pkg=$PKG" -ForegroundColor DarkGray
+if (-not (Test-Path -LiteralPath $vhd)) { throw "master Root.vhd not found: $vhd  (create the throwaway clone + open it once first)" }
 
-function Kill-Bst { foreach ($p in 'HD-Player', 'HD-MultiInstanceManager', 'BstkSVC', 'BlueStacksHelper') { Get-Process -Name $p -EA SilentlyContinue | Stop-Process -Force -EA SilentlyContinue }; Start-Sleep 2 }
-$commonEnv = @{ BSR_BSTK = $bstk; BSR_CONF = $conf; BSR_INSTANCE = $Instance; BSR_VHD = $vhd;
-    BSR_EXE = (Join-Path $InstallDir 'HD-Player.exe'); BSR_ADB = $Adb; BSR_PLAYER = $Player; BSR_ADBPORT = $adbPort; BSR_SELF = $Cmd
-}
-
-# ---------------------------------------------------------------- REVERT
-if ($Revert) {
-    Step "REVERT '$Instance'"
-    Kill-Bst
-    Eng $commonEnv @('-Action', 'Unroot') 'Unroot (remove su offline)' | Out-Null
-    Eng $commonEnv @('-Action', 'Patch', '-Restore') 'Restore HD-Player.exe' | Out-Null
-    Eng $commonEnv @('-Action', 'ConfUnroot') 'conf flags -> 0' | Out-Null
-    Eng $commonEnv @('-Action', 'DiskRO') '.bstk -> Readonly' | Out-Null
-    Write-Host "`nReverted. (Root.vhd backup, if made, is at $vhd.bsrbak)" -ForegroundColor Green
-    exit 0
-}
-
-# ---------------------------------------------------------------- ROOT + PROVE
-Step "1) prepare disk / conf / integrity bypass"
-Kill-Bst
-$r1 = Eng $commonEnv @('-Action', 'DiskRW') '.bstk -> Normal'
-$r2 = Eng $commonEnv @('-Action', 'ConfRoot') 'conf root/adb flags -> 1'
-$r3 = Eng $commonEnv @('-Action', 'Patch') 'HD-Player integrity bypass'
-if ($r1.Code -eq 0) { Ok "disk set R/W" } else { No "DiskRW failed" }
-if ($r2.Code -eq 0) { Ok "conf flags set" } else { No "ConfRoot failed" }
-if ($r3.Code -eq 0) { Ok "integrity bypass applied" } else { No "Patch failed" }
-
-Step "2) boot + install su over adb (engine AdbRoot)"
-$r4 = Eng $commonEnv @('-Action', 'AdbRoot') 'AdbRoot (boot, push su, verify uid=0)'
-if ($r4.Code -eq 0 -and $r4.Out -match 'uid=0') { Ok "ONLINE root: su -c id => uid=0" }
-elseif ($r4.Code -eq 0) { Ok "su installed online (uid=0 not echoed; will re-check)" }
-else {
-    No "online adb root did not confirm (rc=$($r4.Code)); trying OFFLINE debugfs fallback"
-    Kill-Bst
-    $r4b = Eng $commonEnv @('-Action', 'Root') 'Root (offline debugfs into Root.vhd)'
-    if ($r4b.Code -eq 0) { Ok "OFFLINE root: su injected into Root.vhd" } else { No "offline root failed too" }
-    # need the instance running for the rest
-    Start-Process -FilePath $Player -ArgumentList @('--instance', $Instance) | Out-Null
-}
-
-$serial = "127.0.0.1:$adbPort"
+# Wait for boot, trying the conf port AND any live-bound port in the BlueStacks band; pins $serial.
 function Wait-Boot([int]$sec) {
     Adb @('start-server') | Out-Null
     $sw = [Diagnostics.Stopwatch]::StartNew()
     while ($sw.Elapsed.TotalSeconds -lt $sec) {
-        Adb @('connect', $serial) | Out-Null
-        if ((Adb @('-s', $serial, 'shell', 'getprop', 'sys.boot_completed')).Trim() -match '1') { Start-Sleep 3; return $true }
+        $cands = @($adbPort) + @(Get-NetTCPConnection -State Listen -EA SilentlyContinue | Where-Object { $_.LocalPort -ge 5550 -and $_.LocalPort -le 5900 } | Select-Object -Expand LocalPort)
+        foreach ($p in ($cands | Select-Object -Unique)) {
+            $s = "127.0.0.1:$p"; Adb @('connect', $s) | Out-Null
+            if ((Adb @('-s', $s, 'shell', 'getprop', 'sys.boot_completed')).Trim() -match '1') { $script:serial = $s; Start-Sleep 3; return $true }
+        }
         Start-Sleep 3
     }
     return $false
 }
 function Shot([string]$name) {
-    $png = Join-Path $Shots $name
-    $old = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
-    try { & $Adb -s $serial exec-out screencap -p > $png } finally { $ErrorActionPreference = $old }
-    if ((Test-Path $png) -and (Get-Item $png).Length -gt 1000) { Info "screenshot -> $png" } else { Info "screenshot failed ($name)" }
+    $png = Join-Path $Shots $name; $o = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
+    try { & $Adb -s $script:serial exec-out screencap -p > $png } finally { $ErrorActionPreference = $o }
+    if ((Test-Path $png) -and (Get-Item $png).Length -gt 1000) { Info "shot -> $png" } else { Info "screenshot failed ($name)" }
 }
 
-Step "3) verify root via adb"
-if (-not (Wait-Boot $BootTimeout)) { No "instance not reachable"; }
-$id = Adb @('-s', $serial, 'shell', '/system/xbin/su -c id 2>/dev/null || /system/bin/su -c id 2>/dev/null')
-Write-Host "  su -c id => $($id.Trim())"
-if ($id -match 'uid=0') { Ok "ROOT CONFIRMED: uid=0 from a normal adb shell" } else { No "uid=0 not returned (SELinux/su style?)" }
-$ls = Adb @('-s', $serial, 'shell', 'ls -lZ /system/xbin/su /system/bin/su 2>/dev/null')
-Write-Host "  su file: $($ls.Trim())"
-
-if (-not $SkipMagisk -and $Magisk -and (Test-Path -LiteralPath $Magisk)) {
-    Step "4) install Magisk + screenshot"
-    Info "installing $Magisk"
-    Write-Host (Adb @('-s', $serial, 'install', '-r', '-g', $Magisk)).Trim()
-    $pkg = 'com.topjohnwu.magisk'
-    Adb @('-s', $serial, 'shell', "monkey -p $pkg -c android.intent.category.LAUNCHER 1") | Out-Null
-    Start-Sleep 8
-    Shot 'magisk_before_reboot.png'
-    $mv = Adb @('-s', $serial, 'shell', 'magisk -V 2>/dev/null; magisk -c 2>/dev/null')
-    Write-Host "  magisk -V/-c => $($mv.Trim())"
-
-    if (-not $Unattended) {
-        Write-Host "`n  >>> NOW (in the emulator window): open Magisk -> Install -> Direct Install (to /system)." -ForegroundColor Yellow
-        Write-Host "  >>> Wait for it to finish, then press ENTER here to reboot + verify." -ForegroundColor Yellow
-        [void](Read-Host)
-    }
-    else { Write-Host "  [unattended] Magisk APK installed + screenshotted; skipping the GUI 'Direct Install' tap. Do it later, then reboot." -ForegroundColor Yellow }
+# ---------------------------------------------------------------- REVERT (Magisk Undo)
+if ($Revert) {
+    Step "REVERT '$Instance' (Magisk Undo)"
+    Ps @($Magisk, '-Action', 'Undo', '-Instance', $Instance, '-SelfCmd', $Cmd, '-Vhd', $vhd, '-Conf', $conf, '-Install', $InstallDir) | Write-Host
+    Write-Host "`nReverted ($Instance). The shared master + HD-Player patch are left intact unless you passed -Full to Undo." -ForegroundColor Green
+    exit 0
 }
 
-Step "5) reboot + re-verify persistence"
-Adb @('-s', $serial, 'reboot') | Out-Null
-Start-Sleep 8
+# ---------------------------------------------------------------- ROOT via the SHIPPED Magisk pipeline
+Step "1) run the FULL Magisk pipeline (bsr_magisk.ps1 -Action Auto; embedded debugfs/su/APK)"
+$autoOut = Ps @($Magisk, '-Action', 'Auto', '-Instance', $Instance, '-SelfCmd', $Cmd, '-Engine', $Engine, '-Vhd', $vhd, '-Conf', $conf, '-Install', $InstallDir)
+$autoRc = $LASTEXITCODE
+Write-Host $autoOut
+if ($autoRc -eq 0) { Ok "pipeline exited 0" } else { No "pipeline exit code = $autoRc" }
+if ($autoOut -match 'VERIFY PASS') { Ok "pipeline reached VERIFY PASS (Magisk sole root, no competing su, no bsr_su traces)" } else { No "pipeline did NOT print VERIFY PASS" }
+if ($autoOut -match 'competing su\s*:\s*none') { Ok "pipeline reported NO competing su" }
+elseif ($autoOut -match 'competing su\s*:\s*\S') { No "pipeline reported a COMPETING su (Abnormal-State regression)" }
+
+# ---------------------------------------------------------------- independent adb re-check
+Step "2) independent verification over adb"
+if (-not (Wait-Boot $BootTimeout)) { No "instance not reachable" }
+$id = (Adb @('-s', $script:serial, 'shell', 'su -c id')).Trim()
+if ($id -match 'uid=0') { Ok "su -c id => $id" } else { No "uid=0 not returned ($id)" }
+$binsu = (Adb @('-s', $script:serial, 'shell', 'readlink /system/bin/su')).Trim()
+if ($binsu -match 'magisk') { Ok "/system/bin/su -> $binsu" } else { No "/system/bin/su not -> magisk ($binsu)" }
+$xbin = (Adb @('-s', $script:serial, 'shell', 'su -c "ls -l /system/xbin/su 2>&1"')).Trim()
+if ($xbin -match 'No such file|not found') { Ok "NO /system/xbin/su (competing su is gone)" } else { No "competing /system/xbin/su present: $xbin" }
+$mv = (Adb @('-s', $script:serial, 'shell', 'su -c "magisk -c"')).Trim()
+if ($mv -match 'kitsune') { Ok "magisk -c => $mv" } else { No "magisk version unexpected ($mv)" }
+$pkg = (Adb @('-s', $script:serial, 'shell', "pm path $PKG")).Trim()
+if ($pkg -match 'package:') { Ok "manager installed: $pkg" } else { Info "manager package not found via pm path ($pkg)" }
+Shot 'magisk_e2e.png'
+
+# ---------------------------------------------------------------- reboot persistence
+Step "3) reboot + re-assert (persistence)"
+Adb @('-s', $script:serial, 'reboot') | Out-Null; Start-Sleep 8
 if (-not (Wait-Boot $BootTimeout)) { No "did not come back after reboot" }
 else {
-    $id2 = Adb @('-s', $serial, 'shell', '/system/xbin/su -c id 2>/dev/null || /system/bin/su -c id 2>/dev/null')
-    Write-Host "  after reboot, su -c id => $($id2.Trim())"
-    if ($id2 -match 'uid=0') { Ok "ROOT PERSISTS after reboot (uid=0)" } else { No "root did NOT persist after reboot" }
-    $mv2 = Adb @('-s', $serial, 'shell', 'magisk -V 2>/dev/null; magisk -c 2>/dev/null')
-    Write-Host "  after reboot, magisk -V/-c => $($mv2.Trim())"
-    if ($mv2.Trim()) { Ok "Magisk reports a version after reboot (installed)" }
-    if (-not $SkipMagisk) { $pkg = 'com.topjohnwu.magisk'; Adb @('-s', $serial, 'shell', "monkey -p $pkg -c android.intent.category.LAUNCHER 1") | Out-Null; Start-Sleep 8; Shot 'magisk_after_reboot.png' }
+    $id2 = (Adb @('-s', $script:serial, 'shell', 'su -c id')).Trim()
+    if ($id2 -match 'uid=0') { Ok "root PERSISTS after reboot (uid=0)" } else { No "root lost after reboot ($id2)" }
+    $xbin2 = (Adb @('-s', $script:serial, 'shell', 'su -c "ls -l /system/xbin/su 2>&1"')).Trim()
+    if ($xbin2 -match 'No such file|not found') { Ok "still NO competing /system/xbin/su after reboot" } else { No "competing su reappeared: $xbin2" }
+    Shot 'magisk_e2e_after_reboot.png'
 }
 
 Write-Host "`n================ LIVE E2E SUMMARY ================" -ForegroundColor Cyan
-$col = if ($fail) { 'Red' } else { 'Green' }
-Write-Host ("  PASS=$pass  FAIL=$fail   screenshots in $Shots") -ForegroundColor $col
-Write-Host "  When satisfied, undo with:  -Revert -Instance $Instance" -ForegroundColor DarkGray
+Write-Host ("  PASS=$pass  FAIL=$fail   screenshots in $Shots") -ForegroundColor $(if ($fail) { 'Red' } else { 'Green' })
+Write-Host "  Undo with:  -Revert -Instance $Instance" -ForegroundColor DarkGray
 exit ([int]($fail -gt 0))

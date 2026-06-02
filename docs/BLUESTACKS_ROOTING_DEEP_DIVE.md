@@ -297,6 +297,7 @@ Per‑instance root = presence of `/data/adb/.bsr_root`. **Proven:** `Rvc64` (fl
 | 2nd instance "couldn't launch" | shared master `Root.vhd` was `type="Normal"` (exclusive) | set master **Readonly** (Finalize) |
 | Kitsune Mask leaked to unrooted instances | shared `/system` ⇒ `magiskd` ran everywhere | per‑instance gate (`bsr_boot.sh` + `/data/adb/.bsr_root`) |
 | `did not become adb‑reachable` though the instance booted | a system `adb` (Android SDK **v1.0.41**) and BlueStacks `HD‑Adb` (**v1.0.36**) fight over the default 5037 server (*"server version doesn't match; killing…"*) → `getprop` fails forever | pin HD‑Adb to a **private** `ANDROID_ADB_SERVER_PORT=15037` (proven: 30/30 getprop OK with a v41 server on 5037; 0/12 on the shared port; full `Boot‑And‑Wait` end‑to‑end PASS) + add **live‑bound‑port** discovery (`Get-NetTCPConnection`) so a stale `status.adb_port` can't strand the boot wait |
+| Magisk "Abnormal State — su not from Magisk" though Verify "passed" | a classic/engine `su` left at `/system/xbin/su` on the **shared master** (old non‑Magisk root / the legacy classic‑su live‑E2E); Prep/Clean never scrubbed it and Verify only swept the *bootstrap* su's hash | Prep + Clean now `rm /system/xbin/su` (+`daemonsu`); Verify enumerates **every** su and FAILS on any non‑Magisk one (`Find-StraySu`, unit‑tested); the live‑E2E now drives the **Magisk pipeline** (not classic su) and asserts no competing su — verified live (stray su scrubbed → VERIFY PASS) |
 
 ---
 
