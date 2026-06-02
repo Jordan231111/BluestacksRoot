@@ -5,6 +5,24 @@ Player — from one file, fully automatically. Releases are grouped by the BlueS
 
 ---
 
+## v9 — Kitsune Mask v31 (release build) · 2026-06-02
+
+Re-bundles **Kitsune Mask v31** using the version-tagged **31.0-kitsune** (versionCode 31000) build,
+replacing the commit-named build (`magisk -c` → `2ef8f002`, versionCode 29999) shipped in v8. Same
+`1q23lyc45/KitsuneMagisk` fork and Magisk version — only the APK bytes differ.
+
+- 📦 **New embedded APK.** SHA-256 `f554c9643a527cda4910e1a044a2bfabd5f034f456587bc995895092dfe9b933`
+  (12,574,128 bytes); `blueStackRoot.cmd` grows ~5 KB of base64 text accordingly.
+- 🔁 **No pipeline logic changes.** The package id (`io.github.huskydg.magisk`) and the APK's internal
+  `lib/$ABI` + `assets/*.sh` layout are unchanged, so the version-agnostic extract/install/undo path roots
+  exactly as before.
+- 🛠️ **Repo kept in sync.** Re-spliced with `tools/reembed-apk.ps1` (byte-level, SHA-256 round-trip
+  verified); refreshed `tools/magisk_databin/` via `tools/extract-databin.ps1`; updated the embedded-APK
+  hash asserted by `tests/Check-Embedded-Sync.ps1`; the bundled reference APK is now
+  `Working Example & Fix/MagiskMyStableBuild.apk`. (E2E `VERIFY PASS` to be re-confirmed on a live instance.)
+
+---
+
 ## v8 — Kitsune Mask v31 · 2026-06-01
 
 Updates the bundled Magisk to **Kitsune Mask v31** (the `1q23lyc45/KitsuneMagisk` fork; `magisk -c` →

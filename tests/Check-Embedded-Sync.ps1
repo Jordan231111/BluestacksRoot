@@ -42,7 +42,7 @@ foreach ($p in @(@('ENGINE', 'tools\bsr_engine.ps1'), @('MAGISK', 'tools\bsr_mag
 
 # --- embedded Magisk APK: decode the base64 blob and verify its SHA-256 (guards against APK drift;
 #     the APK is re-embedded by tools\reembed-apk.ps1, which round-trips this same hash). ---
-$ApkSha256 = 'e01648059a412fd9946a99801260dfde81c99def2512f161657faf404a280e05'
+$ApkSha256 = 'f554c9643a527cda4910e1a044a2bfabd5f034f456587bc995895092dfe9b933'
 try {
     $apkB64 = (Extract 'APK') -replace '[^A-Za-z0-9+/=]', ''
     $apkBytes = [Convert]::FromBase64String($apkB64)

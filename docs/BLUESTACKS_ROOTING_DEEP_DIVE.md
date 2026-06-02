@@ -115,7 +115,7 @@ E: write failed with 32: Broken pipe
 **`/data/adb/magisk/` was EMPTY.** `magisk --post-fs-data` runs `magisk_env()`, which does `if (access(DATABIN "/busybox", X_OK)) return false;` → **"environment incomplete, abort."** The installer couldn't populate this root‑owned dir because the only su in `$PATH` at install time was Magisk's own half‑installed `/system/bin/su → magisk` (daemon dead) → `su: request rejected` → `Broken pipe` → dir left empty. Classic chicken‑and‑egg.
 
 ### 4.3 The fix (proven)
-Populate `/data/adb/magisk` with the **canonical 64‑bit install set**, copied byte‑for‑byte from the matching APK (`KitsuneMagisk-v31.apk`, `lib/$ABI` renamed + `assets/*.sh`):
+Populate `/data/adb/magisk` with the **canonical 64‑bit install set**, copied byte‑for‑byte from the matching APK (`MagiskMyStableBuild.apk`, `lib/$ABI` renamed + `assets/*.sh`):
 ```
 busybox  magisk32  magisk64  magiskboot  magiskinit  magiskpolicy  stub.apk
 util_functions.sh  boot_patch.sh  addon.d.sh   (root:root, 0755 / stub 0644)
@@ -243,7 +243,7 @@ Re‑verified from `recovered/BstkRooter/` (decompiled "Root" `fcn.14001d370` + 
 | Stock bindmount (extracted from factory) | `tools/su_src/bindmount.orig` (1339 B) |
 | Modified bindmount (bootstrap) | `tools/su_src/bindmount.mod` |
 | Magisk databin (extracted from APK) | `tools/magisk_databin/` |
-| Magisk APK (manager + all binaries) | `Working Example & Fix/KitsuneMagisk-v31.apk` |
+| Magisk APK (manager + all binaries) | `Working Example & Fix/MagiskMyStableBuild.apk` |
 | Engine (patch, conf, ext4, Root/Unroot) | `tools/bsr_engine.ps1` (embedded in `blueStackRoot.cmd`) |
 | Offline su inject (bootstrap) | `tests/rootvhd-hook.ps1` |
 | Offline bsr_su remove + stock bindmount restore | `tests/remove-bsr-su.ps1` |
@@ -304,7 +304,7 @@ Per‑instance root = presence of `/data/adb/.bsr_root`. **Proven:** `Rvc64` (fl
 **DONE & PROVEN (cold boot, emulator root OFF):** Magisk is the **sole working root** on
 flagged instances (`su → magisk`, `uid=0`); unrooted instances are functionally clean (no daemon/su/app);
 both run **simultaneously**. Zero traces of our bootstrap/engine su; stock `bindmount`; factory `.xb` su;
-HD‑Player patch intact; backups retained. (Bundled Magisk: **Kitsune Mask v31** — `magisk -c` → `2ef8f002` / 29999; the breakthrough was originally proven on Magisk Delta v27.2-kitsune-4, and the pipeline is version-agnostic.)
+HD‑Player patch intact; backups retained. (Bundled Magisk: **Kitsune Mask v31** — `magisk -c` → `31.0-kitsune` / 31000; the breakthrough was originally proven on Magisk Delta v27.2-kitsune-4, and the pipeline is version-agnostic.)
 
 **Single‑file tool:** `blueStackRoot.cmd` (≈20 MB) embeds the engine + debugfs + bootstrap su + the
 orchestrator + the Magisk APK. **Option 3** = root Android‑11 (Rvc64) with Magisk; **Option 6** = unroot.

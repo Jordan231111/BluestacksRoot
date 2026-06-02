@@ -13,7 +13,7 @@ by the current pipeline.
 | `split.cmd` | Helper to split/join large blobs. |
 | `Magisk.cpp` | Magisk source/decompiled snippet used while studying the daemon. |
 | `uninstall_script.sh` | Old guest‑side uninstaller. |
-| `magiskkitsune.apk` | A *different* Magisk Delta build (the tool embeds `Working Example & Fix/KitsuneMagisk-v31.apk`). |
+| `magiskkitsune.apk` | A *different* Magisk Delta build (the tool embeds `Working Example & Fix/MagiskMyStableBuild.apk`). |
 
 ## `original-cmd/` — the original `blueStackRoot.cmd` before the rewrite
 | File | What it is |

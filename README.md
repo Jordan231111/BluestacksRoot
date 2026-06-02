@@ -19,7 +19,7 @@ download, no other files, nothing to install. Works on the latest BlueStacks (5.
 
 Works on the 64-bit BlueStacks instances — **Android 9, 11, and 13**.
 
-**⬇️ [Download `blueStackRoot.cmd`](https://github.com/Jordan231111/BluestacksRoot/releases/download/v8/blueStackRoot.cmd)** — one file (~20 MB) with the **real Magisk APK embedded inside** — nothing else to download. *(All versions: [Releases page](https://github.com/Jordan231111/BluestacksRoot/releases).)*
+**⬇️ [Download `blueStackRoot.cmd`](https://github.com/Jordan231111/BluestacksRoot/releases/download/v9/blueStackRoot.cmd)** — one file (~20 MB) with the **real Magisk APK embedded inside** — nothing else to download. *(All versions: [Releases page](https://github.com/Jordan231111/BluestacksRoot/releases).)*
 
 1. **First, open the exact instance you want to root** — launch it from the Multi-Instance Manager and let
    it boot once. The tool roots the instance of your chosen Android version that you **opened most
@@ -99,9 +99,9 @@ BlueStacks and carries binaries inside it. Heuristic scanners flag that pattern.
   | `__BSR_APK__` | The **official, unmodified Kitsune Mask (Magisk Delta) v31** APK | SHA-256 below |
 
 - **The Magisk APK is the real one.** Its SHA-256 is
-  `e01648059a412fd9946a99801260dfde81c99def2512f161657faf404a280e05` (12,570,028 bytes) — the genuine
-  [Kitsune Mask v31 build](https://github.com/1q23lyc45/KitsuneMagisk/releases) (`magisk -c` → `2ef8f002`,
-  versionCode 29999). You're trusting Magisk, not me.
+  `f554c9643a527cda4910e1a044a2bfabd5f034f456587bc995895092dfe9b933` (12,574,128 bytes) — the genuine
+  [Kitsune Mask v31 build](https://github.com/1q23lyc45/KitsuneMagisk/releases) (`magisk -c` → `31.0-kitsune`,
+  versionCode 31000). You're trusting Magisk, not me.
 - **Verify it yourself in 30 seconds.** Scan the file on [VirusTotal](https://www.virustotal.com/), or
   extract any embedded blob and check its hash — open the `.cmd` in any text editor and the `__BSR_*__`
   markers are right there. The whole point of this project is that you *don't* have to trust a black box.

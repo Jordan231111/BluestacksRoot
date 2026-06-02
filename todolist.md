@@ -1,7 +1,7 @@
 # Todo List
 
 ## Done
-- [x] **bumped bundled Magisk → Kitsune Mask v31** (`1q23lyc45` fork; `magisk -c` 2ef8f002 / 29999) via new
+- [x] **bumped bundled Magisk → Kitsune Mask v31** (`1q23lyc45` fork; `magisk -c` 31.0-kitsune / 31000) via new
       `tools/reembed-apk.ps1` (byte-level splice + SHA-256 round-trip); refreshed `tools/magisk_databin/`
       (`tools/extract-databin.ps1`); `tests/Check-Embedded-Sync.ps1` now guards the embedded APK SHA. No
       pipeline logic change (same package id `io.github.huskydg.magisk` + identical APK layout); live-instance

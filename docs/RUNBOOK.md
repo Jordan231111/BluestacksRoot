@@ -17,7 +17,7 @@ Everything here is built from steps proven on this machine; the one offline step
 
 - **Run as Administrator** (offline VHD editing needs it).
 - **Matching Magisk APK present.** Use the same build you want installed, e.g.
-  `Working Example & Fix\KitsuneMagisk-v31.apk`. This single file provides both the manager app
+  `Working Example & Fix\MagiskMyStableBuild.apk`. This single file provides both the manager app
   and every Magisk binary. (A different Magisk version → pass that APK; nothing else changes.)
 - **Know your instance name** (default `Rvc64`) and paths:
   - Root.vhd: `C:\ProgramData\BlueStacks_nxt\Engine\<Instance>\Root.vhd`
@@ -46,7 +46,7 @@ No other files, no internet. (If you drop a different `Magisk*.apk` next to the 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File tools\bsr_magisk.ps1 `
     -Action Auto -Instance Rvc64 `
-    -MagiskApk "Working Example & Fix\KitsuneMagisk-v31.apk"
+    -MagiskApk "Working Example & Fix\MagiskMyStableBuild.apk"
 ```
 
 Either way, the pipeline runs and ends with a self‑verify:
@@ -69,7 +69,7 @@ Total wall time ≈ 8–12 min (two cold boots + two carves). When it prints
 Run the same script one phase at a time (lets you inspect between steps):
 
 ```powershell
-$apk = "Working Example & Fix\KitsuneMagisk-v31.apk"
+$apk = "Working Example & Fix\MagiskMyStableBuild.apk"
 powershell -NoProfile -ExecutionPolicy Bypass -File tools\bsr_magisk.ps1 -Action Prep     -Instance Rvc64 -MagiskApk $apk
 powershell -NoProfile -ExecutionPolicy Bypass -File tools\bsr_magisk.ps1 -Action Data     -Instance Rvc64 -MagiskApk $apk
 powershell -NoProfile -ExecutionPolicy Bypass -File tools\bsr_magisk.ps1 -Action Clean    -Instance Rvc64
@@ -97,7 +97,7 @@ S=$("$ADB" devices | awk '/device$/{print $1;exit}')
 "$ADB" -s $S shell 'su -c "ls /system/xbin/su"'     # -> No such file or directory  (good)
 "$ADB" -s $S shell 'getprop bst.instance.Rvc64.enable_root_access'   # -> 0
 # Magisk daemon + app:
-"$ADB" -s $S shell 'su -c "magisk -c"'              # -> 2ef8f002 ...
+"$ADB" -s $S shell 'su -c "magisk -c"'              # -> 31.0-kitsune ...
 ```
 
 In the Magisk app: **Magisk → Installed — Kitsune Mask v31**, no warning dialog. (Grant Superuser to apps
