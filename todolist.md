@@ -1,6 +1,14 @@
 # Todo List
 
 ## Done
+- [x] **adb robustness: immune to adb-version conflicts + live-bound port detection** — `Boot-And-Wait`
+      was timing out ("did not become adb-reachable") on hosts that also have a *different-version* system
+      `adb` (Android SDK v1.0.41 vs BlueStacks HD-Adb v1.0.36) fighting over the default server port 5037
+      (*"server version doesn't match; killing…"*). Fixed by pinning HD-Adb to a private
+      `ANDROID_ADB_SERVER_PORT=15037` + only ever using `HD-Adb.exe`, and by merging the **live-bound**
+      listening port into `Get-AdbPortCandidates` (rescues a stale `status.adb_port`). Proven live: 30/30
+      isolated getprop OK with a v41 server on 5037 (0/12 on the shared port), 20/20 stable port detection,
+      full Boot-And-Wait end-to-end PASS. +3 resolve tests (25), re-embedded, all suites green (28+25).
 - [x] **bundled a custom Kitsune v31 build so the in-app DenyList works with ReZygisk/NeoZygisk** — the deny
       module now stores entries in the `denylist` table (not `hidelist`), built from
       `Jordan231111/KitsuneMagisk@25fa2159f`. Re-embedded (`reembed-apk.ps1`, SHA `fac319d2…`, round-trip OK),

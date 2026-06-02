@@ -90,7 +90,24 @@ if (-not $Debugfs) {
 }
 if (-not $Conf)    { $Conf = Join-Path $DataRoot 'bluestacks.conf' }
 if (-not $Vhd -and $Instance) { $Vhd = Join-Path $DataRoot "Engine\$Instance\Root.vhd" }
-$Adb    = Join-Path $Install 'HD-Adb.exe'
+# Resolve BlueStacks' OWN adb (HD-Adb.exe). We deliberately do NOT fall back to a system adb.exe:
+# mixing a system adb (e.g. Android SDK platform-tools v1.0.41) with BlueStacks' HD-Adb (v1.0.36)
+# triggers the "adb server version doesn't match this client; killing..." war -- the two kill each
+# other's server, getprop/shell calls fail intermittently, and a fully-booted instance can still
+# fail Boot-And-Wait with "did not become adb-reachable". So we pin HD-Adb.exe specifically.
+function Resolve-HdAdb {
+    $c = New-Object System.Collections.Generic.List[string]
+    if($Install){ [void]$c.Add((Join-Path $Install 'HD-Adb.exe')) }
+    if($reg -and $reg.InstallDir){ [void]$c.Add((Join-Path ($reg.InstallDir.TrimEnd('\','/')) 'HD-Adb.exe')) }
+    foreach($p in @((Join-Path $env:ProgramFiles 'BlueStacks_nxt\HD-Adb.exe'),
+                    (Join-Path ${env:ProgramFiles(x86)} 'BlueStacks_nxt\HD-Adb.exe'),
+                    (Join-Path $env:ProgramFiles 'BlueStacks_msi5\HD-Adb.exe'),
+                    (Join-Path ${env:ProgramFiles(x86)} 'BlueStacks_msi5\HD-Adb.exe'))){ [void]$c.Add($p) }
+    foreach($p in $c){ if($p -and (Test-Path -LiteralPath $p)){ return (Resolve-Path -LiteralPath $p).Path } }
+    $g = Get-Command 'HD-Adb.exe' -ErrorAction SilentlyContinue; if($g){ return $g.Source }
+    return (Join-Path $Install 'HD-Adb.exe')   # most-likely path even if absent (a later check reports it)
+}
+$Adb    = Resolve-HdAdb
 $Player = Join-Path $Install 'HD-Player.exe'
 $BsrSu  = if($BsrSuPath){$BsrSuPath}else{ Join-Path $Here 'su_src\bsr_su' }   # the setuid bootstrap su (4968 B)
 
@@ -371,10 +388,54 @@ function Set-ConfKey($key,$val){
 
 # ---- adb helpers ----
 function Adb([string[]]$a){ (& $Adb @a 2>&1 | Out-String) }
-# Candidate adb ports for THIS instance, in priority order, from BlueStacks' OWN conf -- NEVER hardcoded
-# to 5555. status.adb_port is the runtime port BlueStacks writes on boot; adb_port is the Multi-Instance
-# Manager's assigned port (clones get 5585/5595/...); 5555 is only a last-resort fallback. Boot-And-Wait
-# tries each AND verifies identity, so a stale status value or a foreign emulator on a port can't mislead.
+
+# Force HD-Adb onto its OWN private server port so a DIFFERENT-version system adb on the default 5037
+# (e.g. Android SDK platform-tools, which is v1.0.41 vs BlueStacks' HD-Adb v1.0.36) can't kill our
+# server mid-run. That version clash ("server version doesn't match; killing...") silently breaks
+# getprop/shell calls -- which is exactly how a fully-booted instance still trips Boot-And-Wait's
+# "did not become adb-reachable" throw. A private port ALSO gives us a clean transport table (no stale
+# 'offline' devices left by other adb sessions). HD-Adb v1.0.36 honours ANDROID_ADB_SERVER_PORT.
+$Script:AdbServerInit = $false
+function Initialize-AdbServer{
+    if(-not $env:ANDROID_ADB_SERVER_PORT){ $env:ANDROID_ADB_SERVER_PORT = '15037' }
+    if(-not (Test-Path -LiteralPath $Adb)){ return }
+    if(-not $Script:AdbServerInit){ & $Adb @('kill-server') *>$null; $Script:AdbServerInit=$true }  # clean slate on OUR port
+    & $Adb @('start-server') *>$null   # idempotent; also revives the server after Kill-BlueStacks nukes HD-Adb
+}
+
+# Test seam: the unit tests dot-source this file and set $Script:LiveAdbPortProbe to a scriptblock so
+# the live scan is deterministic (it otherwise depends on what is really listening on the host).
+$Script:LiveAdbPortProbe = $null
+# Ports actually LISTENING in the BlueStacks adb band right now. This catches what the conf can get
+# wrong: a clone can rebind a port that differs from BOTH status.adb_port and adb_port (verified in the
+# wild -- when an instance's usual port is held by a leftover socket, BlueStacks records one port but
+# binds another). We do NOT filter by owning process (the forwarder may be a privileged VM proc we
+# can't name without elevation); every candidate is still verified by getprop + Is-BlueStacks in
+# Boot-And-Wait, so a non-instance port here is harmless. Band 5550-5900 spans BlueStacks' clone ports
+# (base 5555, clones +10 per instance => _9 = 5645, etc.).
+function Get-LiveAdbPorts{
+    if($Script:LiveAdbPortProbe){ return @(& $Script:LiveAdbPortProbe) }
+    $out=New-Object System.Collections.Generic.List[string]
+    try{
+        Get-NetTCPConnection -State Listen -ErrorAction Stop |
+            Where-Object { $_.LocalPort -ge 5550 -and $_.LocalPort -le 5900 } |
+            ForEach-Object { [void]$out.Add([string]$_.LocalPort) }
+    }catch{
+        try{   # fallback for hosts without the NetTCPIP module
+            foreach($ln in (netstat -ano -p tcp 2>$null)){
+                if($ln -match 'LISTENING' -and $ln -match ':(\d{4,5})\b'){ $p=[int]$Matches[1]; if($p -ge 5550 -and $p -le 5900){ [void]$out.Add([string]$p) } }
+            }
+        }catch{}
+    }
+    return @($out | Sort-Object -Unique)
+}
+
+# Candidate adb ports for THIS instance, in priority order. status.adb_port is the runtime port
+# BlueStacks writes on boot; adb_port is the Multi-Instance Manager's assigned port (clones get
+# 5585/5595/...). Those (from BlueStacks' OWN conf) come FIRST -- authoritative when fresh. Then the
+# actually-bound listening ports, which rescue us when the conf is stale. 5555 is the last resort.
+# NEVER hardcoded to a single value; Boot-And-Wait tries each AND verifies identity, so a stale conf
+# value or a foreign emulator on a port can't mislead.
 function Get-AdbPortCandidates{
     $cands=New-Object System.Collections.Generic.List[string]
     if($Conf -and (Test-Path $Conf)){
@@ -386,6 +447,7 @@ function Get-AdbPortCandidates{
             }
         }catch{}
     }
+    foreach($lp in @(Get-LiveAdbPorts)){ [void]$cands.Add($lp) }   # live bound ports rescue a stale conf
     [void]$cands.Add('5555')
     $seen=@{}; $out=@(); foreach($c in $cands){ if(-not $seen.ContainsKey($c)){ $seen[$c]=$true; $out+=$c } }
     ,$out
@@ -423,6 +485,7 @@ function AdbTry([string[]]$a,[int]$tries=4){
 }
 function AdbSu([string]$serial,[string]$cmd){ AdbShellRetry $serial "/system/xbin/su -c '$cmd'" }
 function Boot-And-Wait([int]$timeoutSec=300){
+    Initialize-AdbServer   # pin HD-Adb to its private server port BEFORE any connect (version-conflict immunity)
     Say "[*] launching instance $Instance ..." Cyan
     Start-Process -FilePath $Player -ArgumentList @('--instance',$Instance) | Out-Null
     # Find the adb endpoint from BlueStacks' OWN per-instance conf ports (re-read each pass: BlueStacks

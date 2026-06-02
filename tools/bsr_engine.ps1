@@ -887,6 +887,10 @@ function AdbShell([string]$cmd) { return AdbS @('shell', $cmd) }
 function Connect-WaitBoot([int]$timeoutSec) {
     $port = if ($AdbPort) { $AdbPort } else { '5555' }
     $Script:Serial = "127.0.0.1:$port"
+    # Isolate HD-Adb on its own server port so a different-version system adb (e.g. Android SDK
+    # platform-tools) on the default 5037 can't kill our server mid-run (the version-mismatch churn
+    # that makes getprop/shell calls fail and a booted instance look "not adb-reachable").
+    if (-not $env:ANDROID_ADB_SERVER_PORT) { $env:ANDROID_ADB_SERVER_PORT = '15037' }
     AdbRaw @('start-server') | Out-Null
     $sw = [System.Diagnostics.Stopwatch]::StartNew()
     $connected = $false
