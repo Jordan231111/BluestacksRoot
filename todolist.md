@@ -1,6 +1,11 @@
 # Todo List
 
 ## Done
+- [x] **bundled a custom Kitsune v31 build so the in-app DenyList works with ReZygisk/NeoZygisk** — the deny
+      module now stores entries in the `denylist` table (not `hidelist`), built from
+      `Jordan231111/KitsuneMagisk@25fa2159f`. Re-embedded (`reembed-apk.ps1`, SHA `fac319d2…`, round-trip OK),
+      refreshed `tools/magisk_databin/`, bumped `tests/Check-Embedded-Sync.ps1`, replaced the reference APK,
+      README transparency note + CHANGELOG v10. (live-instance E2E re-confirm pending)
 - [x] **bumped bundled Magisk → Kitsune Mask v31** (`1q23lyc45` fork; `magisk -c` 31.0-kitsune / 31000) via new
       `tools/reembed-apk.ps1` (byte-level splice + SHA-256 round-trip); refreshed `tools/magisk_databin/`
       (`tools/extract-databin.ps1`); `tests/Check-Embedded-Sync.ps1` now guards the embedded APK SHA. No

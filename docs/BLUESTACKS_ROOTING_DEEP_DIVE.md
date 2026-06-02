@@ -243,7 +243,7 @@ Re‑verified from `recovered/BstkRooter/` (decompiled "Root" `fcn.14001d370` + 
 | Stock bindmount (extracted from factory) | `tools/su_src/bindmount.orig` (1339 B) |
 | Modified bindmount (bootstrap) | `tools/su_src/bindmount.mod` |
 | Magisk databin (extracted from APK) | `tools/magisk_databin/` |
-| Magisk APK (manager + all binaries) | `Working Example & Fix/MagiskMyStableBuild.apk` |
+| Magisk APK (manager + all binaries) | `Working Example & Fix/MagiskMyStableBuild.apk` — **custom Kitsune v31** (`denylist`-table patch; see README / CHANGELOG v10) |
 | Engine (patch, conf, ext4, Root/Unroot) | `tools/bsr_engine.ps1` (embedded in `blueStackRoot.cmd`) |
 | Offline su inject (bootstrap) | `tests/rootvhd-hook.ps1` |
 | Offline bsr_su remove + stock bindmount restore | `tests/remove-bsr-su.ps1` |

@@ -19,6 +19,9 @@ Everything here is built from steps proven on this machine; the one offline step
 - **Matching Magisk APK present.** Use the same build you want installed, e.g.
   `Working Example & Fix\MagiskMyStableBuild.apk`. This single file provides both the manager app
   and every Magisk binary. (A different Magisk version → pass that APK; nothing else changes.)
+  > The bundled `MagiskMyStableBuild.apk` is a **custom Kitsune v31 build** (a 3-line `denylist`-table patch so
+  > Magisk's in-app DenyList works with ReZygisk/NeoZygisk) — see the README "Is this safe?" section and
+  > CHANGELOG v10. To use stock upstream Magisk instead, just pass its APK here.
 - **Know your instance name** (default `Rvc64`) and paths:
   - Root.vhd: `C:\ProgramData\BlueStacks_nxt\Engine\<Instance>\Root.vhd`
   - conf: `C:\ProgramData\BlueStacks_nxt\bluestacks.conf`

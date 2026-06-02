@@ -5,6 +5,33 @@ Player — from one file, fully automatically. Releases are grouped by the BlueS
 
 ---
 
+## v10 — Custom Kitsune build: the in-app DenyList now works with ReZygisk · 2026-06-02
+
+Swaps the bundled Magisk for a **custom build of Kitsune Mask v31** (still `31.0-kitsune`, versionCode
+31000) that fixes a long-standing table mismatch. Kitsune's DenyList UI/CLI wrote app entries to the
+`hidelist` table, but external ptrace-Zygisk modules (**ReZygisk / NeoZygisk**) read the `denylist` table —
+so toggling an app in Magisk's own hide list had **no effect** under those modules, and you had to run
+`magisk --sqlite "INSERT INTO denylist ..."` by hand.
+
+- 🩹 **The patch (3 lines).** In `native/src/core/deny/utils.cpp` the deny module's default table is now
+  `denylist` instead of `hidelist` (SuList mode still uses `sulist`, which those modules also read). Built from
+  [`Jordan231111/KitsuneMagisk@25fa2159f`](https://github.com/Jordan231111/KitsuneMagisk/tree/kitsune), a fork
+  of `1q23lyc45/KitsuneMagisk`. Result: the **in-app DenyList toggle now actually hides root** for
+  ReZygisk/NeoZygisk-protected apps — no SQLite editing needed.
+- 📦 **New embedded APK.** SHA-256 `fac319d2de262fcfff1684e13e1a5c61c486d2a773a7a8ffcfdbfe6f763a7fd4`
+  (12,574,128 bytes — same size as the stock v31 APK, since `"hidelist"`→`"denylist"` is byte-length-neutral).
+  Verified **rebuilt, not re-signed**: `lib/x86_64/libmagisk64.so` and `lib/x86/libmagisk32.so` both differ
+  from the stock APK.
+- 🔁 **No blueStackRoot pipeline change.** Package id (`io.github.huskydg.magisk`) and the APK's `lib/$ABI` +
+  `assets/*.sh` layout are unchanged, so the version-agnostic extract/install/undo path roots exactly as before.
+- 🛠️ **Repo kept in sync + transparent.** Re-spliced with `tools/reembed-apk.ps1` (byte-level, SHA-256
+  round-trip); refreshed `tools/magisk_databin/` via `tools/extract-databin.ps1`; updated the embedded-APK hash
+  asserted by `tests/Check-Embedded-Sync.ps1`; replaced the reference `Working Example & Fix/MagiskMyStableBuild.apk`;
+  README "Is this safe?" now states plainly that the APK is a custom build and links the source/diff. (Live E2E
+  `VERIFY PASS` to be re-confirmed on an instance.)
+
+---
+
 ## v9 — Kitsune Mask v31 (release build) · 2026-06-02
 
 Re-bundles **Kitsune Mask v31** using the version-tagged **31.0-kitsune** (versionCode 31000) build,
