@@ -42,7 +42,8 @@ foreach ($p in @(@('ENGINE', 'tools\bsr_engine.ps1'), @('MAGISK', 'tools\bsr_mag
 
 # --- embedded Magisk APK: decode the base64 blob and verify its SHA-256 (guards against APK drift;
 #     the APK is re-embedded by tools\reembed-apk.ps1, which round-trips this same hash). ---
-$ApkSha256 = 'f554c9643a527cda4910e1a044a2bfabd5f034f456587bc995895092dfe9b933'
+# Custom Kitsune v31 build (denylist-table patch) from Jordan231111/KitsuneMagisk@25fa2159f. See README / CHANGELOG.
+$ApkSha256 = 'fac319d2de262fcfff1684e13e1a5c61c486d2a773a7a8ffcfdbfe6f763a7fd4'
 try {
     $apkB64 = (Extract 'APK') -replace '[^A-Za-z0-9+/=]', ''
     $apkBytes = [Convert]::FromBase64String($apkB64)

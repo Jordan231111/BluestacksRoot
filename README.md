@@ -10,7 +10,7 @@
 
 **Root BlueStacks 5 / MSI App Player with real Magisk — from one file, with no traces left behind.**
 **Run `blueStackRoot.cmd` as administrator, pick your Android version, and you're rooted.**
-**The genuine Magisk Delta (Kitsune) APK is now bundled inside the `.cmd` itself** — no separate Magisk
+**A Magisk Delta (Kitsune v31) build is now bundled inside the `.cmd` itself** — no separate Magisk
 download, no other files, nothing to install. Works on the latest BlueStacks (5.22.169).
 
 ---
@@ -96,12 +96,18 @@ BlueStacks and carries binaries inside it. Heuristic scanners flag that pattern.
   | `__BSR_ENGINE__` / `__BSR_MAGISK__` | The two PowerShell scripts above (plain text) | Diff against `tools/*.ps1` in this repo |
   | `__BSR_DFS__` | `debugfs` from the standard Cygwin **e2fsprogs** suite | Standard open-source ext4 tool |
   | `__BSR_SU__` / `__BSR_BSRSU__` | Tiny `su` binaries used only *during* install, then **erased** | Source in [`tools/su_src/`](tools/su_src) |
-  | `__BSR_APK__` | The **official, unmodified Kitsune Mask (Magisk Delta) v31** APK | SHA-256 below |
+  | `__BSR_APK__` | A **custom, open-source build of Kitsune Mask (Magisk Delta) v31** — one small documented patch | SHA-256 + source below |
 
-- **The Magisk APK is the real one.** Its SHA-256 is
-  `f554c9643a527cda4910e1a044a2bfabd5f034f456587bc995895092dfe9b933` (12,574,128 bytes) — the genuine
-  [Kitsune Mask v31 build](https://github.com/1q23lyc45/KitsuneMagisk/releases) (`magisk -c` → `31.0-kitsune`,
-  versionCode 31000). You're trusting Magisk, not me.
+- **The Magisk APK is a custom, open-source build of Kitsune Mask v31** (`magisk -c` → `31.0-kitsune`,
+  versionCode 31000). SHA-256
+  `fac319d2de262fcfff1684e13e1a5c61c486d2a773a7a8ffcfdbfe6f763a7fd4` (12,574,128 bytes). It is built from
+  [`Jordan231111/KitsuneMagisk`](https://github.com/Jordan231111/KitsuneMagisk/tree/kitsune) (commit
+  `25fa2159f`) — a fork of [`1q23lyc45/KitsuneMagisk`](https://github.com/1q23lyc45/KitsuneMagisk) with a
+  **single 3-line source patch**: the DenyList backend stores entries in the `denylist` table instead of
+  `hidelist`, so apps you toggle in Magisk's **own DenyList UI** are picked up by the Zygisk implementations
+  (ReZygisk / NeoZygisk) that read `denylist` — i.e. the in-app hide toggle finally hides root. Nothing else
+  is changed. **Don't just trust me — read the one-commit diff and rebuild it yourself**; the SHA-256 above
+  is exactly what's embedded in the `.cmd` (re-verifiable with `tests/Check-Embedded-Sync.ps1`).
 - **Verify it yourself in 30 seconds.** Scan the file on [VirusTotal](https://www.virustotal.com/), or
   extract any embedded blob and check its hash — open the `.cmd` in any text editor and the `__BSR_*__`
   markers are right there. The whole point of this project is that you *don't* have to trust a black box.
