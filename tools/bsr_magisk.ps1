@@ -60,29 +60,7 @@ function Redact-UserPath($value){
     $s = $s -replace '(?i)(/Users/)([^/]+)(?=$|/)','${1}xxxxx'
     $s
 }
-# --------- optional redacted file log (extensive logging for debug builds) ----------
-# Stays off until Init-BsrLog runs, which only happens on the real dispatch path -- never when the unit
-# tests dot-source this file. Say tees to it; LogV writes verbose adb/boot detail to the FILE ONLY so the
-# console output is unchanged. All sinks go through Redact-UserPath, so the account name never lands in a log.
-$Script:LogFile = $null
-function Init-BsrLog {
-    if($Script:LogFile){ return }
-    try{
-        $dir = Join-Path $env:TEMP 'bsr_work'
-        if(-not (Test-Path $dir)){ New-Item -ItemType Directory -Path $dir -Force | Out-Null }
-        $Script:LogFile = Join-Path $dir ("bsr_run_{0}_{1}.log" -f $Action,(Get-Date -Format 'yyyyMMdd_HHmmss'))
-        [System.IO.File]::AppendAllText($Script:LogFile, (Redact-UserPath ("==== bsr_magisk $Action  $(Get-Date -Format o)  PS$($PSVersionTable.PSVersion)  instance=$Instance ====`r`n")))
-    }catch{ $Script:LogFile = $null }
-}
-function Say($m,$c='Gray'){
-    $r = Redact-UserPath $m
-    Write-Host $r -ForegroundColor $c
-    if($Script:LogFile){ try{ [System.IO.File]::AppendAllText($Script:LogFile, ([string]$r + "`r`n")) }catch{} }
-}
-function LogV($m){
-    if(-not $Script:LogFile){ return }
-    try{ [System.IO.File]::AppendAllText($Script:LogFile, ('    {0:HH:mm:ss} {1}' -f (Get-Date), (Redact-UserPath ([string]$m))) + "`r`n") }catch{}
-}
+function Say($m,$c='Gray'){ Write-Host (Redact-UserPath $m) -ForegroundColor $c }
 function Fwd($p){ $p -replace '\\','/' }
 
 # --------- normalize incoming paths (callers may pass a trailing '\' or a stray '"') ----------
@@ -695,19 +673,16 @@ function Boot-And-Wait([int]$timeoutSec=300){
             $conn=(& $Adb @('connect',$cand) 2>&1 | Out-String)
             if($conn -match '(?i)(connected to|already connected)'){ $sawLife=$true }
             $state = Get-AdbState $cand
-            LogV "connect $cand -> [$(Compact-Line $conn 60)] state=[$state]"
             # The slow-boot fix: a connected-but-offline transport never self-heals, so force a fresh socket.
             if($state -ne 'device'){
-                $rc = Repair-AdbTransport $cand
+                Repair-AdbTransport $cand | Out-Null
                 $state = Get-AdbState $cand
-                LogV "heal $cand -> reconnect=[$(Compact-Line $rc 60)] state=[$state]"
             }
             if($state -ne 'device'){ $lastDiag = "$cand state=[$state]"; continue }
             # boot_completed must be EXACTLY "1" on its own line -- a "device '...:port' not found" error
             # contains the port digits and would false-positive a naive -match '1'.
             $out=(& $Adb @('-s',$cand,'shell','getprop','sys.boot_completed') 2>&1 | Out-String)
             $lastDiag = "$cand state=device boot=[$(Compact-Line $out)]"
-            LogV "getprop sys.boot_completed @ $cand -> [$(Compact-Line $out)]"
             if(-not (($out -split "`n" | ForEach-Object { $_.Trim() }) -contains '1')){ continue }
             if(Is-BlueStacks $cand){ $serial=$cand; break }      # confirmed: our instance
             elseif(-not $fallback){ $fallback=$cand }            # booted, but identity unconfirmed
@@ -1003,7 +978,6 @@ function Do-Undo {
 # Only dispatch when run normally (-File / &). When DOT-SOURCED (. bsr_magisk.ps1) -- e.g. by the test
 # suite to unit-test the resolver functions -- skip the pipeline so nothing boots or writes.
 if ($MyInvocation.InvocationName -ne '.') {
-    Init-BsrLog
     try {
         switch($Action){
             'Prep'     { Do-Prep }
@@ -1022,6 +996,5 @@ if ($MyInvocation.InvocationName -ne '.') {
         # forever; we only ever started one if Initialize-AdbServer ran (an online action), so tidy it
         # up so nothing of ours lingers on the port after the tool exits. (runs even if an action threw)
         if ($Script:AdbServerInit -and (Test-Path -LiteralPath $Adb)) { & $Adb @('kill-server') *>$null }
-        if ($Script:LogFile) { Say "[*] full step-by-step debug log: $Script:LogFile" DarkGray }
     }
 }
