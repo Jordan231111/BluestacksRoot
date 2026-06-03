@@ -108,6 +108,7 @@ if (-not $Debugfs) {
 }
 if (-not $Conf)    { $Conf = Join-Path $DataRoot 'bluestacks.conf' }
 if (-not $Vhd -and $Instance) { $Vhd = Join-Path $DataRoot "Engine\$Instance\Root.vhd" }
+$PlayerLog = Join-Path $DataRoot 'Logs\Player.log'   # host-side boot-phase log; every line is tagged with the instance name
 # Resolve BlueStacks' OWN adb (HD-Adb.exe). We deliberately do NOT fall back to a system adb.exe:
 # mixing a system adb (e.g. Android SDK platform-tools v1.0.41) with BlueStacks' HD-Adb (v1.0.36)
 # triggers the "adb server version doesn't match this client; killing..." war -- the two kill each
@@ -498,6 +499,36 @@ function Get-LiveAdbPorts{
     return @($out | Sort-Object -Unique)
 }
 
+# Test seam: unit tests set this to a scriptblock returning the Player.log text to scan.
+$Script:PlayerLogProbe = $null
+$Script:PlayerLogOffset = 0
+# Mark the current end of Player.log so the readiness scan only looks at THIS boot's lines (the log is
+# append-only and shared across instances/runs, so an old [Ready] from a previous session must not count).
+function Set-PlayerLogMark { $Script:PlayerLogOffset = if($PlayerLog -and (Test-Path $PlayerLog)){ try{ (Get-Item $PlayerLog).Length }catch{ 0 } } else { 0 } }
+# New Player.log text since the mark (bounded to the last ~1 MB so a very chatty log stays cheap to scan).
+function Get-PlayerLogNew {
+    if($Script:PlayerLogProbe){ return [string](& $Script:PlayerLogProbe) }
+    if(-not ($PlayerLog -and (Test-Path $PlayerLog))){ return '' }
+    $txt=''
+    try{
+        $fs=[IO.File]::Open($PlayerLog,'Open','Read','ReadWrite')
+        try{
+            $len=$fs.Length; $start=$Script:PlayerLogOffset
+            if($len -lt $start){ $start=0 }
+            if(($len - $start) -gt 1MB){ $start=$len - 1MB }
+            $fs.Position=$start
+            $txt=(New-Object IO.StreamReader($fs)).ReadToEnd()
+        } finally { $fs.Close() }
+    }catch{ $txt='' }
+    $txt
+}
+# Host-side boot signals (no adb needed -- immune to the offline-transport race). BlueStacks tags every
+# Player.log line "<instance> [<phase>]" and the phase walks StartingKernel -> StartingAndroid -> Ready.
+# Ready = fully booted (home launcher up); Alive = any phase line for THIS instance (cheap liveness a false
+# WMI command-line read cannot contradict, so it stops the endless relaunch on a slow boot).
+function Test-PlayerLogReady([string]$name=$Instance){ $t=Get-PlayerLogNew; if(-not $t){ return $false }; [bool]($t -match ('(?im)\s'+[regex]::Escape($name)+'\s+\[Ready\]')) }
+function Test-PlayerLogAlive([string]$name=$Instance){ $t=Get-PlayerLogNew; if(-not $t){ return $false }; [bool]($t -match ('(?im)\s'+[regex]::Escape($name)+'\s+\[(StartingKernel|StartingAndroid|Ready|Stopping)\]')) }
+
 # Candidate adb ports for THIS instance, in priority order. status.adb_port is the runtime port
 # BlueStacks writes on boot; adb_port is the Multi-Instance Manager's assigned port (clones get
 # 5585/5595/...). Those (from BlueStacks' OWN conf) come FIRST -- authoritative when fresh. Then the
@@ -528,6 +559,21 @@ function Is-BlueStacks([string]$serial){
 }
 $Script:AdbSerial = $null   # the pinned 127.0.0.1:<port> transport for the current boot
 function AdbConnect{ $s = if($Script:AdbSerial){$Script:AdbSerial}else{"127.0.0.1:$((Get-AdbPortCandidates)[0])"}; & $Adb @('connect',$s) *>$null }
+# Transport state for $serial from `adb get-state`: 'device' (usable), 'offline' (socket up but handshake
+# not done), or an error line. Returns the LAST non-empty, non-'* daemon *' token so daemon-start noise on
+# the first call doesn't mask the real state. (Parse split out so it is unit-testable without adb.)
+function Parse-AdbState([string]$text){ ($text -split "`r?`n" | ForEach-Object { $_.Trim() } | Where-Object { $_ -and ($_ -notmatch '^\*') } | Select-Object -Last 1) }
+function Get-AdbState([string]$serial){ Parse-AdbState (& $Adb @('-s',$serial,'get-state') 2>&1 | Out-String) }
+# Force a FRESH transport for a wedged 'offline' TCP device. adb never re-handshakes a connected-but-offline
+# socket -- a plain 'connect' on it just returns 'already connected' and leaves it offline -- so on a slow
+# boot the transport can sit offline indefinitely while the guest is in fact up. disconnect (drop the dead
+# socket) + connect (new handshake against a now-ready adbd) is what recovers it; the same thing a manual
+# kill-server+connect does, but scoped to this one transport so other instances are left untouched.
+function Repair-AdbTransport([string]$serial){
+    & $Adb @('disconnect',$serial) *>$null
+    Start-Sleep -Milliseconds 600
+    (& $Adb @('connect',$serial) 2>&1 | Out-String)
+}
 # False if adb reported a transient transport/device error (common while a freshly-booted instance
 # is still restarting adbd). Such output should be retried after a reconnect, not trusted.
 function AdbOk([string]$o){ -not ($o -match "device '.*' not found" -or $o -match 'device .* not found' -or $o -match 'no devices/emulators found' -or $o -match 'device offline' -or $o -match 'error: closed') }
@@ -537,7 +583,7 @@ function AdbShellRetry([string]$serial,[string]$cmd,[int]$tries=6){
     for($k=0;$k -lt $tries;$k++){
         $o=(& $Adb @('-s',$serial,'shell',$cmd) 2>&1 | Out-String)
         if(AdbOk $o){ return $o }
-        Start-Sleep 3; & $Adb @('start-server') *>$null; AdbConnect
+        Start-Sleep 3; & $Adb @('start-server') *>$null; Repair-AdbTransport $serial | Out-Null
     }
     $o
 }
@@ -547,7 +593,7 @@ function AdbTry([string[]]$a,[int]$tries=4){
     for($k=0;$k -lt $tries;$k++){
         $o=(& $Adb @($a) 2>&1 | Out-String)
         if(AdbOk $o){ return $o }
-        Start-Sleep 3; & $Adb @('start-server') *>$null; AdbConnect
+        Start-Sleep 3; & $Adb @('start-server') *>$null; if($Script:AdbSerial){ Repair-AdbTransport $Script:AdbSerial | Out-Null } else { AdbConnect }
     }
     $o
 }
@@ -575,49 +621,74 @@ function Boot-And-Wait([int]$timeoutSec=300){
     Initialize-AdbServer   # pin HD-Adb to its private server port BEFORE any connect (version-conflict immunity)
     if(-not (Test-Path -LiteralPath $Player)){ throw "HD-Player.exe not found: $Player" }
     $sw=[Diagnostics.Stopwatch]::StartNew()
-    $lastLaunch=-999; $lastProgress=-999; $extended=$false; $sawLife=$false; $lastDiag=''
+    $lastLaunch=-999; $lastProgress=-999; $extended=$false; $sawLife=$false; $sawReady=$false; $readyAt=-1; $lastDiag=''
     function Start-BsrInstanceLaunch {
         Say "[*] launching instance $Instance ..." Cyan
         Start-Process -FilePath $Player -ArgumentList @('--instance',$Instance) | Out-Null
         $sw.Elapsed.TotalSeconds
     }
     $lastLaunch = Start-BsrInstanceLaunch
+    Set-PlayerLogMark   # only count [Ready] lines written AFTER this launch, not a prior boot's
     Say "[*] HD-Adb server port: $env:ANDROID_ADB_SERVER_PORT" DarkGray
-    # Find the adb endpoint from BlueStacks' OWN per-instance conf ports (re-read each pass: BlueStacks
-    # writes the actual bound port during boot). Try each candidate, require boot_completed=1, and confirm
-    # it is really our BlueStacks instance -- so neither a stale port nor a foreign emulator on 5555 can
-    # mislead us. We pin to that 127.0.0.1:<port> transport (never the transient emulator-XXXX serial).
-    $serial=$null; $fallback=$null
+    # Find the adb endpoint from BlueStacks' OWN per-instance conf ports (status.adb_port first). Each pass we
+    # connect, read get-state, and -- crucially -- HEAL a wedged 'offline' transport (disconnect + reconnect)
+    # instead of letting a plain 'connect' no-op on it; THEN require boot_completed=1 and confirm the device
+    # is really our BlueStacks instance. A host-side Player.log [Ready] is an independent 'guest booted'
+    # signal, so a slow boot is tolerated while a genuinely dead launch still fails fast.
+    $serial=$null; $fallback=$null; $primary=@(Get-AdbPortCandidates)[0]
     while(-not $serial){
         $elapsed=$sw.Elapsed.TotalSeconds
         $limit = if($sawLife){ $timeoutSec + 300 } else { $timeoutSec }
         if($elapsed -ge $limit){ break }
+        # Guest booted (Player.log [Ready]) but adb never came online even after healing -> conclusive
+        # failure; don't burn the full slow-boot grace on it.
+        if($sawReady -and $readyAt -ge 0 -and ($elapsed - $readyAt) -ge 120){ break }
+        # Clearly NOT a slow boot: nothing alive at all after a short while -> stop instead of waiting it out.
+        if(-not $sawLife -and $elapsed -ge 90){ break }
         if($elapsed -ge $timeoutSec -and $sawLife -and -not $extended){
             Say "[~] instance is alive but not adb-ready after $timeoutSec s; extending wait (slow BlueStacks boot)." Yellow
             $extended=$true
         }
         Start-Sleep 3; & $Adb @('start-server') *>$null
+
+        # Liveness is instance-specific (so another running instance can't mask a dead launch) and does NOT
+        # trust the WMI command-line read alone (it reads null / != instance on some hosts -> a false zero).
         $playerCount = Get-HdPlayerCount $Instance
-        if($playerCount -gt 0){ $sawLife=$true }
-        if($playerCount -eq 0 -and ($elapsed - $lastLaunch) -ge 45){
-            Say "[~] no HD-Player process seen yet; retrying launch for $Instance ..." Yellow
+        $ourPortUp   = (@(Get-LiveAdbPorts) -contains $primary)
+        $logAlive    = Test-PlayerLogAlive $Instance
+        $alive = ($playerCount -gt 0 -or $ourPortUp -or $logAlive)
+        if($alive){ $sawLife=$true }
+        if(-not $sawReady -and (Test-PlayerLogReady $Instance)){ $sawReady=$true; $sawLife=$true; $readyAt=$elapsed; Say "[+] Player.log: $Instance reached [Ready] (guest booted)" Green }
+
+        # Relaunch ONLY when nothing says the instance is alive -- a false WMI zero no longer spams launches
+        # while the instance is clearly up (its adb port is listening or Player.log is advancing).
+        if(-not $alive -and ($elapsed - $lastLaunch) -ge 45){
+            Say "[~] instance not detected (no process / adb port / Player.log); retrying launch for $Instance ..." Yellow
             $lastLaunch = Start-BsrInstanceLaunch
         }
+
         $cands = @(Get-AdbPortCandidates)
         foreach($port in $cands){
             $cand="127.0.0.1:$port"
             $conn=(& $Adb @('connect',$cand) 2>&1 | Out-String)
             if($conn -match '(?i)(connected to|already connected)'){ $sawLife=$true }
+            $state = Get-AdbState $cand
+            # The slow-boot fix: a connected-but-offline transport never self-heals, so force a fresh socket.
+            if($state -ne 'device'){
+                Repair-AdbTransport $cand | Out-Null
+                $state = Get-AdbState $cand
+            }
+            if($state -ne 'device'){ $lastDiag = "$cand state=[$state]"; continue }
             # boot_completed must be EXACTLY "1" on its own line -- a "device '...:port' not found" error
             # contains the port digits and would false-positive a naive -match '1'.
             $out=(& $Adb @('-s',$cand,'shell','getprop','sys.boot_completed') 2>&1 | Out-String)
-            $lastDiag = "$cand connect=[$(Compact-Line $conn)] boot=[$(Compact-Line $out)]"
+            $lastDiag = "$cand state=device boot=[$(Compact-Line $out)]"
             if(-not (($out -split "`n" | ForEach-Object { $_.Trim() }) -contains '1')){ continue }
             if(Is-BlueStacks $cand){ $serial=$cand; break }      # confirmed: our instance
             elseif(-not $fallback){ $fallback=$cand }            # booted, but identity unconfirmed
         }
         if(($sw.Elapsed.TotalSeconds - $lastProgress) -ge 30 -and -not $serial){
-            Say ("[~] waiting for adb: elapsed={0:n0}s hdplayer($Instance)={1} candidates={2} last={3}" -f $sw.Elapsed.TotalSeconds,$playerCount,($cands -join ','),$lastDiag) DarkGray
+            Say ("[~] waiting for adb: elapsed={0:n0}s hdplayer($Instance)={1} ready={2} candidates={3} last={4}" -f $sw.Elapsed.TotalSeconds,$playerCount,$sawReady,($cands -join ','),$lastDiag) DarkGray
             $lastProgress=$sw.Elapsed.TotalSeconds
         }
     }
@@ -625,11 +696,11 @@ function Boot-And-Wait([int]$timeoutSec=300){
     if(-not $serial){ throw "instance '$Instance' did not boot / become adb-reachable within $([int]$sw.Elapsed.TotalSeconds) s (adb server port $env:ANDROID_ADB_SERVER_PORT; last: $lastDiag)" }
     $Script:AdbSerial=$serial
     # Stabilize: a freshly-booted instance (esp. a first boot) restarts adbd a few times, which drops the
-    # transport -> the next call fails with "device '127.0.0.1:<port>' not found". Wait until a plain shell
-    # is reliably reachable (3 consecutive hits, reconnecting each time) before handing the serial to callers.
+    # transport -> the next call fails with "device '127.0.0.1:<port>' not found". HEAL (not just reconnect)
+    # on each drop until a plain shell is reliably reachable (3 consecutive hits) before handing it over.
     $stable=0
     for($s=0;$s -lt 30 -and $stable -lt 3;$s++){
-        AdbConnect
+        if((Get-AdbState $serial) -ne 'device'){ Repair-AdbTransport $serial | Out-Null } else { AdbConnect }
         $t=(& $Adb @('-s',$serial,'shell','echo BSR_RDY') 2>&1 | Out-String)
         if($t -match 'BSR_RDY'){ $stable++ } else { $stable=0; Start-Sleep 3 }
     }

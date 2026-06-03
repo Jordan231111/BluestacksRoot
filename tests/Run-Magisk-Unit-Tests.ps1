@@ -226,6 +226,27 @@ try {
     )
     foreach ($c in $adbCases) { Ok "adbok: $($c[0])" ((AdbOk $c[1]) -eq $c[2]) }
 
+    Section 'Parse-AdbState (get-state classifier)'
+    Eq 'state: device' 'device' (Parse-AdbState "device`n")
+    Eq 'state: offline' 'offline' (Parse-AdbState 'offline')
+    Eq 'state: skips daemon-start noise' 'device' (Parse-AdbState "* daemon not running; starting now on tcp:15037 *`n* daemon started successfully *`ndevice")
+    Eq 'state: not-found line preserved' "error: device '127.0.0.1:5555' not found" (Parse-AdbState "error: device '127.0.0.1:5555' not found")
+    Eq 'state: empty -> empty' '' (Parse-AdbState '')
+    Ok 'state: offline is not device' ((Parse-AdbState 'offline') -ne 'device')
+
+    Section 'Player.log boot/liveness signals'
+    $plReady    = '2026-06-03 15:11:46.616-0400 5988 13764 PLR    Rvc64 [Ready] I: HomeActivity shown'
+    $plStarting = '2026-06-03 15:11:10.000-0400 5988 2360  SER    Rvc64 [StartingAndroid] I: GUEST booting'
+    $plOther    = '2026-06-03 15:11:46.616-0400 5988 13764 PLR    Tiramisu64_9 [Ready] I: shown'
+    $plClone    = '2026-06-03 15:11:46.616-0400 5988 13764 PLR    Rvc64_9 [Ready] I: shown'
+    function Probe([string]$txt) { $script:PlayerLogProbe = { $txt }.GetNewClosure() }
+    Probe $plReady;    Ok 'plog: [Ready] -> ready'           (Test-PlayerLogReady 'Rvc64'); Ok 'plog: [Ready] -> alive' (Test-PlayerLogAlive 'Rvc64')
+    Probe $plStarting; Ok 'plog: [StartingAndroid] not ready' (-not (Test-PlayerLogReady 'Rvc64')); Ok 'plog: [StartingAndroid] alive' (Test-PlayerLogAlive 'Rvc64')
+    Probe $plOther;    Ok 'plog: other instance not ready'   (-not (Test-PlayerLogReady 'Rvc64')); Ok 'plog: other instance not alive' (-not (Test-PlayerLogAlive 'Rvc64'))
+    Probe $plClone;    Ok 'plog: clone tag not base ready'   (-not (Test-PlayerLogReady 'Rvc64'))
+    Probe '';          Ok 'plog: empty not ready'            (-not (Test-PlayerLogReady 'Rvc64')); Ok 'plog: empty not alive' (-not (Test-PlayerLogAlive 'Rvc64'))
+    $script:PlayerLogProbe = $null
+
     Section 'Compact-Line'
     Eq 'compact: newline collapse' 'a | b | c' (Compact-Line "a`r`nb`nc" 80)
     Eq 'compact: no truncate at max' 'abcdef' (Compact-Line 'abcdef' 6)
@@ -291,6 +312,7 @@ try {
 } finally {
     $script:LiveAdbPortProbe = $null
     $script:AdbServerPortProbe = $null
+    $script:PlayerLogProbe = $null
     foreach ($d in $script:made) { try { Remove-Item -LiteralPath $d -Recurse -Force -ErrorAction SilentlyContinue } catch { } }
 }
 
