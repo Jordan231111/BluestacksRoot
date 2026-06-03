@@ -18,6 +18,20 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 $Here = if ($PSScriptRoot) { $PSScriptRoot } else { Split-Path -Parent $MyInvocation.MyCommand.Path }
+
+function Redact-UserPath($value) {
+    if ($null -eq $value) { return $value }
+    $s = [string]$value
+    $s = $s -replace '(?i)([A-Z]:[\\/]+Users[\\/]+)([^\\/]+)(?=$|[\\/])', '${1}xxxxx'
+    $s = $s -replace '(?i)(/Users/)([^/]+)(?=$|/)', '${1}xxxxx'
+    $s
+}
+function Say([string]$m, [string]$c = 'Gray') { Write-Host (Redact-UserPath $m) -ForegroundColor $c }
+trap {
+    Say "[!] $($_.Exception.Message)" Red
+    exit 1
+}
+
 if (-not $Cmd) { $Cmd = Join-Path $Here '..\blueStackRoot.cmd' }
 $Cmd = (Resolve-Path $Cmd).Path
 $Apk = (Resolve-Path $Apk).Path
@@ -57,7 +71,7 @@ $out = New-Object byte[] ($contentStart + $newContent.Length + ($bytes.Length - 
 [Array]::Copy($newContent, 0, $out, $contentStart, $newContent.Length)
 [Array]::Copy($bytes, $ei, $out, $contentStart + $newContent.Length, $bytes.Length - $ei)
 [System.IO.File]::WriteAllBytes($Cmd, $out)
-Write-Host ("re-embedded APK: {0:N0} -> {1:N0} bytes (delta {2:N0})" -f $orig, $out.Length, ($out.Length - $orig))
+Say ("re-embedded APK: {0:N0} -> {1:N0} bytes (delta {2:N0})" -f $orig, $out.Length, ($out.Length - $orig))
 
 # --- verify: extract the block back out, strip non-base64, decode, compare SHA-256 + length ---
 $t = [System.IO.File]::ReadAllText($Cmd)
@@ -67,11 +81,11 @@ $i = $t.IndexOf([char]10, $i) + 1
 $emb = ($t.Substring($i, $j - $i) -replace '[^A-Za-z0-9+/=]', '')
 $dec = [Convert]::FromBase64String($emb)
 $embSha = Sha256Hex $dec
-Write-Host ("source APK : {0:N0} bytes  sha256 {1}" -f $apkBytes.Length, $srcSha)
-Write-Host ("embedded   : {0:N0} bytes  sha256 {1}" -f $dec.Length, $embSha)
+Say ("source APK : {0:N0} bytes  sha256 {1}" -f $apkBytes.Length, $srcSha)
+Say ("embedded   : {0:N0} bytes  sha256 {1}" -f $dec.Length, $embSha)
 if ($dec.Length -eq $apkBytes.Length -and $embSha -ceq $srcSha) {
-    Write-Host '  [OK] embedded APK round-trips to the source APK (SHA-256 + length match).' -ForegroundColor Green
+    Say '  [OK] embedded APK round-trips to the source APK (SHA-256 + length match).' Green
     exit 0
 }
-Write-Host '  [FAIL] embedded APK does NOT match the source APK.' -ForegroundColor Red
+Say '  [FAIL] embedded APK does NOT match the source APK.' Red
 exit 1

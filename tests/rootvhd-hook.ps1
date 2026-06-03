@@ -2,11 +2,14 @@
 # /android/system/bin/bindmount so it installs that su over /system/xbin/su at boot.
 # Mirrors the engine's carve/writeback. HD-Player patch stays on. Root.vhd.bsrbak exists.
 $ErrorActionPreference='Stop'
+$Here = if($PSScriptRoot){ $PSScriptRoot } else { Split-Path -Parent $MyInvocation.MyCommand.Path }
+$Repo = Split-Path -Parent $Here
 $Vhd='C:\ProgramData\BlueStacks_nxt\Engine\Rvc64\Root.vhd'
-$Dfs='C:\Users\Jordan\Documents\BluestacksRoot\tools\debugfs\debugfs.exe'
-$SuLocal='C:\Users\Jordan\Documents\BluestacksRoot\tools\su_src\bsr_su'
-$BmLocal='C:\Users\Jordan\Documents\BluestacksRoot\tools\su_src\bindmount.mod'
-function Log($m,$c='Gray'){ Write-Host $m -ForegroundColor $c }
+$Dfs=Join-Path $Repo 'tools\debugfs\debugfs.exe'
+$SuLocal=Join-Path $Repo 'tools\su_src\bsr_su'
+$BmLocal=Join-Path $Repo 'tools\su_src\bindmount.mod'
+function Redact-UserPath($v){ if($null -eq $v){return $v}; $s=[string]$v; $s=$s -replace '(?i)([A-Z]:[\\/]+Users[\\/]+)([^\\/]+)(?=$|[\\/])','${1}xxxxx'; $s=$s -replace '(?i)(/Users/)([^/]+)(?=$|/)','${1}xxxxx'; $s }
+function Log($m,$c='Gray'){ Write-Host (Redact-UserPath $m) -ForegroundColor $c }
 function Fwd($p){ $p -replace '\\','/' }
 
 Log '== kill BlueStacks (unlock Root.vhd) ==' Cyan

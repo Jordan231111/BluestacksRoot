@@ -4,11 +4,14 @@
 # Keeps Magisk's /system install + the HD-Player patch untouched.
 # Backs up the current (Magisk-good) Root.vhd first.
 $ErrorActionPreference='Stop'
+$Here = if($PSScriptRoot){ $PSScriptRoot } else { Split-Path -Parent $MyInvocation.MyCommand.Path }
+$Repo = Split-Path -Parent $Here
 $Vhd='C:\ProgramData\BlueStacks_nxt\Engine\Rvc64\Root.vhd'
 $BakGood='C:\ProgramData\BlueStacks_nxt\Engine\Rvc64\Root.vhd.magiskgood'
-$Dfs='C:\Users\Jordan\Documents\BluestacksRoot\tools\debugfs\debugfs.exe'
-$BmOrig='C:\Users\Jordan\Documents\BluestacksRoot\tools\su_src\bindmount.orig'
-function Log($m,$c='Gray'){ Write-Host $m -ForegroundColor $c }
+$Dfs=Join-Path $Repo 'tools\debugfs\debugfs.exe'
+$BmOrig=Join-Path $Repo 'tools\su_src\bindmount.orig'
+function Redact-UserPath($v){ if($null -eq $v){return $v}; $s=[string]$v; $s=$s -replace '(?i)([A-Z]:[\\/]+Users[\\/]+)([^\\/]+)(?=$|[\\/])','${1}xxxxx'; $s=$s -replace '(?i)(/Users/)([^/]+)(?=$|/)','${1}xxxxx'; $s }
+function Log($m,$c='Gray'){ Write-Host (Redact-UserPath $m) -ForegroundColor $c }
 function Fwd($p){ $p -replace '\\','/' }
 function Read-DeviceBytes($dev,$off,$cnt){ $fs=[System.IO.File]::Open($dev,'Open','Read','ReadWrite'); try{ $sb=[long]([Math]::Floor($off/512)*512); $d=[int]($off-$sb); $need=[int]([Math]::Ceiling(($d+$cnt)/512.0)*512); $b=New-Object byte[] $need; $fs.Position=$sb; [void]$fs.Read($b,0,$need); $r=New-Object byte[] $cnt; [Array]::Copy($b,$d,$r,0,$cnt); $r } finally{ $fs.Close() } }
 function Copy-DeviceToFile($dev,$start,$len,$out){ $fs=[System.IO.File]::Open($dev,'Open','Read','ReadWrite'); try{ $fs.Position=$start; $o=[System.IO.File]::Open($out,'Create','Write','None'); try{ $buf=New-Object byte[] (16MB); [long]$rem=$len; while($rem -gt 0){ $w=[int][Math]::Min([long]$buf.Length,$rem); $n=$fs.Read($buf,0,$w); if($n -le 0){break}; $o.Write($buf,0,$n); $rem-=$n } } finally{ $o.Close() } } finally{ $fs.Close() } }

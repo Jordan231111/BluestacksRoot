@@ -29,8 +29,15 @@ if (-not $Engine) { $Engine = Join-Path $repo 'tools\bsr_engine.ps1' }
 if (-not $Cmd) { $Cmd = Join-Path $repo 'blueStackRoot.cmd' }
 if (-not (Test-Path -LiteralPath $Engine)) { throw "engine not found: $Engine" }
 $Engine = (Resolve-Path -LiteralPath $Engine).Path
-Write-Host "engine: $Engine" -ForegroundColor DarkGray
-Write-Host "cmd:    $Cmd" -ForegroundColor DarkGray
+function Redact-UserPath($value) {
+    if ($null -eq $value) { return $value }
+    $s = [string]$value
+    $s = $s -replace '(?i)([A-Z]:[\\/]+Users[\\/]+)([^\\/]+)(?=$|[\\/])', '${1}xxxxx'
+    $s = $s -replace '(?i)(/Users/)([^/]+)(?=$|/)', '${1}xxxxx'
+    $s
+}
+Write-Host "engine: $(Redact-UserPath $Engine)" -ForegroundColor DarkGray
+Write-Host "cmd:    $(Redact-UserPath $Cmd)" -ForegroundColor DarkGray
 $work = Join-Path $env:TEMP ("bsr_tests_" + $PID)
 if (Test-Path $work) { Remove-Item $work -Recurse -Force }
 New-Item -ItemType Directory -Path $work -Force | Out-Null

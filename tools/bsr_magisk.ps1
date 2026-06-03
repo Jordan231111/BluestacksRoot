@@ -42,7 +42,25 @@ $Here = Split-Path -Parent $Self
 # --------- the bsr_su grant policy / known signatures ----------
 $BSR_SU_SHA = '7eb6380ee26ce0b68d9f3f23ac04f50e0dfdd49359ef17d1a4978be1795913dd'
 
-function Say($m,$c='Gray'){ Write-Host $m -ForegroundColor $c }
+function Redact-UserPath($value){
+    if($null -eq $value){ return $value }
+    $s = [string]$value
+    $roots = @($env:USERPROFILE) | Where-Object { $_ }
+    foreach($root in $roots){
+        $root = $root.TrimEnd('\','/')
+        if(-not $root){ continue }
+        $parent = Split-Path -Parent $root
+        if($parent){
+            $masked = Join-Path $parent 'xxxxx'
+            $s = $s -replace "(?i)$([regex]::Escape($root))", ($masked -replace '\$','$$')
+            $s = $s -replace "(?i)$([regex]::Escape(($root -replace '\\','/')))", (($masked -replace '\\','/') -replace '\$','$$')
+        }
+    }
+    $s = $s -replace '(?i)([A-Z]:[\\/]+Users[\\/]+)([^\\/]+)(?=$|[\\/])','${1}xxxxx'
+    $s = $s -replace '(?i)(/Users/)([^/]+)(?=$|/)','${1}xxxxx'
+    $s
+}
+function Say($m,$c='Gray'){ Write-Host (Redact-UserPath $m) -ForegroundColor $c }
 function Fwd($p){ $p -replace '\\','/' }
 
 # --------- normalize incoming paths (callers may pass a trailing '\' or a stray '"') ----------
@@ -886,6 +904,9 @@ if ($MyInvocation.InvocationName -ne '.') {
             'Auto'     { Do-Prep; Do-Data; Do-Clean; Do-Finalize; Do-Verify }
             'Undo'     { Do-Undo }
         }
+    } catch {
+        Say "[!] $($_.Exception.Message)" Red
+        exit 1
     } finally {
         # Free our private adb-server port on the way out. adb normally leaves its server running
         # forever; we only ever started one if Initialize-AdbServer ran (an online action), so tidy it

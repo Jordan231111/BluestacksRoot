@@ -5,6 +5,22 @@ Player — from one file, fully automatically. Releases are grouped by the BlueS
 
 ---
 
+## v14 — Privacy: redact user-profile paths in logs · 2026-06-03
+
+Masks Windows/macOS user-profile directories in runtime and helper output so logs show
+`C:\Users\xxxxx\...` or `/Users/xxxxx/...` instead of the local account name.
+
+- Redacts normal runtime logging in `bsr_magisk.ps1` and `bsr_engine.ps1`.
+- Redacts top-level failure messages so PowerShell exceptions do not print raw workspace paths.
+- Redacts the `.cmd` menu path display (`DataDir`, `Install`, `debugfs`) and the `.bstk not found` path.
+- Removes hardcoded local `C:\Users\...` paths from older test/dev probe scripts and derives them from the
+  repo location instead.
+- Adds resolver tests for Windows, slash-style Windows, and Unix-style user-profile redaction.
+- Re-embedded the updated runtime scripts into `blueStackRoot.cmd`. No Magisk APK, su, debugfs, or disk
+  payload changes.
+
+---
+
 ## v13 — Android 11 launch/boot-wait hardening after Rvc64 timeout reports · 2026-06-03
 
 Follow-up to the v12 reports where PREP succeeded but DATA failed with

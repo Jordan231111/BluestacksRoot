@@ -11,6 +11,20 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 $Here = if ($PSScriptRoot) { $PSScriptRoot } else { Split-Path -Parent $MyInvocation.MyCommand.Path }
+
+function Redact-UserPath($value) {
+    if ($null -eq $value) { return $value }
+    $s = [string]$value
+    $s = $s -replace '(?i)([A-Z]:[\\/]+Users[\\/]+)([^\\/]+)(?=$|[\\/])', '${1}xxxxx'
+    $s = $s -replace '(?i)(/Users/)([^/]+)(?=$|/)', '${1}xxxxx'
+    $s
+}
+function Say([string]$m, [string]$c = 'Gray') { Write-Host (Redact-UserPath $m) -ForegroundColor $c }
+trap {
+    Say "[!] $($_.Exception.Message)" Red
+    exit 1
+}
+
 if (-not $Cmd)    { $Cmd    = Join-Path $Here '..\blueStackRoot.cmd' }
 if (-not $Engine) { $Engine = Join-Path $Here 'bsr_engine.ps1' }
 if (-not $Magisk) { $Magisk = Join-Path $Here 'bsr_magisk.ps1' }
@@ -47,7 +61,7 @@ $orig = $bytes.Length
 $bytes = Splice-Block $bytes 'MAGISK' $Magisk    # splice the LATER block first so earlier offsets don't move
 $bytes = Splice-Block $bytes 'ENGINE' $Engine
 [IO.File]::WriteAllBytes($Cmd, $bytes)
-Write-Host ("re-embedded: {0} -> {1} bytes" -f $orig, $bytes.Length)
+Say ("re-embedded: {0} -> {1} bytes" -f $orig, $bytes.Length)
 
 # ---- verify: extract each block back out and compare to the source (ignoring trailing EOL) ----
 function Extract([string]$text, [string]$tok) {
@@ -61,7 +75,7 @@ $bad = $false
 foreach ($p in @(@('ENGINE', $Engine), @('MAGISK', $Magisk))) {
     $emb = (Extract $t $p[0]).TrimEnd("`r", "`n")
     $src = ([IO.File]::ReadAllText($p[1])).TrimEnd("`r", "`n")
-    if ($emb -ceq $src) { Write-Host "  [OK] embedded $($p[0]) matches tools source ($($src.Length) chars)" -ForegroundColor Green }
-    else { Write-Host "  [MISMATCH] embedded $($p[0]) != source" -ForegroundColor Red; $bad = $true }
+    if ($emb -ceq $src) { Say "  [OK] embedded $($p[0]) matches tools source ($($src.Length) chars)" Green }
+    else { Say "  [MISMATCH] embedded $($p[0]) != source" Red; $bad = $true }
 }
 exit ([int]$bad)

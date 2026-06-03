@@ -1,10 +1,13 @@
 # READ-ONLY: extract the pristine /android/system/bin/bindmount from Root.vhd.bsrbak
 # so we can restore the genuine stock script (no traces of our edits).
 $ErrorActionPreference='Continue'
+$Here = if($PSScriptRoot){ $PSScriptRoot } else { Split-Path -Parent $MyInvocation.MyCommand.Path }
+$Repo = Split-Path -Parent $Here
 $Bak='C:\ProgramData\BlueStacks_nxt\Engine\Rvc64\Root.vhd.bsrbak'
-$Dfs='C:\Users\Jordan\Documents\BluestacksRoot\tools\debugfs\debugfs.exe'
-$OutDir='C:\Users\Jordan\Documents\BluestacksRoot\tools\su_src'
-function Log($m,$c='Gray'){ Write-Host $m -ForegroundColor $c }
+$Dfs=Join-Path $Repo 'tools\debugfs\debugfs.exe'
+$OutDir=Join-Path $Repo 'tools\su_src'
+function Redact-UserPath($v){ if($null -eq $v){return $v}; $s=[string]$v; $s=$s -replace '(?i)([A-Z]:[\\/]+Users[\\/]+)([^\\/]+)(?=$|[\\/])','${1}xxxxx'; $s=$s -replace '(?i)(/Users/)([^/]+)(?=$|/)','${1}xxxxx'; $s }
+function Log($m,$c='Gray'){ Write-Host (Redact-UserPath $m) -ForegroundColor $c }
 function Fwd($p){ $p -replace '\\','/' }
 function Read-DeviceBytes($dev,$off,$cnt){ $fs=[System.IO.File]::Open($dev,'Open','Read','ReadWrite'); try{ $sb=[long]([Math]::Floor($off/512)*512); $d=[int]($off-$sb); $need=[int]([Math]::Ceiling(($d+$cnt)/512.0)*512); $b=New-Object byte[] $need; $fs.Position=$sb; [void]$fs.Read($b,0,$need); $r=New-Object byte[] $cnt; [Array]::Copy($b,$d,$r,0,$cnt); $r } finally{ $fs.Close() } }
 

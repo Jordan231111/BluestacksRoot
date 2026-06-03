@@ -2,10 +2,13 @@
 # check whether BlueStacks resets feature.rooting at launch, and whether native su then grants.
 # Touches ONLY conf (modify-only, no BOM). HD-Player patch stays on. No disk surgery.
 $ErrorActionPreference='Continue'
+$Here = if($PSScriptRoot){ $PSScriptRoot } else { Split-Path -Parent $MyInvocation.MyCommand.Path }
+$Repo = Split-Path -Parent (Split-Path -Parent $Here)
 $Inst='Rvc64'; $Install='C:\Program Files\BlueStacks_nxt'; $Conf='C:\ProgramData\BlueStacks_nxt\bluestacks.conf'
 $Adb=Join-Path $Install 'HD-Adb.exe'; $Player=Join-Path $Install 'HD-Player.exe'
-$Engine='C:\Users\Jordan\Documents\BluestacksRoot\tools\bsr_engine.ps1'
-function Log($m,$c='Gray'){ Write-Host $m -ForegroundColor $c }
+$Engine=Join-Path $Repo 'tools\bsr_engine.ps1'
+function Redact-UserPath($v){ if($null -eq $v){return $v}; $s=[string]$v; $s=$s -replace '(?i)([A-Z]:[\\/]+Users[\\/]+)([^\\/]+)(?=$|[\\/])','${1}xxxxx'; $s=$s -replace '(?i)(/Users/)([^/]+)(?=$|/)','${1}xxxxx'; $s }
+function Log($m,$c='Gray'){ Write-Host (Redact-UserPath $m) -ForegroundColor $c }
 function A($ar){ (& $Adb @ar 2>&1 | Out-String).Trim() }
 function Dev{ $d=(A @('devices')) -split "`n" | Where-Object {$_ -match '\tdevice$'} | %{($_ -split '\t')[0]}; if($d){@($d)[0]}else{$null} }
 function Sh($s,$c){ (& $Adb @('-s',$s,'shell',$c) 2>&1 | Out-String).Trim() }

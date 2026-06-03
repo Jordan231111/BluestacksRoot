@@ -1,9 +1,12 @@
 # READ-ONLY recon of Data.vhdx: can debugfs open the partition device directly,
 # and is /downloads/.xb/su really there? No writes. Instance must be killed first.
 $ErrorActionPreference='Continue'
+$Here = if($PSScriptRoot){ $PSScriptRoot } else { Split-Path -Parent $MyInvocation.MyCommand.Path }
+$Repo = Split-Path -Parent (Split-Path -Parent $Here)
 $Data='C:\ProgramData\BlueStacks_nxt\Engine\Rvc64\Data.vhdx'
-$Dfs='C:\Users\Jordan\Documents\BluestacksRoot\tools\debugfs\debugfs.exe'
-function Log($m,$c='Gray'){ Write-Host $m -ForegroundColor $c }
+$Dfs=Join-Path $Repo 'tools\debugfs\debugfs.exe'
+function Redact-UserPath($v){ if($null -eq $v){return $v}; $s=[string]$v; $s=$s -replace '(?i)([A-Z]:[\\/]+Users[\\/]+)([^\\/]+)(?=$|[\\/])','${1}xxxxx'; $s=$s -replace '(?i)(/Users/)([^/]+)(?=$|/)','${1}xxxxx'; $s }
+function Log($m,$c='Gray'){ Write-Host (Redact-UserPath $m) -ForegroundColor $c }
 
 Log '== kill BlueStacks so Data.vhdx is unlocked ==' Cyan
 foreach($p in 'HD-Player','HD-MultiInstanceManager','BstkSVC','HD-Agent','BlueStacksHelper','BlueStacksAppplayerWeb'){ Get-Process -Name $p -EA SilentlyContinue | Stop-Process -Force -EA SilentlyContinue }

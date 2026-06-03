@@ -29,6 +29,19 @@ if (-not $Su) { $Su = Join-Path $repo 'recovered\BstkRooter\embedded_su_decrypte
 if (-not $DebugfsDir) { $DebugfsDir = Join-Path $here 'debugfs' }
 if (-not $Out) { $Out = Join-Path $repo 'blueStackRoot.cmd' }
 
+function Redact-UserPath($value) {
+    if ($null -eq $value) { return $value }
+    $s = [string]$value
+    $s = $s -replace '(?i)([A-Z]:[\\/]+Users[\\/]+)([^\\/]+)(?=$|[\\/])', '${1}xxxxx'
+    $s = $s -replace '(?i)(/Users/)([^/]+)(?=$|/)', '${1}xxxxx'
+    $s
+}
+function Say([string]$m, [string]$c = 'Gray') { Write-Host (Redact-UserPath $m) -ForegroundColor $c }
+trap {
+    Say "[!] $($_.Exception.Message)" Red
+    exit 1
+}
+
 foreach ($f in @($Head, $Engine, $Su)) { if (-not (Test-Path -LiteralPath $f)) { throw "missing input: $f" } }
 
 $expectSha = '185106357CFC0D1DB4B8EFB033DE863F437850437E0EF6B62630C05F291B4902'
@@ -39,14 +52,14 @@ function To-CRLF([string]$s) { ($s -replace "`r`n", "`n") -replace "`n", "`r`n" 
 $suBytes = [System.IO.File]::ReadAllBytes($Su)
 $sha = (([System.Security.Cryptography.SHA256]::Create().ComputeHash($suBytes) | ForEach-Object { $_.ToString('X2') }) -join '')
 if ($sha -ne $expectSha) { throw "su payload SHA-256 mismatch:`n  expected $expectSha`n  got      $sha`n  ($Su)" }
-Write-Host "su        : $($suBytes.Length) bytes  sha256 OK" -ForegroundColor Green
+Say "su        : $($suBytes.Length) bytes  sha256 OK" Green
 
 $ms = New-Object System.IO.MemoryStream
 $gz = New-Object System.IO.Compression.GZipStream($ms, [System.IO.Compression.CompressionLevel]::Optimal, $true)
 $gz.Write($suBytes, 0, $suBytes.Length); $gz.Dispose()
 $gzBytes = $ms.ToArray(); $ms.Dispose()
 $b64 = [Convert]::ToBase64String($gzBytes)
-Write-Host "compressed: $($gzBytes.Length) bytes  ->  base64 $($b64.Length) chars" -ForegroundColor Gray
+Say "compressed: $($gzBytes.Length) bytes  ->  base64 $($b64.Length) chars" Gray
 
 $sb = New-Object System.Text.StringBuilder
 for ($i = 0; $i -lt $b64.Length; $i += $Wrap) {
@@ -76,10 +89,10 @@ if (Test-Path -LiteralPath $DebugfsDir) {
     $zb = [System.IO.File]::ReadAllBytes($tmpZip); Remove-Item -LiteralPath $tmpZip -Force
     $dfsB64 = [Convert]::ToBase64String($zb)
     $dfsB64crlf = To-CRLF (Wrap-B64 $dfsB64 $Wrap)
-    Write-Host "debugfs   : zip $($zb.Length) bytes  ->  base64 $($dfsB64.Length) chars (embedded)" -ForegroundColor Green
+    Say "debugfs   : zip $($zb.Length) bytes  ->  base64 $($dfsB64.Length) chars (embedded)" Green
 }
 else {
-    Write-Host "debugfs   : $DebugfsDir not found -- building WITHOUT the embedded offline fallback." -ForegroundColor Yellow
+    Say "debugfs   : $DebugfsDir not found -- building WITHOUT the embedded offline fallback." Yellow
 }
 
 # --- assemble ---
@@ -99,4 +112,4 @@ $final = ($parts -join $nl)
 # write without BOM (cmd dislikes a UTF-8 BOM on the first line)
 [System.IO.File]::WriteAllText($Out, $final, (New-Object System.Text.UTF8Encoding($false)))
 $sz = (Get-Item -LiteralPath $Out).Length
-Write-Host "wrote     : $Out  ($([math]::Round($sz/1MB,2)) MB)" -ForegroundColor Green
+Say "wrote     : $Out  ($([math]::Round($sz/1MB,2)) MB)" Green

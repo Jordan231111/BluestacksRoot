@@ -10,11 +10,14 @@ $Bstk     = Join-Path $EngRoot 'Rvc64.bstk'
 $Adb      = Join-Path $Install 'HD-Adb.exe'
 $Player   = Join-Path $Install 'HD-Player.exe'
 $Hd       = Join-Path $Install 'HD-Player.exe'
-$Self     = 'C:\Users\Jordan\Documents\BluestacksRoot\blueStackRoot.cmd'
-$Engine   = 'C:\Users\Jordan\Documents\BluestacksRoot\tools\bsr_engine.ps1'
+$Here     = if($PSScriptRoot){ $PSScriptRoot } else { Split-Path -Parent $MyInvocation.MyCommand.Path }
+$Repo     = Split-Path -Parent (Split-Path -Parent $Here)
+$Self     = Join-Path $Repo 'blueStackRoot.cmd'
+$Engine   = Join-Path $Repo 'tools\bsr_engine.ps1'
 $PlayerLog= 'C:\ProgramData\BlueStacks_nxt\Logs\Player.log'
 
-function Log($m,$c='Gray'){ Write-Host $m -ForegroundColor $c }
+function Redact-UserPath($v){ if($null -eq $v){return $v}; $s=[string]$v; $s=$s -replace '(?i)([A-Z]:[\\/]+Users[\\/]+)([^\\/]+)(?=$|[\\/])','${1}xxxxx'; $s=$s -replace '(?i)(/Users/)([^/]+)(?=$|/)','${1}xxxxx'; $s }
+function Log($m,$c='Gray'){ Write-Host (Redact-UserPath $m) -ForegroundColor $c }
 function Eng([string[]]$a,[string]$desc){
   Log "`n==== ENGINE: $desc ====" Cyan
   & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $Engine @a 2>&1 | ForEach-Object { Log "   $_" }

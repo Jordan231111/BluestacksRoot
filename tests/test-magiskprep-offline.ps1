@@ -3,13 +3,16 @@
 # Strategy: copy bsrbak -> scratch.vhd, carve ext4, run the SAME debugfs writes Do-Prep uses,
 # then dump each written file back out and SHA-compare to its source. No write-back (read-only proof).
 $ErrorActionPreference='Continue'
+$Here = if($PSScriptRoot){ $PSScriptRoot } else { Split-Path -Parent $MyInvocation.MyCommand.Path }
+$Repo = Split-Path -Parent $Here
 $Bak='C:\ProgramData\BlueStacks_nxt\Engine\Rvc64\Root.vhd.bsrbak'
-$Dfs='C:\Users\Jordan\Documents\BluestacksRoot\tools\debugfs\debugfs.exe'
-if(-not (Test-Path $Dfs)){ $Dfs='C:\Users\Jordan\AppData\Local\Temp\bsr_work\debugfs\debugfs.exe' }
-$DB='C:\Users\Jordan\Documents\BluestacksRoot\tools\magisk_databin'      # APK-extracted binaries
-$BsrSu='C:\Users\Jordan\Documents\BluestacksRoot\tools\su_src\bsr_su'
-$BA='C:\Users\Jordan\Documents\BluestacksRoot\tools\magisk_artifacts\bootanim.rc'
-function Log($m,$c='Gray'){ Write-Host $m -ForegroundColor $c }
+$Dfs=Join-Path $Repo 'tools\debugfs\debugfs.exe'
+if(-not (Test-Path $Dfs)){ $Dfs=Join-Path $env:TEMP 'bsr_work\debugfs\debugfs.exe' }
+$DB=Join-Path $Repo 'tools\magisk_databin'      # APK-extracted binaries
+$BsrSu=Join-Path $Repo 'tools\su_src\bsr_su'
+$BA=Join-Path $Repo 'tools\magisk_artifacts\bootanim.rc'
+function Redact-UserPath($v){ if($null -eq $v){return $v}; $s=[string]$v; $s=$s -replace '(?i)([A-Z]:[\\/]+Users[\\/]+)([^\\/]+)(?=$|[\\/])','${1}xxxxx'; $s=$s -replace '(?i)(/Users/)([^/]+)(?=$|/)','${1}xxxxx'; $s }
+function Log($m,$c='Gray'){ Write-Host (Redact-UserPath $m) -ForegroundColor $c }
 function Fwd($p){ $p -replace '\\','/' }
 function Read-DeviceBytes($dev,$off,$cnt){ $fs=[System.IO.File]::Open($dev,'Open','Read','ReadWrite'); try{ $sb=[long]([Math]::Floor($off/512)*512); $d=[int]($off-$sb); $need=[int]([Math]::Ceiling(($d+$cnt)/512.0)*512); $b=New-Object byte[] $need; $fs.Position=$sb; [void]$fs.Read($b,0,$need); $r=New-Object byte[] $cnt; [Array]::Copy($b,$d,$r,0,$cnt); $r } finally{ $fs.Close() } }
 function Copy-DeviceToFile($dev,$start,$len,$out){ $fs=[System.IO.File]::Open($dev,'Open','Read','ReadWrite'); try{ $fs.Position=$start; $o=[System.IO.File]::Open($out,'Create','Write','None'); try{ $buf=New-Object byte[] (16MB); [long]$rem=$len; while($rem -gt 0){ $w=[int][Math]::Min([long]$buf.Length,$rem); $n=$fs.Read($buf,0,$w); if($n -le 0){break}; $o.Write($buf,0,$n); $rem-=$n } } finally{ $o.Close() } } finally{ $fs.Close() } }

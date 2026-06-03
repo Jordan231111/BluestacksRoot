@@ -75,7 +75,25 @@ if (-not $NoBackup -and $env:BSR_NOBACKUP -eq '1') { $NoBackup = $true }
 if (-not $NoLaunch -and $env:BSR_NOLAUNCH -eq '1') { $NoLaunch = $true }
 if (-not $Force -and $env:BSR_FORCE -eq '1') { $Force = $true }
 
-function Say([string]$m, [string]$c = 'Gray') { Write-Host $m -ForegroundColor $c }
+function Redact-UserPath($value) {
+    if ($null -eq $value) { return $value }
+    $s = [string]$value
+    $roots = @($env:USERPROFILE) | Where-Object { $_ }
+    foreach ($root in $roots) {
+        $root = $root.TrimEnd('\', '/')
+        if (-not $root) { continue }
+        $parent = Split-Path -Parent $root
+        if ($parent) {
+            $masked = Join-Path $parent 'xxxxx'
+            $s = $s -replace "(?i)$([regex]::Escape($root))", ($masked -replace '\$', '$$')
+            $s = $s -replace "(?i)$([regex]::Escape(($root -replace '\\', '/')))", (($masked -replace '\\', '/') -replace '\$', '$$')
+        }
+    }
+    $s = $s -replace '(?i)([A-Z]:[\\/]+Users[\\/]+)([^\\/]+)(?=$|[\\/])', '${1}xxxxx'
+    $s = $s -replace '(?i)(/Users/)([^/]+)(?=$|/)', '${1}xxxxx'
+    $s
+}
+function Say([string]$m, [string]$c = 'Gray') { Write-Host (Redact-UserPath $m) -ForegroundColor $c }
 
 # Registry discovery (NO hardcoded install/data paths): honour a custom BlueStacks location by reading
 # InstallDir/DataDir/UserDefinedDir from the registry -- nxt (BlueStacks 5) then msi5 (MSI App Player),
@@ -1079,32 +1097,37 @@ function Invoke-AdbVerify {
 # ===========================================================================
 #  dispatch
 # ===========================================================================
-switch ($Action) {
-    'ExtractSu' {
-        if (-not $OutFile) { throw "ExtractSu requires -OutFile." }
-        $bytes = Get-EmbeddedSu $SelfPath
-        [System.IO.File]::WriteAllBytes($OutFile, $bytes)
-        Say "[+] su extracted to $OutFile ($($bytes.Length) bytes, sha256 verified)." Green
-        exit 0
+try {
+    switch ($Action) {
+        'ExtractSu' {
+            if (-not $OutFile) { throw "ExtractSu requires -OutFile." }
+            $bytes = Get-EmbeddedSu $SelfPath
+            [System.IO.File]::WriteAllBytes($OutFile, $bytes)
+            Say "[+] su extracted to $OutFile ($($bytes.Length) bytes, sha256 verified)." Green
+            exit 0
+        }
+        'TestExt4' {
+            if (-not $Img) { throw "TestExt4 requires -Img <ext4 image>." }
+            $suBytes = $null
+            if (-not $Restore) { $suBytes = Get-EmbeddedSu $SelfPath }   # -Restore here means 'remove'
+            $ok = Edit-Ext4 $Img ([bool]$Restore) $suBytes
+            exit ([int](-not $ok))
+        }
+        'Patch' { exit (Invoke-Patch) }
+        'Root' { exit (Invoke-VhdSu $false) }
+        'Unroot' { exit (Invoke-VhdSu $true) }
+        'AdbRoot' { exit (Invoke-AdbSu $false) }
+        'AdbUnroot' { exit (Invoke-AdbSu $true) }
+        'AdbVerify' { exit (Invoke-AdbVerify) }
+        'DiskRW' { exit (Invoke-Bstk $false) }
+        'DiskRO' { exit (Invoke-Bstk $true) }
+        'ConfRoot' { exit (Invoke-Conf $true) }
+        'ConfUnroot' { exit (Invoke-Conf $false) }
+        'Resolve' { Invoke-Resolve; exit 0 }
+        'BaseDir' { Write-Output (Get-BaseDir $DataDir $UserDef); exit 0 }
+        'VhdSelfTest' { exit (Invoke-VhdSelfTest) }
     }
-    'TestExt4' {
-        if (-not $Img) { throw "TestExt4 requires -Img <ext4 image>." }
-        $suBytes = $null
-        if (-not $Restore) { $suBytes = Get-EmbeddedSu $SelfPath }   # -Restore here means 'remove'
-        $ok = Edit-Ext4 $Img ([bool]$Restore) $suBytes
-        exit ([int](-not $ok))
-    }
-    'Patch' { exit (Invoke-Patch) }
-    'Root' { exit (Invoke-VhdSu $false) }
-    'Unroot' { exit (Invoke-VhdSu $true) }
-    'AdbRoot' { exit (Invoke-AdbSu $false) }
-    'AdbUnroot' { exit (Invoke-AdbSu $true) }
-    'AdbVerify' { exit (Invoke-AdbVerify) }
-    'DiskRW' { exit (Invoke-Bstk $false) }
-    'DiskRO' { exit (Invoke-Bstk $true) }
-    'ConfRoot' { exit (Invoke-Conf $true) }
-    'ConfUnroot' { exit (Invoke-Conf $false) }
-    'Resolve' { Invoke-Resolve; exit 0 }
-    'BaseDir' { Write-Output (Get-BaseDir $DataDir $UserDef); exit 0 }
-    'VhdSelfTest' { exit (Invoke-VhdSelfTest) }
+} catch {
+    Say "[!] $($_.Exception.Message)" Red
+    exit 1
 }

@@ -99,6 +99,13 @@ Eq 'engine: defaults to 5555 when neither present' '5555' (Resolve-Map (New-Fake
 
 Write-Host "`n=== ADB PORT candidates (orchestrator, dot-sourced) ===" -ForegroundColor Cyan
 . $Magisk   # dispatch guard => nothing boots; functions become available
+
+Write-Host "`n=== log privacy redaction ===" -ForegroundColor Cyan
+Eq 'redact: Windows user profile segment' 'C:\Users\xxxxx\Documents\BluestacksRoot\log.txt' (Redact-UserPath 'C:\Users\Alice\Documents\BluestacksRoot\log.txt')
+Eq 'redact: slash-style user profile segment' 'C:/Users/xxxxx/AppData/Local/Temp/x.log' (Redact-UserPath 'C:/Users/Alice/AppData/Local/Temp/x.log')
+Eq 'redact: Unix user profile segment' '/Users/xxxxx/Library/Logs/x.log' (Redact-UserPath '/Users/Alice/Library/Logs/x.log')
+Eq 'redact: non-user path unchanged' 'C:\ProgramData\BlueStacks_nxt\bluestacks.conf' (Redact-UserPath 'C:\ProgramData\BlueStacks_nxt\bluestacks.conf')
+
 # Stub the live-bound-port scan so these conf-only cases are deterministic regardless of what is
 # actually listening on the test host (the seam Get-LiveAdbPorts checks first).
 $script:LiveAdbPortProbe = { @() }

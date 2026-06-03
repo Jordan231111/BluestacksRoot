@@ -16,6 +16,20 @@ param(
 $ErrorActionPreference = 'Stop'
 $Here = if ($PSScriptRoot) { $PSScriptRoot } else { Split-Path -Parent $MyInvocation.MyCommand.Path }
 if (-not $Dst) { $Dst = Join-Path $Here 'magisk_databin' }
+
+function Redact-UserPath($value) {
+    if ($null -eq $value) { return $value }
+    $s = [string]$value
+    $s = $s -replace '(?i)([A-Z]:[\\/]+Users[\\/]+)([^\\/]+)(?=$|[\\/])', '${1}xxxxx'
+    $s = $s -replace '(?i)(/Users/)([^/]+)(?=$|/)', '${1}xxxxx'
+    $s
+}
+function Say([string]$m, [string]$c = 'Gray') { Write-Host (Redact-UserPath $m) -ForegroundColor $c }
+trap {
+    Say "[!] $($_.Exception.Message)" Red
+    exit 1
+}
+
 $Apk = (Resolve-Path $Apk).Path
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 
@@ -41,8 +55,8 @@ try {
         $e = $zip.GetEntry($k)
         if (-not $e) { throw "APK missing expected member: $k" }
         [System.IO.Compression.ZipFileExtensions]::ExtractToFile($e, (Join-Path $Dst $map[$k]), $true)
-        Write-Host ("  {0,-16} <- {1}  ({2:N0} bytes)" -f $map[$k], $k, $e.Length)
+        Say ("  {0,-16} <- {1}  ({2:N0} bytes)" -f $map[$k], $k, $e.Length)
     }
 }
 finally { $zip.Dispose() }
-Write-Host ("[+] refreshed databin -> {0} ({1} files)" -f $Dst, $map.Count) -ForegroundColor Green
+Say ("[+] refreshed databin -> {0} ({1} files)" -f $Dst, $map.Count) Green
