@@ -139,11 +139,21 @@ $script:AdbServerPortProbe = { @{ 15037 = 'ours' } }                   # our own
 Eq 'adb-port: our own HD-Adb server -> reuse 15037'   '15037' (Resolve-AdbServerPort)
 $script:AdbServerPortProbe = { @{ 15037 = 'other'; 15039 = 'ours' } }  # first FREE wins over a later reusable
 Eq 'adb-port: stranger on 15037 -> first free 15038'  '15038' (Resolve-AdbServerPort)
-$env:ANDROID_ADB_SERVER_PORT = '5037'                                  # explicit override is honoured
-Eq 'adb-port: explicit env override is respected'     '5037'  (Resolve-AdbServerPort)
+$script:AdbServerPortProbe = { @{} }
+$env:ANDROID_ADB_SERVER_PORT = '5037'                                  # unsafe inherited default is ignored
+Eq 'adb-port: inherited default 5037 is ignored'       '15037' (Resolve-AdbServerPort)
+$env:ANDROID_ADB_SERVER_PORT = '15040'                                 # private-band override is honoured
+Eq 'adb-port: private env override is respected'       '15040' (Resolve-AdbServerPort)
 $script:AdbServerPortProbe = $null
 Remove-Item Env:\ANDROID_ADB_SERVER_PORT -ErrorAction SilentlyContinue
 if ($savedPort) { $env:ANDROID_ADB_SERVER_PORT = $savedPort }
+
+Write-Host "`n=== HD-Player instance matching (Rvc64 scoped launch/wait) ===" -ForegroundColor Cyan
+Ok 'hdplayer: spaced target arg matches' (Test-HdPlayerInstance '"C:\Program Files\BlueStacks_nxt\HD-Player.exe" --instance Rvc64' 'Rvc64')
+Ok 'hdplayer: quoted target arg matches' (Test-HdPlayerInstance '"C:\Program Files\BlueStacks_nxt\HD-Player.exe" --instance "Rvc64"' 'Rvc64')
+Ok 'hdplayer: equals target arg matches' (Test-HdPlayerInstance '"C:\Program Files\BlueStacks_nxt\HD-Player.exe" --instance=Rvc64' 'Rvc64')
+Ok 'hdplayer: clone name is not a prefix match' (-not (Test-HdPlayerInstance '"C:\Program Files\BlueStacks_nxt\HD-Player.exe" --instance Rvc64_1' 'Rvc64'))
+Ok 'hdplayer: another instance does not match' (-not (Test-HdPlayerInstance '"C:\Program Files\BlueStacks_nxt\HD-Player.exe" --instance Pie64' 'Rvc64'))
 
 Write-Host "`n=== competing-su detection (Find-StraySu -- what Verify fails on) ===" -ForegroundColor Cyan
 # Magisk's own su are symlinks to magisk; anything else is a competing root (Magisk "Abnormal State").

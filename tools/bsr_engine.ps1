@@ -899,9 +899,10 @@ function Get-AdbServerPortState {
     return $state
 }
 # Pick a private adb-server port that is FREE (or already hosts our own HD-Adb server), so we never
-# collide with something already using 15037 before this run. Explicit env override wins.
+# collide with something already using 15037 before this run. Private-band env overrides win; 5037
+# is ignored because it is the shared adb default that causes version-conflict churn.
 function Resolve-AdbServerPort {
-    if ($env:ANDROID_ADB_SERVER_PORT) { return $env:ANDROID_ADB_SERVER_PORT }
+    if ($env:ANDROID_ADB_SERVER_PORT -and $env:ANDROID_ADB_SERVER_PORT -ne '5037') { return $env:ANDROID_ADB_SERVER_PORT }
     $state = Get-AdbServerPortState
     foreach ($p in 15037..15057) { $s = $state[$p]; if (-not $s -or $s -eq 'ours') { return "$p" } }
     return '15037'
@@ -914,7 +915,7 @@ function Connect-WaitBoot([int]$timeoutSec) {
     # Isolate HD-Adb on its own server port so a different-version system adb (e.g. Android SDK
     # platform-tools) on the default 5037 can't kill our server mid-run (the version-mismatch churn
     # that makes getprop/shell calls fail and a booted instance look "not adb-reachable").
-    if (-not $env:ANDROID_ADB_SERVER_PORT) { $env:ANDROID_ADB_SERVER_PORT = (Resolve-AdbServerPort) }
+    if ((-not $env:ANDROID_ADB_SERVER_PORT) -or $env:ANDROID_ADB_SERVER_PORT -eq '5037') { $env:ANDROID_ADB_SERVER_PORT = (Resolve-AdbServerPort) }
     AdbRaw @('start-server') | Out-Null
     $sw = [System.Diagnostics.Stopwatch]::StartNew()
     $connected = $false
@@ -940,12 +941,28 @@ function Connect-WaitBoot([int]$timeoutSec) {
     return $false
 }
 
+function Test-HdPlayerInstance([string]$cmdLine, [string]$name) {
+    if ([string]::IsNullOrWhiteSpace($cmdLine) -or [string]::IsNullOrWhiteSpace($name)) { return $false }
+    $escaped = [regex]::Escape($name)
+    $rx = "(?i)(^|\s)--instance(?:\s+|=)(`"$escaped`"|$escaped)(?=\s|$)"
+    return ($cmdLine -match $rx)
+}
+
+function Get-HdPlayerInstanceCount([string]$name) {
+    try {
+        return @(Get-CimInstance Win32_Process -Filter "Name='HD-Player.exe'" -ErrorAction Stop |
+            Where-Object { Test-HdPlayerInstance $_.CommandLine $name }).Count
+    } catch {
+        return 0
+    }
+}
+
 function Launch-Instance {
     if ($NoLaunch) { Say "[*] -NoLaunch: assuming the instance is already running." ; return }
     if (-not $Player -or -not (Test-Path -LiteralPath $Player)) { Say "[~] HD-Player.exe not provided; not launching (will try to connect anyway)." Yellow; return }
     if (-not $Instance) { throw "AdbRoot requires -Instance to launch." }
-    $running = @(Get-Process -Name 'HD-Player' -ErrorAction SilentlyContinue)
-    if ($running.Count -gt 0) { Say "[*] HD-Player already running; not launching a second instance." ; return }
+    $running = Get-HdPlayerInstanceCount $Instance
+    if ($running -gt 0) { Say "[*] HD-Player for '$Instance' already running; not launching a second copy." ; return }
     Say "[*] Booting instance '$Instance' ..."
     Start-Process -FilePath $Player -ArgumentList @('--instance', $Instance) | Out-Null
 }

@@ -5,6 +5,33 @@ Player — from one file, fully automatically. Releases are grouped by the BlueS
 
 ---
 
+## v13 — Android 11 launch/boot-wait hardening after Rvc64 timeout reports · 2026-06-03
+
+Follow-up to the v12 reports where PREP succeeded but DATA failed with
+`instance 'Rvc64' did not boot / become adb-reachable within 300 s`. The issue discussion showed ADB
+works once the Android 11 instance is manually opened (`127.0.0.1:5555 device`), so the remaining weak
+spot was host-side launch/wait behavior rather than the offline image prep or Magisk payload.
+
+- 🚀 **Boot wait now keeps the host launch alive.** `Boot-And-Wait` logs progress every ~30s, retries the
+  `HD-Player --instance ...` launch if no player process is present, and extends the wait only when the
+  target instance is visibly alive but ADB is still not ready. The liveness check is scoped to the requested
+  Android 11 instance, so another running BlueStacks instance cannot mask an Rvc64 launch miss. Normal boots
+  do not get slower; dead launches still fail on the original timeout.
+- 🧯 **Inherited shared adb port 5037 is ignored.** A stale `ANDROID_ADB_SERVER_PORT=5037` no longer pulls
+  the tool back onto the shared SDK/HD-Adb conflict port. Private overrides such as `15040` are still
+  honored.
+- ⏱️ **Shutdown handling is less racy.** `Kill-BlueStacks` waits only as long as needed, up to 20s, for
+  BlueStacks-owned processes to exit. This avoids a stale listener briefly holding `5555` and forcing the
+  next Android 11 launch onto an alternate live port.
+- 🔎 **Failure output is actionable.** Timeout errors now include the HD-Adb server port, candidate device
+  ports, HD-Player process count, and the last connect/getprop result, so future logs show whether launch,
+  bind, or boot completion is the failing stage.
+- 🧪 **Validated on Android 11 / Rvc64 only.** Live boot tested with a foreign listener on 5037; Rvc64 still
+  booted through the private HD-Adb server and reached `sys.boot_completed=1`. Parser checks, resolver
+  tests, synthetic tests, and embedded-sync checks all pass. No Magisk APK or disk payload changes.
+
+---
+
 ## v12 — Magisk is the SOLE root: scrub any competing su + Verify fails on one · 2026-06-02
 
 Fixes Magisk reporting **"Abnormal State — a su binary not from Magisk has been detected"** on an instance

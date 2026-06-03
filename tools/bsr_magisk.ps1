@@ -297,10 +297,16 @@ function Kill-BlueStacks {
     # HD-Player/Adb/Agent/MultiInstanceManager/CommonLoader, BstkSVC, BlueStacksHelper/Web/Services...
     # This is scoped (no unrelated services are touched) and complete (BstkSVC holds the .bstk/conf
     # lock, so it MUST go or config edits won't persist -- verified). BlueStacks 5 has no auto-restart
-    # Windows service, so killing the processes is sufficient.
+    # Windows service, so killing the processes is sufficient. Wait only as long as needed: a slow
+    # HD-Player shutdown can leave the old adb listener bound for a few seconds, which makes the next
+    # boot rebind to a different live port.
     $killed = Get-Process -EA SilentlyContinue | Where-Object { $_.Name -match '^(HD-|Bstk|BlueStacks)' }
     if($killed){ $killed | Stop-Process -Force -EA SilentlyContinue }
-    Start-Sleep 4
+    $sw=[Diagnostics.Stopwatch]::StartNew()
+    do{
+        Start-Sleep 1
+        $left = @(Get-Process -EA SilentlyContinue | Where-Object { $_.Name -match '^(HD-|Bstk|BlueStacks)' })
+    }while($left.Count -gt 0 -and $sw.Elapsed.TotalSeconds -lt 20)
 }
 
 # Run a debugfs command-list against an ext4 image file; returns combined output.
@@ -410,10 +416,14 @@ function Get-AdbServerPortState{
 }
 # Pick a private adb-server port that is FREE (or already hosts our own HD-Adb server). THIS is what
 # handles "something is already using 15037 before my session": a non-adb app or a foreign-version adb
-# on a candidate port is skipped, so we never collide with it and never kill it. An explicitly-set
-# ANDROID_ADB_SERVER_PORT always wins (escape hatch). 15037..15057 gives 21 ports of headroom.
+# on a candidate port is skipped, so we never collide with it and never kill it. A private-band
+# ANDROID_ADB_SERVER_PORT override wins, but the shared default 5037 is ignored. 15037..15057 gives
+# 21 ports of headroom.
 function Resolve-AdbServerPort{
-    if($env:ANDROID_ADB_SERVER_PORT){ return $env:ANDROID_ADB_SERVER_PORT }
+    # Do not inherit the default shared adb server port. A user/system env var of 5037 silently disables
+    # our version-conflict fix and puts HD-Adb back in the Android SDK adb fight. Private-band overrides
+    # are still honoured for debugging.
+    if($env:ANDROID_ADB_SERVER_PORT -and $env:ANDROID_ADB_SERVER_PORT -ne '5037'){ return $env:ANDROID_ADB_SERVER_PORT }
     $state = if($Script:AdbServerPortProbe){ & $Script:AdbServerPortProbe } else { Get-AdbServerPortState }
     foreach($p in 15037..15057){ $s=$state[$p]; if(-not $s -or $s -eq 'ours'){ return "$p" } }
     return '15037'   # band fully occupied (extreme) -- proceed; a later adb error would surface it clearly
@@ -424,7 +434,7 @@ function Resolve-AdbServerPort{
 # fully-booted instance still trips Boot-And-Wait's "did not become adb-reachable" throw. A private
 # port also gives us a clean transport table (no stale 'offline' devices). HD-Adb honours the env var.
 function Initialize-AdbServer{
-    if(-not $env:ANDROID_ADB_SERVER_PORT){ $env:ANDROID_ADB_SERVER_PORT = (Resolve-AdbServerPort) }
+    if((-not $env:ANDROID_ADB_SERVER_PORT) -or $env:ANDROID_ADB_SERVER_PORT -eq '5037'){ $env:ANDROID_ADB_SERVER_PORT = (Resolve-AdbServerPort) }
     if(-not (Test-Path -LiteralPath $Adb)){ return }
     if(-not $Script:AdbServerInit){ & $Adb @('kill-server') *>$null; $Script:AdbServerInit=$true }  # clean slate on OUR port
     & $Adb @('start-server') *>$null   # idempotent; also revives the server after Kill-BlueStacks nukes HD-Adb
@@ -511,30 +521,77 @@ function AdbTry([string[]]$a,[int]$tries=4){
     $o
 }
 function AdbSu([string]$serial,[string]$cmd){ AdbShellRetry $serial "/system/xbin/su -c '$cmd'" }
+function Compact-Line([string]$s,[int]$max=120){
+    $x = (($s -replace "`r?`n",' | ').Trim())
+    if($x.Length -gt $max){ return ($x.Substring(0,$max-3) + '...') }
+    $x
+}
+function Test-HdPlayerInstance([string]$cmdLine,[string]$name){
+    if([string]::IsNullOrWhiteSpace($cmdLine) -or [string]::IsNullOrWhiteSpace($name)){ return $false }
+    $escaped=[regex]::Escape($name)
+    $rx="(?i)(^|\s)--instance(?:\s+|=)(`"$escaped`"|$escaped)(?=\s|$)"
+    return ($cmdLine -match $rx)
+}
+function Get-HdPlayerCount([string]$name=$Instance){
+    try{
+        return @(Get-CimInstance Win32_Process -Filter "Name='HD-Player.exe'" -EA Stop |
+            Where-Object { Test-HdPlayerInstance $_.CommandLine $name }).Count
+    }catch{
+        return 0
+    }
+}
 function Boot-And-Wait([int]$timeoutSec=300){
     Initialize-AdbServer   # pin HD-Adb to its private server port BEFORE any connect (version-conflict immunity)
-    Say "[*] launching instance $Instance ..." Cyan
-    Start-Process -FilePath $Player -ArgumentList @('--instance',$Instance) | Out-Null
+    if(-not (Test-Path -LiteralPath $Player)){ throw "HD-Player.exe not found: $Player" }
+    $sw=[Diagnostics.Stopwatch]::StartNew()
+    $lastLaunch=-999; $lastProgress=-999; $extended=$false; $sawLife=$false; $lastDiag=''
+    function Start-BsrInstanceLaunch {
+        Say "[*] launching instance $Instance ..." Cyan
+        Start-Process -FilePath $Player -ArgumentList @('--instance',$Instance) | Out-Null
+        $sw.Elapsed.TotalSeconds
+    }
+    $lastLaunch = Start-BsrInstanceLaunch
+    Say "[*] HD-Adb server port: $env:ANDROID_ADB_SERVER_PORT" DarkGray
     # Find the adb endpoint from BlueStacks' OWN per-instance conf ports (re-read each pass: BlueStacks
     # writes the actual bound port during boot). Try each candidate, require boot_completed=1, and confirm
     # it is really our BlueStacks instance -- so neither a stale port nor a foreign emulator on 5555 can
     # mislead us. We pin to that 127.0.0.1:<port> transport (never the transient emulator-XXXX serial).
     $serial=$null; $fallback=$null
-    for($i=0;$i -lt ($timeoutSec/3) -and -not $serial;$i++){
+    while(-not $serial){
+        $elapsed=$sw.Elapsed.TotalSeconds
+        $limit = if($sawLife){ $timeoutSec + 300 } else { $timeoutSec }
+        if($elapsed -ge $limit){ break }
+        if($elapsed -ge $timeoutSec -and $sawLife -and -not $extended){
+            Say "[~] instance is alive but not adb-ready after $timeoutSec s; extending wait (slow BlueStacks boot)." Yellow
+            $extended=$true
+        }
         Start-Sleep 3; & $Adb @('start-server') *>$null
-        foreach($port in (Get-AdbPortCandidates)){
+        $playerCount = Get-HdPlayerCount $Instance
+        if($playerCount -gt 0){ $sawLife=$true }
+        if($playerCount -eq 0 -and ($elapsed - $lastLaunch) -ge 45){
+            Say "[~] no HD-Player process seen yet; retrying launch for $Instance ..." Yellow
+            $lastLaunch = Start-BsrInstanceLaunch
+        }
+        $cands = @(Get-AdbPortCandidates)
+        foreach($port in $cands){
             $cand="127.0.0.1:$port"
-            & $Adb @('connect',$cand) *>$null
+            $conn=(& $Adb @('connect',$cand) 2>&1 | Out-String)
+            if($conn -match '(?i)(connected to|already connected)'){ $sawLife=$true }
             # boot_completed must be EXACTLY "1" on its own line -- a "device '...:port' not found" error
             # contains the port digits and would false-positive a naive -match '1'.
             $out=(& $Adb @('-s',$cand,'shell','getprop','sys.boot_completed') 2>&1 | Out-String)
+            $lastDiag = "$cand connect=[$(Compact-Line $conn)] boot=[$(Compact-Line $out)]"
             if(-not (($out -split "`n" | ForEach-Object { $_.Trim() }) -contains '1')){ continue }
             if(Is-BlueStacks $cand){ $serial=$cand; break }      # confirmed: our instance
             elseif(-not $fallback){ $fallback=$cand }            # booted, but identity unconfirmed
         }
+        if(($sw.Elapsed.TotalSeconds - $lastProgress) -ge 30 -and -not $serial){
+            Say ("[~] waiting for adb: elapsed={0:n0}s hdplayer($Instance)={1} candidates={2} last={3}" -f $sw.Elapsed.TotalSeconds,$playerCount,($cands -join ','),$lastDiag) DarkGray
+            $lastProgress=$sw.Elapsed.TotalSeconds
+        }
     }
     if(-not $serial -and $fallback){ Say "[~] using booted device $fallback (BlueStacks marker not seen)." Yellow; $serial=$fallback }
-    if(-not $serial){ throw "instance '$Instance' did not boot / become adb-reachable within $timeoutSec s" }
+    if(-not $serial){ throw "instance '$Instance' did not boot / become adb-reachable within $([int]$sw.Elapsed.TotalSeconds) s (adb server port $env:ANDROID_ADB_SERVER_PORT; last: $lastDiag)" }
     $Script:AdbSerial=$serial
     # Stabilize: a freshly-booted instance (esp. a first boot) restarts adbd a few times, which drops the
     # transport -> the next call fails with "device '127.0.0.1:<port>' not found". Wait until a plain shell
