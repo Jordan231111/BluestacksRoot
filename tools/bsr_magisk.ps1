@@ -505,7 +505,7 @@ function Get-AdbPortCandidates{
     foreach($lp in @(Get-LiveAdbPorts)){ [void]$cands.Add($lp) }   # live bound ports rescue a stale conf
     [void]$cands.Add('5555')
     $seen=@{}; $out=@(); foreach($c in $cands){ if(-not $seen.ContainsKey($c)){ $seen[$c]=$true; $out+=$c } }
-    ,$out
+    $out
 }
 # Is the device on $serial actually a BlueStacks instance (vs a foreign emulator squatting the port)?
 # BlueStacks exposes bst.* props + the bst service manager (init.svc.bstsvcmgrtest); a stock AVD has neither.

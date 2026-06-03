@@ -112,10 +112,11 @@ $script:LiveAdbPortProbe = { @() }
 function Cands([string]$dataDir, [string]$inst) {
     $script:Conf = Join-Path $dataDir 'bluestacks.conf'
     $script:Instance = $inst
-    , (Get-AdbPortCandidates)
+    @(Get-AdbPortCandidates)
 }
 Eq 'cands: single 5555 (deduped against fallback)' '5555'      ((Cands (New-FakeData 'Pie64' @{ 'status.adb_port' = '5555' } 'c') 'Pie64') -join ',')
 Eq 'cands: non-5555 first, 5555 fallback'          '5585,5555' ((Cands (New-FakeData 'Rvc64_3' @{ 'status.adb_port' = '5585' } 'c') 'Rvc64_3') -join ',')
+Ok 'cands: returns flat string elements, not one nested array' (((Cands (New-FakeData 'Rvc64_3' @{ 'status.adb_port' = '5585' } 'c') 'Rvc64_3').Count -eq 2) -and ((Cands (New-FakeData 'Rvc64_3' @{ 'status.adb_port' = '5585' } 'c') 'Rvc64_3')[0] -is [string]))
 Eq 'cands: adb_port used when status absent'        '5595,5555' ((Cands (New-FakeData 'Rvc64' @{ 'adb_port' = '5595' } 'c') 'Rvc64') -join ',')
 # stale-status case (Rvc64_4 in the wild: status=5555 stale, adb_port=5595 real) -> BOTH tried
 Eq 'cands: stale status + real adb_port both tried' '5555,5595' ((Cands (New-FakeData 'Rvc64_4' @{ 'status.adb_port' = '5555'; 'adb_port' = '5595' } 'c') 'Rvc64_4') -join ',')

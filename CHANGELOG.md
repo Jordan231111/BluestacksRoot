@@ -5,6 +5,22 @@ Player — from one file, fully automatically. Releases are grouped by the BlueS
 
 ---
 
+## v15 — Fix malformed adb serial when multiple Rvc64 adb ports are candidates · 2026-06-03
+
+Fixes the reproduced DATA-stage failure where progress output showed `candidates=System.Object[]` and adb
+was called with a malformed serial like `127.0.0.1:5555 5557`, producing `error: unknown host service`.
+
+- `Get-AdbPortCandidates` now returns a flat string list instead of one nested PowerShell array object.
+- `Boot-And-Wait` now tries candidate ports separately (`127.0.0.1:5555`, then `127.0.0.1:5557`, etc.)
+  instead of accidentally joining them into one invalid serial.
+- Resolver tests now assert the candidate list shape, and CI now runs a heavier pure-unit suite for the
+  Magisk orchestrator covering candidate-port matrices, log redaction, adb server-port selection,
+  HD-Player instance matching, adb retry classifiers, and stray `su` parsing.
+- Re-embedded the updated orchestrator into `blueStackRoot.cmd`. No Magisk APK, su, debugfs, disk payload,
+  or rooting-pipeline changes beyond the adb candidate-list fix.
+
+---
+
 ## v14 — Privacy: redact user-profile paths in logs · 2026-06-03
 
 Masks Windows/macOS user-profile directories in runtime and helper output so logs show

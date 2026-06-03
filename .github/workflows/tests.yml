@@ -48,3 +48,9 @@ jobs:
       - name: Path + adb-port resolution tests
         shell: cmd
         run: powershell -NoProfile -ExecutionPolicy Bypass -File tests\Run-Resolve-Tests.ps1
+
+      # Heavy pure-unit coverage for the Magisk orchestrator: candidate-port ordering/shape,
+      # redaction, adb retry classifiers, HD-Player instance matching, and su-inventory parsing.
+      - name: Magisk orchestrator pure unit tests
+        shell: cmd
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File tests\Run-Magisk-Unit-Tests.ps1
