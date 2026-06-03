@@ -130,8 +130,21 @@ $Player = Join-Path $Install 'HD-Player.exe'
 $BsrSu  = if($BsrSuPath){$BsrSuPath}else{ Join-Path $Here 'su_src\bsr_su' }   # the setuid bootstrap su (4968 B)
 
 # ---- embedded-payload self-extraction (only used when -SelfCmd <blueStackRoot.cmd> is given) ----
+# Extract-Block is called up to 3x per run (DFS + BSRSU + APK payloads), each scanning the large
+# (~21 MB) self .cmd. Read it once and cache by path so it is read once, not three times.
+# $script:SelfReadCount is a test seam (asserted by Run-Magisk-Unit-Tests.ps1).
+$script:SelfCmdTextCache = @{}
+$script:SelfReadCount = 0
+function Get-SelfText($path){
+    if(-not $path){ return $null }
+    if($script:SelfCmdTextCache.ContainsKey($path)){ return $script:SelfCmdTextCache[$path] }
+    $script:SelfReadCount++
+    $t=[System.IO.File]::ReadAllText($path)
+    $script:SelfCmdTextCache[$path]=$t
+    return $t
+}
 function Extract-Block($cmdPath,$begTok,$endTok){
-    $t=[System.IO.File]::ReadAllText($cmdPath)
+    $t=Get-SelfText $cmdPath
     $b="__BSR_${begTok}_"+"BEGIN__"; $e="__BSR_${endTok}_"+"END__"
     $i=$t.IndexOf($b); $j=$t.IndexOf($e)
     if($i -lt 0 -or $j -le $i){ return $null }

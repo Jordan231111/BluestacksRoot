@@ -112,11 +112,15 @@ function Read-PE([string]$p) { return [IO.File]::ReadAllBytes($p) }
 Section "Integrity patch (synthetic PE)"
 
 # 1) single validated site -> patched
-$pe = Write-PE (New-FakePE 1) 'hd1.exe'
+$pe1Bytes = New-FakePE 1
+$pe = Write-PE $pe1Bytes 'hd1.exe'
 $r = Run-Engine @('-Action', 'Patch', '-Exe', $pe)
 $bb = Read-PE $pe
 Check ($r.Code -eq 0 -and $bb[0x227] -eq 0x90 -and $bb[0x228] -eq 0x90) "single site NOPped (74 10 -> 90 90)"
 Check (Test-Path "$pe.bak") "backup .bak created"
+# seek-write proof: the in-place patch changed EXACTLY the 2 JZ bytes and left every other byte intact
+$diff = 0; for ($z = 0; $z -lt $pe1Bytes.Length; $z++) { if ($pe1Bytes[$z] -ne $bb[$z]) { $diff++ } }
+Check ($diff -eq 2 -and $pe1Bytes[0x227] -ne $bb[0x227] -and $pe1Bytes[0x228] -ne $bb[0x228]) "patch changed EXACTLY 2 bytes (seek-write, no whole-file rewrite drift)"
 
 # 2) idempotent: running again is a no-op success
 $r2 = Run-Engine @('-Action', 'Patch', '-Exe', $pe)

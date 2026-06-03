@@ -243,6 +243,51 @@ try {
     )
     foreach ($c in $suCases) { Eq "stray: $($c[0])" $c[2] ((Find-StraySu $c[1]) -join ',') }
 
+    Section 'Extract-Block + self-read memoization'
+    # Build a fake single-file .cmd carrying three embedded blocks, then prove Extract-Block returns
+    # each block's content AND reads the (large) self file only ONCE total across the three calls.
+    $mk = { param($tok) "__BSR_${tok}_" + 'BEGIN__' }   # build markers by concat (no literal token here)
+    $fakeCmdLines = @(
+        'rem head',
+        (& $mk 'DFS'), 'DFS-PAYLOAD-AAA', ('__BSR_DFS_' + 'END__'),
+        (& $mk 'BSRSU'), 'BSRSU-PAYLOAD-BBB', ('__BSR_BSRSU_' + 'END__'),
+        (& $mk 'APK'), 'APK-PAYLOAD-CCC', ('__BSR_APK_' + 'END__'),
+        'rem tail'
+    )
+    $fakeRoot = Join-Path $env:TEMP ("bsr_mag_self_" + [guid]::NewGuid().ToString('N').Substring(0, 8))
+    New-Item -ItemType Directory -Path $fakeRoot -Force | Out-Null
+    $script:made.Add($fakeRoot)
+    $fakeCmd = Join-Path $fakeRoot 'blueStackRoot.cmd'
+    [IO.File]::WriteAllText($fakeCmd, (($fakeCmdLines -join "`r`n") + "`r`n"), (New-Object Text.UTF8Encoding($false)))
+    $script:SelfCmdTextCache = @{}; $script:SelfReadCount = 0
+    $dfs = (Extract-Block $fakeCmd 'DFS' 'DFS').Trim()
+    $su = (Extract-Block $fakeCmd 'BSRSU' 'BSRSU').Trim()
+    $apk = (Extract-Block $fakeCmd 'APK' 'APK').Trim()
+    Eq 'extract: DFS block content' 'DFS-PAYLOAD-AAA' $dfs
+    Eq 'extract: BSRSU block content' 'BSRSU-PAYLOAD-BBB' $su
+    Eq 'extract: APK block content' 'APK-PAYLOAD-CCC' $apk
+    Eq 'extract: self .cmd read ONCE for 3 extractions (memoized)' 1 $script:SelfReadCount
+    Ok 'extract: cached text == fresh ReadAllText' ($script:SelfCmdTextCache[$fakeCmd] -eq ([IO.File]::ReadAllText($fakeCmd)))
+    Ok 'extract: missing marker -> $null' ($null -eq (Extract-Block $fakeCmd 'NOPE' 'NOPE'))
+
+    Section 'Set-ConfKey (modify-only, UTF-8 no BOM)'
+    $confRoot = Join-Path $env:TEMP ("bsr_mag_conf_" + [guid]::NewGuid().ToString('N').Substring(0, 8))
+    New-Item -ItemType Directory -Path $confRoot -Force | Out-Null
+    $script:made.Add($confRoot)
+    $confPath = Join-Path $confRoot 'bluestacks.conf'
+    $seed = @('bst.feature.rooting="0"', 'bst.instance.Rvc64_1+x.enable_root_access="0"')  # +/. = regex-special key
+    [IO.File]::WriteAllText($confPath, (($seed -join "`r`n") + "`r`n"), (New-Object Text.UTF8Encoding($false)))
+    $script:Conf = $confPath
+    Set-ConfKey 'bst.feature.rooting' '1'
+    Set-ConfKey 'bst.instance.Rvc64_1+x.enable_root_access' '1'   # exercises [regex]::Escape on the key
+    Set-ConfKey 'bst.does.not.exist' '1'                          # absent key -> must NOT be added
+    $confTxt = [IO.File]::ReadAllText($confPath)
+    Ok 'confkey: existing flag flipped to 1' ($confTxt -match 'bst\.feature\.rooting="1"')
+    Ok 'confkey: regex-special instance key flipped' ($confTxt -match 'Rvc64_1\+x\.enable_root_access="1"')
+    Ok 'confkey: absent key not added' ($confTxt -notmatch 'bst\.does\.not\.exist')
+    $cb = [IO.File]::ReadAllBytes($confPath)
+    Ok 'confkey: no UTF-8 BOM' (-not ($cb.Length -ge 3 -and $cb[0] -eq 0xEF -and $cb[1] -eq 0xBB -and $cb[2] -eq 0xBF))
+
 } finally {
     $script:LiveAdbPortProbe = $null
     $script:AdbServerPortProbe = $null

@@ -44,6 +44,13 @@ jobs:
         shell: cmd
         run: powershell -NoProfile -ExecutionPolicy Bypass -File tests\Run-Tests.ps1
 
+      # Proves the optimized HD-Player integrity patch (Array.IndexOf scan + seek-write) is byte-for-byte
+      # identical to the original byte-by-byte algorithm (frozen oracle) and reports the speedup.
+      # Real HD-Player.exe auto-skips here (no BlueStacks on the runner); synthetic coverage runs.
+      - name: Patch equivalence + speedup (HD-Player integrity bypass)
+        shell: cmd
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File tests\Run-Patch-Equivalence.ps1
+
       # Nothing-hardcoded guarantees: custom install/data paths + adb port (5555 is not assumed).
       - name: Path + adb-port resolution tests
         shell: cmd

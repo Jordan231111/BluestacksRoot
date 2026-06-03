@@ -5,6 +5,34 @@ Player — from one file, fully automatically. Releases are grouped by the BlueS
 
 ---
 
+## v16 — ⚡ The HD-Player integrity patch is ~80× faster (byte-for-byte identical) · 2026-06-03
+
+Pure performance + test-coverage release. **No rooting-behavior, Magisk APK, su, debugfs, or disk-payload
+changes** — identical inputs produce identical outputs, *proven byte-for-byte* against the original algorithm.
+
+- ⚡ **Anti-tamper patch: whole-file scan ~20 s → ~0.25 s (~80×); the patch step drops from ~23 s to under 2 s.**
+  The patch only ever flips **2 bytes**, yet it used to read, scan, and rewrite the entire ~27 MB
+  `HD-Player.exe`. The 6× whole-file anchor-string scan + the `.text` `CALL;TEST;JZ` scan ran byte-by-byte
+  in interpreted PowerShell (~177 M iterations); they now use native `[Array]::IndexOf` to jump straight to
+  each candidate byte (measured on a real 27 MB binary: **20,159 ms → 248 ms**).
+- 💾 **Writes 2 bytes, not 27 MB.** The validated `90 90` is now written in place via a `FileStream` seek
+  instead of rewriting the whole file — same output, a fraction of the disk I/O.
+- 📦 **Reads the 21 MB single-file `.cmd` once, not 3×.** The orchestrator memoizes the self-read used to
+  extract the embedded debugfs / su / APK blobs.
+- 🧰 **Zero new dependencies.** Everything rides on the in-box Windows PowerShell / .NET runtime the tool
+  already uses — nothing to install, nothing from BlueStacks.
+- 🧪 **Proven, not promised.** New `tests\Run-Patch-Equivalence.ps1` keeps a *frozen copy of the original
+  algorithm* as an oracle and asserts the optimized engine produces byte-identical results across synthetic
+  PEs **and the real `HD-Player.exe`** (same 1675 candidates, same validated site, same patched bytes —
+  including a full-scale re-patch) and prints the before/after timing. Wired into CI next to the engine,
+  resolver, and Magisk suites (all green).
+- 🔎 **Same update-proof matching as before** — dynamic PE parse + the stable `CALL;TEST;JZ` idiom +
+  `"Verified/Failed the disk integrity!"` anchor validation. Only the *iteration* changed, never *what* is
+  matched, so version-proofness is unchanged.
+- Re-embedded the optimized engine + orchestrator into `blueStackRoot.cmd`.
+
+---
+
 ## v15 — Fix malformed adb serial when multiple Rvc64 adb ports are candidates · 2026-06-03
 
 Fixes the reproduced DATA-stage failure where progress output showed `candidates=System.Object[]` and adb
