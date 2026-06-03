@@ -1,0 +1,4 @@
+# debug.cmd is a hand-run batch launcher with a multi-line `if ( ... )` elevation block; cmd.exe needs
+# CRLF to parse that reliably. Force CRLF on every checkout/platform (and every release built from a
+# fresh checkout) so the repo copy always matches the shipped asset and always runs.
+debug.cmd text eol=crlf
