@@ -5,6 +5,35 @@ Player — from one file, fully automatically. Releases are grouped by the BlueS
 
 ---
 
+## v17 — Heal the wedged "device offline" adb transport on slow / low-end PCs · 2026-06-03
+
+Fixes [#18](https://github.com/Jordan231111/BluestacksRoot/issues/18): PREP/DATA succeed but the instance
+loops on `device offline` forever on a slow-booting (multi-minute) low-end PC, even though the guest boots
+fine. The per-instance adb transport, opened during early boot, wedges in `offline` (TCP socket up, adb
+handshake never finalized) and a plain `connect` no-ops on it (`already connected`), so `Boot-And-Wait`
+polled `getprop` over a dead transport until timeout. On a fast PC the offline window is a few seconds and
+clears on its own — which is why it never reproduced there.
+
+- 🩹 **Self-healing transport.** A candidate that isn't `device` is now `disconnect`+`connect`ed to force a
+  fresh handshake instead of re-using the wedged socket — the deterministic form of the manual
+  `kill-server; connect` that recovered it by hand. `AdbShellRetry`/`AdbTry` heal on a dropped transport too.
+- 📜 **Host-side boot signal.** A per-instance `Player.log [Ready]` line is used as an adb-independent
+  "guest booted" signal (immune to the offline-transport race) for liveness and timeout shaping.
+- 🧭 **Liveness, not WMI-only.** Relaunch fires only when nothing says the instance is alive (conf adb port
+  not listening AND no `Player.log` activity AND no process), so a null/blocked WMI command-line read no
+  longer spams `retrying launch`.
+- ⏱️ **Reasonable waits.** Fail fast (~90 s) when nothing is alive at all (not a slow boot); cap the
+  post-`[Ready]` wait; otherwise tolerate multi-minute boots.
+- 🐞 **New `debug.cmd`** — a standalone, read-only diagnostic that launches the instance, tests the
+  disconnect+reconnect heal *live*, and writes one redacted `bsr_debug_*.log` so a single attached log
+  pinpoints the failure mode. The production `blueStackRoot.cmd` keeps terminal logging only (writes no files).
+- 🧪 New unit tests for `Parse-AdbState` + the `Player.log` ready/alive parsers (Magisk 256, engine 29,
+  resolver 49, patch-equivalence 24; embedded blocks in sync). **No Magisk APK, su, debugfs, or disk-payload
+  changes** — only the host-side adb wait/boot logic. Confirmed on the original reporter's low-end 2013 PC.
+- Re-embedded the updated orchestrator into `blueStackRoot.cmd`.
+
+---
+
 ## v16 — ⚡ The HD-Player integrity patch is ~80× faster (byte-for-byte identical) · 2026-06-03
 
 Pure performance + test-coverage release. **No rooting-behavior, Magisk APK, su, debugfs, or disk-payload

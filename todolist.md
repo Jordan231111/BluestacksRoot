@@ -1,6 +1,18 @@
 # Todo List
 
 ## Done
+- [x] **adb: heal the wedged "device offline" transport on slow / low-end PCs (#18)** — on a multi-minute
+      boot the per-instance adb transport opens during early boot and wedges `offline` (socket up, handshake
+      never finalized); a plain `connect` no-ops on it (`already connected`), so `Boot-And-Wait` polled
+      `getprop` over a dead transport until timeout though the guest had booted. Fix: on a non-`device`
+      candidate, **`disconnect`+`connect` to force a fresh handshake** (deterministic form of the manual
+      `kill-server; connect`); gate "booted" on a host-side **`Player.log [Ready]`** signal; base liveness on
+      the conf adb port / Player.log (not the WMI command-line read alone — a false zero on some hosts → no
+      more `retrying launch` spam); fail fast when nothing is alive, cap the post-`[Ready]` wait, tolerate
+      multi-minute boots. `AdbShellRetry`/`AdbTry` heal on drops too. Added a standalone read-only
+      **`debug.cmd`** diagnostic (tests the heal live, writes one redacted log); production `blueStackRoot.cmd`
+      logs to the terminal only. +unit tests (`Parse-AdbState`, Player.log parsers); all suites green
+      (Magisk 256, engine 29, resolver 49, patch 24; embedded in sync). Confirmed on the reporter's 2013 PC. → v17.
 - [x] **Magisk is the SOLE root: scrub any competing su + Verify catches it** — an instance could show
       "Abnormal State — su not from Magisk" when the shared master still carried a classic/engine
       `/system/xbin/su` (old non-Magisk root / the **legacy classic-su live-E2E**, which injected one).
