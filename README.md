@@ -104,8 +104,8 @@ BlueStacks and carries binaries inside it. Heuristic scanners flag that pattern.
   [`Jordan231111/KitsuneMagisk`](https://github.com/Jordan231111/KitsuneMagisk/tree/kitsune) (commit
   `25fa2159f`) — a fork of [`1q23lyc45/KitsuneMagisk`](https://github.com/1q23lyc45/KitsuneMagisk) with a
   **single 3-line source patch**: the DenyList backend stores entries in the `denylist` table instead of
-  `hidelist`, so apps you toggle in Magisk's **own DenyList UI** are picked up by the Zygisk implementations
-  (ReZygisk / NeoZygisk) that read `denylist` — i.e. the in-app hide toggle finally hides root. Nothing else
+  `hidelist`, so apps you toggle in Magisk's **own DenyList UI** are picked up by the Zygisk implementation
+  (ReZygisk) that reads `denylist` — i.e. the in-app hide toggle finally hides root. Nothing else
   is changed. **Don't just trust me — read the one-commit diff and rebuild it yourself**; the SHA-256 above
   is exactly what's embedded in the `.cmd` (re-verifiable with `tests/Check-Embedded-Sync.ps1`).
 - **Verify it yourself in 30 seconds.** Scan the file on [VirusTotal](https://www.virustotal.com/), or
@@ -167,11 +167,11 @@ stack to run Xposed modules and sideload **modified / unsigned APKs**. Compatibl
 
 | File | What it is | How to install |
 |---|---|---|
-| [`NeoZygisk-v2.3-275-release.zip`](modules/NeoZygisk-v2.3-275-release.zip) | **Zygisk** implementation ([JingMatrix/NeoZygisk](https://github.com/JingMatrix/NeoZygisk)) — provides the Zygote injection that LSPosed needs on Magisk Delta | Magisk app → **Modules → Install from storage** → reboot |
-| [`Vector-v2.0-3021-Release.zip`](modules/Vector-v2.0-3021-Release.zip) | **LSPosed** Zygisk build ([JingMatrix/LSPosed](https://github.com/JingMatrix/LSPosed), released as "Vector") — the Xposed framework | Flash in Magisk **after** NeoZygisk → reboot |
+| [`ReZygisk-v1.0.0-521-8034041-release.zip`](modules/ReZygisk-v1.0.0-521-8034041-release.zip) | **Zygisk** implementation ([Jordan231111/ReZygisk](https://github.com/Jordan231111/ReZygisk)) — provides the Zygote injection that LSPosed needs on Magisk Delta | Magisk app → **Modules → Install from storage** → reboot |
+| [`Vector-v2.0-3021-Release.zip`](modules/Vector-v2.0-3021-Release.zip) | **LSPosed** Zygisk build ([JingMatrix/LSPosed](https://github.com/JingMatrix/LSPosed), released as "Vector") — the Xposed framework | Flash in Magisk **after** ReZygisk → reboot |
 | [`CorePatch-4.9.apk`](modules/CorePatch-4.9.apk) | **CorePatch** ([LSPosed/CorePatch](https://github.com/LSPosed/CorePatch)) — lets you install **unsigned / modified APKs** by disabling signature verification | Install the APK → enable it in **LSPosed → Modules** → reboot |
 
-**Order matters:** root with Magisk → flash **NeoZygisk** (turn Zygisk on) → flash **Vector / LSPosed** →
+**Order matters:** root with Magisk → flash **ReZygisk** (turn Zygisk on) → flash **Vector / LSPosed** →
 install **CorePatch** and enable it in LSPosed. Confirm each step works (Magisk shows the module active /
 LSPosed shows "Active") before moving to the next, and reboot the instance between flashes.
 
@@ -181,7 +181,7 @@ LSPosed shows "Active") before moving to the next, and reboot the instance betwe
 &nbsp;
 
 ```
-5c84df9f962c04855b3523a3a75022cf5e4f3ad3dfd94794ed92b43e911f3b9a  NeoZygisk-v2.3-275-release.zip
+c953fb3effab897bd98d04ed9d91ac0b952acfe574e3af3136314dbba8107543  ReZygisk-v1.0.0-521-8034041-release.zip
 d5e39669c02c2c699ab948eb8f3639b348eefb7749553224a9c62fa4a2f2dc18  Vector-v2.0-3021-Release.zip
 1bdc47d5b48afffd37948a9f5638ae6a5f3d4d02ca01ae36143588284b979996  CorePatch-4.9.apk
 ```
