@@ -168,7 +168,7 @@ stack to run Xposed modules and sideload **modified / unsigned APKs**. Compatibl
 | File | What it is | How to install |
 |---|---|---|
 | [`ReZygisk-v1.0.0-521-8034041-release.zip`](modules/ReZygisk-v1.0.0-521-8034041-release.zip) | **Zygisk** implementation ([Jordan231111/ReZygisk](https://github.com/Jordan231111/ReZygisk)) — provides the Zygote injection that LSPosed needs on Magisk Delta | Magisk app → **Modules → Install from storage** → reboot |
-| [`Vector-v2.0-3021-Release.zip`](modules/Vector-v2.0-3021-Release.zip) | **LSPosed** Zygisk build ([JingMatrix/LSPosed](https://github.com/JingMatrix/LSPosed), released as "Vector") — the Xposed framework | Flash in Magisk **after** ReZygisk → reboot |
+| [`Vector-v2.0-3043-Release.zip`](modules/Vector-v2.0-3043-Release.zip) | **LSPosed** Zygisk build ([JingMatrix/LSPosed](https://github.com/JingMatrix/LSPosed), released as "Vector") — the Xposed framework | Flash in Magisk **after** ReZygisk → reboot |
 | [`CorePatch-4.9.apk`](modules/CorePatch-4.9.apk) | **CorePatch** ([LSPosed/CorePatch](https://github.com/LSPosed/CorePatch)) — lets you install **unsigned / modified APKs** by disabling signature verification | Install the APK → enable it in **LSPosed → Modules** → reboot |
 
 **Order matters:** root with Magisk → flash **ReZygisk** (turn Zygisk on) → flash **Vector / LSPosed** →
@@ -182,7 +182,7 @@ LSPosed shows "Active") before moving to the next, and reboot the instance betwe
 
 ```
 c953fb3effab897bd98d04ed9d91ac0b952acfe574e3af3136314dbba8107543  ReZygisk-v1.0.0-521-8034041-release.zip
-d5e39669c02c2c699ab948eb8f3639b348eefb7749553224a9c62fa4a2f2dc18  Vector-v2.0-3021-Release.zip
+94042fc223a00c7c3ab94193ad929c814b8309e00f5d25a29a1733f60165869a  Vector-v2.0-3043-Release.zip
 1bdc47d5b48afffd37948a9f5638ae6a5f3d4d02ca01ae36143588284b979996  CorePatch-4.9.apk
 ```
 
