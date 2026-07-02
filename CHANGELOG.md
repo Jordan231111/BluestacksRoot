@@ -5,6 +5,39 @@ Player — from one file, fully automatically. Releases are grouped by the BlueS
 
 ---
 
+## v18 — Survive antivirus tampering on the first step (GZip / Base-64 crash) · 2026-07-01
+
+Fixes [#24](https://github.com/Jordan231111/BluestacksRoot/issues/24): the pipeline died on the first step
+with `Invalid length for a Base-64 char array or string` (or earlier `The compression mode specified in the
+GZip header is unknown`) — then still printed a green *"Magisk pipeline finished"*. Root cause: Windows
+Defender reads the embedded Magisk APK + setuid `su` as HackTool/PUA and **strips those bytes out of the
+on-disk `.cmd`**, so `FromBase64String`/`GZipStream` choke on the damaged payload. The old AV exclusion ran
+*after* the menu and never covered the temp work dir, so it protected nothing at the moment it mattered.
+
+- 🛡️ **AV exclusion first, and wider.** New `:av_setup` adds the Defender exclusions **before any payload is
+  decoded or written** — the folder, the DataDir, **and `%TEMP%\bsr_work`** (where the decoded APK / `su` /
+  debugfs land). Held for the whole session, removed on clean exit; the old mid-operation
+  `:av_exclude`/`:av_unexclude` churn is gone.
+- 🔎 **Payload integrity → actionable error.** `Get-BlockBytes` validates every embedded block (marker,
+  base64 length, decode); the bootstrap `su` is additionally checked by gzip magic **and** SHA-256. A damaged
+  block now throws *"antivirus most likely removed part of this file … add a Defender exclusion, then
+  re-download blueStackRoot.cmd from Releases into the same folder"* instead of a raw .NET exception.
+- 🧪 **Post-write quarantine check.** After the APK / `su` / debugfs are written to `%TEMP%\bsr_work`,
+  `Assert-Extracted` confirms they still exist and match size — catching AV that quarantines the *extracted*
+  files mid-run (not just the `.cmd`), even when a path exclusion is in place but the verdict is behavioural.
+- 🏷️ **Names your antivirus.** On any payload-damage error the message reports the actual installed AV
+  (via `root/SecurityCenter2`); Defender is excluded automatically, third-party products can't be, so the
+  guidance points you at the right exclusion list. *(Full "AV-proof for every scanner" is not possible — the
+  first scan happens before this file can run — but this covers Defender end-to-end and every other case
+  gracefully.)*
+- ✅ **No more false "finished".** The batch captures the PowerShell exit code and prints the green success
+  line only when the pipeline actually succeeds; on failure it prints red guidance. `bsr_magisk.ps1` now
+  `exit 0`s explicitly on success so `%errorlevel%` is trustworthy.
+- 📦 **`.gitattributes`** pins `blueStackRoot.cmd` as binary (`-text -diff`) so a clone can't EOL-normalize
+  and shift the payload offsets.
+
+---
+
 ## v17 — Heal the wedged "device offline" adb transport on slow / low-end PCs · 2026-06-03
 
 Fixes [#18](https://github.com/Jordan231111/BluestacksRoot/issues/18): PREP/DATA succeed but the instance

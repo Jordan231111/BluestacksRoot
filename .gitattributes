@@ -2,3 +2,10 @@
 # CRLF to parse that reliably. Force CRLF on every checkout/platform (and every release built from a
 # fresh checkout) so the repo copy always matches the shipped asset and always runs.
 debug.cmd text eol=crlf
+
+# blueStackRoot.cmd is a ~21 MB polyglot: a small CRLF batch header followed by LF-delimited base64/gzip
+# payload blocks (a Magisk APK, a setuid su, the debugfs bundle). It must check out BYTE-FOR-BYTE identical
+# to the shipped release asset on every platform/git config -- any EOL normalization would rewrite the
+# payload lines, shift byte offsets, and can leave the embedded blocks undecodable. Mark it binary (no
+# autocrlf, no eol conversion, no diff) so a clone can never corrupt the payload. See issue #24.
+blueStackRoot.cmd -text -diff

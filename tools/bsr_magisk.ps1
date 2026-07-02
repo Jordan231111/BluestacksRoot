@@ -152,20 +152,66 @@ function Extract-Block($cmdPath,$begTok,$endTok){
     $i=$t.IndexOf([char]10,$i)+1
     $t.Substring($i,$j-$i)
 }
+# ---- payload integrity: turn a cryptic base64/gzip crash into an actionable message (issue #24) ----
+# The embedded blocks (APK, debugfs zip, bootstrap-su gzip) are exactly the bytes antivirus loves to
+# strip from this .cmd -- a real Magisk APK + a setuid 'su' ELF read as HackTool/PUA. When Defender
+# removes part of the file (or a download is cut short) FromBase64String / GZipStream throw an opaque
+# .NET error. Get-BlockBytes validates structure first and, on any problem, throws a message that tells
+# the user what to actually do instead of surfacing a raw exception.
+# Name the antivirus actually installed (root/SecurityCenter2) so the guidance can be vendor-specific.
+# Only Defender can be excluded from code; for anything else the user must add the exclusion by hand, so
+# telling them WHICH product is running is the honest, useful help. Best-effort: empty string on any error.
+function Get-AvHint {
+    try {
+        $av = @(Get-CimInstance -Namespace 'root/SecurityCenter2' -ClassName AntiVirusProduct -ErrorAction Stop |
+                ForEach-Object { $_.displayName } | Where-Object { $_ } | Select-Object -Unique)
+        if($av.Count){ return " Antivirus detected: $($av -join ', '). Windows Defender exclusions are added for you; any THIRD-PARTY antivirus you must exclude yourself -- add this folder and %TEMP%\bsr_work to its exclusions." }
+    } catch {}
+    return ''
+}
+function Fail-Damaged($what){
+    throw ("embedded $what payload is damaged or incomplete -- antivirus most likely removed part of this " +
+           "file, or the download was interrupted." + (Get-AvHint) + " Fix: add a folder exclusion for this " +
+           "directory, then RE-DOWNLOAD blueStackRoot.cmd from the GitHub Releases page into the SAME folder " +
+           "and run it again.")
+}
+# After a payload is written to %TEMP%\bsr_work, confirm AV didn't quarantine/alter it in the moment between
+# write and use (real Magisk APK / setuid su are prime targets even with a path exclusion, if the verdict is
+# cloud/behavioural rather than path-based).
+function Assert-Extracted($path,$expectedLen,$what){
+    if(-not (Test-Path -LiteralPath $path)){
+        throw ("the extracted $what was deleted right after it was written -- antivirus quarantined it." + (Get-AvHint) + " Add the exclusions above and run again.")
+    }
+    if($expectedLen -and ((Get-Item -LiteralPath $path).Length -ne $expectedLen)){
+        throw ("the extracted $what changed size after it was written -- antivirus altered/quarantined it." + (Get-AvHint) + " Add the exclusions above and run again.")
+    }
+}
+function Get-BlockBytes($tok){
+    if(-not ($SelfCmd -and (Test-Path $SelfCmd))){ throw "no -SelfCmd path: cannot read the embedded $tok payload." }
+    $b64 = Extract-Block $SelfCmd $tok $tok
+    if($null -eq $b64){ Fail-Damaged $tok }                                    # BEGIN/END marker gone -> truncated
+    $b64 = ($b64 -replace '[^A-Za-z0-9+/=]','')
+    if($b64.Length -lt 16 -or ($b64.Length % 4) -ne 0){ Fail-Damaged $tok }    # not a valid base64 length
+    try { return [Convert]::FromBase64String($b64) } catch { Fail-Damaged $tok }
+}
 function Ensure-Debugfs {
     if($script:Debugfs -and (Test-Path $script:Debugfs)){ return }
     foreach($c in @((Join-Path $Here 'debugfs\debugfs.exe'), (Join-Path $env:TEMP 'bsr_work\debugfs\debugfs.exe'))){ if(Test-Path $c){ $script:Debugfs=$c; return } }
     if($SelfCmd -and (Test-Path $SelfCmd)){
-        $b64=Extract-Block $SelfCmd 'DFS' 'DFS'
-        if($b64){ $b64=($b64 -replace '[^A-Za-z0-9+/=]',''); $d=Join-Path $env:TEMP 'bsr_work\debugfs'; New-Item -ItemType Directory -Path $d -Force | Out-Null; $zip=Join-Path $d '_d.zip'; [System.IO.File]::WriteAllBytes($zip,[Convert]::FromBase64String($b64)); Add-Type -AssemblyName System.IO.Compression.FileSystem; $za=[System.IO.Compression.ZipFile]::OpenRead($zip); try{ foreach($en in $za.Entries){ if(-not $en.Name){continue}; $tp=Join-Path $d $en.FullName; $dd=Split-Path -Parent $tp; if(-not(Test-Path $dd)){New-Item -ItemType Directory -Path $dd -Force|Out-Null}; [System.IO.Compression.ZipFileExtensions]::ExtractToFile($en,$tp,$true) } } finally { $za.Dispose() }; Remove-Item $zip -Force -EA SilentlyContinue; $exe=Join-Path $d 'debugfs.exe'; if(Test-Path $exe){ $script:Debugfs=$exe } }
+        $zipBytes=Get-BlockBytes 'DFS'
+        $d=Join-Path $env:TEMP 'bsr_work\debugfs'; New-Item -ItemType Directory -Path $d -Force | Out-Null; $zip=Join-Path $d '_d.zip'; [System.IO.File]::WriteAllBytes($zip,$zipBytes); Add-Type -AssemblyName System.IO.Compression.FileSystem; try{ $za=[System.IO.Compression.ZipFile]::OpenRead($zip) }catch{ Fail-Damaged 'DFS' }; try{ foreach($en in $za.Entries){ if(-not $en.Name){continue}; $tp=Join-Path $d $en.FullName; $dd=Split-Path -Parent $tp; if(-not(Test-Path $dd)){New-Item -ItemType Directory -Path $dd -Force|Out-Null}; [System.IO.Compression.ZipFileExtensions]::ExtractToFile($en,$tp,$true) } } finally { $za.Dispose() }; Remove-Item $zip -Force -EA SilentlyContinue; $exe=Join-Path $d 'debugfs.exe'; Assert-Extracted $exe $null 'debugfs.exe'; $script:Debugfs=$exe
     }
     if(-not ($script:Debugfs -and (Test-Path $script:Debugfs))){ throw "debugfs.exe not found (pass -Debugfs or -SelfCmd)." }
 }
 function Ensure-BsrSu {
     if($script:BsrSu -and (Test-Path $script:BsrSu)){ return }
     if($SelfCmd -and (Test-Path $SelfCmd)){
-        $b64=Extract-Block $SelfCmd 'BSRSU' 'BSRSU'
-        if($b64){ $b64=($b64 -replace '[^A-Za-z0-9+/=]',''); $gz=[Convert]::FromBase64String($b64); $in=New-Object System.IO.MemoryStream(,$gz); $z=New-Object System.IO.Compression.GZipStream($in,[System.IO.Compression.CompressionMode]::Decompress); $out=New-Object System.IO.MemoryStream; $buf=New-Object byte[] 65536; while(($n=$z.Read($buf,0,$buf.Length)) -gt 0){ $out.Write($buf,0,$n) }; $z.Close(); $in.Close(); $d=Join-Path $env:TEMP 'bsr_work'; New-Item -ItemType Directory -Path $d -Force | Out-Null; $p=Join-Path $d 'bsr_su'; [System.IO.File]::WriteAllBytes($p,$out.ToArray()); $out.Close(); $script:BsrSu=$p }
+        $gz=Get-BlockBytes 'BSRSU'
+        if($gz.Length -lt 2 -or $gz[0] -ne 0x1F -or $gz[1] -ne 0x8B){ Fail-Damaged 'BSRSU' }   # gzip magic 1F 8B
+        try{ $in=New-Object System.IO.MemoryStream(,$gz); $z=New-Object System.IO.Compression.GZipStream($in,[System.IO.Compression.CompressionMode]::Decompress); $out=New-Object System.IO.MemoryStream; $buf=New-Object byte[] 65536; while(($n=$z.Read($buf,0,$buf.Length)) -gt 0){ $out.Write($buf,0,$n) }; $z.Close(); $in.Close(); $su=$out.ToArray(); $out.Close() }catch{ Fail-Damaged 'BSRSU' }
+        $sha=[BitConverter]::ToString([Security.Cryptography.SHA256]::Create().ComputeHash($su)).Replace('-','').ToLower()
+        if($sha -ne $BSR_SU_SHA){ Fail-Damaged 'BSRSU' }                                       # decoded su must match the known-good hash
+        $d=Join-Path $env:TEMP 'bsr_work'; New-Item -ItemType Directory -Path $d -Force | Out-Null; $p=Join-Path $d 'bsr_su'; [System.IO.File]::WriteAllBytes($p,$su); Assert-Extracted $p $su.Length 'bootstrap su'; $script:BsrSu=$p
     }
     if(-not ($script:BsrSu -and (Test-Path $script:BsrSu))){ throw "bootstrap su (bsr_su) not found (pass -BsrSuPath or -SelfCmd)." }
 }
@@ -173,8 +219,8 @@ function Ensure-MagiskApk {
     if($script:MagiskApk -and (Test-Path $script:MagiskApk)){ return }
     # an external APK next to the .cmd already resolved by the caller; otherwise extract the EMBEDDED one
     if($SelfCmd -and (Test-Path $SelfCmd)){
-        $b64=Extract-Block $SelfCmd 'APK' 'APK'
-        if($b64){ $b64=($b64 -replace '[^A-Za-z0-9+/=]',''); $d=Join-Path $env:TEMP 'bsr_work'; New-Item -ItemType Directory -Path $d -Force | Out-Null; $p=Join-Path $d 'magisk.apk'; [System.IO.File]::WriteAllBytes($p,[Convert]::FromBase64String($b64)); $script:MagiskApk=$p; Say "[*] using embedded Magisk APK ($([Math]::Round((Get-Item $p).Length/1MB,1)) MB)." DarkGray }
+        $apkBytes=Get-BlockBytes 'APK'
+        $d=Join-Path $env:TEMP 'bsr_work'; New-Item -ItemType Directory -Path $d -Force | Out-Null; $p=Join-Path $d 'magisk.apk'; [System.IO.File]::WriteAllBytes($p,$apkBytes); Assert-Extracted $p $apkBytes.Length 'Magisk APK'; $script:MagiskApk=$p; Say "[*] using embedded Magisk APK ($([Math]::Round((Get-Item $p).Length/1MB,1)) MB)." DarkGray
     }
     if(-not ($script:MagiskApk -and (Test-Path $script:MagiskApk))){ throw "Magisk APK not found (pass -MagiskApk or -SelfCmd with an embedded APK)." }
 }
@@ -997,4 +1043,7 @@ if ($MyInvocation.InvocationName -ne '.') {
         # up so nothing of ours lingers on the port after the tool exits. (runs even if an action threw)
         if ($Script:AdbServerInit -and (Test-Path -LiteralPath $Adb)) { & $Adb @('kill-server') *>$null }
     }
+    # Explicit success code so the batch caller can trust %errorlevel% -- a native tool in the 'finally'
+    # above otherwise leaves its own $LASTEXITCODE as the process exit code. The catch path already exits 1.
+    exit 0
 }
