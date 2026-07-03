@@ -168,12 +168,16 @@ stack to run Xposed modules and sideload **modified / unsigned APKs**. Compatibl
 | File | What it is | How to install |
 |---|---|---|
 | [`ReZygisk-v1.0.0-521-8034041-release.zip`](modules/ReZygisk-v1.0.0-521-8034041-release.zip) | **Zygisk** implementation ([Jordan231111/ReZygisk](https://github.com/Jordan231111/ReZygisk)) — provides the Zygote injection that LSPosed needs on Magisk Delta | Magisk app → **Modules → Install from storage** → reboot |
-| [`Vector-v2.0-3043-Release.zip`](modules/Vector-v2.0-3043-Release.zip) | **LSPosed** Zygisk build ([JingMatrix/LSPosed](https://github.com/JingMatrix/LSPosed), released as "Vector") — the Xposed framework | Flash in Magisk **after** ReZygisk → reboot |
+| [`Vector-v2.0-3043-Release.zip`](modules/Vector-v2.0-3043-Release.zip) | **LSPosed** Zygisk build ([JingMatrix/LSPosed](https://github.com/JingMatrix/LSPosed), released as "Vector") — the Xposed framework | Flash in Magisk **after** ReZygisk → reboot. **⚠️ Android 9 (Pie64): flash [Vector v1.11.0](https://github.com/JingMatrix/Vector/releases/tag/v1.11.0) instead — see note below.** |
 | [`CorePatch-4.9.apk`](modules/CorePatch-4.9.apk) | **CorePatch** ([LSPosed/CorePatch](https://github.com/LSPosed/CorePatch)) — lets you install **unsigned / modified APKs** by disabling signature verification | Install the APK → enable it in **LSPosed → Modules** → reboot |
 
 **Order matters:** root with Magisk → flash **ReZygisk** (turn Zygisk on) → flash **Vector / LSPosed** →
 install **CorePatch** and enable it in LSPosed. Confirm each step works (Magisk shows the module active /
 LSPosed shows "Active") before moving to the next, and reboot the instance between flashes.
+
+> **⚠️ Android 9 (Pie64):** the bundled **Vector v2.0 (3043)** won't activate on Pie — flash
+> **[Vector v1.11.0](https://github.com/JingMatrix/Vector/releases/tag/v1.11.0)** instead (same step, right
+> after ReZygisk). **Android 11 & 13 are fine with the bundled build.**
 
 <details>
 <summary><b>Verify the downloads (SHA-256)</b></summary>
