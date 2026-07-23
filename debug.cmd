@@ -3,9 +3,9 @@ setlocal EnableExtensions
 title BlueStacksRoot ADB Diagnostic
 
 rem ===========================================================================
-rem  debug.cmd  --  read-only ADB / boot-timing diagnostic for BlueStacksRoot.
+rem  debug.cmd  --  read-only ADB, bootstrap-root, and SELinux diagnostic.
 rem  Does NOT touch any disk image, conf, or HD-Player binary. It only launches
-rem  the instance and observes how adb + the boot progress behave, writing a
+rem  the instance and observes adb, boot progress, root delivery, and guest SELinux, writing a
 rem  redacted log to the Desktop. Run it, reproduce, then attach the .log file.
 rem
 rem  Usage:   debug.cmd                 (auto-detects the most-recent instance)
@@ -27,6 +27,7 @@ if not "%errorlevel%"=="0" (
 rem --- extract the embedded PowerShell body (after the marker) to a temp .ps1 ---
 set "SELF=%~f0"
 set "PS1=%TEMP%\bsr_debug_%RANDOM%%RANDOM%.ps1"
+set "BSR_DEBUG_HOME=%~dp0"
 powershell -NoProfile -ExecutionPolicy Bypass -Command "$t=[IO.File]::ReadAllText($env:SELF); $m='#__BSR'+'_DEBUG_PS__'; $i=$t.IndexOf($m); if($i -lt 0){ Write-Error 'marker not found'; exit 1 }; [IO.File]::WriteAllText($env:PS1, $t.Substring($i))"
 powershell -NoProfile -ExecutionPolicy Bypass -File "%PS1%" %1
 del "%PS1%" >nul 2>&1
@@ -68,29 +69,72 @@ Log "BlueStacksRoot ADB diagnostic" Green
 Log "log file : $(Redact $LogFile)"
 Log "OS       : $([Environment]::OSVersion.VersionString)   PowerShell $($PSVersionTable.PSVersion)"
 
-# ----------------------------- registry discovery -----------------------------
-function Get-Reg {
-  foreach($k in @('HKLM:\SOFTWARE\BlueStacks_nxt','HKLM:\SOFTWARE\BlueStacks_msi5',
-                  'HKLM:\SOFTWARE\WOW6432Node\BlueStacks_nxt','HKLM:\SOFTWARE\WOW6432Node\BlueStacks_msi5')){
-    try{ $p = Get-ItemProperty -Path $k -ErrorAction Stop
-         if($p -and ($p.InstallDir -or $p.DataDir -or $p.UserDefinedDir)){ return $p } }catch{}
-  }
-  return $null
+# ----------------------------- validated layout discovery -----------------------------
+function Prop($o,$n){ if($o){$p=$o.PSObject.Properties[$n];if($p){return $p.Value}};$null }
+function Norm($v){
+  if([string]::IsNullOrWhiteSpace("$v")){return $null}
+  $s=[Environment]::ExpandEnvironmentVariables(("$v").Trim())
+  if($s -match '^\s*"([^"]+)"'){$s=$Matches[1]}
+  $s.Trim().Trim('"').TrimEnd(' ','\','/')
 }
-$reg = Get-Reg
-$Install = if($reg -and $reg.InstallDir){ $reg.InstallDir.TrimEnd('\') } else { Join-Path $env:ProgramFiles 'BlueStacks_nxt' }
-$DataRoot = if($reg -and $reg.DataDir){ $reg.DataDir } elseif($reg -and $reg.UserDefinedDir){ $reg.UserDefinedDir } else { Join-Path $env:ProgramData 'BlueStacks_nxt' }
-if($DataRoot -match '(?i)[\\/]engine[\\/]?$'){ $DataRoot = $DataRoot -replace '(?i)[\\/]engine[\\/]?$','' }
-$DataRoot = $DataRoot.TrimEnd('\','/')
+function ExeFrom($v){
+  if([string]::IsNullOrWhiteSpace("$v")){return $null}
+  $s=[Environment]::ExpandEnvironmentVariables(("$v").Trim())
+  if($s -match '^\s*"([^"]+?\.exe)"'){return $Matches[1]}
+  if($s -match '^\s*(.+?\.exe)(?:\s|$)'){return $Matches[1].Trim('"')}
+  $null
+}
+function Records {
+  $a=New-Object System.Collections.Generic.List[object];$seen=@{}
+  function Add($src,$p){
+    $i=Norm (Prop $p 'InstallDir');if(-not $i){$i=Norm (Prop $p 'InstallLocation')}
+    if(-not $i){$x=ExeFrom (Prop $p 'DisplayIcon');if(-not $x){$x=ExeFrom (Prop $p 'UninstallString')};if($x){$i=Norm (Split-Path -Parent $x)}}
+    $d=Norm (Prop $p 'DataDir');$u=Norm (Prop $p 'UserDefinedDir')
+    if(-not $i -and -not $d -and -not $u){return}
+    $id=("$i|$d|$u").ToLowerInvariant();if($seen[$id]){return};$seen[$id]=$true
+    [void]$a.Add([pscustomobject]@{InstallDir=$i;DataDir=$d;UserDefinedDir=$u;Source="$src"})
+  }
+  foreach($root in @('HKLM:\SOFTWARE','HKLM:\SOFTWARE\WOW6432Node','HKCU:\SOFTWARE','HKCU:\SOFTWARE\WOW6432Node')){
+    try{foreach($k in @(Get-ChildItem -LiteralPath $root -EA Stop|Where-Object{$_.PSChildName -match '(?i)(bluestacks|msi.*app.*player)'})){try{Add $k.PSPath (Get-ItemProperty -LiteralPath $k.PSPath -EA Stop)}catch{}}}catch{}
+  }
+  foreach($root in @('HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall','HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall','HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall')){
+    try{foreach($k in @(Get-ChildItem -LiteralPath $root -EA Stop)){try{$p=Get-ItemProperty -LiteralPath $k.PSPath -EA Stop;if($k.PSChildName -match '(?i)bluestacks|msi.*app.*player' -or (Prop $p 'DisplayName') -match '(?i)bluestacks|msi.*app.*player'){Add $k.PSPath $p}}catch{}}}catch{}
+  }
+  @($a|ForEach-Object{$_})
+}
+function DataAt($v){
+  $p=Norm $v;if(-not $p -or -not(Test-Path -LiteralPath $p)){return $null}
+  try{if(-not(Get-Item -LiteralPath $p -EA Stop).PSIsContainer){if((Split-Path -Leaf $p)-ieq'bluestacks.conf'){$p=Split-Path -Parent $p}else{return $null}}}catch{return $null}
+  for($i=0;$i-lt5-and$p;$i++){if(Test-Path -LiteralPath (Join-Path $p 'bluestacks.conf')){return (Resolve-Path -LiteralPath $p).Path.TrimEnd('\','/')};$q=Split-Path -Parent $p;if(-not$q-or$q-eq$p){break};$p=$q}
+  $null
+}
+function InstallAt($v){
+  $p=Norm $v;if(-not$p-or-not(Test-Path -LiteralPath $p)){return $null}
+  try{if(-not(Get-Item -LiteralPath $p -EA Stop).PSIsContainer){$p=Split-Path -Parent $p}}catch{return $null}
+  for($i=0;$i-lt4-and$p;$i++){if((Test-Path -LiteralPath (Join-Path $p 'HD-Player.exe'))-and(Test-Path -LiteralPath (Join-Path $p 'HD-Adb.exe'))){return (Resolve-Path -LiteralPath $p).Path.TrimEnd('\','/')};$q=Split-Path -Parent $p;if(-not$q-or$q-eq$p){break};$p=$q}
+  $null
+}
+function Same($a,$b){if(-not$a-or-not$b){return $false};try{[IO.Path]::GetFullPath($a).TrimEnd('\','/')-ieq[IO.Path]::GetFullPath($b).TrimEnd('\','/')}catch{$a-ieq$b}}
+function RecordData($r){foreach($v in @($r.DataDir,$r.UserDefinedDir)){$d=DataAt $v;if($d){return $d}};$null}
+
+$custom=$null;$customFile=if($env:BSR_DEBUG_HOME){Join-Path $env:BSR_DEBUG_HOME 'bluestacksconfig.txt'}else{$null}
+if($customFile-and(Test-Path -LiteralPath $customFile)){try{$custom=([IO.File]::ReadAllText($customFile)).Trim()}catch{}}
+$records=@(Records);$customData=DataAt $custom;$customInstall=InstallAt $custom
+if($custom-and-not$customData-and-not$customInstall){Log "[!] Saved custom path is not a valid install or data folder: $(Redact $custom)" Red;return}
+$DataRoot=$customData
+if(-not$DataRoot-and$customInstall){foreach($r in $records){$ri=InstallAt $r.InstallDir;if($ri-and(Same $ri $customInstall)){$DataRoot=RecordData $r;if($DataRoot){break}}}}
+if(-not$DataRoot){foreach($r in $records){$DataRoot=RecordData $r;if($DataRoot){break}}}
+if(-not$DataRoot){Log '[!] No validated BlueStacks data folder was found in the registry; use option 8 in blueStackRoot.cmd first.' Red;return}
+$Install=$customInstall
+if(-not$Install){foreach($r in $records){$rd=RecordData $r;$ri=InstallAt $r.InstallDir;if($ri-and$rd-and(Same $rd $DataRoot)){$Install=$ri;break}}}
+if(-not$Install){try{foreach($p in @(Get-Process -Name 'HD-Player','HD-Adb' -EA SilentlyContinue)){$Install=InstallAt $p.Path;if($Install){break}}}catch{}}
+if(-not$Install){try{foreach($s in @(Get-CimInstance Win32_Service -EA Stop|Where-Object{$_.Name-match'(?i)bstk|bluestacks'-or$_.DisplayName-match'(?i)bluestacks|msi.*app.*player'})){$Install=InstallAt (ExeFrom $s.PathName);if($Install){break}}}catch{}}
+if(-not$Install){foreach($r in $records){$Install=InstallAt $r.InstallDir;if($Install){break}}}
+if(-not$Install){Log '[!] No validated BlueStacks install folder was found; use option 8 in blueStackRoot.cmd first.' Red;return}
 $Conf      = Join-Path $DataRoot 'bluestacks.conf'
 $PlayerLog = Join-Path $DataRoot 'Logs\Player.log'
 $Player    = Join-Path $Install 'HD-Player.exe'
 $AdbExe    = Join-Path $Install 'HD-Adb.exe'
-if(-not (Test-Path $AdbExe)){
-  foreach($c in @((Join-Path $env:ProgramFiles 'BlueStacks_nxt\HD-Adb.exe'),
-                  (Join-Path ${env:ProgramFiles(x86)} 'BlueStacks_nxt\HD-Adb.exe'),
-                  (Join-Path $env:ProgramFiles 'BlueStacks_msi5\HD-Adb.exe'))){ if(Test-Path $c){ $AdbExe=$c; break } }
-}
 
 function Adb([string[]]$a){ try{ (& $AdbExe @a 2>&1 | Out-String).Trim() }catch{ "ERR: $($_.Exception.Message)" } }
 function State($serial){ $o = Adb @('-s',$serial,'get-state'); ($o -split "`r?`n" | ForEach-Object { $_.Trim() } | Where-Object { $_ } | Select-Object -Last 1) }
@@ -214,7 +258,7 @@ $HARD_CAP   = 480   # absolute ceiling
 $NOPROGRESS = 120   # nothing alive at all by here -> bail
 $POST_READY = 75    # booted but adb won't come online even after heal -> conclusive
 
-$readyAt=$null; $firstOnlineAt=$null; $healWorkedAt=$null; $sawProc=$false; $lastPhase=$null
+$readyAt=$null; $firstOnlineAt=$null; $healWorkedAt=$null; $sawProc=$false; $lastPhase=$null; $diagSerial=$null
 $identityLogged=$false; $nextHeal=20; $done=$false; $verdict='(inconclusive)'
 
 while(-not $done){
@@ -254,6 +298,7 @@ while(-not $done){
     # SUCCESS without heal
     if($state -eq 'device' -and (($bc -split "`r?`n" | ForEach-Object { $_.Trim() }) -contains '1')){
       if(-not $firstOnlineAt){ $firstOnlineAt = $el }
+      $diagSerial=$cand
       $verdict = "SUCCESS: $cand online + boot_completed=1 at ${el}s (no disconnect needed)"; $done=$true; break
     }
 
@@ -272,6 +317,7 @@ while(-not $done){
         $bc2 = Adb @('-s',$cand,'shell','getprop','sys.boot_completed')
         Log "      boot_completed after heal -> $(Compact $bc2 14)"
         if(($bc2 -split "`r?`n" | ForEach-Object { $_.Trim() }) -contains '1'){
+          $diagSerial=$cand
           $verdict = "SUCCESS via HEAL: $cand online+boot_completed=1 at ${el}s -- disconnect+connect WAS required (this is the fix)"; $done=$true; break
         }
       }
@@ -292,6 +338,32 @@ while(-not $done){
   } catch {
     Log "   [iter error] $($_.Exception.Message)" DarkYellow
   }
+}
+
+Section 'ROOT + SELINUX DIAGNOSTICS'
+if($diagSerial){
+  try{
+    $confLines = [IO.File]::ReadAllLines($Conf) | Where-Object {
+      $_ -match ('^bst\.instance\.'+[regex]::Escape($Instance)+'\.enable_root_access=') -or
+      $_ -match '^bst\.(feature\.rooting|enable_adb_access)='
+    }
+    foreach($line in $confLines){Log "host conf: $line"}
+  }catch{Log "host conf read failed: $($_.Exception.Message)" DarkYellow}
+  Log "guest getenforce      : $(Compact (Adb @('-s',$diagSerial,'shell','getenforce')) 120)"
+  Log "guest selinux fs      : $(Compact (Adb @('-s',$diagSerial,'shell','if [ -d /sys/fs/selinux ]; then ls -ld /sys/fs/selinux; cat /sys/fs/selinux/enforce 2>/dev/null; else echo MISSING; fi')) 180)"
+  Log "guest selinux props   : $(Compact (Adb @('-s',$diagSerial,'shell','getprop ro.boot.selinux; getprop ro.build.selinux')) 120)"
+  Log "guest kernel cmdline  : $(Compact (Adb @('-s',$diagSerial,'shell','cat /proc/cmdline')) 240)"
+  Log "guest bindmount prop  : $(Compact (Adb @('-s',$diagSerial,'shell','getprop bst.config.bindmount')) 80)"
+  Log "guest bootstrap files : $(Compact (Adb @('-s',$diagSerial,'shell','ls -l /system/etc/bsr_su /system/xbin/su /system/xbin/bstk/su /system/bin/bindmount 2>&1')) 360)"
+  Log "guest bootstrap hashes: $(Compact (Adb @('-s',$diagSerial,'shell','sha256sum /system/etc/bsr_su /system/xbin/su /system/xbin/bstk/su 2>&1')) 360)"
+  Log "guest xbin mount      : $(Compact (Adb @('-s',$diagSerial,'shell','mount | grep " /system/xbin "')) 300)"
+  $bootstrapId=Adb @('-s',$diagSerial,'shell','/system/etc/bsr_su -c id 2>&1')
+  Log "guest direct bsr_su id: $(Compact $bootstrapId 180)" $(if($bootstrapId-match'uid=0'){'Green'}else{'Yellow'})
+  if($bootstrapId-match'uid=0'){
+    Log "guest bsr kernel log  : $(Compact (Adb @('-s',$diagSerial,'shell','/system/etc/bsr_su -c "dmesg | grep -i bsr | tail -20"')) 500)"
+  }
+}else{
+  Log 'Guest was never adb-ready, so root/SELinux guest probes were skipped.' Yellow
 }
 
 Section 'VERDICT'

@@ -109,13 +109,35 @@ try {
     Eq 'Clean-Path: strips quotes/trailing slash' 'C:\Program Files\BlueStacks_nxt' (Clean-Path '"C:\Program Files\BlueStacks_nxt\"')
     Eq 'Clean-Path: trims spaces' 'D:\BlueStacks' (Clean-Path '  D:\BlueStacks\  ')
     Eq 'Fwd: backslashes become slashes' 'C:/Users/xxxxx/a/b' (Fwd 'C:\Users\xxxxx\a\b')
+    $fakeInstall = Join-Path $env:TEMP ("bsr_mag_install_" + [guid]::NewGuid().ToString('N').Substring(0, 8))
+    New-Item -ItemType Directory -Path $fakeInstall -Force | Out-Null
+    $script:made.Add($fakeInstall)
+    [IO.File]::WriteAllBytes((Join-Path $fakeInstall 'HD-Player.exe'), (New-Object byte[] 8))
+    [IO.File]::WriteAllBytes((Join-Path $fakeInstall 'HD-Adb.exe'), (New-Object byte[] 8))
+    Eq 'Get-InstallRoot: validates both BlueStacks executables' (Resolve-Path $fakeInstall).Path (Get-InstallRoot $fakeInstall)
+    Ok 'Get-InstallRoot: rejects an arbitrary existing folder' ($null -eq (Get-InstallRoot $env:TEMP))
 
     Section 'DataRoot Resolution'
     Eq 'DataRoot: DataDir plain' 'D:\BS' (Get-DataRoot ([pscustomobject]@{ DataDir = 'D:\BS'; UserDefinedDir = 'E:\Other' }))
     Eq 'DataRoot: DataDir strips Engine' 'D:\BS' (Get-DataRoot ([pscustomobject]@{ DataDir = 'D:\BS\Engine'; UserDefinedDir = $null }))
     Eq 'DataRoot: DataDir strips Engine trailing slash' 'D:\BS' (Get-DataRoot ([pscustomobject]@{ DataDir = 'D:\BS\Engine\'; UserDefinedDir = $null }))
     Eq 'DataRoot: UserDefinedDir fallback' 'E:\UserDefined' (Get-DataRoot ([pscustomobject]@{ DataDir = $null; UserDefinedDir = 'E:\UserDefined\' }))
-    Eq 'DataRoot: null registry ProgramData fallback' (Join-Path $env:ProgramData 'BlueStacks_nxt') (Get-DataRoot $null)
+    Ok 'DataRoot: null registry stays null (no guessed path)' ($null -eq (Get-DataRoot $null))
+
+    Section 'Bootstrap su fallback selection (issue #28)'
+    $script:BootstrapSuPath = $null
+    $script:BootstrapSuProbe = { param($path) if($path -eq '/system/etc/bsr_su'){'uid=0(root) gid=0(root)'}else{'not found'} }
+    Eq 'bootstrap: direct offline-setuid source wins' '/system/etc/bsr_su' (Resolve-BootstrapSu 'fake:1')
+    $script:BootstrapSuPath = $null
+    $script:BootstrapSuProbe = { param($path) if($path -eq '/system/xbin/su'){'uid=0(root)'}else{'inaccessible or not found'} }
+    Eq 'bootstrap: xbin bind is used when direct execution is unavailable' '/system/xbin/su' (Resolve-BootstrapSu 'fake:1')
+    $script:BootstrapSuPath = $null
+    $script:BootstrapSuProbe = { param($path) 'inaccessible or not found' }
+    Ok 'bootstrap: all missing returns null' ($null -eq (Resolve-BootstrapSu 'fake:1'))
+    Ok 'bootstrap: failure retains all three probe results for diagnostics' ($script:BootstrapSuProbeResults.Count -eq 3)
+    Ok 'bindmount template retries bootstrap even when xbin was already mounted' ($BINDMOUNT_MOD -match 'Bind the bootstrap on every invocation')
+    $script:BootstrapSuProbe = $null
+    $script:BootstrapSuPath = $null
 
     Section 'ADB Candidate Ports - Fixed Cases'
     ArrEq 'cands: status only + fallback' @('5585', '5555') (Cands 'Rvc64' @{ 'status.adb_port' = '5585' } @())
@@ -313,6 +335,8 @@ try {
     $script:LiveAdbPortProbe = $null
     $script:AdbServerPortProbe = $null
     $script:PlayerLogProbe = $null
+    $script:BootstrapSuProbe = $null
+    $script:BootstrapSuPath = $null
     foreach ($d in $script:made) { try { Remove-Item -LiteralPath $d -Recurse -Force -ErrorAction SilentlyContinue } catch { } }
 }
 

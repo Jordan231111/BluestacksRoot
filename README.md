@@ -19,7 +19,7 @@ download, no other files, nothing to install. Works on the latest BlueStacks (5.
 
 Works on the 64-bit BlueStacks instances — **Android 9, 11, and 13**.
 
-**⬇️ [Download `blueStackRoot.cmd`](https://github.com/Jordan231111/BluestacksRoot/releases/download/v18/blueStackRoot.cmd)** — one file (~20 MB) with the **real Magisk APK embedded inside** — nothing else to download. *(All versions: [Releases page](https://github.com/Jordan231111/BluestacksRoot/releases).)*
+**⬇️ [Download `blueStackRoot.cmd`](https://github.com/Jordan231111/BluestacksRoot/releases/download/v19/blueStackRoot.cmd)** — one file (~20 MB) with the **real Magisk APK embedded inside** — nothing else to download. *(All versions: [Releases page](https://github.com/Jordan231111/BluestacksRoot/releases).)*
 
 1. **First, open the exact instance you want to root** — launch it from the Multi-Instance Manager and let
    it boot once. The tool roots the instance of your chosen Android version that you **opened most
@@ -64,6 +64,10 @@ The undo options are **per-instance** and multi-instance safe: they remove Magis
 instance and leave any other rooted instances working. The menu also has **7** for a *full host scrub*
 (restore the master `Root.vhd` to factory **and** un-patch `HD-Player.exe` — unroots every instance of the
 chosen version), **8** to point the tool at a custom BlueStacks folder, and **0** to exit.
+
+**Custom installs:** option 8 accepts either the install folder (`HD-Player.exe` + `HD-Adb.exe`) or data
+folder (`bluestacks.conf`). Paths are discovered from validated BlueStacks registry/runtime evidence—never
+guessed from a standard location—and an ambiguous or invalid result stops safely.
 
 </details>
 
@@ -127,6 +131,14 @@ so you can **root the *latest* BlueStacks (5.22.210) without downgrading** — a
 with **no traces**, not a detectable classic `su`. If `bst.feature.rooting` keeps **reverting to `0`** on
 launch, that's the same anti-tamper system, and this tool handles it for you. Full technical breakdown:
 [`docs/BLUESTACKS_ROOTING_DEEP_DIVE.md`](docs/BLUESTACKS_ROOTING_DEEP_DIVE.md) §2 (the single-byte patch).
+
+## ❓ Why does `getenforce` say `Disabled`? Do I need a permissive-mode option?
+
+That is BlueStacks' factory guest state; blueStackRoot does not change SELinux. Disabled already enforces no
+SELinux denials, while permissive loads a policy but only logs denials. `setenforce 0` cannot turn a disabled
+subsystem into permissive—doing that would require a compatible guest kernel, boot configuration, and policy.
+Therefore there is no misleading menu toggle. A mod that only checks for the literal word `Permissive` should
+also accept `Disabled`; full evidence and caveats are in the [technical deep dive](docs/BLUESTACKS_ROOTING_DEEP_DIVE.md#16-guest-security-posture-helps-us).
 
 ## 🔧 How the Magisk path works (the hard part)
 

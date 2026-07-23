@@ -32,6 +32,7 @@ param(
     [switch]$NoBackup,
     [switch]$Full                             # Undo: also scrub the shared master + un-patch HD-Player (unroots ALL instances)
 )
+if(-not $NoBackup -and $env:BSR_NOBACKUP -eq '1'){ $NoBackup=$true }
 # NOTE: 'Continue' (not 'Stop') because native tools (adb, debugfs) write normal output to
 # stderr, which under 'Stop' becomes a fatal NativeCommandError. Every critical step below has
 # an explicit success check + throw, and disk cmdlets use -ErrorAction Stop, so failures still abort.
@@ -64,9 +65,9 @@ function Say($m,$c='Gray'){ Write-Host (Redact-UserPath $m) -ForegroundColor $c 
 function Fwd($p){ $p -replace '\\','/' }
 
 # --------- normalize incoming paths (callers may pass a trailing '\' or a stray '"') ----------
-# A registry InstallDir like  C:\Program Files\BlueStacks_nxt\  becomes  -Install "...\nxt\"  on the
-# command line, and PowerShell -File treats the \" as an escaped quote -> the value arrives as
-# '...\nxt"'.  Strip stray quotes and any trailing slash/space so Join-Path stays clean.
+# A registry InstallDir ending in '\' can become a quoted command-line value ending in '\"';
+# PowerShell -File can then deliver a stray trailing quote. Strip quotes/slashes/spaces so
+# Join-Path receives a clean, registry-derived value.
 function Clean-Path($p){ if($null -eq $p){return $p}; ($p -replace '"','').Trim().TrimEnd('\') }
 $Install = Clean-Path $Install
 $Engine  = Clean-Path $Engine
@@ -75,60 +76,156 @@ $Vhd     = Clean-Path $Vhd
 $Conf    = Clean-Path $Conf
 $SelfCmd = Clean-Path $SelfCmd
 
-# --------- registry discovery (NO hardcoded install/data paths) ----------
-# BlueStacks records its real install/data folders in the registry; honour a custom install location by
-# reading them instead of assuming C:\Program Files\.. / C:\ProgramData\.. . nxt (BlueStacks 5) first,
-# then msi5 (MSI App Player), under both the native and WOW6432Node views.
-function Get-RegBlueStacks{
-    foreach($k in @('HKLM:\SOFTWARE\BlueStacks_nxt','HKLM:\SOFTWARE\BlueStacks_msi5',
-                    'HKLM:\SOFTWARE\WOW6432Node\BlueStacks_nxt','HKLM:\SOFTWARE\WOW6432Node\BlueStacks_msi5')){
+# --------- validated discovery (NO hardcoded filesystem locations) ----------
+function Get-ObjProp($object,[string]$name){
+    if(-not $object){ return $null }
+    $p=$object.PSObject.Properties[$name]
+    if($p){ return $p.Value }
+    $null
+}
+function Normalize-DiscoveredPath([string]$value){
+    if([string]::IsNullOrWhiteSpace($value)){ return $null }
+    $s=[Environment]::ExpandEnvironmentVariables($value.Trim())
+    if($s -match '^\s*"([^"]+)"'){ $s=$Matches[1] }
+    $s=$s.Trim().Trim('"').TrimEnd(' ','\','/')
+    if($s){$s}else{$null}
+}
+function Get-ExeFromCommand([string]$value){
+    if([string]::IsNullOrWhiteSpace($value)){ return $null }
+    $s=[Environment]::ExpandEnvironmentVariables($value.Trim())
+    if($s -match '^\s*"([^"]+?\.exe)"'){ return $Matches[1] }
+    if($s -match '^\s*(.+?\.exe)(?:\s|$)'){ return $Matches[1].Trim('"') }
+    $null
+}
+function Get-RegBlueStacksRecords{
+    $records=New-Object System.Collections.Generic.List[object]; $seen=@{}
+    function Add-Record($source,$p){
+        if(-not $p){return}
+        $install=Normalize-DiscoveredPath (Get-ObjProp $p 'InstallDir')
+        if(-not $install){$install=Normalize-DiscoveredPath (Get-ObjProp $p 'InstallLocation')}
+        if(-not $install){
+            $exe=Get-ExeFromCommand (Get-ObjProp $p 'DisplayIcon')
+            if(-not $exe){$exe=Get-ExeFromCommand (Get-ObjProp $p 'UninstallString')}
+            if($exe){$install=Normalize-DiscoveredPath (Split-Path -Parent $exe)}
+        }
+        $data=Normalize-DiscoveredPath (Get-ObjProp $p 'DataDir')
+        $user=Normalize-DiscoveredPath (Get-ObjProp $p 'UserDefinedDir')
+        if(-not $install -and -not $data -and -not $user){return}
+        $id=("$install|$data|$user").ToLowerInvariant(); if($seen.ContainsKey($id)){return}; $seen[$id]=$true
+        [void]$records.Add([pscustomobject]@{Source="$source";InstallDir=$install;DataDir=$data;UserDefinedDir=$user})
+    }
+    foreach($root in @('HKLM:\SOFTWARE','HKLM:\SOFTWARE\WOW6432Node','HKCU:\SOFTWARE','HKCU:\SOFTWARE\WOW6432Node')){
+        if(-not(Test-Path -LiteralPath $root)){continue}
         try{
-            $p=Get-ItemProperty -Path $k -ErrorAction Stop
-            if($p -and ($p.InstallDir -or $p.DataDir -or $p.UserDefinedDir)){
-                return [pscustomobject]@{ InstallDir=$p.InstallDir; DataDir=$p.DataDir; UserDefinedDir=$p.UserDefinedDir }
+            foreach($key in @(Get-ChildItem -LiteralPath $root -ErrorAction Stop | Where-Object {$_.PSChildName -match '(?i)(bluestacks|msi.*app.*player)'})){
+                try{Add-Record $key.PSPath (Get-ItemProperty -LiteralPath $key.PSPath -ErrorAction Stop)}catch{}
             }
         }catch{}
     }
-    return $null
+    foreach($root in @('HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall',
+                       'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall',
+                       'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall')){
+        if(-not(Test-Path -LiteralPath $root)){continue}
+        try{
+            foreach($key in @(Get-ChildItem -LiteralPath $root -ErrorAction Stop)){
+                try{
+                    $p=Get-ItemProperty -LiteralPath $key.PSPath -ErrorAction Stop
+                    if($key.PSChildName -match '(?i)bluestacks|msi.*app.*player' -or (Get-ObjProp $p 'DisplayName') -match '(?i)bluestacks|msi.*app.*player'){Add-Record $key.PSPath $p}
+                }catch{}
+            }
+        }catch{}
+    }
+    @($records | ForEach-Object {$_})
 }
+function Get-RegBlueStacks{ @(Get-RegBlueStacksRecords | Select-Object -First 1)[0] }
 # Folder that actually holds bluestacks.conf + Engine\. Newer BlueStacks reports DataDir as ...\Engine.
 function Get-DataRoot($reg){
-    $d = if($reg){ if($reg.DataDir){$reg.DataDir}elseif($reg.UserDefinedDir){$reg.UserDefinedDir}else{$null} } else { $null }
-    if(-not $d){ $d = Join-Path $env:ProgramData 'BlueStacks_nxt' }
-    if($d -match '(?i)[\\/]engine[\\/]?$'){ $d = $d -replace '(?i)[\\/]engine[\\/]?$','' }
+    $d=if($reg){if($reg.DataDir){$reg.DataDir}elseif($reg.UserDefinedDir){$reg.UserDefinedDir}else{$null}}else{$null}
+    if(-not $d){return $null}
+    if($d -match '(?i)[\\/]engine[\\/]?$'){$d=$d -replace '(?i)[\\/]engine[\\/]?$',''}
     $d.TrimEnd('\','/')
 }
+function Get-InstallRoot([string]$value){
+    $p=Normalize-DiscoveredPath $value
+    if(-not $p -or -not(Test-Path -LiteralPath $p)){return $null}
+    try{if(-not(Get-Item -LiteralPath $p -ErrorAction Stop).PSIsContainer){$p=Split-Path -Parent $p}}catch{return $null}
+    for($i=0;$i -lt 4 -and $p;$i++){
+        if((Test-Path -LiteralPath (Join-Path $p 'HD-Player.exe')) -and (Test-Path -LiteralPath (Join-Path $p 'HD-Adb.exe'))){return (Resolve-Path -LiteralPath $p).Path.TrimEnd('\','/')}
+        $parent=Split-Path -Parent $p; if(-not $parent -or $parent -eq $p){break}; $p=$parent
+    }
+    $null
+}
+function Same-Path([string]$a,[string]$b){
+    if(-not $a -or -not $b){return $false}
+    try{([IO.Path]::GetFullPath($a).TrimEnd('\','/')) -ieq ([IO.Path]::GetFullPath($b).TrimEnd('\','/'))}catch{$a.TrimEnd('\','/') -ieq $b.TrimEnd('\','/')}
+}
+function Get-RuntimeInstallRoots{
+    $out=New-Object System.Collections.Generic.List[string]
+    foreach($name in @('HD-Player','HD-Adb')){
+        try{foreach($proc in @(Get-Process -Name $name -ErrorAction SilentlyContinue)){try{$r=Get-InstallRoot $proc.Path;if($r){[void]$out.Add($r)}}catch{}}}catch{}
+    }
+    try{
+        foreach($svc in @(Get-CimInstance Win32_Service -ErrorAction Stop | Where-Object {$_.Name -match '(?i)bstk|bluestacks' -or $_.DisplayName -match '(?i)bluestacks|msi.*app.*player'})){
+            $r=Get-InstallRoot (Get-ExeFromCommand $svc.PathName);if($r){[void]$out.Add($r)}
+        }
+    }catch{}
+    foreach($root in @('HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths',
+                       'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths')){
+        foreach($name in @('HD-Player.exe','HD-Adb.exe')){
+            $key=Join-Path $root $name
+            try{$raw=(Get-Item -LiteralPath $key -ErrorAction Stop).GetValue('');$r=Get-InstallRoot $raw;if($r){[void]$out.Add($r)}}catch{}
+        }
+    }
+    foreach($name in @('HD-Player.exe','HD-Adb.exe')){try{$g=Get-Command $name -ErrorAction SilentlyContinue;if($g){$r=Get-InstallRoot $g.Source;if($r){[void]$out.Add($r)}}}catch{}}
+    @($out | Select-Object -Unique)
+}
+function Resolve-InstallRoot([string]$preferred,$records,[string]$dataRoot){
+    foreach($record in @($records)){
+        $rd=Get-DataRoot $record; $ri=Get-InstallRoot $record.InstallDir
+        if($ri -and $rd -and (Same-Path $rd $dataRoot)){return $ri}
+    }
+    $p=Get-InstallRoot $preferred;if($p){return $p}
+    $valid=New-Object System.Collections.Generic.List[string]
+    foreach($r in @(Get-RuntimeInstallRoots)){if($r-and-not($valid-contains$r)){[void]$valid.Add($r)}}
+    foreach($record in @($records)){$p=Get-InstallRoot $record.InstallDir;if($p-and-not($valid-contains$p)){[void]$valid.Add($p)}}
+    if($valid.Count-eq1){return $valid[0]}
+    if($valid.Count-gt1){throw "Multiple marker-valid BlueStacks installations were found and none matches the selected data folder. Use option 8 to select the intended install folder."}
+    $null
+}
 
-$reg = Get-RegBlueStacks
-if (-not $Install) { $Install = if($reg -and $reg.InstallDir){ $reg.InstallDir.TrimEnd('\') } else { Join-Path $env:ProgramFiles 'BlueStacks_nxt' } }
-$DataRoot = Get-DataRoot $reg
+$regRecords=@(Get-RegBlueStacksRecords)
+$reg=if($regRecords.Count){$regRecords[0]}else{$null}
+$DataRoot=if($Conf -and (Test-Path -LiteralPath $Conf)){Split-Path -Parent $Conf}else{Get-DataRoot $reg}
+$Install=Resolve-InstallRoot $Install $regRecords $DataRoot
 if (-not $Engine)  { $Engine  = Join-Path $Here 'bsr_engine.ps1' }
 if (-not $Debugfs) {
     foreach($c in @((Join-Path $Here 'debugfs\debugfs.exe'), (Join-Path $env:TEMP 'bsr_work\debugfs\debugfs.exe'))){ if(Test-Path $c){ $Debugfs=$c; break } }
 }
-if (-not $Conf)    { $Conf = Join-Path $DataRoot 'bluestacks.conf' }
-if (-not $Vhd -and $Instance) { $Vhd = Join-Path $DataRoot "Engine\$Instance\Root.vhd" }
-$PlayerLog = Join-Path $DataRoot 'Logs\Player.log'   # host-side boot-phase log; every line is tagged with the instance name
+if (-not $Conf -and $DataRoot)    { $Conf = Join-Path $DataRoot 'bluestacks.conf' }
+if (-not $Vhd -and $Instance -and $DataRoot) { $Vhd = Join-Path $DataRoot "Engine\$Instance\Root.vhd" }
+$PlayerLog = if($DataRoot){Join-Path $DataRoot 'Logs\Player.log'}else{$null}   # host-side boot-phase log
 # Resolve BlueStacks' OWN adb (HD-Adb.exe). We deliberately do NOT fall back to a system adb.exe:
 # mixing a system adb (e.g. Android SDK platform-tools v1.0.41) with BlueStacks' HD-Adb (v1.0.36)
 # triggers the "adb server version doesn't match this client; killing..." war -- the two kill each
 # other's server, getprop/shell calls fail intermittently, and a fully-booted instance can still
 # fail Boot-And-Wait with "did not become adb-reachable". So we pin HD-Adb.exe specifically.
 function Resolve-HdAdb {
-    $c = New-Object System.Collections.Generic.List[string]
-    if($Install){ [void]$c.Add((Join-Path $Install 'HD-Adb.exe')) }
-    if($reg -and $reg.InstallDir){ [void]$c.Add((Join-Path ($reg.InstallDir.TrimEnd('\','/')) 'HD-Adb.exe')) }
-    foreach($p in @((Join-Path $env:ProgramFiles 'BlueStacks_nxt\HD-Adb.exe'),
-                    (Join-Path ${env:ProgramFiles(x86)} 'BlueStacks_nxt\HD-Adb.exe'),
-                    (Join-Path $env:ProgramFiles 'BlueStacks_msi5\HD-Adb.exe'),
-                    (Join-Path ${env:ProgramFiles(x86)} 'BlueStacks_msi5\HD-Adb.exe'))){ [void]$c.Add($p) }
-    foreach($p in $c){ if($p -and (Test-Path -LiteralPath $p)){ return (Resolve-Path -LiteralPath $p).Path } }
+    if($Install){
+        $p=Join-Path $Install 'HD-Adb.exe'
+        if(Test-Path -LiteralPath $p){return (Resolve-Path -LiteralPath $p).Path}
+    }
     $g = Get-Command 'HD-Adb.exe' -ErrorAction SilentlyContinue; if($g){ return $g.Source }
-    return (Join-Path $Install 'HD-Adb.exe')   # most-likely path even if absent (a later check reports it)
+    return $null
 }
 $Adb    = Resolve-HdAdb
-$Player = Join-Path $Install 'HD-Player.exe'
+$Player = if($Install){Join-Path $Install 'HD-Player.exe'}else{$null}
 $BsrSu  = if($BsrSuPath){$BsrSuPath}else{ Join-Path $Here 'su_src\bsr_su' }   # the setuid bootstrap su (4968 B)
+
+function Assert-BlueStacksHostTools{
+    if(-not $Install){throw "BlueStacks install folder could not be resolved from validated registry/process/service/PATH evidence. Use menu option 8 to select the folder containing HD-Player.exe and HD-Adb.exe."}
+    if(-not(Test-Path -LiteralPath $Player)){throw "HD-Player.exe not found in the resolved install folder: $Install"}
+    if(-not($Adb -and (Test-Path -LiteralPath $Adb))){throw "HD-Adb.exe not found in the resolved install folder: $Install"}
+}
 
 # ---- embedded-payload self-extraction (only used when -SelfCmd <blueStackRoot.cmd> is given) ----
 # Extract-Block is called up to 3x per run (DFS + BSRSU + APK payloads), each scanning the large
@@ -279,36 +376,50 @@ $MAGISK_CONFIG = "SYSTEMMODE=true`nRECOVERYMODE=false`n"
 # bootstrap bindmount: stock behaviour + bind our setuid su over xbin/su AFTER the .xb overmount
 $BINDMOUNT_MOD = @'
 #!/system/bin/sh
-# Rooting helper: bindmount /data/downloads/.xb over /system/xbin, then bind our setuid su.
+# Rooting helper: preserve stock .xb behavior, then idempotently expose our setuid bootstrap.
 MAXSIZE=100000
 MARKER_FILE="/data/downloads/.bm"
 to_mount=$(getprop bst.config.bindmount)
+[ -n "$to_mount" ] || to_mount=0
 echo "to_mount=$to_mount" > /dev/kmsg
 mounted=`mountpoint -q /system/xbin && echo "1" || echo "0"`
 echo "mounted=$mounted" > /dev/kmsg
-FILESIZE=$(stat -c%s "$MARKER_FILE")
+FILESIZE=$(stat -c%s "$MARKER_FILE" 2>/dev/null)
+[ -n "$FILESIZE" ] || FILESIZE=0
 echo "Size of $MARKER_FILE = $FILESIZE bytes." > /dev/kmsg
-if (( FILESIZE > MAXSIZE )); then
-    rm $MARKER_FILE
-    touch $MARKER_FILE
+if [ "$FILESIZE" -gt "$MAXSIZE" ]; then
+    rm -f "$MARKER_FILE"
+    touch "$MARKER_FILE"
 fi
-if [ $to_mount -gt 0 ] && [ $mounted -le 0 ] && [ -d /data/downloads/.xb ]; then
-    echo "Bind mounting..." > /dev/kmsg
-    mount -o bind /data/downloads/.xb/ /system/xbin/ > /dev/kmsg
-    echo "`date` bindmount" >> $MARKER_FILE
-    if [ -f /system/etc/bsr_su ]; then
-        mount -o bind /system/etc/bsr_su /system/xbin/su
-        mount -o bind /system/etc/bsr_su /system/xbin/bstk/su
-        echo "bsr: ungated setuid su bind-mounted" > /dev/kmsg
+if [ "$to_mount" -gt 0 ]; then
+    if [ "$mounted" -le 0 ] && [ -d /data/downloads/.xb ]; then
+        echo "Bind mounting..." > /dev/kmsg
+        mount -o bind /data/downloads/.xb/ /system/xbin/ > /dev/kmsg
+        echo "`date` bindmount" >> "$MARKER_FILE"
     fi
-    /system/xbin/su --auto-daemon &
-elif [ $to_mount -le 0 ] && [ $mounted -gt 0 ]; then
+    # This script can run more than once, or after another helper already mounted xbin.
+    # Bind the bootstrap on every invocation instead of only on the first .xb mount.
+    mounted=`mountpoint -q /system/xbin && echo "1" || echo "0"`
+    bootstrap=0
+    if [ "$mounted" -gt 0 ] && [ -f /system/etc/bsr_su ]; then
+        for target in /system/xbin/su /system/xbin/bstk/su; do
+            if [ -e "$target" ] && mount -o bind /system/etc/bsr_su "$target"; then
+                bootstrap=1
+            fi
+        done
+        [ "$bootstrap" -gt 0 ] && echo "bsr: ungated setuid su bind-mounted" > /dev/kmsg
+    fi
+    # Do not pass --auto-daemon to bsr_su (it is intentionally daemonless).
+    if [ "$bootstrap" -le 0 ] && [ ! -f /system/etc/bsr_su ] && [ -x /system/xbin/su ]; then
+        /system/xbin/su --auto-daemon &
+    fi
+elif [ "$mounted" -gt 0 ]; then
     for pid in `pgrep daemonsu`
     do
         kill -9 $pid
     done
     sleep 3
-    echo "`date` unbindmount" >> $MARKER_FILE
+    echo "`date` unbindmount" >> "$MARKER_FILE"
     umount /system/xbin/su 2>/dev/null
     umount /system/xbin/bstk/su 2>/dev/null
     umount /system/xbin/ > /dev/kmsg
@@ -463,7 +574,7 @@ function Extract-MagiskApk($apk,$dst){
 function Set-ConfKey($key,$val){
     if(-not (Test-Path $Conf)){ throw "conf not found: $Conf" }
     $raw=[System.IO.File]::ReadAllText($Conf)
-    $pat = [regex]::Escape($key) + '="\d"'
+    $pat = '(?m)^\s*' + [regex]::Escape($key) + '\s*=.*$'
     if($raw -notmatch $pat){ Say "[~] conf key $key not present; leaving conf unchanged." Yellow; return }
     $new=[regex]::Replace($raw, $pat, ($key + '="' + $val + '"'))
     if($new -ne $raw){ [System.IO.File]::WriteAllText($Conf,$new,(New-Object System.Text.UTF8Encoding($false))); Say "[+] conf: $key=$val" Green }
@@ -643,7 +754,33 @@ function AdbTry([string[]]$a,[int]$tries=4){
     }
     $o
 }
-function AdbSu([string]$serial,[string]$cmd){ AdbShellRetry $serial "/system/xbin/su -c '$cmd'" }
+$Script:BootstrapSuPath = $null
+$Script:BootstrapSuProbe = $null   # unit-test seam: scriptblock(path) -> simulated `su -c id` output
+$Script:BootstrapSuProbeResults = @()
+function Resolve-BootstrapSu([string]$serial){
+    if($Script:BootstrapSuPath){ return $Script:BootstrapSuPath }
+    $results=New-Object System.Collections.Generic.List[string]
+    foreach($path in @('/system/etc/bsr_su','/system/xbin/su','/system/xbin/bstk/su')){
+        $o=if($Script:BootstrapSuProbe){& $Script:BootstrapSuProbe $path}else{AdbShellRetry $serial "$path -c 'id' 2>&1"}
+        [void]$results.Add("$path=[$(Compact-Line $o 100)]")
+        if($o -match 'uid=0'){
+            $Script:BootstrapSuPath=$path
+            $Script:BootstrapSuProbeResults=@($results | ForEach-Object {$_})
+            return $path
+        }
+    }
+    $Script:BootstrapSuProbeResults=@($results | ForEach-Object {$_})
+    return $null
+}
+function Get-BootstrapDiagnostics([string]$serial){
+    $guest=AdbShellRetry $serial 'echo BSR_BOOTSTRAP_DIAG; id; getenforce 2>/dev/null; echo bindmount=$(getprop bst.config.bindmount); ls -l /system/etc/bsr_su /system/xbin/su /system/xbin/bstk/su /system/bin/bindmount 2>&1; mount | grep " /system/xbin " 2>/dev/null'
+    (($Script:BootstrapSuProbeResults -join '; ') + '; guest=[' + (Compact-Line $guest 500) + ']')
+}
+function AdbSu([string]$serial,[string]$cmd){
+    $path=Resolve-BootstrapSu $serial
+    if(-not $path){ return "BSR_BOOTSTRAP_SU_NOT_FOUND: $(Get-BootstrapDiagnostics $serial)" }
+    AdbShellRetry $serial "$path -c '$cmd'"
+}
 function Compact-Line([string]$s,[int]$max=120){
     $x = (($s -replace "`r?`n",' | ').Trim())
     if($x.Length -gt $max){ return ($x.Substring(0,$max-3) + '...') }
@@ -664,6 +801,7 @@ function Get-HdPlayerCount([string]$name=$Instance){
     }
 }
 function Boot-And-Wait([int]$timeoutSec=300){
+    Assert-BlueStacksHostTools
     Initialize-AdbServer   # pin HD-Adb to its private server port BEFORE any connect (version-conflict immunity)
     if(-not (Test-Path -LiteralPath $Player)){ throw "HD-Player.exe not found: $Player" }
     $sw=[Diagnostics.Stopwatch]::StartNew()
@@ -759,6 +897,7 @@ function Boot-And-Wait([int]$timeoutSec=300){
 #  ACTIONS
 # ====================================================================
 function Do-Prep {
+    Assert-BlueStacksHostTools
     Ensure-MagiskApk; Ensure-BsrSu; Ensure-Debugfs
     Say '==== PREP (offline) ====' Cyan
     Kill-BlueStacks
@@ -774,9 +913,12 @@ function Do-Prep {
     Say '[*] HD-Player anti-tamper patch (engine Patch)...'
     $hdp = Join-Path $Install 'HD-Player.exe'
     & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $Engine -Action Patch -Exe $hdp 2>&1 | ForEach-Object { Say "    $_" DarkGray }
+    if($LASTEXITCODE -ne 0){ throw "HD-Player anti-tamper patch failed (exit code $LASTEXITCODE)." }
 
-    # 2) conf: emulator root ON (so the bootstrap bindmount runs) + adb on
+    # 2) conf: emulator root ON (so the bootstrap bindmount runs) + adb on. feature.rooting is a
+    # real global BlueStacks key and is required by some builds before bst.config.bindmount becomes 1.
     Set-ConfKey "bst.instance.$Instance.enable_root_access" 1
+    Set-ConfKey "bst.feature.rooting" 1
     Set-ConfKey "bst.enable_adb_access" 1
 
     # 3) stage files
@@ -808,16 +950,19 @@ function Do-Prep {
         $cmds += @('cd /android/system/etc','rm bsr_su',"write $(Fwd $BsrSu) bsr_su",'sif bsr_su mode 0106755','sif bsr_su uid 0','sif bsr_su gid 0','sif bsr_su links_count 1')
         # hijacked bindmount
         $cmds += @('cd /android/system/bin','rm bindmount',"write $(Fwd (Join-Path $tmpDir 'bindmount')) bindmount",'sif bindmount mode 0100755','sif bindmount uid 0','sif bindmount gid 0','sif bindmount links_count 1')
-        # scrub any pre-existing CLASSIC/engine su from the shared master. An older non-Magisk root
-        # (engine Root/AdbRoot -- e.g. the legacy live-E2E) leaves a setuid /system/xbin/su, which makes
-        # Magisk report "Abnormal State -- a su binary not from Magisk has been detected". Magisk's own su
-        # live at /system/bin/su -> magisk and /sbin/su -> magisk, so /system/xbin/su is never ours.
-        $cmds += @('cd /android/system/xbin','rm su','rm daemonsu')
+        # Replace (never retain) any classic/engine su with OUR known bootstrap as a second delivery path.
+        # If a build never raises bst.config.bindmount or no longer creates /data/downloads/.xb, native
+        # /system/xbin remains visible and this still grants the one-time bootstrap. Clean removes it.
+        $cmds += @('cd /android/system/xbin','rm su','rm daemonsu',
+                   "write $(Fwd $BsrSu) su",'sif su mode 0106755','sif su uid 0','sif su gid 0','sif su links_count 1')
         # verify
         $cmds += @('stat /android/system/etc/init/magisk/magisk64','stat /android/system/etc/init/bootanim.rc','stat /android/system/etc/bsr_su','stat /android/system/bin/bindmount','stat /android/system/xbin/su')
         $out = Invoke-Debugfs $img $cmds
         Say $out DarkGray
-        $good = ($out -match '(?s)bsr_su.*?Inode:\s*\d') -and ($out -match '(?s)bootanim\.rc.*?Inode:\s*\d') -and ($out -match '(?s)magisk64.*?Inode:\s*\d')
+        $good = ($out -match '(?s)bsr_su.*?Inode:\s*\d') -and
+                ($out -match '(?s)bootanim\.rc.*?Inode:\s*\d') -and
+                ($out -match '(?s)magisk64.*?Inode:\s*\d') -and
+                ($out -match '(?s)/android/system/xbin/su.*?Inode:\s*\d')
         if(-not $good){ Say '[!] prep verify FAILED' Red }
         return $good
     } $true
@@ -916,6 +1061,7 @@ function Do-Clean {
 function Do-Finalize {
     Say '==== FINALIZE (emulator root OFF + shareable master) ====' Cyan
     Set-ConfKey "bst.instance.$Instance.enable_root_access" 0
+    Set-ConfKey "bst.feature.rooting" 0
     # Ensure the shared master Root.vhd + fastboot.vdi are Readonly so MULTIPLE instances can attach
     # them at once (type="Normal" is exclusive -> a 2nd instance fails with VBOX_E_INVALID_OBJECT_STATE).
     # Data.vhdx stays Normal (per-instance, writable). This is the factory layout.
@@ -953,6 +1099,7 @@ function Do-Verify {
     $serial = Boot-And-Wait
     $id  = (& $Adb @('-s',$serial,'shell','su -c id') 2>&1 | Out-String).Trim()
     $whi = (& $Adb @('-s',$serial,'shell','readlink /system/bin/su') 2>&1 | Out-String).Trim()
+    $selinux = (& $Adb @('-s',$serial,'shell','getenforce') 2>&1 | Out-String).Trim()
     # Enumerate EVERY su in the standard PATH dirs and classify each: a symlink to magisk is ours,
     # anything else is a competing root (the cause of Magisk's "Abnormal State"). Pushed as a script
     # file (not inline su -c '...') because the loop's semicolons don't survive PS -> adb -> device quoting.
@@ -973,6 +1120,7 @@ done
     $sweep = (& $Adb @('-s',$serial,'shell',"su -c `"find /system /data/adb /data/downloads -type f -size 4968c 2>/dev/null | while read f; do [ \`"`$(sha256sum `$f|cut -d' ' -f1)\`" = '$BSR_SU_SHA' ] && echo TRACE:`$f; done; echo SWEEPDONE`"") 2>&1 | Out-String)
     Say ("  su -c id            : {0}" -f $id) $(if($id -match 'uid=0'){'Green'}else{'Red'})
     Say ("  /system/bin/su ->   : {0}" -f $whi)
+    Say ("  SELinux (guest)     : {0}  (reported by BlueStacks; blueStackRoot does not change it)" -f $selinux) DarkGray
     Say  "  su inventory        :"
     foreach($l in ($scan -split "`n")){ $l=$l.Trim(); if($l){ Say "      $l" DarkGray } }
     if($stray.Count){ Say ("  competing su        : {0}  <-- NOT from Magisk" -f ($stray -join ', ')) Red }
@@ -987,12 +1135,12 @@ done
 }
 
 function Do-Undo {
+    Assert-BlueStacksHostTools
     # PER-INSTANCE unroot (multi-instance safe): just drop THIS instance's root flag + /data Magisk
     # state + app. The shared master /system and HD-Player patch are LEFT INTACT so any OTHER rooted
     # instances keep working. Use -Full to also scrub the master + un-patch (unroots ALL instances).
     Say "==== UNDO ($Instance) ====" Cyan
     Kill-BlueStacks; Start-Sleep 2
-    if(-not (Test-Path $Player)){ Say "[!] HD-Player.exe not found at '$Player'." Red; return }
     try {
         $serial = Boot-And-Wait 240
         & $Adb @('-s',$serial,'uninstall','io.github.huskydg.magisk') 2>&1 | Out-Null
@@ -1005,6 +1153,7 @@ function Do-Undo {
     } catch { Say "[~] could not boot to unroot /data: $($_.Exception.Message)" Yellow }
     Kill-BlueStacks
     Set-ConfKey "bst.instance.$Instance.enable_root_access" 0
+    Set-ConfKey "bst.feature.rooting" 0
 
     if($Full){
         Say '[*] -Full: scrubbing shared master + un-patching HD-Player (unroots ALL instances)...' Yellow

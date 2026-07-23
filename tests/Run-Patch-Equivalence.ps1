@@ -41,7 +41,17 @@ $repo = Split-Path -Parent $here
 if (-not $Engine) { $Engine = Join-Path $repo 'tools\bsr_engine.ps1' }
 if (-not (Test-Path -LiteralPath $Engine)) { throw "engine not found: $Engine" }
 $Engine = (Resolve-Path -LiteralPath $Engine).Path
-if (-not $RealExe) { $RealExe = Join-Path $env:ProgramFiles 'BlueStacks_nxt\HD-Player.exe' }
+if (-not $RealExe) {
+    # Exercise the same marker-validated discovery as the shipped launcher. A made-up base is sufficient:
+    # Resolve discovers the install/data roots before it derives any instance-specific paths.
+    $probe = (& powershell.exe -NoProfile -ExecutionPolicy Bypass -File $Engine `
+        -Action Resolve -Base '__bsr_patch_test_probe__' 2>&1 | Out-String)
+    $install = @($probe -split "`r?`n" |
+        Where-Object { $_ -match '^BSR_INSTALL=(.+)$' } |
+        ForEach-Object { ([regex]::Match($_, '^BSR_INSTALL=(.+)$')).Groups[1].Value } |
+        Select-Object -Last 1)[0]
+    if ($install) { $RealExe = Join-Path $install 'HD-Player.exe' }
+}
 
 $work = Join-Path $env:TEMP ("bsr_patcheq_" + $PID)
 if (Test-Path $work) { Remove-Item $work -Recurse -Force }
@@ -294,7 +304,7 @@ try {
 
     # =================================================================
     Section "Real HD-Player.exe (copied to TEMP; never the installed binary)"
-    if (Test-Path -LiteralPath $RealExe) {
+    if ($RealExe -and (Test-Path -LiteralPath $RealExe)) {
         $b = [IO.File]::ReadAllBytes($RealExe)
         Assert-ScannerEquivalence $b ("real HD-Player.exe ({0:N0} bytes)" -f $b.Length)
         Assert-EngineMatchesOracle $b -NoBackup ("real HD-Player.exe as-is ({0:N0} bytes)" -f $b.Length)
@@ -307,7 +317,10 @@ try {
         }
         else { Sk "real HD-Player.exe: no validated site found to exercise the write path" }
     }
-    else { Sk "real HD-Player.exe not found at $RealExe (set -RealExe or install BlueStacks)" }
+    else {
+        $where = if ($RealExe) { $RealExe } else { '(no marker-validated install discovered)' }
+        Sk "real HD-Player.exe not found at $where (set -RealExe or install BlueStacks)"
+    }
 
     # =================================================================
     if (-not $SkipBench) {
@@ -315,7 +328,7 @@ try {
         $benchTargets = @()
         $synthSize = [int]($BenchTextMB * 1MB)
         $benchTargets += , @("synthetic .text ~$BenchTextMB MB", (New-PE -ValidSites 1 -DecoyBytes 20000 -TextSize $synthSize))
-        if (Test-Path -LiteralPath $RealExe) { $benchTargets += , @('real HD-Player.exe', ([IO.File]::ReadAllBytes($RealExe))) }
+        if ($RealExe -and (Test-Path -LiteralPath $RealExe)) { $benchTargets += , @('real HD-Player.exe', ([IO.File]::ReadAllBytes($RealExe))) }
         foreach ($bt in $benchTargets) {
             $name = $bt[0]; $bb = $bt[1]; $pe = PE-Parse $bb
             $ts = $pe.TextRaw + 5; $te = $pe.TextRaw + $pe.TextRawSize - 3; if ($te -gt $bb.Length - 3) { $te = $bb.Length - 3 }

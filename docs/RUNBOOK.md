@@ -23,9 +23,10 @@ Everything here is built from steps proven on this machine; the one offline step
   > Magisk's in-app DenyList works with ReZygisk/NeoZygisk) — see the README "Is this safe?" section and
   > CHANGELOG v10. To use stock upstream Magisk instead, just pass its APK here.
 - **Know your instance name** (default `Rvc64`) and paths:
-  - Root.vhd: `C:\ProgramData\BlueStacks_nxt\Engine\<Instance>\Root.vhd`
-  - conf: `C:\ProgramData\BlueStacks_nxt\bluestacks.conf`
-  - BlueStacks install: `C:\Program Files\BlueStacks_nxt`
+  - Typical layout example only: a data folder contains `bluestacks.conf` and `Engine\<Instance>\Root.vhd`;
+    an install folder contains `HD-Player.exe` and `HD-Adb.exe`.
+  - The tool does **not** assume drive letters or standard folders. It uses marker-validated registry,
+    uninstall, process/service, App Paths, `PATH`, and option-8 evidence.
 - **Backups (auto + manual).** A pristine `Root.vhd.bsrbak` and a Magisk‑good `Root.vhd.magiskgood`
   already exist. If starting fresh, make one: copy `Root.vhd` → `Root.vhd.bsrbak` while BlueStacks is closed.
 
@@ -44,6 +45,8 @@ The `.cmd` is fully self‑contained (engine + debugfs + bootstrap su + the orch
 3. Wait for `VERIFY PASS`. Done. (Option **6** = `Undo … Android 11 Rvc64` fully restores factory.)
 
 No other files, no internet. (If you drop a different `Magisk*.apk` next to the `.cmd`, it uses that instead of the embedded one.)
+For a nonstandard layout, option **8** accepts either the install folder (`HD-Player.exe` +
+`HD-Adb.exe`) or data folder (`bluestacks.conf`) and identifies it by contents.
 
 ### 1b. Or run the orchestrator directly (from the repo)
 ```powershell
@@ -56,7 +59,7 @@ Either way, the pipeline runs and ends with a self‑verify:
 
 | Phase | Disk activity | What it does |
 |---|---|---|
-| **Prep** (offline) | 1 Root.vhd carve+writeback (~1–2 min) | HD‑Player anti‑tamper patch; conf `enable_root_access=1`; writes Magisk `/system` files + hijacked `bootanim.rc` + bootstrap `bsr_su` + hijacked `bindmount` |
+| **Prep** (offline) | 1 Root.vhd carve+writeback (~1–2 min) | HD‑Player anti‑tamper patch; conf instance/global root flags = 1; writes Magisk `/system` files + hijacked `bootanim.rc` + independently reachable bootstrap `bsr_su` + hijacked `bindmount` |
 | **Data** (online) | runtime `/data` only | boots; `adb install` the APK; via bootstrap su populates `/data/adb/magisk` (busybox + ABI binaries + scripts) and sets the grant policy |
 | **Clean** (offline) | 1 Root.vhd carve+writeback | removes `bsr_su`; restores the **stock** `bindmount` |
 | **Finalize** | conf only | `enable_root_access=0` (emulator root OFF) |
@@ -150,12 +153,17 @@ device after completion: **only Magisk's**. No DiskRW, no engine‑su, no daemon
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| `bootstrap su not root` during **Data** | patch didn't apply, or `enable_root_access≠1`, or `bindmount` not hijacked | re‑run **Prep**; confirm `HD-Player.exe` = `84 C0 90 90` |
+| `bootstrap su not root` during **Data** | Old builds tried only `/system/xbin/su`; the xbin mount can be absent, late, or already mounted without the bootstrap bind | **Fixed after v18:** update and retry. Prep supplies direct + native-xbin + bind-mounted paths and Data accepts only a path that proves `uid=0`. If all fail, attach the new `debug.cmd` log, which now records the exact conf/property/file/mount state |
+| `getenforce` prints `Disabled`; a mod asks for `Permissive` | BlueStacks booted without active SELinux policy enforcement; blueStackRoot did not disable it. A literal-string compatibility check may confuse Disabled with a restrictive state | There is nothing for `setenforce 0` to relax. Ask the mod author to accept `Disabled`, or use a BlueStacks build that supplies an SELinux-enabled kernel and compatible policy; this cannot be a safe rooter menu toggle |
 | Magisk app: *Magisk environment incomplete* | `/data/adb/magisk` not populated | re‑run **Data** (it populates it) |
 | Magisk app: *Abnormal State — a su binary not from Magisk* | a **competing `/system/xbin/su`** on the shared master (an old non‑Magisk/classic root, e.g. a prior engine root or the legacy live‑E2E) — Magisk's own su are `/system/bin/su`→magisk + `/sbin/su`→magisk | **fixed in v12**: Prep/Clean now scrub `/system/xbin/su` and Verify FAILS on any non‑Magisk su. To repair an existing instance, **re‑run Clean** (it removes the stray su) and reboot |
 | `su` returns nothing / `uid=2000` after Finalize | shell took BlueStacks' gated su; Magisk daemon down | check `/cache/magisk.log`; ensure `/data/adb/magisk/busybox` exists |
 | Instance won't boot after edits | HD‑Player patch missing | restore `HD-Player.exe.bak`, re‑apply patch, retry |
 | `instance '<x>' did not boot / become adb‑reachable within N s` — **but the instance is up** (Home visible, Magisk installed) | a **system `adb` of a different version** (e.g. Android SDK platform‑tools **v1.0.41**) keeps killing BlueStacks' **HD‑Adb v1.0.36** server on the shared port 5037 — *"adb server version doesn't match this client; killing…"* — so `getprop` calls fail | **fixed in v11**: the tool pins HD‑Adb to its own server port (`ANDROID_ADB_SERVER_PORT=15037`) so the two never collide, and also tries the **live‑bound** adb port, not just `bluestacks.conf`. Update the tool. (Diagnose: compare `adb version` on `PATH` vs `"…\BlueStacks_nxt\HD-Adb.exe" version`.) |
+
+`debug.cmd` is read-only with respect to guest/root files. It launches the selected instance and writes one
+redacted `bsr_debug_*.log`. Use it **after reproducing with the updated tool** if bootstrap or adb still
+fails; the pre-fix debug script only measured adb timing and cannot explain issue #28.
 
 ---
 

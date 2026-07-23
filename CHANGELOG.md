@@ -5,6 +5,35 @@ Player — from one file, fully automatically. Releases are grouped by the BlueS
 
 ---
 
+## v19 — Fix custom paths and harden bootstrap root · 2026-07-23
+
+- 🧭 **Custom paths now mean what the user selected ([#27](https://github.com/Jordan231111/BluestacksRoot/issues/27)).**
+  Option 8 previously saved every selection as `DataDir`, so selecting an install folder left `InstallDir`
+  unchanged and the later root/undo stages fell back to a default `HD-Player.exe`. It now classifies the
+  selection by marker files and keeps install/data roots independent. Discovery enumerates product and
+  uninstall registry records, running processes/services, App Paths, and `PATH`; it validates
+  `HD-Player.exe` + `HD-Adb.exe` or `bluestacks.conf` before accepting a path. All guessed
+  `Program Files`/`ProgramData` fallbacks are removed: ambiguous or missing evidence fails with a useful
+  error instead of modifying the wrong installation.
+- 🩹 **Bootstrap root no longer depends on one xbin mount ([#28](https://github.com/Jordan231111/BluestacksRoot/issues/28)).**
+  The Data stage hardcoded `/system/xbin/su`, while the modified BlueStacks `bindmount` exposed it only in
+  the same invocation that first mounted `.xb`. If the property was late/zero, `.xb` was absent, or xbin
+  was already mounted, the known-good offline `bsr_su` existed but was never tried. Prep now enables both
+  relevant BlueStacks root flags, stages a transient native-xbin fallback, and the runtime probes three
+  independently delivered bootstrap paths, accepting only one that proves `uid=0`. The bind helper retries
+  its two bindings idempotently, the HD-Player patch exit code is checked immediately, and a failure now
+  includes the conf/mount/file/SELinux evidence needed to diagnose a genuinely new build.
+- 🔐 **SELinux `Disabled` explained ([#25](https://github.com/Jordan231111/BluestacksRoot/issues/25)).**
+  No project code disables SELinux; tested BlueStacks guests report it disabled at factory boot. Disabled
+  already means there is no SELinux policy enforcement, and cannot be changed to permissive with
+  `setenforce 0` unless the guest first boots an SELinux-capable kernel with a valid policy. A menu toggle
+  would therefore be misleading and unsafe. Verify now prints the guest state, and `debug.cmd` captures the
+  SELinux filesystem, properties, command line, bootstrap binaries, mount, hashes, and direct root probe.
+- 🧪 Added issue-specific resolver and bootstrap fallback tests; all 375 offline checks pass. A destructive
+  no-backup run of the shipped `.cmd` passed its built-in cold-boot Verify on BlueStacks 5.22.252.1006.
+
+---
+
 ## v18 — Survive antivirus tampering on the first step (GZip / Base-64 crash) · 2026-07-01
 
 Fixes [#24](https://github.com/Jordan231111/BluestacksRoot/issues/24): the pipeline died on the first step

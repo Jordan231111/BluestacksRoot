@@ -1,6 +1,14 @@
 # Todo List
 
 ## Done
+- [x] **Issues #27/#28 path + bootstrap hardening; #25 SELinux diagnosis** — option 8 now distinguishes
+      marker-validated install and data folders instead of overwriting DataDir; all standard-folder guesses
+      are gone in favor of paired registry/uninstall/runtime/App-Paths/PATH evidence and fail-closed
+      validation. Bootstrap root now has direct, native-xbin, and bind-mounted delivery paths, retries
+      idempotently, enables both BlueStacks root flags, and records actionable failure evidence. Confirmed
+      the project never disables SELinux: `Disabled` is BlueStacks' factory guest state and cannot become
+      permissive through `setenforce`; documented why no menu toggle is appropriate and expanded
+      `debug.cmd` to capture root + SELinux state.
 - [x] **adb: heal the wedged "device offline" transport on slow / low-end PCs (#18)** — on a multi-minute
       boot the per-instance adb transport opens during early boot and wedges `offline` (socket up, handshake
       never finalized); a plain `connect` no-ops on it (`already connected`), so `Boot-And-Wait` polled

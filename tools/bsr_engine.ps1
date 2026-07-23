@@ -40,6 +40,8 @@ param(
     [string]$Img,        # TestExt4 target (plain ext4 image)
     [string]$DataDir,    # BlueStacks DataDir (Resolve / BaseDir)
     [string]$UserDef,    # BlueStacks UserDefinedDir (Resolve / BaseDir)
+    [string]$InstallDir, # BlueStacks install folder (Resolve)
+    [string]$CustomPath, # user-selected install OR data folder (Resolve / BaseDir)
     [string]$Base,       # base version e.g. Rvc64 (Resolve)
     [string]$Adb,        # HD-Adb.exe                       (AdbRoot / AdbUnroot)
     [string]$Player,     # HD-Player.exe (to boot instance) (AdbRoot)
@@ -66,6 +68,8 @@ $SelfPath = EnvOr $SelfPath 'BSR_SELF'
 $Debugfs = EnvOr $Debugfs 'BSR_DEBUGFS'
 $DataDir = EnvOr $DataDir 'BSR_DATADIR'
 $UserDef = EnvOr $UserDef 'BSR_USERDEF'
+$InstallDir = EnvOr $InstallDir 'BSR_INSTALL'
+$CustomPath = EnvOr $CustomPath 'BSR_CUSTOM'
 $Base = EnvOr $Base 'BSR_BASE'
 $Adb = EnvOr $Adb 'BSR_ADB'
 $Player = EnvOr $Player 'BSR_PLAYER'
@@ -109,20 +113,215 @@ function Get-SelfText([string]$path) {
     return $t
 }
 
-# Registry discovery (NO hardcoded install/data paths): honour a custom BlueStacks location by reading
-# InstallDir/DataDir/UserDefinedDir from the registry -- nxt (BlueStacks 5) then msi5 (MSI App Player),
-# native and WOW6432Node views.  Must not Write-Host (callers like Resolve/BaseDir parse stdout).
-function Get-RegBlueStacks {
-    foreach ($k in @('HKLM:\SOFTWARE\BlueStacks_nxt', 'HKLM:\SOFTWARE\BlueStacks_msi5',
-                     'HKLM:\SOFTWARE\WOW6432Node\BlueStacks_nxt', 'HKLM:\SOFTWARE\WOW6432Node\BlueStacks_msi5')) {
+# BlueStacks layout discovery. Filesystem locations are never guessed from ProgramFiles/ProgramData or
+# product folder names. Product + uninstall registry records remain paired, and every selected location
+# is validated by BlueStacks-owned marker files before use. A running process/service, App Paths entry,
+# or PATH entry can rescue a missing/stale InstallDir.
+function Normalize-DiscoveryPath([string]$value) {
+    if ([string]::IsNullOrWhiteSpace($value)) { return $null }
+    $s = [Environment]::ExpandEnvironmentVariables($value.Trim())
+    if ($s -match '^\s*"([^"]+)"') { $s = $Matches[1] }
+    $s = $s.Trim().Trim('"').TrimEnd(' ', '\', '/')
+    if (-not $s) { return $null }
+    return $s
+}
+
+function Get-ExePathFromCommand([string]$value) {
+    if ([string]::IsNullOrWhiteSpace($value)) { return $null }
+    $s = [Environment]::ExpandEnvironmentVariables($value.Trim())
+    if ($s -match '^\s*"([^"]+?\.exe)"') { return $Matches[1] }
+    if ($s -match '^\s*(.+?\.exe)(?:\s|$)') { return $Matches[1].Trim('"') }
+    return $null
+}
+
+function Get-ObjectProperty($object, [string]$name) {
+    if (-not $object) { return $null }
+    $prop = $object.PSObject.Properties[$name]
+    if ($prop) { return $prop.Value }
+    return $null
+}
+
+function Get-RegBlueStacksRecords {
+    $records = New-Object System.Collections.Generic.List[object]
+    $seen = @{}
+    function Add-RegRecord($source, $p) {
+        if (-not $p) { return }
+        $install = Normalize-DiscoveryPath (Get-ObjectProperty $p 'InstallDir')
+        if (-not $install) { $install = Normalize-DiscoveryPath (Get-ObjectProperty $p 'InstallLocation') }
+        if (-not $install) {
+            $exe = Get-ExePathFromCommand (Get-ObjectProperty $p 'DisplayIcon')
+            if (-not $exe) { $exe = Get-ExePathFromCommand (Get-ObjectProperty $p 'UninstallString') }
+            if ($exe) { $install = Normalize-DiscoveryPath (Split-Path -Parent $exe) }
+        }
+        $data = Normalize-DiscoveryPath (Get-ObjectProperty $p 'DataDir')
+        $user = Normalize-DiscoveryPath (Get-ObjectProperty $p 'UserDefinedDir')
+        if (-not $install -and -not $data -and -not $user) { return }
+        $id = ("$install|$data|$user").ToLowerInvariant()
+        if ($seen.ContainsKey($id)) { return }
+        $seen[$id] = $true
+        [void]$records.Add([pscustomobject]@{
+            Source = "$source"; InstallDir = $install; DataDir = $data; UserDefinedDir = $user
+        })
+    }
+
+    foreach ($root in @('HKLM:\SOFTWARE', 'HKLM:\SOFTWARE\WOW6432Node',
+                        'HKCU:\SOFTWARE', 'HKCU:\SOFTWARE\WOW6432Node')) {
+        if (-not (Test-Path -LiteralPath $root)) { continue }
         try {
-            $p = Get-ItemProperty -Path $k -ErrorAction Stop
-            if ($p -and ($p.InstallDir -or $p.DataDir -or $p.UserDefinedDir)) {
-                return [pscustomobject]@{ InstallDir = $p.InstallDir; DataDir = $p.DataDir; UserDefinedDir = $p.UserDefinedDir }
+            foreach ($key in @(Get-ChildItem -LiteralPath $root -ErrorAction Stop |
+                               Where-Object { $_.PSChildName -match '(?i)(bluestacks|msi.*app.*player)' })) {
+                try { Add-RegRecord $key.PSPath (Get-ItemProperty -LiteralPath $key.PSPath -ErrorAction Stop) } catch { }
             }
         } catch { }
     }
+    foreach ($root in @('HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall',
+                        'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall',
+                        'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall')) {
+        if (-not (Test-Path -LiteralPath $root)) { continue }
+        try {
+            foreach ($key in @(Get-ChildItem -LiteralPath $root -ErrorAction Stop)) {
+                try {
+                    $p = Get-ItemProperty -LiteralPath $key.PSPath -ErrorAction Stop
+                    if ($key.PSChildName -match '(?i)bluestacks|msi.*app.*player' -or
+                        (Get-ObjectProperty $p 'DisplayName') -match '(?i)bluestacks|msi.*app.*player') {
+                        Add-RegRecord $key.PSPath $p
+                    }
+                } catch { }
+            }
+        } catch { }
+    }
+    return @($records | ForEach-Object { $_ })
+}
+
+function Get-RegBlueStacks {
+    return @(Get-RegBlueStacksRecords | Select-Object -First 1)[0]
+}
+
+function Get-DataRootFromPath([string]$value) {
+    $p = Normalize-DiscoveryPath $value
+    if (-not $p -or -not (Test-Path -LiteralPath $p)) { return $null }
+    try {
+        if (-not (Get-Item -LiteralPath $p -ErrorAction Stop).PSIsContainer) {
+            if ((Split-Path -Leaf $p) -ieq 'bluestacks.conf') { $p = Split-Path -Parent $p }
+            else { return $null }
+        }
+    } catch { return $null }
+    for ($i = 0; $i -lt 5 -and $p; $i++) {
+        if (Test-Path -LiteralPath (Join-Path $p 'bluestacks.conf')) {
+            return (Resolve-Path -LiteralPath $p).Path.TrimEnd('\', '/')
+        }
+        $parent = Split-Path -Parent $p
+        if (-not $parent -or $parent -eq $p) { break }
+        $p = $parent
+    }
     return $null
+}
+
+function Get-InstallRootFromPath([string]$value) {
+    $p = Normalize-DiscoveryPath $value
+    if (-not $p -or -not (Test-Path -LiteralPath $p)) { return $null }
+    try {
+        if (-not (Get-Item -LiteralPath $p -ErrorAction Stop).PSIsContainer) { $p = Split-Path -Parent $p }
+    } catch { return $null }
+    for ($i = 0; $i -lt 4 -and $p; $i++) {
+        if ((Test-Path -LiteralPath (Join-Path $p 'HD-Player.exe')) -and
+            (Test-Path -LiteralPath (Join-Path $p 'HD-Adb.exe'))) {
+            return (Resolve-Path -LiteralPath $p).Path.TrimEnd('\', '/')
+        }
+        $parent = Split-Path -Parent $p
+        if (-not $parent -or $parent -eq $p) { break }
+        $p = $parent
+    }
+    return $null
+}
+
+function Test-SamePath([string]$left, [string]$right) {
+    if (-not $left -or -not $right) { return $false }
+    try {
+        return ([IO.Path]::GetFullPath($left).TrimEnd('\', '/') -ieq
+                [IO.Path]::GetFullPath($right).TrimEnd('\', '/'))
+    } catch { return ($left.TrimEnd('\', '/') -ieq $right.TrimEnd('\', '/')) }
+}
+
+function Get-RecordDataRoot($record) {
+    if (-not $record) { return $null }
+    foreach ($p in @($record.DataDir, $record.UserDefinedDir)) {
+        $root = Get-DataRootFromPath $p
+        if ($root) { return $root }
+    }
+    return $null
+}
+
+function Get-RuntimeInstallRoots {
+    $out = New-Object System.Collections.Generic.List[string]
+    foreach ($name in @('HD-Player', 'HD-Adb')) {
+        try {
+            foreach ($proc in @(Get-Process -Name $name -ErrorAction SilentlyContinue)) {
+                try {
+                    $root = Get-InstallRootFromPath $proc.Path
+                    if ($root) { [void]$out.Add($root) }
+                } catch { }
+            }
+        } catch { }
+    }
+    try {
+        foreach ($svc in @(Get-CimInstance Win32_Service -ErrorAction Stop |
+                           Where-Object { $_.Name -match '(?i)bstk|bluestacks' -or
+                                          $_.DisplayName -match '(?i)bluestacks|msi.*app.*player' })) {
+            $root = Get-InstallRootFromPath (Get-ExePathFromCommand $svc.PathName)
+            if ($root) { [void]$out.Add($root) }
+        }
+    } catch { }
+    foreach ($root in @('HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths',
+                        'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths')) {
+        foreach ($exeName in @('HD-Player.exe', 'HD-Adb.exe')) {
+            $key = Join-Path $root $exeName
+            try {
+                $raw = (Get-Item -LiteralPath $key -ErrorAction Stop).GetValue('')
+                $found = Get-InstallRootFromPath $raw
+                if ($found) { [void]$out.Add($found) }
+            } catch { }
+        }
+    }
+    foreach ($exeName in @('HD-Player.exe', 'HD-Adb.exe')) {
+        try {
+            $cmd = Get-Command $exeName -ErrorAction SilentlyContinue
+            if ($cmd) {
+                $root = Get-InstallRootFromPath $cmd.Source
+                if ($root) { [void]$out.Add($root) }
+            }
+        } catch { }
+    }
+    return @($out | Select-Object -Unique)
+}
+
+function Resolve-InstallRoot([string]$preferred, [string]$custom, [string]$dataRoot) {
+    $customInstall = Get-InstallRootFromPath $custom
+    if ($customInstall) { return $customInstall }
+
+    $records = @(Get-RegBlueStacksRecords)
+    foreach ($record in $records) {
+        $recordData = Get-RecordDataRoot $record
+        $recordInstall = Get-InstallRootFromPath $record.InstallDir
+        if ($recordInstall -and $recordData -and (Test-SamePath $recordData $dataRoot)) { return $recordInstall }
+    }
+
+    $preferredInstall = Get-InstallRootFromPath $preferred
+    if ($preferredInstall) { return $preferredInstall }
+
+    $valid = New-Object System.Collections.Generic.List[string]
+    foreach ($root in @(Get-RuntimeInstallRoots)) {
+        if ($root -and -not ($valid -contains $root)) { [void]$valid.Add($root) }
+    }
+    foreach ($record in $records) {
+        $root = Get-InstallRootFromPath $record.InstallDir
+        if ($root -and -not ($valid -contains $root)) { [void]$valid.Add($root) }
+    }
+    if ($valid.Count -eq 1) { return $valid[0] }
+    if ($valid.Count -gt 1) {
+        throw "Multiple BlueStacks installations were found and none matches the selected data folder. Use option 8 and select the intended install folder."
+    }
+    throw "BlueStacks install folder was not found. Registry, uninstall records, running processes, services, App Paths, and PATH contained no folder with both HD-Player.exe and HD-Adb.exe. Use option 8 to select it."
 }
 
 # Expected SHA-256 of the decrypted su ELF (derivation §1).  Used as an integrity gate.
@@ -779,38 +978,44 @@ function Invoke-VhdSelfTest {
 #  Emits ONLY  KEY=VALUE  lines on stdout (so a .cmd `for /f` can `set` them).
 #  NOTE: must never Write-Host here -- it would pollute the captured output.
 # ===========================================================================
-# Normalize to the folder that actually holds bluestacks.conf + Engine\.
-# Newer BlueStacks (e.g. 5.22.169) sets DataDir to ...\BlueStacks_nxt\Engine,
-# while UserDefinedDir is the real base ...\BlueStacks_nxt -- handle both.
-function Get-BaseDir([string]$dataDir, [string]$userDef) {
-    $cands = New-Object System.Collections.Generic.List[string]
-    if ($dataDir) {
-        if ($dataDir -match '(?i)[\\/]engine[\\/]?$') { [void]$cands.Add(($dataDir -replace '(?i)[\\/]engine[\\/]?$', '')) }
-        [void]$cands.Add($dataDir)
+# Normalize to the folder that actually owns bluestacks.conf. Inputs may point at the conf itself,
+# the data root, Engine\, an instance below Engine\, or the install folder selected through option 8.
+function Get-BaseDir([string]$dataDir, [string]$userDef, [string]$custom = $CustomPath,
+                     [string]$preferredInstall = $InstallDir) {
+    $customData = Get-DataRootFromPath $custom
+    if ($customData) { return $customData }
+    $customInstall = Get-InstallRootFromPath $custom
+    if ($custom -and -not $customInstall) {
+        throw "The saved custom folder is neither a BlueStacks install folder (HD-Player.exe + HD-Adb.exe) nor a data folder (bluestacks.conf). Use option 8 to replace it."
     }
-    if ($userDef) { [void]$cands.Add($userDef) }
-    # registry-declared data dir (honours a custom install) before the ProgramData fallback
-    $reg = Get-RegBlueStacks
-    if ($reg) {
-        foreach ($d in @($reg.DataDir, $reg.UserDefinedDir)) {
-            if ($d) {
-                if ($d -match '(?i)[\\/]engine[\\/]?$') { [void]$cands.Add(($d -replace '(?i)[\\/]engine[\\/]?$', '')) }
-                [void]$cands.Add($d)
+
+    $records = @(Get-RegBlueStacksRecords)
+    $wantedInstall = if ($customInstall) { $customInstall } else { Get-InstallRootFromPath $preferredInstall }
+    if ($wantedInstall) {
+        foreach ($record in $records) {
+            $recordInstall = Get-InstallRootFromPath $record.InstallDir
+            if ($recordInstall -and (Test-SamePath $recordInstall $wantedInstall)) {
+                $recordData = Get-RecordDataRoot $record
+                if ($recordData) { return $recordData }
             }
         }
     }
-    [void]$cands.Add((Join-Path $env:ProgramData 'BlueStacks_nxt'))
-    $pick = $null
-    foreach ($c in $cands) { if ($c -and (Test-Path -LiteralPath (Join-Path $c 'bluestacks.conf'))) { $pick = $c; break } }
-    if (-not $pick) { foreach ($c in $cands) { if ($c -and (Test-Path -LiteralPath (Join-Path $c 'Engine'))) { $pick = $c; break } } }
-    if (-not $pick) { $pick = $cands[0] }
-    return $pick.TrimEnd('\', '/')
+
+    foreach ($candidate in @($dataDir, $userDef)) {
+        $root = Get-DataRootFromPath $candidate
+        if ($root) { return $root }
+    }
+    foreach ($record in $records) {
+        $root = Get-RecordDataRoot $record
+        if ($root) { return $root }
+    }
+    throw "BlueStacks data folder was not found. Registry records contained no valid bluestacks.conf. Use option 8 to select the data folder or its bluestacks.conf."
 }
 
 function Invoke-Resolve {
-    if (-not $DataDir -and -not $UserDef) { throw "Resolve requires -DataDir/-UserDef (or BSR_DATADIR/BSR_USERDEF)." }
     if (-not $Base) { throw "Resolve requires -Base (or BSR_BASE)." }
-    $DataDir = Get-BaseDir $DataDir $UserDef     # normalize ...\Engine -> base
+    $DataDir = Get-BaseDir $DataDir $UserDef $CustomPath $InstallDir
+    $resolvedInstall = Resolve-InstallRoot $InstallDir $CustomPath $DataDir
     $instance = $null
     $rx = '^' + [regex]::Escape($Base) + '(_\d+)?$'
 
@@ -895,6 +1100,7 @@ function Invoke-Resolve {
     }
 
     Write-Output "BSR_DATADIR=$DataDir"
+    Write-Output "BSR_INSTALL=$resolvedInstall"
     Write-Output "BSR_INSTANCE=$instance"
     Write-Output "BSR_MASTER=$master"
     Write-Output "BSR_BSTK=$bstk"
@@ -915,15 +1121,14 @@ function Invoke-Resolve {
 function Resolve-Adb {
     if ($Adb -and (Test-Path -LiteralPath $Adb)) { return (Resolve-Path -LiteralPath $Adb).Path }
     $cands = New-Object System.Collections.Generic.List[string]
-    $reg = Get-RegBlueStacks                                   # registry InstallDir first (custom installs)
-    if ($reg -and $reg.InstallDir) { [void]$cands.Add((Join-Path ($reg.InstallDir.TrimEnd('\', '/')) 'HD-Adb.exe')) }
-    foreach ($p in @(
-            (Join-Path $env:ProgramFiles 'BlueStacks_nxt\HD-Adb.exe'),
-            (Join-Path ${env:ProgramFiles(x86)} 'BlueStacks_nxt\HD-Adb.exe'),
-            (Join-Path $env:ProgramFiles 'BlueStacks_msi5\HD-Adb.exe'),
-            (Join-Path ${env:ProgramFiles(x86)} 'BlueStacks_msi5\HD-Adb.exe'))) { [void]$cands.Add($p) }
+    foreach ($root in @(Get-RuntimeInstallRoots)) { [void]$cands.Add((Join-Path $root 'HD-Adb.exe')) }
+    foreach ($reg in @(Get-RegBlueStacksRecords)) {
+        $root = Get-InstallRootFromPath $reg.InstallDir
+        if ($root) { [void]$cands.Add((Join-Path $root 'HD-Adb.exe')) }
+    }
     foreach ($p in $cands) { if ($p -and (Test-Path -LiteralPath $p)) { return $p } }
-    foreach ($n in @('HD-Adb.exe', 'adb.exe')) { $c = Get-Command $n -EA SilentlyContinue; if ($c) { return $c.Source } }
+    $c = Get-Command 'HD-Adb.exe' -EA SilentlyContinue
+    if ($c) { return $c.Source }
     throw "HD-Adb.exe not found. Pass -Adb <path to HD-Adb.exe> (or BSR_ADB)."
 }
 
@@ -1160,7 +1365,7 @@ try {
         'ConfRoot' { exit (Invoke-Conf $true) }
         'ConfUnroot' { exit (Invoke-Conf $false) }
         'Resolve' { Invoke-Resolve; exit 0 }
-        'BaseDir' { Write-Output (Get-BaseDir $DataDir $UserDef); exit 0 }
+        'BaseDir' { Write-Output (Get-BaseDir $DataDir $UserDef $CustomPath $InstallDir); exit 0 }
         'VhdSelfTest' { exit (Invoke-VhdSelfTest) }
     }
 } catch {

@@ -17,6 +17,7 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 $Here = if ($PSScriptRoot) { $PSScriptRoot } else { Split-Path -Parent $MyInvocation.MyCommand.Path }
+$RepoRoot = (Resolve-Path (Join-Path $Here '..')).Path
 if (-not $Engine) { $Engine = (Resolve-Path (Join-Path $Here '..\tools\bsr_engine.ps1')).Path }
 if (-not $Magisk) { $Magisk = (Resolve-Path (Join-Path $Here '..\tools\bsr_magisk.ps1')).Path }
 $script:pass = 0; $script:fail = 0
@@ -61,8 +62,19 @@ function New-FakeData([string]$instance, [hashtable]$confKeys, [string]$tag = 'r
     [IO.File]::WriteAllBytes((Join-Path $eng 'Root.vhd'), (New-Object byte[] 64))
     return (Long $root)   # long-path form so expected paths match the engine's disk-resolved VHD path
 }
-function Resolve-Map([string]$dataDir, [string]$base) {
-    $out = Eng @('-Action', 'Resolve', '-DataDir', $dataDir, '-Base', $base)
+function New-FakeInstall([string]$tag = 'install') {
+    $root = Join-Path $env:TEMP ("bsr_${tag}_" + [guid]::NewGuid().ToString('N').Substring(0, 8))
+    New-Item -ItemType Directory -Path $root -Force | Out-Null
+    [IO.File]::WriteAllBytes((Join-Path $root 'HD-Player.exe'), (New-Object byte[] 8))
+    [IO.File]::WriteAllBytes((Join-Path $root 'HD-Adb.exe'), (New-Object byte[] 8))
+    $script:Made.Add($root)
+    return (Long $root)
+}
+$script:FakeInstall = New-FakeInstall
+function Resolve-Map([string]$dataDir, [string]$base, [string]$customPath = '') {
+    $args = @('-Action', 'Resolve', '-DataDir', $dataDir, '-InstallDir', $script:FakeInstall, '-Base', $base)
+    if ($customPath) { $args += @('-CustomPath', $customPath) }
+    $out = Eng $args
     $h = @{}; foreach ($l in $out) { if ("$l" -match '^(BSR_[A-Z]+)=(.*)$') { $h[$Matches[1]] = $Matches[2] } }
     return $h
 }
@@ -85,7 +97,21 @@ Eq 'Resolve: instance'  'Pie64' $m1['BSR_INSTANCE']
 Eq 'Resolve: master'    'Pie64' $m1['BSR_MASTER']
 Eq 'Resolve: conf path' (Join-Path $d1 'bluestacks.conf') $m1['BSR_CONF']
 Eq 'Resolve: vhd path'  (Join-Path $d1 'Engine\Pie64\Root.vhd') $m1['BSR_VHD']
+Eq 'Resolve: validated install path' $script:FakeInstall $m1['BSR_INSTALL']
 Ok 'Resolve: bstk under custom root' ($m1['BSR_BSTK'] -eq (Join-Path $d1 'Engine\Pie64\Pie64.bstk'))
+
+# Issue #27 regression: option 8 may point at the INSTALL folder. It must update InstallDir without
+# replacing DataDir, and both returned paths must be marker-validated.
+$installOverride = New-FakeInstall 'custom_install'
+$mCustomInstall = Resolve-Map $d1 'Pie64' $installOverride
+Eq 'Resolve(option 8 install): install folder is honored' $installOverride $mCustomInstall['BSR_INSTALL']
+Eq 'Resolve(option 8 install): data folder is not overwritten' $d1 $mCustomInstall['BSR_DATADIR']
+
+# The inverse is equally important: selecting a data folder must not turn it into an executable folder.
+$customData = New-FakeData 'Pie64' @{ 'status.adb_port' = '5577' } 'custom_data'
+$mCustomData = Resolve-Map $d1 'Pie64' $customData
+Eq 'Resolve(option 8 data): data folder is honored' $customData $mCustomData['BSR_DATADIR']
+Eq 'Resolve(option 8 data): install remains independently validated' $script:FakeInstall $mCustomData['BSR_INSTALL']
 
 # 5) a clone instance resolves its master (Rvc64_3 -> Rvc64) and keeps its own bstk/vhd
 $m2 = Resolve-Map (New-FakeData 'Rvc64_3' @{ 'status.adb_port' = '5585' }) 'Rvc64'
@@ -177,7 +203,22 @@ Write-Host "`n=== DataRoot resolution (orchestrator Get-DataRoot, custom/registr
 Eq 'DataRoot: ...\Engine is normalized to base'      'X:\Custom\BS'   (Get-DataRoot ([pscustomobject]@{ DataDir = 'X:\Custom\BS\Engine'; UserDefinedDir = $null }))
 Eq 'DataRoot: plain data dir kept as-is'             'X:\Custom\Data' (Get-DataRoot ([pscustomobject]@{ DataDir = 'X:\Custom\Data'; UserDefinedDir = $null }))
 Eq 'DataRoot: UserDefinedDir used when DataDir empty' 'D:\BS'         (Get-DataRoot ([pscustomobject]@{ DataDir = $null; UserDefinedDir = 'D:\BS' }))
-Ok 'DataRoot: null registry -> env ProgramData fallback (no hardcoded C: literal)' ((Get-DataRoot $null) -eq (Join-Path $env:ProgramData 'BlueStacks_nxt'))
+Ok 'DataRoot: null registry -> null (no guessed filesystem fallback)' ($null -eq (Get-DataRoot $null))
+Eq 'InstallRoot: marker-validated custom install' $script:FakeInstall (Get-InstallRoot $script:FakeInstall)
+Ok 'InstallRoot: data folder is never mistaken for install' ($null -eq (Get-InstallRoot $d1))
+
+Write-Host "`n=== production path policy (no guessed BlueStacks filesystem locations) ===" -ForegroundColor Cyan
+$pathSources = @(
+    (Join-Path $RepoRoot 'tools\bsr_engine.ps1'),
+    (Join-Path $RepoRoot 'tools\bsr_magisk.ps1'),
+    (Join-Path $RepoRoot 'debug.cmd'),
+    (Join-Path $RepoRoot 'tests\Run-Live-E2E.ps1'),
+    (Join-Path $RepoRoot 'tests\Run-Patch-Equivalence.ps1')
+)
+$pathText = ($pathSources | ForEach-Object { [IO.File]::ReadAllText($_) }) -join "`n"
+Ok 'path policy: no ProgramFiles-based BlueStacks fallback' ($pathText -notmatch '(?i)Join-Path\s+\$\{?env:ProgramFiles(?:\(x86\))?\}?\s+[''"][^''"]*BlueStacks')
+Ok 'path policy: no ProgramData-based BlueStacks fallback' ($pathText -notmatch '(?i)Join-Path\s+\$env:ProgramData\s+[''"]BlueStacks')
+Ok 'path policy: no batch %ProgramData% BlueStacks fallback' ($pathText -notmatch '(?i)%ProgramData%[\\/]BlueStacks')
 
 # ---- cleanup ----
 foreach ($d in $script:Made) { try { Remove-Item -LiteralPath $d -Recurse -Force -ErrorAction SilentlyContinue } catch { } }

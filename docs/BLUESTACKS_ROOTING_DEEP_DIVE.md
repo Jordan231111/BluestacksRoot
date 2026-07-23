@@ -62,10 +62,18 @@ magisk     /sbin          tmpfs                             <- Magisk sbin (setu
 - `/system/bin` and `/sbin` are **Magisk tmpfs** at runtime — Magisk's `su` symlinks there are **not** persistent files; `setup-sbin` rebuilds them every boot from `/system/etc/init/magisk`.
 
 ### 1.5 `bindmount` — BlueStacks' own root helper
-`/system/bin/bindmount` (stock, 1339 B, uid 1000) is started by init `on property:bst.config.bindmount=*`. Stock logic: when `bst.config.bindmount>0` and `/data/downloads/.xb` exists → `mount -o bind /data/downloads/.xb/ /system/xbin/` then `/system/xbin/su --auto-daemon &`. `bst.config.bindmount` is set to 1 when `bst.instance.<inst>.enable_root_access=1`. BlueStacks' `su` is a **host‑gated daemon** (`daemonsu`); it will not grant `adb shell` su — which is why we needed a bootstrap su of our own (§3).
+`/system/bin/bindmount` (stock, 1339 B, uid 1000) is started by init `on property:bst.config.bindmount=*`. Stock logic: when `bst.config.bindmount>0` and `/data/downloads/.xb` exists → `mount -o bind /data/downloads/.xb/ /system/xbin/` then `/system/xbin/su --auto-daemon &`. BlueStacks derives that property from the instance/global root flags. BlueStacks' `su` is a **host‑gated daemon** (`daemonsu`); it will not grant `adb shell` su — which is why we needed a bootstrap su of our own (§3).
 
 ### 1.6 Guest security posture (helps us)
-- `getenforce` = **Disabled** (SELinux off) → setuid binaries + our edits honored without policy.
+- Factory BlueStacks guests tested here already return `getenforce` = **Disabled** before this tool runs.
+  Repository history contains no `setenforce`, `androidboot.selinux`, or policy-removal step; the rooter
+  merely reports the state during Verify.
+- **Disabled and Permissive are not synonyms.** Permissive loads SELinux policy and logs denials without
+  enforcing them; Disabled has no active SELinux enforcement at all. It is therefore already less
+  restrictive for a mod, although a mod that string-compares only `Permissive` may reject it.
+- There is deliberately no “make permissive” menu item. `setenforce 0` only switches an enabled, policy-loaded
+  subsystem. Disabled → Permissive requires BlueStacks to supply/boot an SELinux-capable kernel and a
+  complete compatible policy; it is not a safe runtime property change.
 - `ro.secure=0`, `ro.debuggable=1`, but **`adb root` hangs** (adbd won't restart as root).
 - `/system`, `/system/xbin` are **not** `nosuid` → setuid execution works.
 
@@ -89,7 +97,15 @@ BlueStacks verifies `Root.vhd` against `root.vhd.bvs`; an unpatched player **rej
 To write the **root‑owned** `/data/adb/magisk` we need a working root **before** Magisk's daemon is alive — a chicken‑and‑egg the GUI can't break. BlueStacks' own su is host‑gated, `adb root` hangs, and Data.vhdx can't be edited offline (128 GB; `debugfs` short‑reads the raw device). So we use a tiny **ungated, daemonless setuid su** at runtime, then remove every trace.
 
 - **`tools/su_src/bsr_su.c`** (~5 KB, x86_64, NDK clang `--target=x86_64-linux-android30`): `setresgid(0,0,0); setresuid(0,0,0);` then `exec`s the requested command/shell. No hypercall, no daemon, no policy → always grants when setuid‑root.
-- **Delivery (the `CAP_FSETID` trick):** `bindmount` runs as root but **without `CAP_FSETID`**, so it cannot `chmod` the setuid bit (a copied su came out `0755` → uid 2000). Fix: write `bsr_su` to `/android/system/etc/bsr_su` **with the setuid bit set offline**, and have a **hijacked `bindmount`** `mount -o bind` it over `/system/xbin/su` **after** the `.xb` overmount — a **bind mount preserves the setuid bit**. Verified: `su -c id → uid=0`, persistent.
+- **Three delivery paths, one known binary:** Prep writes setuid-root `bsr_su` offline to canonical
+  `/android/system/etc/bsr_su` and to transient native `/android/system/xbin/su`. Data first tries the
+  canonical path directly. If BlueStacks overmounted native xbin with `/data/downloads/.xb`, the hijacked
+  `bindmount` idempotently binds the canonical inode over `.xb/su` and `.xb/bstk/su`; Data probes those
+  paths too and accepts only output containing `uid=0`.
+- **Why the bind is still needed (`CAP_FSETID`):** `bindmount` runs as root but without `CAP_FSETID`, so a
+  runtime copy loses setuid (`0755` → uid 2000). An offline-set setuid inode plus `mount -o bind` preserves
+  that bit. The direct and native-xbin paths also cover builds where the property never rises, `.xb` is
+  absent, or xbin was already mounted before the helper ran.
 - This bootstrap is **100 % removed** at the end (§5). It exists only during the install.
 
 ---
@@ -147,9 +163,10 @@ After the fix, the Magisk app showed **"Abnormal State — A 'su' binary not fro
 |---|---|---|---|
 | engine 2 MB su (`185106357…`) | `/system/xbin/su` | Root.vhd | `bsr_engine.ps1 -Action Unroot` (`rm /android/system/xbin/su`) |
 | bootstrap `bsr_su` (4968 B, `7eb6380e…`) | `/system/etc/bsr_su` | Root.vhd | offline `debugfs rm` |
+| bootstrap native-xbin fallback (same 4968 B inode contents) | `/system/xbin/su` | Root.vhd | offline `debugfs rm` during Clean |
 | modified `bindmount` | `/system/bin/bindmount` | Root.vhd | offline restore of stock (1339 B, uid 1000, 0775) |
-| `bsr_su` copies | `/data/downloads/.xb/su`, `.xb/bstk/su` | Data.vhdx | runtime `cp` of factory su (41160 B) over them |
-| emulator root flag | `bst.instance.Rvc64.enable_root_access` | conf | set `0` (modify‑only, no BOM) |
+| runtime bind overlays (no file copy) | `/system/xbin/su`, `/system/xbin/bstk/su` while `.xb` is mounted | mount table only | disappear on unmount/shutdown; factory `.xb` files are never overwritten |
+| emulator root flags | instance `enable_root_access` + global `bst.feature.rooting` | conf | set `0` (modify‑only, no BOM) |
 
 **Kept (intentional):** Magisk's files (`/system/etc/init/magisk/*`, hijacked `bootanim.rc`, `/data/adb/*`), the factory `/system/xbin/bstk/su`, and the HD‑Player patch. A full SHA sweep for `bsr_su` across `/system` + `/data` returns **zero hits**. Magisk app Home is clean.
 
@@ -162,17 +179,20 @@ Designed for **fewest persistent read/writes** to reach the exact proven state. 
 ```
 PHASE A — OFFLINE PREP   (instance down; edits HD-Player, conf, and the Root.vhd file directly)
   A1  Patch HD-Player anti-tamper           (idempotent; keep HD-Player.exe.bak)
-  A2  conf: enable_root_access=1, enable_adb_access=1   (modify-only, UTF-8 no BOM)
+  A2  conf: instance enable_root_access=1, global bst.feature.rooting=1,
+      enable_adb_access=1   (modify-only, UTF-8 no BOM)
   A3  ONE Root.vhd carve+debugfs+writeback, writing:
         - Magisk system files -> /android/system/etc/init/magisk/{magisk32,magisk64,
           magiskinit,magiskpolicy,config,stub.apk}        (from the APK)
         - hijacked /android/system/etc/init/bootanim.rc  (+ bootanim.rc.gz = gz of original)
-        - bootstrap: /android/system/etc/bsr_su (setuid) + hijacked /android/system/bin/bindmount
+        - bootstrap: setuid /android/system/etc/bsr_su + transient native
+          /android/system/xbin/su + hijacked /android/system/bin/bindmount
 
 PHASE B — BOOT + ONLINE  (bootstrap su active over adb)
   B1  launch instance; wait for sys.boot_completed=1
   B2  adb install Magisk APK (the manager app)
-  B3  via /system/xbin/su (bsr_su):
+  B3  probe canonical /system/etc/bsr_su, /system/xbin/su, and /system/xbin/bstk/su;
+      via the first one that proves uid=0:
         - mkdir /data/adb/{magisk,modules,post-fs-data.d,service.d}
         - populate /data/adb/magisk from the APK (busybox, magisk32/64, magiskboot,
           magiskinit, magiskpolicy, stub.apk, util_functions.sh, boot_patch.sh, addon.d.sh)
@@ -180,9 +200,9 @@ PHASE B — BOOT + ONLINE  (bootstrap su active over adb)
         - sync
 
 PHASE C — OFFLINE CLEANUP (instance down; ONE Root.vhd carve+writeback + conf)
-  C1  Root.vhd: rm /android/system/etc/bsr_su ; restore stock bindmount (1339 B, uid 1000, 0775)
-  C2  runtime-erase happens earlier/at boot: restore factory su over /data/downloads/.xb/{su,bstk/su}
-  C3  conf: enable_root_access=0
+  C1  Root.vhd: rm canonical + native-xbin bsr_su; restore stock bindmount (1339 B, uid 1000, 0775)
+  C2  runtime bind overlays are gone after shutdown; factory .xb files were never overwritten
+  C3  conf: instance enable_root_access=0; global bst.feature.rooting=0
 
 PHASE D — VERIFY (cold boot)
   D1  launch; su -c id -> uid=0 (Magisk); /system/xbin/su absent; bsr_su sweep clean;
@@ -298,6 +318,9 @@ Per‑instance root = presence of `/data/adb/.bsr_root`. **Proven:** `Rvc64` (fl
 | Kitsune Mask leaked to unrooted instances | shared `/system` ⇒ `magiskd` ran everywhere | per‑instance gate (`bsr_boot.sh` + `/data/adb/.bsr_root`) |
 | `did not become adb‑reachable` though the instance booted | a system `adb` (Android SDK **v1.0.41**) and BlueStacks `HD‑Adb` (**v1.0.36**) fight over the default 5037 server (*"server version doesn't match; killing…"*) → `getprop` fails forever | pin HD‑Adb to a **private** `ANDROID_ADB_SERVER_PORT=15037` (proven: 30/30 getprop OK with a v41 server on 5037; 0/12 on the shared port; full `Boot‑And‑Wait` end‑to‑end PASS) + add **live‑bound‑port** discovery (`Get-NetTCPConnection`) so a stale `status.adb_port` can't strand the boot wait |
 | Magisk "Abnormal State — su not from Magisk" though Verify "passed" | a classic/engine `su` left at `/system/xbin/su` on the **shared master** (old non‑Magisk root / the legacy classic‑su live‑E2E); Prep/Clean never scrubbed it and Verify only swept the *bootstrap* su's hash | Prep + Clean now `rm /system/xbin/su` (+`daemonsu`); Verify enumerates **every** su and FAILS on any non‑Magisk one (`Find-StraySu`, unit‑tested); the live‑E2E now drives the **Magisk pipeline** (not classic su) and asserts no competing su — verified live (stray su scrubbed → VERIFY PASS) |
+| Option 8 install folder ignored; later `HD-Player.exe` came from a default path | the batch treated every custom choice as `DataDir`, never changed `InstallDir`, then source scripts guessed standard filesystem locations | classify option 8 by BlueStacks-owned marker files; resolve install/data independently from dynamically enumerated registry/uninstall/runtime evidence; marker-validate every result and fail instead of guessing |
+| `bootstrap su not root`: `/system/xbin/su` inaccessible | Data hardcoded one path, while the old modified `bindmount` exposed it only during the first `.xb` mount; a missing/late property, absent `.xb`, or already-mounted xbin skipped the bind | set both BlueStacks root flags; retry bindings idempotently; stage the known bootstrap at direct `/system/etc/bsr_su` and transient native xbin paths; probe all three and require `uid=0`; preserve full diagnostics on failure |
+| A mod requests SELinux `Permissive`, but `getenforce` says `Disabled` | BlueStacks factory guest has no active SELinux enforcement; the rooter did not change it. The mod likely checks the literal state name | no menu toggle: Disabled already enforces fewer restrictions than Permissive, and enabling SELinux would require a compatible guest kernel + policy at boot. `debug.cmd` now captures proof for the mod author |
 
 ---
 

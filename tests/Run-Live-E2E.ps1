@@ -37,6 +37,9 @@ param(
     [string]$DataDir,
     [string]$Shots,
     [int]$BootTimeout = 300,
+    [int]$RebootCycles = 1,
+    [switch]$NoBackup,
+    [switch]$VerifyOnly,
     [switch]$Revert
 )
 $ErrorActionPreference = 'Stop'
@@ -49,22 +52,7 @@ if (-not $Shots) { $Shots = Join-Path $here 'live-shots' }
 if (-not (Test-Path $Shots)) { New-Item -ItemType Directory -Path $Shots -Force | Out-Null }
 $PKG = 'io.github.huskydg.magisk'   # the bundled Kitsune Mask package (NOT com.topjohnwu.magisk)
 
-# ---- registry discovery (nxt then msi5) ----
-function Reg1($k, $n) { try { (Get-ItemProperty -Path $k -Name $n -EA Stop).$n } catch { $null } }
-if (-not $InstallDir -or -not $DataDir) {
-    foreach ($k in @('HKLM:\SOFTWARE\BlueStacks_nxt', 'HKLM:\SOFTWARE\BlueStacks_msi5')) {
-        if (Test-Path $k) {
-            if (-not $InstallDir) { $InstallDir = Reg1 $k 'InstallDir' }
-            if (-not $DataDir) { $DataDir = Reg1 $k 'DataDir'; if (-not $DataDir) { $DataDir = Reg1 $k 'UserDefinedDir' } }
-            if ($InstallDir) { break }
-        }
-    }
-}
-if (-not $InstallDir) { $InstallDir = 'C:\Program Files\BlueStacks_nxt' }
-if (-not $DataDir) { $DataDir = Join-Path $env:ProgramData 'BlueStacks_nxt' }
-if (-not $Adb) { $Adb = Join-Path $InstallDir 'HD-Adb.exe' }
-if (-not $Player) { $Player = Join-Path $InstallDir 'HD-Player.exe' }
-foreach ($f in @($Cmd, $Engine, $Magisk, $Adb)) { if (-not (Test-Path -LiteralPath $f)) { throw "missing: $f" } }
+foreach ($f in @($Cmd, $Engine, $Magisk)) { if (-not (Test-Path -LiteralPath $f)) { throw "missing: $f" } }
 if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)) { throw 'Run elevated (Administrator).' }
 
 $pass = 0; $fail = 0
@@ -76,14 +64,58 @@ function Step($m) { Write-Host "`n=== $m ===" -ForegroundColor Cyan }
 # isolate HD-Adb on its own server port (immune to a different-version system adb on 5037)
 if (-not $env:ANDROID_ADB_SERVER_PORT) { $env:ANDROID_ADB_SERVER_PORT = '15037' }
 function Adb([string[]]$a) { $o = $ErrorActionPreference; $ErrorActionPreference = 'Continue'; try { (& $Adb @a 2>&1 | Out-String) } finally { $ErrorActionPreference = $o } }
-function Ps([string[]]$a) { $o = $ErrorActionPreference; $ErrorActionPreference = 'Continue'; try { & powershell.exe -NoProfile -ExecutionPolicy Bypass -File @a 2>&1 | Out-String } finally { $ErrorActionPreference = $o } }
+function Run-PsFile([string[]]$a) { $o = $ErrorActionPreference; $ErrorActionPreference = 'Continue'; try { & powershell.exe -NoProfile -ExecutionPolicy Bypass -File @a 2>&1 | Out-String } finally { $ErrorActionPreference = $o } }
+function Output-Lines([string]$text){ @($text -split "`r?`n" | ForEach-Object {$_.Trim()} | Where-Object {$_}) }
+function Adb-State([string]$target){
+    $lines=Output-Lines (Adb @('-s',$target,'get-state'))
+    @($lines | Where-Object {$_ -match '^(device|offline|unauthorized|unknown)$'} | Select-Object -Last 1)[0]
+}
+function Is-BootComplete([string]$text){ (Output-Lines $text) -contains '1' }
+function Is-TransportError([string]$text){ $text -match "device '.*' not found|device .* not found|no devices/emulators found|device offline|error: closed" }
 
-# resolve instance paths via the engine
+# Resolve every host path through the same marker-validated engine used by the shipped launcher.
 $base = $Instance -replace '_\d+$', ''
-$res = Ps @($Engine, '-Action', 'Resolve', '-DataDir', $DataDir, '-Base', $base)
+$resolveArgs = @($Engine, '-Action', 'Resolve', '-Base', $base)
+if($DataDir){$resolveArgs += @('-DataDir',$DataDir)}
+if($InstallDir){$resolveArgs += @('-InstallDir',$InstallDir)}
+$res = Run-PsFile $resolveArgs
 $paths = @{}; foreach ($l in ($res -split "`r?`n")) { if ("$l" -match '^(BSR_\w+)=(.*)$') { $paths[$Matches[1]] = $Matches[2] } }
-$conf = if ($paths['BSR_CONF']) { $paths['BSR_CONF'] } else { Join-Path $DataDir 'bluestacks.conf' }
+$InstallDir = $paths['BSR_INSTALL']
+$DataDir = $paths['BSR_DATADIR']
+$conf = $paths['BSR_CONF']
 $vhd = $paths['BSR_VHD']
+if (-not $InstallDir -or -not $DataDir -or -not $conf -or -not $vhd) { throw "validated path resolution failed: $res" }
+if (-not $Adb) { $Adb = Join-Path $InstallDir 'HD-Adb.exe' }
+if (-not $Player) { $Player = Join-Path $InstallDir 'HD-Player.exe' }
+foreach ($f in @($Adb,$Player,$conf,$vhd)) { if (-not (Test-Path -LiteralPath $f)) { throw "missing resolved BlueStacks file: $f" } }
+function Get-ExactInstanceProcesses {
+    # Recent BlueStacks builds hide HD-Player's WMI CommandLine/ExecutablePath. Player.log is stored
+    # under the marker-validated DataDir and prefixes every exact-instance line with the host PID,
+    # so use its newest line and then require that PID to still be an HD-Player process.
+    $playerLog=Join-Path $DataDir 'Logs\Player.log'
+    if(-not(Test-Path -LiteralPath $playerLog)){return @()}
+    try{
+        $text=(Get-Content -LiteralPath $playerLog -Tail 6000 -ErrorAction Stop) -join "`n"
+        $rx='(?m)^\S+\s+\S+\s+(\d+)\s+\d+\s+\S+\s+'+[regex]::Escape($Instance)+'\s+\['
+        $hits=[regex]::Matches($text,$rx)
+        if(-not $hits.Count){return @()}
+        $hostPid=[int]$hits[$hits.Count-1].Groups[1].Value
+        $proc=Get-Process -Id $hostPid -ErrorAction SilentlyContinue
+        if($proc -and $proc.Name -eq 'HD-Player'){
+            return @([pscustomobject]@{ProcessId=$hostPid})
+        }
+    }catch{}
+    @()
+}
+function Get-ExactInstanceAdbPorts {
+    $ids=@(Get-ExactInstanceProcesses | Select-Object -ExpandProperty ProcessId)
+    if(-not $ids){return @()}
+    @(
+        Get-NetTCPConnection -State Listen -ErrorAction SilentlyContinue |
+        Where-Object {$_.LocalPort -ge 5550 -and $_.LocalPort -le 5900 -and $ids -contains $_.OwningProcess} |
+        Select-Object -ExpandProperty LocalPort -Unique
+    )
+}
 # the EXACT instance's adb port from conf (Resolve matches the base, which may be a different clone)
 $adbPort = '5555'
 if (Test-Path -LiteralPath $conf) {
@@ -98,17 +130,69 @@ if (-not (Test-Path -LiteralPath $vhd)) { throw "master Root.vhd not found: $vhd
 
 # Wait for boot, trying the conf port AND any live-bound port in the BlueStacks band; pins $serial.
 function Wait-Boot([int]$sec) {
+    Adb @('kill-server') | Out-Null
+    Start-Sleep 1
     Adb @('start-server') | Out-Null
     $sw = [Diagnostics.Stopwatch]::StartNew()
     while ($sw.Elapsed.TotalSeconds -lt $sec) {
-        $cands = @($adbPort) + @(Get-NetTCPConnection -State Listen -EA SilentlyContinue | Where-Object { $_.LocalPort -ge 5550 -and $_.LocalPort -le 5900 } | Select-Object -Expand LocalPort)
+        $exactIds=@(Get-ExactInstanceProcesses | Select-Object -ExpandProperty ProcessId)
+        $livePorts=@(Get-ExactInstanceAdbPorts)
+        if(-not $exactIds){Start-Sleep 2;continue}
+        $cands = @($livePorts) + @($adbPort)
         foreach ($p in ($cands | Select-Object -Unique)) {
-            $s = "127.0.0.1:$p"; Adb @('connect', $s) | Out-Null
-            if ((Adb @('-s', $s, 'shell', 'getprop', 'sys.boot_completed')).Trim() -match '1') { $script:serial = $s; Start-Sleep 3; return $true }
+            $listener=@(Get-NetTCPConnection -State Listen -LocalPort ([int]$p) -ErrorAction SilentlyContinue |
+                        Select-Object -First 1)
+            if($listener -and $exactIds -notcontains $listener[0].OwningProcess){continue}
+            $s = "127.0.0.1:$p"
+            Adb @('connect', $s) | Out-Null
+            $state=Adb-State $s
+            if($state -ne 'device'){
+                Adb @('disconnect',$s) | Out-Null
+                Start-Sleep 1
+                Adb @('connect',$s) | Out-Null
+                Start-Sleep 1
+                $state=Adb-State $s
+            }
+            if($state -eq 'device'){
+                $boot=Adb @('-s',$s,'shell','getprop','sys.boot_completed')
+                if(Is-BootComplete $boot){$script:serial=$s;Start-Sleep 3;return $true}
+            }
         }
         Start-Sleep 3
     }
     return $false
+}
+function Restart-ExactInstance {
+    Shell-Retry 'sync' | Out-Null
+    $targets=@(Get-ExactInstanceProcesses)
+    if(-not $targets){throw "exact HD-Player process for '$Instance' was not found"}
+    $oldIds=@($targets | Select-Object -ExpandProperty ProcessId)
+    foreach($target in $targets){
+        Stop-Process -Id $target.ProcessId -Force -ErrorAction Stop
+    }
+    for($i=0;$i -lt 60 -and @(Get-ExactInstanceProcesses | Where-Object {$oldIds -contains $_.ProcessId}).Count;$i++){Start-Sleep -Milliseconds 500}
+    if(@(Get-ExactInstanceProcesses | Where-Object {$oldIds -contains $_.ProcessId}).Count){throw "exact instance did not stop (PID $($oldIds -join ','))"}
+    Start-Process -FilePath $Player -ArgumentList @('--instance',$Instance) | Out-Null
+    $new=$null
+    for($i=0;$i -lt 60;$i++){
+        $new=@(Get-ExactInstanceProcesses | Where-Object {$oldIds -notcontains $_.ProcessId} | Select-Object -First 1)[0]
+        if($new){break}
+        Start-Sleep -Milliseconds 500
+    }
+    if(-not $new){throw "exact instance did not relaunch with a new process after stopping PID $($oldIds -join ',')"}
+    Info "exact cold boot: PID $($oldIds -join ',') -> $($new.ProcessId)"
+}
+function Shell-Retry([string]$command,[int]$tries=5){
+    $last=''
+    for($i=0;$i -lt $tries;$i++){
+        $last=Adb @('-s',$script:serial,'shell',$command)
+        if(-not(Is-TransportError $last)){return $last}
+        Adb @('disconnect',$script:serial)|Out-Null
+        Start-Sleep 1
+        Adb @('connect',$script:serial)|Out-Null
+        Start-Sleep 2
+    }
+    $last
 }
 function Shot([string]$name) {
     $png = Join-Path $Shots $name; $o = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
@@ -119,46 +203,58 @@ function Shot([string]$name) {
 # ---------------------------------------------------------------- REVERT (Magisk Undo)
 if ($Revert) {
     Step "REVERT '$Instance' (Magisk Undo)"
-    Ps @($Magisk, '-Action', 'Undo', '-Instance', $Instance, '-SelfCmd', $Cmd, '-Vhd', $vhd, '-Conf', $conf, '-Install', $InstallDir) | Write-Host
+    Run-PsFile @($Magisk, '-Action', 'Undo', '-Instance', $Instance, '-SelfCmd', $Cmd, '-Vhd', $vhd, '-Conf', $conf, '-Install', $InstallDir) | Write-Host
     Write-Host "`nReverted ($Instance). The shared master + HD-Player patch are left intact unless you passed -Full to Undo." -ForegroundColor Green
     exit 0
 }
 
 # ---------------------------------------------------------------- ROOT via the SHIPPED Magisk pipeline
-Step "1) run the FULL Magisk pipeline (bsr_magisk.ps1 -Action Auto; embedded debugfs/su/APK)"
-$autoOut = Ps @($Magisk, '-Action', 'Auto', '-Instance', $Instance, '-SelfCmd', $Cmd, '-Engine', $Engine, '-Vhd', $vhd, '-Conf', $conf, '-Install', $InstallDir)
-$autoRc = $LASTEXITCODE
-Write-Host $autoOut
-if ($autoRc -eq 0) { Ok "pipeline exited 0" } else { No "pipeline exit code = $autoRc" }
-if ($autoOut -match 'VERIFY PASS') { Ok "pipeline reached VERIFY PASS (Magisk sole root, no competing su, no bsr_su traces)" } else { No "pipeline did NOT print VERIFY PASS" }
-if ($autoOut -match 'competing su\s*:\s*none') { Ok "pipeline reported NO competing su" }
-elseif ($autoOut -match 'competing su\s*:\s*\S') { No "pipeline reported a COMPETING su (Abnormal-State regression)" }
+if(-not $VerifyOnly){
+    Step "1) run the FULL Magisk pipeline (bsr_magisk.ps1 -Action Auto; embedded debugfs/su/APK)"
+    $autoArgs=@($Magisk, '-Action', 'Auto', '-Instance', $Instance, '-SelfCmd', $Cmd, '-Engine', $Engine, '-Vhd', $vhd, '-Conf', $conf, '-Install', $InstallDir)
+    if($NoBackup){$autoArgs += '-NoBackup'}
+    $autoOut = Run-PsFile $autoArgs
+    $autoRc = $LASTEXITCODE
+    Write-Host $autoOut
+    if ($autoRc -eq 0) { Ok "pipeline exited 0" } else { No "pipeline exit code = $autoRc" }
+    if ($autoOut -match 'VERIFY PASS') { Ok "pipeline reached VERIFY PASS (Magisk sole root, no competing su, no bsr_su traces)" } else { No "pipeline did NOT print VERIFY PASS" }
+    if ($autoOut -match 'competing su\s*:\s*none') { Ok "pipeline reported NO competing su" }
+    elseif ($autoOut -match 'competing su\s*:\s*\S') { No "pipeline reported a COMPETING su (Abnormal-State regression)" }
+}else{
+    Step '1) verify-only stress run (the shipped launcher already completed Auto)'
+    if(-not @(Get-ExactInstanceProcesses).Count){
+        Start-Process -FilePath $Player -ArgumentList @('--instance',$Instance) | Out-Null
+        Info "launched exact instance '$Instance' for verify-only stress"
+    }
+}
 
 # ---------------------------------------------------------------- independent adb re-check
 Step "2) independent verification over adb"
 if (-not (Wait-Boot $BootTimeout)) { No "instance not reachable" }
-$id = (Adb @('-s', $script:serial, 'shell', 'su -c id')).Trim()
+$id = (Shell-Retry 'su -c id').Trim()
 if ($id -match 'uid=0') { Ok "su -c id => $id" } else { No "uid=0 not returned ($id)" }
-$binsu = (Adb @('-s', $script:serial, 'shell', 'readlink /system/bin/su')).Trim()
+$binsu = (Shell-Retry 'readlink /system/bin/su').Trim()
 if ($binsu -match 'magisk') { Ok "/system/bin/su -> $binsu" } else { No "/system/bin/su not -> magisk ($binsu)" }
-$xbin = (Adb @('-s', $script:serial, 'shell', 'su -c "ls -l /system/xbin/su 2>&1"')).Trim()
+$xbin = (Shell-Retry 'su -c "ls -l /system/xbin/su 2>&1"').Trim()
 if ($xbin -match 'No such file|not found') { Ok "NO /system/xbin/su (competing su is gone)" } else { No "competing /system/xbin/su present: $xbin" }
-$mv = (Adb @('-s', $script:serial, 'shell', 'su -c "magisk -c"')).Trim()
+$mv = (Shell-Retry 'su -c "magisk -c"').Trim()
 if ($mv -match 'kitsune') { Ok "magisk -c => $mv" } else { No "magisk version unexpected ($mv)" }
-$pkg = (Adb @('-s', $script:serial, 'shell', "pm path $PKG")).Trim()
+$pkg = (Shell-Retry "pm path $PKG").Trim()
 if ($pkg -match 'package:') { Ok "manager installed: $pkg" } else { Info "manager package not found via pm path ($pkg)" }
 Shot 'magisk_e2e.png'
 
-# ---------------------------------------------------------------- reboot persistence
-Step "3) reboot + re-assert (persistence)"
-Adb @('-s', $script:serial, 'reboot') | Out-Null; Start-Sleep 8
-if (-not (Wait-Boot $BootTimeout)) { No "did not come back after reboot" }
-else {
-    $id2 = (Adb @('-s', $script:serial, 'shell', 'su -c id')).Trim()
-    if ($id2 -match 'uid=0') { Ok "root PERSISTS after reboot (uid=0)" } else { No "root lost after reboot ($id2)" }
-    $xbin2 = (Adb @('-s', $script:serial, 'shell', 'su -c "ls -l /system/xbin/su 2>&1"')).Trim()
-    if ($xbin2 -match 'No such file|not found') { Ok "still NO competing /system/xbin/su after reboot" } else { No "competing su reappeared: $xbin2" }
-    Shot 'magisk_e2e_after_reboot.png'
+# ---------------------------------------------------------------- cold-boot persistence
+for($cycle=1;$cycle -le $RebootCycles;$cycle++){
+    Step "3.$cycle) exact-instance cold boot + re-assert (persistence cycle $cycle/$RebootCycles)"
+    Restart-ExactInstance
+    if (-not (Wait-Boot $BootTimeout)) { No "did not come back after cold-boot cycle $cycle"; continue }
+    $id2 = (Shell-Retry 'su -c id').Trim()
+    if ($id2 -match 'uid=0') { Ok "root PERSISTS after cold-boot cycle $cycle (uid=0)" } else { No "root lost after cold-boot cycle $cycle ($id2)" }
+    $xbin2 = (Shell-Retry 'su -c "ls -l /system/xbin/su 2>&1"').Trim()
+    if ($xbin2 -match 'No such file|not found') { Ok "still NO competing /system/xbin/su after cold-boot cycle $cycle" } else { No "competing su reappeared: $xbin2" }
+    $trace=(Shell-Retry "su -c `"find /system /data/adb /data/downloads -type f -size 4968c 2>/dev/null | while read f; do [ \`"`$(sha256sum `$f|cut -d' ' -f1)\`" = '7eb6380ee26ce0b68d9f3f23ac04f50e0dfdd49359ef17d1a4978be1795913dd' ] && echo TRACE:`$f; done`"").Trim()
+    if(-not $trace){Ok "no bootstrap-su hash trace after cold-boot cycle $cycle"}else{No "bootstrap-su trace after cold-boot cycle $cycle`: $trace"}
+    Shot "magisk_e2e_after_cold_boot_$cycle.png"
 }
 
 Write-Host "`n================ LIVE E2E SUMMARY ================" -ForegroundColor Cyan
