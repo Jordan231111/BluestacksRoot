@@ -6,6 +6,7 @@ on:
       - .github/workflows/issue-fix-validation.yml
       - tools/bsr_host.ps1
       - tools/apply-issue-fix.py
+      - tools/finalize-host-fix.py
       - tests/Run-Host-IO-Tests.ps1
 permissions:
   contents: write
@@ -28,6 +29,8 @@ jobs:
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
           python tools/apply-issue-fix.py
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          python tools/finalize-host-fix.py
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
           powershell.exe -NoProfile -ExecutionPolicy Bypass -File tools/reembed.ps1
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
       - name: Run existing suites and real Windows host regression tests
@@ -49,7 +52,7 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -- tools/bsr_engine.ps1 tools/bsr_magisk.ps1 tools/reembed.ps1 debug.cmd blueStackRoot.cmd
+          git add -- tools/bsr_host.ps1 tests/Run-Host-IO-Tests.ps1 tools/bsr_engine.ps1 tools/bsr_magisk.ps1 tools/reembed.ps1 debug.cmd blueStackRoot.cmd
           git diff --cached --quiet
           if ($LASTEXITCODE -eq 1) {
             git commit -m 'fix: integrate host I/O guards and rebuild validated single-file tool'
