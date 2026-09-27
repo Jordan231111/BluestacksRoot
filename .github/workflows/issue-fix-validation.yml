@@ -1,0 +1,76 @@
+name: Issue fix Windows validation
+on:
+  push:
+    branches: [fix/issues-31-32-disk-access]
+    paths:
+      - .github/workflows/issue-fix-validation.yml
+      - tools/bsr_host.ps1
+      - tools/apply-issue-fix.py
+      - tests/Run-Host-IO-Tests.ps1
+permissions:
+  contents: write
+concurrency:
+  group: issue-fix-validation
+  cancel-in-progress: false
+jobs:
+  validate:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: fix/issues-31-32-disk-access
+      - name: Apply focused source changes and rebuild single-file entry points
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          python -c "from pathlib import Path; [p.write_bytes(p.read_bytes().replace(b'\r\n',b'\n')) for p in [Path('tools')/n for n in ['bsr_host.ps1','bsr_engine.ps1','bsr_magisk.ps1','reembed.ps1']]]"
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          python tools/apply-issue-fix.py
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          powershell.exe -NoProfile -ExecutionPolicy Bypass -File tools/reembed.ps1
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+      - name: Run existing suites and real Windows host regression tests
+        shell: powershell
+        run: |
+          New-Item -ItemType Directory -Path validation-results -Force | Out-Null
+          $failed = 0
+          foreach ($test in @('Check-Embedded-Sync','Run-Tests','Run-Patch-Equivalence','Run-Resolve-Tests','Run-Magisk-Unit-Tests','Run-Host-IO-Tests')) {
+            $arguments = @('-NoProfile','-ExecutionPolicy','Bypass','-File',"tests/$test.ps1")
+            if ($test -eq 'Run-Host-IO-Tests') { $arguments += '-Integration' }
+            & powershell.exe @arguments 2>&1 | Tee-Object -FilePath "validation-results/$test.txt"
+            $code = $LASTEXITCODE
+            "$test : exit=$code" | Tee-Object -FilePath validation-results/summary.txt -Append
+            if ($code -ne 0) { $failed++ }
+          }
+          exit ([int]($failed -gt 0))
+      - name: Commit tested generated changes to feature branch only
+        shell: powershell
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- tools/bsr_engine.ps1 tools/bsr_magisk.ps1 tools/reembed.ps1 debug.cmd blueStackRoot.cmd
+          git diff --cached --quiet
+          if ($LASTEXITCODE -eq 1) {
+            git commit -m 'fix: integrate host I/O guards and rebuild validated single-file tool'
+            if ($LASTEXITCODE) { exit $LASTEXITCODE }
+            git push origin HEAD:refs/heads/fix/issues-31-32-disk-access
+            if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          }
+      - name: Download issue screenshot for review
+        if: always()
+        continue-on-error: true
+        shell: powershell
+        run: |
+          Invoke-WebRequest -UseBasicParsing 'https://github.com/user-attachments/assets/864a513c-6e6f-4be1-9103-6ce7f32db635' -OutFile validation-results/issue-32.png
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: issue-fix-validation
+          retention-days: 7
+          path: |
+            validation-results/
+            blueStackRoot.cmd
+            debug.cmd
+            tools/*.ps1
+            tests/Run-Host-IO-Tests.ps1
