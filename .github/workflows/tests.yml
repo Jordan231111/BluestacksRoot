@@ -61,3 +61,9 @@ jobs:
       - name: Magisk orchestrator pure unit tests
         shell: cmd
         run: powershell -NoProfile -ExecutionPolicy Bypass -File tests\Run-Magisk-Unit-Tests.ps1
+
+      # No BlueStacks needed: mocked launch denial plus disposable real VHD/VHDX images,
+      # including a VHDX named .vhd, typed queries/detach, and backup-before-preflight order.
+      - name: Host I/O regressions (issues 31 and 32)
+        shell: cmd
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File tests\Run-Host-IO-Tests.ps1 -Integration
