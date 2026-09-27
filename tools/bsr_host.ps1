@@ -7,6 +7,9 @@
 function Get-BsrExceptionDetail($record) {
     $e = if ($record -is [System.Management.Automation.ErrorRecord]) { $record.Exception } else { $record }
     $parts = New-Object System.Collections.Generic.List[string]
+    if ($record -is [System.Management.Automation.ErrorRecord]) {
+        [void]$parts.Add("ErrorId=$($record.FullyQualifiedErrorId)")
+    }
     while ($e -is [Exception]) {
         $hr = [BitConverter]::ToUInt32([BitConverter]::GetBytes([int]$e.HResult), 0)
         $native = if ($e -is [ComponentModel.Win32Exception]) { " Win32=$($e.NativeErrorCode)" } else { '' }
@@ -54,10 +57,10 @@ function Mount-BsrDiskImage([string]$ImagePath, [switch]$ReadOnly) {
     try {
         $path = (Resolve-Path -LiteralPath $ImagePath -ErrorAction Stop).Path
         $storage = Get-BsrDiskStorageType $path
-        # A query can itself fail when the filename has the wrong extension.
-        # Let the explicit-format mount report the authoritative native error.
+        # Query with the detected format too; otherwise an existing VHDX mount
+        # under a .vhd name can be missed by the extension-selected provider.
         $existing = $null
-        try { $existing = Get-DiskImage -ImagePath $path -ErrorAction Stop } catch { }
+        try { $existing = Get-DiskImage -ImagePath $path -StorageType $storage -ErrorAction Stop } catch { }
         if ($existing -and $existing.Attached) {
             throw "[BSR_DISK_IN_USE] Image is already attached: $path. Close the emulator or detach your existing mount before retrying."
         }
@@ -78,10 +81,10 @@ function Mount-BsrDiskImage([string]$ImagePath, [switch]$ReadOnly) {
 function Test-BsrDiskAttach([string]$ImagePath) {
     $attached = $false
     try {
-        Mount-BsrDiskImage $ImagePath | Out-Null
+        $mount = Mount-BsrDiskImage $ImagePath
         $attached = $true
     } finally {
-        if ($attached) { Dismount-DiskImage -ImagePath $ImagePath -ErrorAction Stop | Out-Null }
+        if ($attached) { Dismount-DiskImage -InputObject $mount -ErrorAction Stop | Out-Null }
     }
 }
 

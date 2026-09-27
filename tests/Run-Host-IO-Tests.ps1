@@ -79,19 +79,21 @@ try {
     $detail = Get-BsrExceptionDetail $outer
     Check 'Nested native code preserved independently of language' ($detail -match 'Win32=5' -and $detail -match 'localized access denial')
     Check 'HRESULT rendered as unsigned hex' ($detail -match 'HRESULT=0x[0-9A-F]{8}')
+    $cimLike = New-Object Management.Automation.ErrorRecord($outer,'HRESULT 0xC03A0014,Mount-DiskImage',[Management.Automation.ErrorCategory]::NotSpecified,$vhdx)
+    Check 'Native CIM HRESULT retained in ErrorId' ((Get-BsrExceptionDetail $cimLike) -match 'ErrorId=HRESULT 0xC03A0014')
 
     $script:mounts = 0; $script:detaches = 0; $script:attached = $false
     $script:queryThrows = $false; $script:mountThrows = $false; $script:lastMount = @{}
-    function Get-DiskImage { [CmdletBinding()]param($ImagePath)
+    function Get-DiskImage { [CmdletBinding()]param($ImagePath,$StorageType)
         if ($script:queryThrows) { throw 'provider cannot infer this extension' }
         [pscustomobject]@{Attached=$script:attached; Number=7}
     }
     function Mount-DiskImage { [CmdletBinding()]param($ImagePath,$StorageType,$Access,[switch]$NoDriveLetter,[switch]$PassThru)
         $script:mounts++; $script:lastMount = $PSBoundParameters
         if ($script:mountThrows) { throw (New-Object ComponentModel.Win32Exception(5,'disk access denied')) }
-        [pscustomobject]@{Attached=$true;Number=7}
+        [pscustomobject]@{Attached=$true;Number=7;StorageType=$StorageType}
     }
-    function Dismount-DiskImage { [CmdletBinding()]param($ImagePath) $script:detaches++ }
+    function Dismount-DiskImage { [CmdletBinding()]param($InputObject) $script:detaches++; $script:detachedType=$InputObject.StorageType }
     Mount-BsrDiskImage $vhdx | Out-Null
     Check 'Mount explicitly selects VHDX' ($script:lastMount.StorageType -ceq 'VHDX')
     Check 'Mount passes literal full custom path' ($script:lastMount.ImagePath -ceq $vhdx)
@@ -112,6 +114,7 @@ try {
     $script:mountThrows = $false
     Test-BsrDiskAttach $vhdx
     Check 'Successful preflight detaches its own mount once' ($script:detaches -eq 1)
+    Check 'Detach uses the typed mount object, not the filename' ($script:detachedType -eq 'VHDX')
     $before = $script:mounts
     $null = Expect-Error 'Unsupported format rejected before native mount' { Mount-BsrDiskImage $vdi } 'BSR_DISK_FORMAT'
     Check 'No native mount for unsupported format' ($script:mounts -eq $before)
@@ -158,11 +161,13 @@ try {
     Check 'Player log mark set before launch' $script:marked
     function Ensure-MagiskApk { }; function Ensure-BsrSu { }; function Ensure-Debugfs { }; function Kill-BlueStacks { }
     function Set-ConfKey { throw 'BUG: configuration was changed' }
-    function Copy-Item { throw 'BUG: backup was reached before preflight' }
+    function Copy-Item { $script:backupAttempted=$true }
     function powershell.exe { throw 'BUG: executable patch was reached before preflight' }
     . ([scriptblock]::Create((Import-Function (Join-Path $Repo 'tools\bsr_magisk.ps1') 'Do-Prep')))
     $Vhd=$vhdx; $NoBackup=$false; $script:mountThrows=$true
-    $null=Expect-Error 'Prep mount failure precedes patch/conf/backup' { Do-Prep } 'BSR_DISK_ATTACH'
+    $script:backupAttempted=$false
+    $null=Expect-Error 'Prep mount failure precedes patch/conf' { Do-Prep } 'BSR_DISK_ATTACH'
+    Check 'Pristine backup attempted before RW attachment' $script:backupAttempted
 
     $debugText=[IO.File]::ReadAllText((Join-Path $Repo 'debug.cmd'))
     $launchSection=[regex]::Match($debugText,"(?s)try \{ Start-BsrPlayer.*?\r?\n\}\r?\n").Value
@@ -191,13 +196,15 @@ try {
                     try { Mount-DiskImage -ImagePath $renamed -Access ReadWrite -NoDriveLetter -ErrorAction Stop | Out-Null; $owned=$true }
                     catch { $oldFailed=$true; Write-Host ('Old extension-only mount: '+(Get-BsrExceptionDetail $_)) }
                     Check 'Reproduced old provider failure for VHDX named .vhd' $oldFailed
-                    if($owned){Dismount-DiskImage -ImagePath $renamed -ErrorAction Stop | Out-Null; $owned=$false}
+                    if($owned){Dismount-DiskImage -ImagePath $renamed -StorageType $format -ErrorAction Stop | Out-Null; $owned=$false}
                 }
                 $mounted=Mount-BsrDiskImage $renamed
                 $owned=$true
                 Check "Real $format mount succeeds through helper" ($mounted.Attached)
+                $queried=Get-DiskImage -ImagePath $renamed -StorageType $mounted.StorageType -ErrorAction Stop
+                Check "Real $format disk-number query keeps format" ($queried.Attached -and $null -ne $queried.Number)
             } finally {
-                if($owned){Dismount-DiskImage -ImagePath $renamed -ErrorAction Stop | Out-Null}
+                if($owned){Dismount-DiskImage -InputObject $mounted -ErrorAction Stop | Out-Null}
             }
         }
     }

@@ -56,6 +56,18 @@ function Splice-Block([byte[]]$bytes, [string]$tok, [string]$file) {
     return , $out
 }
 
+# Keep the three single-file entry points in sync with the canonical host helpers.
+$hostSource = [IO.File]::ReadAllText((Join-Path $Here 'bsr_host.ps1')).TrimEnd("`r", "`n")
+foreach ($file in @($Engine, $Magisk, (Join-Path $Here '..\debug.cmd'))) {
+    $text = [IO.File]::ReadAllText($file)
+    $nl = if ($text.Contains("`r`n")) { "`r`n" } else { "`n" }
+    $rx = [regex]'(?ms)^# BSR_HOST_HELPERS_BEGIN\r?\n.*?^# BSR_HOST_HELPERS_END(?=\r?$)'
+    if ($rx.Matches($text).Count -ne 1) { throw "Expected one host-helper block in $file" }
+    $block = '# BSR_HOST_HELPERS_BEGIN' + $nl + ($hostSource -replace '\r?\n', $nl) + $nl + '# BSR_HOST_HELPERS_END'
+    $text = $rx.Replace($text, [Text.RegularExpressions.MatchEvaluator]{ param($m) $block })
+    [IO.File]::WriteAllText($file, $text, (New-Object Text.UTF8Encoding($false)))
+}
+
 $bytes = [IO.File]::ReadAllBytes($Cmd)
 $orig = $bytes.Length
 $bytes = Splice-Block $bytes 'MAGISK' $Magisk    # splice the LATER block first so earlier offsets don't move
