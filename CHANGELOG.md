@@ -5,6 +5,18 @@ Player — from one file, fully automatically. Releases are grouped by the BlueS
 
 ---
 
+## v20 — Disk compatibility and better diagnostics · 2026-09-28
+
+- Detect the actual VHD/VHDX format and check read-only mounting before changing the player or root settings.
+- Reject incomplete disk copies, clean up failed edits, and prevent launched players from holding output pipes open.
+- Expand `debug.cmd` with disk probes, Windows error codes, signatures, permissions, policy events, and instance-specific ADB checks. Mask user-directory names while retaining technical evidence.
+- Remove the obsolete `recovered/BstkRooter` files and their unused legacy assembler.
+- Verified rooting and cold-boot persistence on Android 11 and 13 with BlueStacks 5.22.265.1013. Still one self-contained `.cmd`.
+
+Addresses [#31](https://github.com/Jordan231111/BluestacksRoot/issues/31) and [#32](https://github.com/Jordan231111/BluestacksRoot/issues/32); their exact Windows launch-denial cause still needs an affected PC's new debug log. [Investigation and tests](docs/ISSUES_31_32.md).
+
+---
+
 ## v19 — Fix custom paths and harden bootstrap root · 2026-07-23
 
 - 🧭 **Custom paths now mean what the user selected ([#27](https://github.com/Jordan231111/BluestacksRoot/issues/27)).**
@@ -350,8 +362,7 @@ method.
   instances carrying `/data/adb/.bsr_root`, so unrooted instances stay clean and boot alongside rooted ones.
 - **Robust adb:** per-instance port from `bluestacks.conf` (re-read live), pinned `127.0.0.1:<port>`
   transport, reconnect/retry across boot — never a hardcoded 5555.
-- **Tested & RE'd:** the offline write is unit-tested byte-for-byte, CI runs real Windows tests, and the
-  closed-source `BstkRooter.exe` is reproduced byte-exact in `recovered/`.
+- **Tested:** the offline write is unit-tested byte-for-byte, and CI runs real Windows tests.
 
 Full write-up: [`docs/BLUESTACKS_ROOTING_DEEP_DIVE.md`](docs/BLUESTACKS_ROOTING_DEEP_DIVE.md) ·
 runbook: [`docs/RUNBOOK.md`](docs/RUNBOOK.md).

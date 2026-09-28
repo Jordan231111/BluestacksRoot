@@ -172,7 +172,8 @@ function Restart-ExactInstance {
     }
     for($i=0;$i -lt 60 -and @(Get-ExactInstanceProcesses | Where-Object {$oldIds -contains $_.ProcessId}).Count;$i++){Start-Sleep -Milliseconds 500}
     if(@(Get-ExactInstanceProcesses | Where-Object {$oldIds -contains $_.ProcessId}).Count){throw "exact instance did not stop (PID $($oldIds -join ','))"}
-    Start-Process -FilePath $Player -ArgumentList @('--instance',$Instance) | Out-Null
+    . (Join-Path $repo 'tools\bsr_host.ps1')
+    Start-BsrPlayer $Player $Instance | Out-Null
     $new=$null
     for($i=0;$i -lt 60;$i++){
         $new=@(Get-ExactInstanceProcesses | Where-Object {$oldIds -notcontains $_.ProcessId} | Select-Object -First 1)[0]
@@ -195,11 +196,31 @@ function Shell-Retry([string]$command,[int]$tries=5){
     $last
 }
 function Shot([string]$name) {
-    $png = Join-Path $Shots $name; $o = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
-    try { & $Adb -s $script:serial exec-out screencap -p > $png } finally { $ErrorActionPreference = $o }
-    if ((Test-Path $png) -and (Get-Item $png).Length -gt 1000) { Info "shot -> $png" } else { Info "screenshot failed ($name)" }
+    $launch=Shell-Retry "monkey -p $PKG -c android.intent.category.LAUNCHER 1"
+    if($launch -notmatch 'Events injected: 1'){throw "Magisk manager did not launch: $launch"}
+    Start-Sleep -Seconds 10
+    # Windows PowerShell's > operator converts native binary stdout into UTF-16.
+    # Copy the pipe's bytes directly, and verify the PNG signature before claiming success.
+    $png = Join-Path $Shots $name
+    $psi=New-Object Diagnostics.ProcessStartInfo
+    $psi.FileName=$Adb; $psi.Arguments='-s '+$script:serial+' exec-out screencap -p'
+    $psi.UseShellExecute=$false; $psi.CreateNoWindow=$true
+    $psi.RedirectStandardOutput=$true; $psi.RedirectStandardError=$true
+    $process=[Diagnostics.Process]::Start($psi)
+    $file=[IO.File]::Create($png)
+    try {
+        $copy=$process.StandardOutput.BaseStream.CopyToAsync($file)
+        $errors=$process.StandardError.ReadToEndAsync()
+        if(-not $process.WaitForExit(15000)){$process.Kill();throw 'ADB screenshot timed out.'}
+        $null=$copy.GetAwaiter().GetResult(); $errorText=$errors.GetAwaiter().GetResult()
+        if($process.ExitCode -ne 0){throw "ADB screenshot failed: $errorText"}
+    } finally {$file.Dispose();$process.Dispose()}
+    $bytes=[IO.File]::ReadAllBytes($png)
+    if($bytes.Length -lt 8 -or [BitConverter]::ToString($bytes,0,8) -ne '89-50-4E-47-0D-0A-1A-0A'){throw "Invalid PNG screenshot: $png"}
+    Info "shot -> $png"
 }
 
+try {
 # ---------------------------------------------------------------- REVERT (Magisk Undo)
 if ($Revert) {
     Step "REVERT '$Instance' (Magisk Undo)"
@@ -223,7 +244,8 @@ if(-not $VerifyOnly){
 }else{
     Step '1) verify-only stress run (the shipped launcher already completed Auto)'
     if(-not @(Get-ExactInstanceProcesses).Count){
-        Start-Process -FilePath $Player -ArgumentList @('--instance',$Instance) | Out-Null
+        . (Join-Path $repo 'tools\bsr_host.ps1')
+        Start-BsrPlayer $Player $Instance | Out-Null
         Info "launched exact instance '$Instance' for verify-only stress"
     }
 }
@@ -239,8 +261,8 @@ $xbin = (Shell-Retry 'su -c "ls -l /system/xbin/su 2>&1"').Trim()
 if ($xbin -match 'No such file|not found') { Ok "NO /system/xbin/su (competing su is gone)" } else { No "competing /system/xbin/su present: $xbin" }
 $mv = (Shell-Retry 'su -c "magisk -c"').Trim()
 if ($mv -match 'kitsune') { Ok "magisk -c => $mv" } else { No "magisk version unexpected ($mv)" }
-$pkg = (Shell-Retry "pm path $PKG").Trim()
-if ($pkg -match 'package:') { Ok "manager installed: $pkg" } else { Info "manager package not found via pm path ($pkg)" }
+$packagePath = (Shell-Retry "pm path $PKG").Trim()
+if ($packagePath -match 'package:') { Ok "manager installed: $packagePath" } else { No "manager package not found via pm path ($packagePath)" }
 Shot 'magisk_e2e.png'
 
 # ---------------------------------------------------------------- cold-boot persistence
@@ -261,3 +283,8 @@ Write-Host "`n================ LIVE E2E SUMMARY ================" -ForegroundCol
 Write-Host ("  PASS=$pass  FAIL=$fail   screenshots in $Shots") -ForegroundColor $(if ($fail) { 'Red' } else { 'Green' })
 Write-Host "  Undo with:  -Revert -Instance $Instance" -ForegroundColor DarkGray
 exit ([int]($fail -gt 0))
+} finally {
+    # Our private ADB server can inherit the caller's redirected log handle.
+    # Release it on both success and failure so CI/terminal capture can finish.
+    Adb @('kill-server') | Out-Null
+}

@@ -1,9 +1,8 @@
 <#
   bsr_engine.ps1  --  blueStackRoot engine
 
-  Pure-PowerShell, faithful re-implementation of the heavy lifting performed by
-  BstkRooter.exe (Taaauu "BSTK Rooter" 1.0.1), derived byte-for-byte from
-  recovered/BstkRooter/BstkRooter_FULL_DERIVATION.md.
+  PowerShell helpers for player patching, instance configuration, disk editing,
+  and the legacy classic-su actions used by the regression tests.
 
   This file is the canonical source.  It is embedded verbatim inside
   blueStackRoot.cmd (between the engine BEGIN/END marker lines); the .cmd
@@ -21,7 +20,7 @@
     TestExt4  Run the exact debugfs edit against a plain ext4 image (-Img) -- used by
               the test-suite to exercise the ext4 logic with no VHD / no admin.
 
-  NOTHING here depends on BstkRooter.exe.  The su payload travels inside the .cmd.
+  The su payload travels inside the .cmd.
 #>
 [CmdletBinding()]
 param(
@@ -111,6 +110,17 @@ function Get-SelfText([string]$path) {
     $t = [System.IO.File]::ReadAllText($path)
     $Script:SelfTextCache[$path] = $t
     return $t
+}
+
+if ($SelfPath) {
+    $hostText = Get-SelfText $SelfPath
+    $hostBegin = '__BSR_HOST_' + 'BEGIN__'; $hostEnd = '__BSR_HOST_' + 'END__'
+    $hostStart = $hostText.IndexOf($hostBegin); $hostStop = $hostText.IndexOf($hostEnd)
+    if ($hostStart -lt 0 -or $hostStop -le $hostStart) { throw 'Embedded HOST helpers are missing; re-download the complete blueStackRoot.cmd.' }
+    $hostStart = $hostText.IndexOf([char]10, $hostStart) + 1
+    . ([scriptblock]::Create($hostText.Substring($hostStart, $hostStop - $hostStart)))
+} else {
+    . (Join-Path $PSScriptRoot 'bsr_host.ps1')
 }
 
 # BlueStacks layout discovery. Filesystem locations are never guessed from ProgramFiles/ProgramData or
@@ -718,38 +728,11 @@ function Read-DeviceBytes([string]$device, [long]$offset, [int]$count) {
 }
 
 function Copy-DeviceToFile([string]$device, [long]$start, [long]$length, [string]$outFile) {
-    $fs = [System.IO.File]::Open($device, 'Open', 'Read', 'ReadWrite')
-    try {
-        $fs.Position = $start
-        $out = [System.IO.File]::Open($outFile, 'Create', 'Write', 'None')
-        try {
-            $buf = New-Object byte[] (16MB)
-            [long]$remaining = $length
-            while ($remaining -gt 0) {
-                $want = [int][Math]::Min([long]$buf.Length, $remaining)
-                $r = $fs.Read($buf, 0, $want)
-                if ($r -le 0) { break }
-                $out.Write($buf, 0, $r)
-                $remaining -= $r
-            }
-        } finally { $out.Close() }
-    } finally { $fs.Close() }
+    Copy-BsrDiskRegion $device $start $length $outFile
 }
 
-function Copy-FileToDevice([string]$inFile, [string]$device, [long]$start) {
-    $fs = [System.IO.File]::Open($device, 'Open', 'ReadWrite', 'ReadWrite')
-    try {
-        $fs.Position = $start
-        $in = [System.IO.File]::OpenRead($inFile)
-        try {
-            $buf = New-Object byte[] (16MB)
-            while (($r = $in.Read($buf, 0, $buf.Length)) -gt 0) {
-                if (($r % 512) -ne 0) { $r += (512 - ($r % 512)) }  # safety pad (img is sector-multiple)
-                $fs.Write($buf, 0, $r)
-            }
-            $fs.Flush()
-        } finally { $in.Close() }
-    } finally { $fs.Close() }
+function Copy-FileToDevice([string]$inFile, [string]$device, [long]$start, [long]$length=0) {
+    Write-BsrDiskRegion $inFile $device $start $length
 }
 
 function Get-Ext4Target($diskNumber, $physical) {
@@ -816,16 +799,16 @@ function Invoke-VhdSu([bool]$remove) {
     $attached = $false
     try {
         Say "[*] Attaching $Vhd (read/write)..."
-        Mount-DiskImage -ImagePath $Vhd -Access ReadWrite -ErrorAction Stop | Out-Null
+        $mounted = Mount-BsrDisk $Vhd
         $attached = $true
         $dn = $null
         for ($try = 0; $try -lt 20; $try++) {
-            $di = Get-DiskImage -ImagePath $Vhd -ErrorAction SilentlyContinue
+            $di = Get-DiskImage -ImagePath $Vhd -StorageType $mounted.StorageType -ErrorAction SilentlyContinue
             if ($di -and $di.Number -ne $null) { $dn = $di.Number; break }
             Start-Sleep -Milliseconds 250
         }
         if ($null -eq $dn) {
-            $disk = Get-DiskImage -ImagePath $Vhd | Get-Disk -ErrorAction SilentlyContinue
+            $disk = Get-DiskImage -ImagePath $Vhd -StorageType $mounted.StorageType | Get-Disk -ErrorAction SilentlyContinue
             if ($disk) { $dn = $disk.Number }
         }
         if ($null -eq $dn) { throw "Could not determine the disk number of the attached VHD." }
@@ -847,7 +830,7 @@ function Invoke-VhdSu([bool]$remove) {
         }
 
         Say "[*] Writing the modified ext4 region back into the VHD ..."
-        Copy-FileToDevice $img $tgt.Device $tgt.Start
+        Copy-FileToDevice $img $tgt.Device $tgt.Start $tgt.Length
         Remove-Item -LiteralPath $img -Force -ErrorAction SilentlyContinue
         if ($remove) { Say "[+] Unrooted successfully! (su removed from Root.vhd)" Green }
         else { Say "[+] Rooted successfully! (su installed into Root.vhd)" Green }
@@ -855,7 +838,7 @@ function Invoke-VhdSu([bool]$remove) {
     }
     finally {
         if ($attached) {
-            try { Dismount-DiskImage -ImagePath $Vhd -ErrorAction Stop | Out-Null; Say "[*] Detached $Vhd." }
+            try { Dismount-DiskImage -InputObject $mounted -ErrorAction Stop | Out-Null; Say "[*] Detached $Vhd." }
             catch { Say "[!] WARNING: failed to detach $Vhd -- detach it manually (Disk Management) before launching BlueStacks." Red }
         }
     }
@@ -951,10 +934,10 @@ function Invoke-VhdSelfTest {
     if (-not (Test-Path -LiteralPath $Vhd)) { throw "VHD not found: $Vhd" }
     $attached = $false
     try {
-        Mount-DiskImage -ImagePath $Vhd -Access ReadWrite -ErrorAction Stop | Out-Null
+        $mounted = Mount-BsrDisk $Vhd
         $attached = $true
         $dn = $null
-        for ($t = 0; $t -lt 20; $t++) { $di = Get-DiskImage -ImagePath $Vhd -EA SilentlyContinue; if ($di -and $di.Number -ne $null) { $dn = $di.Number; break }; Start-Sleep -Milliseconds 250 }
+        for ($t = 0; $t -lt 20; $t++) { $di = Get-DiskImage -ImagePath $Vhd -StorageType $mounted.StorageType -EA SilentlyContinue; if ($di -and $di.Number -ne $null) { $dn = $di.Number; break }; Start-Sleep -Milliseconds 250 }
         if ($null -eq $dn) { throw "no disk number" }
         $physical = "\\.\PhysicalDrive$dn"
         $tgt = Get-Ext4Target $dn $physical
@@ -963,14 +946,14 @@ function Invoke-VhdSelfTest {
         $img1 = New-TempFile 'st1' '.img'; $img2 = New-TempFile 'st2' '.img'
         Copy-DeviceToFile $tgt.Device $tgt.Start $tgt.Length $img1
         $h1 = Get-Sha256Hex ([System.IO.File]::ReadAllBytes($img1))
-        Copy-FileToDevice $img1 $tgt.Device $tgt.Start
+        Copy-FileToDevice $img1 $tgt.Device $tgt.Start $tgt.Length
         Copy-DeviceToFile $tgt.Device $tgt.Start $tgt.Length $img2
         $h2 = Get-Sha256Hex ([System.IO.File]::ReadAllBytes($img2))
         Remove-Item $img1, $img2 -Force -EA SilentlyContinue
         if ($h1 -eq $h2) { Say "[+] carve/write-back is byte-identical (sha256 $($h1.Substring(0,16))...)." Green; return 0 }
         Say "[!] MISMATCH after write-back: $h1 vs $h2" Red; return 1
     }
-    finally { if ($attached) { try { Dismount-DiskImage -ImagePath $Vhd -EA Stop | Out-Null } catch { Say "[!] detach failed for $Vhd" Red } } }
+    finally { if ($attached) { Dismount-DiskImage -InputObject $mounted -EA Stop | Out-Null } }
 }
 
 # ===========================================================================
@@ -1223,7 +1206,7 @@ function Launch-Instance {
     $running = Get-HdPlayerInstanceCount $Instance
     if ($running -gt 0) { Say "[*] HD-Player for '$Instance' already running; not launching a second copy." ; return }
     Say "[*] Booting instance '$Instance' ..."
-    Start-Process -FilePath $Player -ArgumentList @('--instance', $Instance) | Out-Null
+    Start-BsrPlayer $Player $Instance | Out-Null
 }
 
 # Run a privileged shell script (pushed to the device) as root, trying the su

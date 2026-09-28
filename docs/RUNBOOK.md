@@ -41,8 +41,8 @@ Everything here is built from steps proven on this machine; the one offline step
 The `.cmd` is fully self‑contained (engine + debugfs + bootstrap su + the orchestrator + the **Magisk APK** are all embedded — 20 MB). Copy it anywhere and:
 
 1. **Right‑click → Run as administrator** (it self‑elevates too).
-2. Pick **option 3 — `Apply … Android 11 Rvc64`**. On Rvc64 this runs the full **Magisk‑as‑final‑root** pipeline automatically.
-3. Wait for `VERIFY PASS`. Done. (Option **6** = `Undo … Android 11 Rvc64` fully restores factory.)
+2. Pick **option 2 — `Android 11 Rvc64`** under ROOT (apply), or **option 3** for Android 13 Tiramisu64. This runs the full **Magisk‑as‑final‑root** pipeline automatically.
+3. Wait for `VERIFY PASS`. Done. (Option **5** removes Magisk from Android 11; **6** removes it from Android 13. Option **7** performs the separate full host scrub.)
 
 No other files, no internet. (If you drop a different `Magisk*.apk` next to the `.cmd`, it uses that instead of the embedded one.)
 For a nonstandard layout, option **8** accepts either the install folder (`HD-Player.exe` +
@@ -153,6 +153,8 @@ device after completion: **only Magisk's**. No DiskRW, no engine‑su, no daemon
 
 | Symptom | Cause | Fix |
 |---|---|---|
+| `Windows could not start HD-Player` / `Access is denied` | Windows rejected the player process before Android started; the message alone does not establish an antivirus cause | Use current `debug.cmd`; it records the native error, signature, ACL, and recent policy events. Repair the specific host permission/policy problem shown by that evidence |
+| `virtual disk support provider ... not found` | Windows could not attach the disk image | Update: the tool now selects VHD/VHDX from file content and checks attach support before changing root flags or the executable. If it still fails, inspect the new format/error details and repair the affected image or Windows storage components; see [#31/#32 investigation](ISSUES_31_32.md) |
 | `bootstrap su not root` during **Data** | Old builds tried only `/system/xbin/su`; the xbin mount can be absent, late, or already mounted without the bootstrap bind | **Fixed after v18:** update and retry. Prep supplies direct + native-xbin + bind-mounted paths and Data accepts only a path that proves `uid=0`. If all fail, attach the new `debug.cmd` log, which now records the exact conf/property/file/mount state |
 | `getenforce` prints `Disabled`; a mod asks for `Permissive` | BlueStacks booted without active SELinux policy enforcement; blueStackRoot did not disable it. A literal-string compatibility check may confuse Disabled with a restrictive state | There is nothing for `setenforce 0` to relax. Ask the mod author to accept `Disabled`, or use a BlueStacks build that supplies an SELinux-enabled kernel and compatible policy; this cannot be a safe rooter menu toggle |
 | Magisk app: *Magisk environment incomplete* | `/data/adb/magisk` not populated | re‑run **Data** (it populates it) |

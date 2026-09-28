@@ -249,6 +249,16 @@ function Extract-Block($cmdPath,$begTok,$endTok){
     $i=$t.IndexOf([char]10,$i)+1
     $t.Substring($i,$j-$i)
 }
+
+# The same host helpers are used by the engine and diagnostic launcher. In the
+# distributed .cmd they are loaded in memory from the embedded HOST block.
+if ($SelfCmd) {
+    $hostCode = Extract-Block $SelfCmd 'HOST' 'HOST'
+    if (-not $hostCode) { throw 'Embedded HOST helpers are missing; re-download the complete blueStackRoot.cmd.' }
+    . ([scriptblock]::Create($hostCode))
+} else {
+    . (Join-Path $Here 'bsr_host.ps1')
+}
 # ---- payload integrity: turn a cryptic base64/gzip crash into an actionable message (issue #24) ----
 # The embedded blocks (APK, debugfs zip, bootstrap-su gzip) are exactly the bytes antivirus loves to
 # strip from this .cmd -- a real Magisk APK + a setuid 'su' ELF read as HackTool/PUA. When Defender
@@ -478,8 +488,8 @@ fi
 #  Raw-device / ext4 helpers (proven; same as the engine)
 # ====================================================================
 function Read-DeviceBytes($dev,$off,$cnt){ $fs=[System.IO.File]::Open($dev,'Open','Read','ReadWrite'); try{ $sb=[long]([Math]::Floor($off/512)*512); $d=[int]($off-$sb); $need=[int]([Math]::Ceiling(($d+$cnt)/512.0)*512); $b=New-Object byte[] $need; $fs.Position=$sb; [void]$fs.Read($b,0,$need); $r=New-Object byte[] $cnt; [Array]::Copy($b,$d,$r,0,$cnt); $r } finally{ $fs.Close() } }
-function Copy-DeviceToFile($dev,$start,$len,$out){ $fs=[System.IO.File]::Open($dev,'Open','Read','ReadWrite'); try{ $fs.Position=$start; $o=[System.IO.File]::Open($out,'Create','Write','None'); try{ $buf=New-Object byte[] (16MB); [long]$rem=$len; while($rem -gt 0){ $w=[int][Math]::Min([long]$buf.Length,$rem); $n=$fs.Read($buf,0,$w); if($n -le 0){break}; $o.Write($buf,0,$n); $rem-=$n } } finally{ $o.Close() } } finally{ $fs.Close() } }
-function Copy-FileToDevice($inf,$dev,$start){ $fs=[System.IO.File]::Open($dev,'Open','ReadWrite','ReadWrite'); try{ $fs.Position=$start; $i=[System.IO.File]::OpenRead($inf); try{ $buf=New-Object byte[] (16MB); while(($n=$i.Read($buf,0,$buf.Length)) -gt 0){ if(($n%512)-ne 0){$n+=(512-($n%512))}; $fs.Write($buf,0,$n) }; $fs.Flush() } finally{ $i.Close() } } finally{ $fs.Close() } }
+function Copy-DeviceToFile($dev,$start,$len,$out){ Copy-BsrDiskRegion $dev $start $len $out }
+function Copy-FileToDevice($inf,$dev,$start,$length){ Write-BsrDiskRegion $inf $dev $start $length }
 
 function Kill-BlueStacks {
     # Kill ONLY BlueStacks-owned processes (names start with HD-, Bstk, or BlueStacks):
@@ -513,32 +523,32 @@ function Invoke-Debugfs($img,[string[]]$cmds){
 
 # Attach Root.vhd, carve ext4 -> temp img, run $editScriptBlock(img), then (optionally) write back.
 function With-RootVhdExt4([scriptblock]$edit,[bool]$writeBack){
-    if(-not (Test-Path $Vhd)){ throw "Root.vhd not found: $Vhd" }
-    $attached=$false
+    if(-not (Test-Path -LiteralPath $Vhd)){ throw "Root.vhd not found: $Vhd" }
+    $mounted=$null; $img=$null
     try{
         Say "[*] attach $Vhd (RW)..." Cyan
-        Mount-DiskImage -ImagePath $Vhd -Access ReadWrite -ErrorAction Stop | Out-Null; $attached=$true
-        $dn=$null; for($i=0;$i -lt 20;$i++){ $di=Get-DiskImage -ImagePath $Vhd -EA SilentlyContinue; if($di.Number -ne $null){$dn=$di.Number;break}; Start-Sleep -Milliseconds 250 }
+        $mounted=Mount-BsrDisk $Vhd
+        $dn=$null; for($i=0;$i -lt 20;$i++){ $di=Get-DiskImage -ImagePath $Vhd -StorageType $mounted.StorageType -EA Stop; if($di.Number -ne $null){$dn=$di.Number;break}; Start-Sleep -Milliseconds 250 }
         if($null -eq $dn){ throw 'no disk number' }
         $tgt=$null
         foreach($p in @(Get-Partition -DiskNumber $dn | Sort-Object Offset)){ $d="\\.\Harddisk$($dn)Partition$($p.PartitionNumber)"; try{ $m=Read-DeviceBytes $d 0x438 2; if($m[0]-eq 0x53 -and $m[1]-eq 0xEF){ $tgt=@{Device=$d;Start=[long]0;Length=[long]$p.Size}; break } }catch{} }
         if(-not $tgt){ throw 'no ext4 partition (0xEF53) in Root.vhd' }
         Say "[*] ext4 device=$($tgt.Device) size=$([Math]::Round($tgt.Length/1GB,2))GB"
-        $img=Join-Path $env:TEMP 'bsr_work\rootvhd_ext4.img'; New-Item -ItemType Directory -Path (Split-Path $img) -Force | Out-Null
+        $img=Join-Path $env:TEMP ('bsr_work\rootvhd_' + [guid]::NewGuid().ToString('N') + '.img'); New-Item -ItemType Directory -Path (Split-Path $img) -Force | Out-Null
         Say "[*] carve ext4 region (~1-2 min)..." Cyan
         Copy-DeviceToFile $tgt.Device $tgt.Start $tgt.Length $img
         $ok = & $edit $img
         if($writeBack -and $ok){
             Say "[*] write modified ext4 back into Root.vhd..." Cyan
-            Copy-FileToDevice $img $tgt.Device $tgt.Start
+            Copy-FileToDevice $img $tgt.Device $tgt.Start $tgt.Length
             Say "[+] Root.vhd updated." Green
         } elseif($writeBack){
             Say "[!] edit reported failure -- NOT writing back (Root.vhd unchanged)." Red
         }
-        Remove-Item $img -Force -EA SilentlyContinue
         return $ok
     } finally {
-        if($attached){ try{ Dismount-DiskImage -ImagePath $Vhd | Out-Null; Say "[*] detached Root.vhd" }catch{ Say 'WARN detach failed' Red } }
+        if($img -and (Test-Path -LiteralPath $img)){ Remove-Item -LiteralPath $img -Force -EA SilentlyContinue }
+        if($mounted){ Dismount-DiskImage -InputObject $mounted -ErrorAction Stop | Out-Null; Say "[*] detached Root.vhd" }
     }
 }
 
@@ -808,11 +818,11 @@ function Boot-And-Wait([int]$timeoutSec=300){
     $lastLaunch=-999; $lastProgress=-999; $extended=$false; $sawLife=$false; $sawReady=$false; $readyAt=-1; $lastDiag=''
     function Start-BsrInstanceLaunch {
         Say "[*] launching instance $Instance ..." Cyan
-        Start-Process -FilePath $Player -ArgumentList @('--instance',$Instance) | Out-Null
+        Start-BsrPlayer $Player $Instance | Out-Null
         $sw.Elapsed.TotalSeconds
     }
-    $lastLaunch = Start-BsrInstanceLaunch
     Set-PlayerLogMark   # only count [Ready] lines written AFTER this launch, not a prior boot's
+    $lastLaunch = Start-BsrInstanceLaunch
     Say "[*] HD-Adb server port: $env:ANDROID_ADB_SERVER_PORT" DarkGray
     # Find the adb endpoint from BlueStacks' OWN per-instance conf ports (status.adb_port first). Each pass we
     # connect, read get-state, and -- crucially -- HEAL a wedged 'offline' transport (disconnect + reconnect)
@@ -901,6 +911,12 @@ function Do-Prep {
     Ensure-MagiskApk; Ensure-BsrSu; Ensure-Debugfs
     Say '==== PREP (offline) ====' Cyan
     Kill-BlueStacks
+
+    # Fail before patching HD-Player or changing root flags if Windows cannot open
+    # this image. Keep the preflight read-only and always release our attachment.
+    Say '[*] checking virtual disk format and Windows mount support...'
+    $preflight=Mount-BsrDisk $Vhd -ReadOnly
+    Dismount-DiskImage -InputObject $preflight -ErrorAction Stop | Out-Null
 
     # 0) one-time pristine safety backup (so Undo can fully restore)
     $bak = "$Vhd.bsrbak"

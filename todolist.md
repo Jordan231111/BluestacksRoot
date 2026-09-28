@@ -97,8 +97,8 @@
 ## Open / nice-to-have
 - [ ] optional: dedicated per-instance Root.vhd (separate VHD + UUID) for a *bit-pristine* `/system` on
       unrooted instances (the gate already makes them functionally clean; this only removes inert files)
-- [ ] update `tools/build.ps1` to assemble the current Magisk build end-to-end (it predates the Magisk
-      pipeline). Re-embedding is now scripted piecewise — `tools/reembed.ps1` (engine + orchestrator) and
+- [ ] add a full assembler for the current Magisk build. Re-embedding is scripted piecewise —
+      `tools/reembed.ps1` (engine + orchestrator + host helpers) and
       `tools/reembed-apk.ps1` (the Magisk APK) — so the remaining gap is a single full-assemble entry point.
 
 ## Notes

@@ -18,7 +18,6 @@ The same pipeline is **version‑agnostic** and has since been proven end‑to�
 4. **A transient bootstrap root** (our setuid `bsr_su`) is needed exactly once — to write the root‑owned `/data/adb/magisk` — then it is **completely removed**.
 5. **No traces:** remove `bsr_su`, restore the stock `bindmount`, remove the engine‑injected `/system/xbin/su`, restore the factory su in `.xb`, set `enable_root_access=0`. Magisk becomes the only root.
 
-**The encrypted `BstkRooter.exe` verdict:** the RE was faithful; **BlueStacks changed the logic** (added the `/data` overmount + daemon‑su + host gate) long after the exe was written. The exe also predates Magisk‑to‑system entirely. (§8)
 
 ---
 
@@ -240,16 +239,13 @@ Notes:
 
 ---
 
-## 8. The encrypted `BstkRooter.exe` — faithful RE; BlueStacks changed the logic
+## 8. Why classic su is insufficient on current BlueStacks
 
-Re‑verified from `recovered/BstkRooter/` (decompiled "Root" `fcn.14001d370` + string tables). The Root routine: kill procs → `FindResourceA(101)` decrypt embedded su → open Root.vhd, find ext4, mount → create `/android/system/xbin`, copy su → `chmod 06755`/chown → set `bst.instance.<inst>.enable_root_access=`. We reproduced this **byte‑exact** (inode/mode/SHA matched — in fact `bsr_engine.ps1` *is* that reproduction, which is why its `Root` action injected the `/system/xbin/su` we later had to remove).
-
-- **Faithful:** the decompilation + strings give the complete Root path; our reproduction matched on disk. No skipped branch.
-- **The exe is blind to the new mechanism:** a whole‑binary search finds **no** `/data`, `downloads`, `.xb`, `bindmount`, `--auto-daemon`, or daemon‑su strings. It only knows `/android/system/xbin/su` + `enable_root_access`. You can't fail to RE handling for identifiers that don't exist in the program.
-- **The live build uses a newer design** that post‑dates the exe: `/system/xbin` overmounted from `/data/downloads/.xb` (shadowing the exe's su), a host‑gated daemon‑su, `bst.feature.rooting` force‑reset to 0 each launch — and Magisk‑to‑system didn't exist in the exe's world at all.
-- **Why it worked on older "anti‑tampered" builds:** older 5.x / Android‑7 "Nougat" instances kept `/system/xbin` **directly on Root.vhd** with no overmount, so injected‑su + integrity bypass sufficed. The Android‑11 line added the overmount/daemon/gate to defeat exactly that.
-
-**Verdict: the environment changed, not your RE.**
+Current Android 11 instances overmount `/system/xbin` from `/data/downloads/.xb` and gate the
+factory su daemon on host settings. Merely injecting a setuid su into `Root.vhd` does not provide
+persistent Magisk root. The current pipeline stages a temporary bootstrap, installs Magisk, and
+removes that bootstrap and any competing classic su before verification. See sections 3-7 for the
+live mount layout, failure evidence, and working installation sequence.
 
 ---
 
@@ -339,13 +335,12 @@ orchestrator + the Magisk APK. **Option 3** = root Android‑11 (Rvc64) with Mag
 | One‑file tool | `blueStackRoot.cmd` |
 | Orchestrator | `tools/bsr_magisk.ps1` (Prep/Data/Clean/Finalize/Verify/Undo, gate + flag) |
 | Engine (patch, conf, ext4, Root/Unroot) | `tools/bsr_engine.ps1` |
-| Build/embed helper | `tools/build.ps1` |
+| Embed helpers | `tools/reembed.ps1`, `tools/reembed-apk.ps1` |
 | Bootstrap su + bindmount templates | `tools/su_src/` |
 | Magisk databin / artifacts (from APK) | `tools/magisk_databin/`, `tools/magisk_artifacts/` |
 | Embedded debugfs bundle | `tools/debugfs/` |
 | Magisk APK + working reference | `Working Example & Fix/` |
 | Proven dev/test scripts | `tests/` (gate‑magisk, remove‑bsr‑su, rootvhd‑hook, test‑magiskprep‑offline, …) |
-| RE of the original exe | `recovered/BstkRooter/` |
 | Superseded code (reference only) | `archive/` (see `archive/README.md`) |
 | Docs | `docs/BLUESTACKS_ROOTING_DEEP_DIVE.md`, `docs/RUNBOOK.md` |
 | HD‑Player patch site | file `0xB46E8` / va `0x1400B52E6` (`74 5B → 90 90`) |

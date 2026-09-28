@@ -34,7 +34,7 @@ jobs:
 
       # The .cmd ships the engine + orchestrator embedded (must match tools\*.ps1) and the Magisk APK
       # (must match its known SHA-256); make sure none of them have drifted.
-      - name: Embedded build in sync with tools/ (engine, orchestrator, APK)
+      - name: Embedded build in sync with tools/ (engine, orchestrator, host helpers, APK)
         shell: cmd
         run: powershell -NoProfile -ExecutionPolicy Bypass -File tests\Check-Embedded-Sync.ps1
 
@@ -61,3 +61,11 @@ jobs:
       - name: Magisk orchestrator pure unit tests
         shell: cmd
         run: powershell -NoProfile -ExecutionPolicy Bypass -File tests\Run-Magisk-Unit-Tests.ps1
+
+      - name: Windows launch and disk format regression tests
+        shell: cmd
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File tests\Run-Host-Tests.ps1
+
+      - name: Diagnostic privacy and failure handling
+        shell: cmd
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File tests\Run-Diagnostic-Tests.ps1

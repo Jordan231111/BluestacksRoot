@@ -5,12 +5,8 @@ title blueStackRoot - one-file BlueStacks 5 / MSI App Player rooter
 REM ====================================================================
 REM  blueStackRoot.cmd  -  SINGLE-FILE BlueStacks rooter
 REM
-REM  A batch orchestrator + an embedded PowerShell engine + an embedded,
-REM  already-decrypted setuid "su" payload.  Faithful re-implementation
-REM  of BstkRooter.exe, derived from
-REM     recovered/BstkRooter/BstkRooter_FULL_DERIVATION.md
-REM
-REM  It does NOT depend on BstkRooter.exe (you may delete that file).
+REM  Historical classic-su batch orchestrator, with an embedded PowerShell
+REM  engine and setuid "su" payload. Superseded by the current Magisk pipeline.
 REM
 REM  APPLY (root) performs, in order:
 REM     1. kill HD-Player / HD-MultiInstanceManager / BstkSVC / Helper
@@ -31,7 +27,7 @@ REM  engine to a temp .ps1 and runs it, and the engine reads its own su /
 REM  debugfs payloads back out of this file.
 REM ====================================================================
 
-REM ---- require Administrator (BstkRooter is requireAdministrator) ----
+REM ---- require Administrator for offline disk access ----
 net session >nul 2>&1
 if %errorlevel% NEQ 0 (
     echo Requesting administrative privileges...

@@ -3,7 +3,7 @@
 <p align="center">
   <a href="https://github.com/Jordan231111/BluestacksRoot/stargazers"><img alt="Stars" src="https://img.shields.io/github/stars/Jordan231111/BluestacksRoot?style=flat&logo=github"></a>
   <a href="https://github.com/Jordan231111/BluestacksRoot/network/members"><img alt="Forks" src="https://img.shields.io/github/forks/Jordan231111/BluestacksRoot?style=flat&logo=github"></a>
-  <img alt="BlueStacks" src="https://img.shields.io/badge/BlueStacks%205-5.22.210%20%E2%9C%93-blue">
+  <img alt="BlueStacks" src="https://img.shields.io/badge/BlueStacks%205-5.22.265.1013%20%E2%9C%93-blue">
   <img alt="Magisk" src="https://img.shields.io/badge/Magisk-Kitsune%20Mask%20v31-brightgreen">
   <a href="./LICENSE"><img alt="License" src="https://img.shields.io/badge/license-CC%20BY--NC--ND%204.0-lightgrey"></a>
 </p>
@@ -11,7 +11,7 @@
 **Root BlueStacks 5 / MSI App Player with real Magisk — from one file, with no traces left behind.**
 **Run `blueStackRoot.cmd` as administrator, pick your Android version, and you're rooted.**
 **A Magisk Delta (Kitsune v31) build is now bundled inside the `.cmd` itself** — no separate Magisk
-download, no other files, nothing to install. Works on the latest BlueStacks (5.22.210).
+download, no other files, nothing to install. Tested on BlueStacks 5.22.265.1013 (Android 11 and 13).
 
 ---
 
@@ -19,7 +19,7 @@ download, no other files, nothing to install. Works on the latest BlueStacks (5.
 
 Works on the 64-bit BlueStacks instances — **Android 9, 11, and 13**.
 
-**⬇️ [Download `blueStackRoot.cmd`](https://github.com/Jordan231111/BluestacksRoot/releases/download/v19/blueStackRoot.cmd)** — one file (~20 MB) with the **real Magisk APK embedded inside** — nothing else to download. *(All versions: [Releases page](https://github.com/Jordan231111/BluestacksRoot/releases).)*
+**⬇️ [Download `blueStackRoot.cmd`](https://github.com/Jordan231111/BluestacksRoot/releases/download/v20/blueStackRoot.cmd)** — one file (~20 MB) with the **real Magisk APK embedded inside** — nothing else to download. *(All versions: [Releases page](https://github.com/Jordan231111/BluestacksRoot/releases).)*
 
 1. **First, open the exact instance you want to root** — launch it from the Multi-Instance Manager and let
    it boot once. The tool roots the instance of your chosen Android version that you **opened most
@@ -88,16 +88,17 @@ all the others keep working, untouched.
 *false positive* common to **every** rooting/emulator tool: the file is an unsigned `.cmd` that modifies
 BlueStacks and carries binaries inside it. Heuristic scanners flag that pattern. Here's why you can trust it:
 
-- **100% open source.** Every line of logic is plain, readable PowerShell and batch — right here in this
+- **100% open source.** The host logic is readable PowerShell, batch, and inline C# — right here in this
   repo. Read [`tools/bsr_magisk.ps1`](tools/bsr_magisk.ps1) and
-  [`tools/bsr_engine.ps1`](tools/bsr_engine.ps1); those are the *exact* scripts embedded in the `.cmd`.
+  [`tools/bsr_engine.ps1`](tools/bsr_engine.ps1), and the shared Windows helpers in
+  [`tools/bsr_host.ps1`](tools/bsr_host.ps1); those are the scripts embedded in the `.cmd`.
   Nothing is obfuscated or "encrypted" — unlike the closed-source rooter binaries floating around.
 - **The big base64 blocks are not a virus — they're just files, bundled so you only download one thing.**
-  The `.cmd` carries five things between clearly-labelled `__BSR_*__` markers:
+  The `.cmd` carries these components between clearly-labelled `__BSR_*__` markers:
 
   | Embedded blob | What it actually is | How to verify |
   |---|---|---|
-  | `__BSR_ENGINE__` / `__BSR_MAGISK__` | The two PowerShell scripts above (plain text) | Diff against `tools/*.ps1` in this repo |
+  | `__BSR_ENGINE__` / `__BSR_MAGISK__` / `__BSR_HOST__` | The PowerShell scripts above (plain text) | Diff against `tools/*.ps1` in this repo |
   | `__BSR_DFS__` | `debugfs` from the standard Cygwin **e2fsprogs** suite | Standard open-source ext4 tool |
   | `__BSR_SU__` / `__BSR_BSRSU__` | Tiny `su` binaries used only *during* install, then **erased** | Source in [`tools/su_src/`](tools/su_src) |
   | `__BSR_APK__` | A **custom, open-source build of Kitsune Mask (Magisk Delta) v31** — one small documented patch | SHA-256 + source below |
@@ -210,6 +211,13 @@ These are the genuine upstream release builds — cross-check the hashes against
 Windows + BlueStacks 5 (nxt) or MSI App Player, run as Administrator. **Nothing to download** — PowerShell
 5.1 (built into Windows) runs the embedded engine, and `HD-Adb.exe` ships with BlueStacks.
 
+If Windows reports **Access is denied** when starting `HD-Player.exe`, that is a host launch
+failure before Android or ADB. If it reports **virtual disk support provider not found**, that is
+a Windows disk-mount failure. Neither message, by itself, proves antivirus interference.
+Run [v20 `debug.cmd`](https://github.com/Jordan231111/BluestacksRoot/releases/download/v20/debug.cmd) and attach its Desktop log. It records disk-mount results, Windows error codes, player signatures,
+permissions, and related policy events. User-directory names are masked; technical details remain. It restarts only the selected instance; close other instances if you need the read-only disk probe. See the
+[investigation of issues #31 and #32](docs/ISSUES_31_32.md) for the evidence and limits of the fixes.
+
 ## 🎥 Video tutorial
 ▶ **[Watch the walkthrough on YouTube](https://www.youtube.com/watch?v=BfxGGTDiESg)** — the current
 one-file Magisk flow (Android 9 / 11 / 13).
@@ -217,16 +225,16 @@ one-file Magisk flow (Android 9 / 11 / 13).
 <sub>Earlier junction-based method (legacy BlueStacks ≤ 5.21.x): [older video](https://youtu.be/LOhKGxuhLrU).</sub>
 
 ## 🧰 For developers (build & tests)
-The `.cmd` embeds `tools/bsr_engine.ps1` + `tools/bsr_magisk.ps1` + `tools/debugfs/` + `tools/su_src/bsr_su`
+The `.cmd` embeds `tools/bsr_engine.ps1` + `tools/bsr_magisk.ps1` + `tools/bsr_host.ps1` + `tools/debugfs/` + `tools/su_src/bsr_su`
 + the Magisk APK between marker lines. To update them, edit the `tools/*.ps1` and run `tools/reembed.ps1`
-(re-splices the engine + orchestrator); swap the bundled Magisk with `tools/reembed-apk.ps1 -Apk <new.apk>`
+(re-splices the engine, orchestrator, and shared host helpers, including `debug.cmd`); swap the bundled Magisk with `tools/reembed-apk.ps1 -Apk <new.apk>`
 (byte-level splice + SHA-256 round-trip verify), then refresh the reference set with
 `tools/extract-databin.ps1 -Apk <new.apk>`. Proven dev/test scripts live in [`tests/`](tests) (e.g.
 `test-magiskprep-offline.ps1` byte-verifies the offline `/system` write; `gate-magisk.ps1`,
-`remove-bsr-su.ps1`; `Check-Embedded-Sync.ps1` asserts the embedded engine/orchestrator/APK match their
-sources). `tools/build.ps1` is the legacy assembler for the classic-su build. Retired
+`remove-bsr-su.ps1`; `Check-Embedded-Sync.ps1` asserts the embedded scripts and APK match their
+sources). Retired
 approaches (junctions, the integrity-bypass scripts, etc.) are kept for reference in
-[`archive/`](archive). The fully reverse-engineered closed-source predecessor lives in `recovered/BstkRooter/`.
+[`archive/`](archive).
 
 ## ☕ Support / Donation
 If this saved you time, a coffee is hugely appreciated — it keeps the last open-source BlueStacks rooter alive:

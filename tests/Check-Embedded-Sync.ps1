@@ -27,7 +27,7 @@ function Extract([string]$tag) {
 }
 
 $fail = 0
-foreach ($p in @(@('ENGINE', 'tools\bsr_engine.ps1'), @('MAGISK', 'tools\bsr_magisk.ps1'))) {
+foreach ($p in @(@('ENGINE', 'tools\bsr_engine.ps1'), @('MAGISK', 'tools\bsr_magisk.ps1'), @('HOST', 'tools\bsr_host.ps1'))) {
     $src = Join-Path $repo $p[1]
     if (-not (Test-Path -LiteralPath $src)) { Write-Host "  [FAIL] source missing: $($p[1])" -ForegroundColor Red; $fail++; continue }
     $emb = Norm (Extract $p[0])
@@ -39,6 +39,12 @@ foreach ($p in @(@('ENGINE', 'tools\bsr_engine.ps1'), @('MAGISK', 'tools\bsr_mag
         $fail++
     }
 }
+$mainText = $t
+$t = [IO.File]::ReadAllText((Join-Path $repo 'debug.cmd'))
+if ((Norm (Extract 'HOST')) -cne (Norm ([IO.File]::ReadAllText((Join-Path $repo 'tools\bsr_host.ps1'))))) {
+    Write-Host '  [FAIL] diagnostic HOST helpers differ from source'; $fail++
+} else { Write-Host '  [PASS] diagnostic HOST helpers match source' -ForegroundColor Green }
+$t = $mainText
 
 # --- embedded Magisk APK: decode the base64 blob and verify its SHA-256 (guards against APK drift;
 #     the APK is re-embedded by tools\reembed-apk.ps1, which round-trips this same hash). ---
