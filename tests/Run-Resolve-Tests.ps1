@@ -16,6 +16,7 @@ param(
     [string]$Magisk
 )
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot 'Test-Support.ps1')
 $Here = if ($PSScriptRoot) { $PSScriptRoot } else { Split-Path -Parent $MyInvocation.MyCommand.Path }
 $RepoRoot = (Resolve-Path (Join-Path $Here '..')).Path
 if (-not $Engine) { $Engine = (Resolve-Path (Join-Path $Here '..\tools\bsr_engine.ps1')).Path }
@@ -221,7 +222,7 @@ Ok 'path policy: no ProgramData-based BlueStacks fallback' ($pathText -notmatch 
 Ok 'path policy: no batch %ProgramData% BlueStacks fallback' ($pathText -notmatch '(?i)%ProgramData%[\\/]BlueStacks')
 
 # ---- cleanup ----
-foreach ($d in $script:Made) { try { Remove-Item -LiteralPath $d -Recurse -Force -ErrorAction SilentlyContinue } catch { } }
+foreach ($d in $script:Made) { Remove-BsrTestDirectory $d }
 
 Write-Host ""
 Write-Host ("RESULT: {0} passed, {1} failed" -f $script:pass, $script:fail) -ForegroundColor $(if ($script:fail) { 'Red' } else { 'Green' })

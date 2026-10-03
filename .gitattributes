@@ -1,5 +1,4 @@
-# debug.cmd is a hand-run batch launcher with a multi-line `if ( ... )` elevation block; cmd.exe needs
-# CRLF to parse that reliably. Force CRLF on every checkout/platform (and every release built from a
+# debug.cmd is a hand-run batch launcher. Keep CRLF on every checkout/platform (and every release built from a
 # fresh checkout) so the repo copy always matches the shipped asset and always runs.
 debug.cmd text eol=crlf
 
@@ -9,3 +8,6 @@ debug.cmd text eol=crlf
 # payload lines, shift byte offsets, and can leave the embedded blocks undecodable. Mark it binary (no
 # autocrlf, no eol conversion, no diff) so a clone can never corrupt the payload. See issue #24.
 blueStackRoot.cmd -text -diff
+
+# Canonical sources and tests must rebuild identically under any core.autocrlf setting.
+*.ps1 text eol=lf

@@ -25,6 +25,7 @@
   Usage (Administrator):
     powershell -NoProfile -ExecutionPolicy Bypass -File tests\Run-Live-E2E.ps1 -Instance Tiramisu64_9
     ...                                                                        -Revert -Instance Tiramisu64_9
+    ... -Instance Tiramisu64_9 -SimulateLostPopulateReply  # replay real population after a discarded reply
 #>
 [CmdletBinding()]
 param(
@@ -40,16 +41,47 @@ param(
     [int]$RebootCycles = 1,
     [switch]$NoBackup,
     [switch]$VerifyOnly,
+    [switch]$CheckFailurePaths,
+    [switch]$SimulateLostPopulateReply,
     [switch]$Revert
 )
 $ErrorActionPreference = 'Stop'
+if($SimulateLostPopulateReply -and ($VerifyOnly -or $Revert)){throw '-SimulateLostPopulateReply requires the full Auto pipeline.'}
 $here = if ($PSScriptRoot) { $PSScriptRoot } elseif ($PSCommandPath) { Split-Path -Parent $PSCommandPath } else { (Get-Location).Path }
 $repo = Split-Path -Parent $here
 if (-not $Cmd) { $Cmd = Join-Path $repo 'blueStackRoot.cmd' }
-if (-not $Engine) { $Engine = Join-Path $repo 'tools\bsr_engine.ps1' }
-$Magisk = Join-Path $repo 'tools\bsr_magisk.ps1'
+. (Join-Path $repo 'tools\bsr_build.ps1')
 if (-not $Shots) { $Shots = Join-Path $here 'live-shots' }
 if (-not (Test-Path $Shots)) { New-Item -ItemType Directory -Path $Shots -Force | Out-Null }
+# Exercise the embedded distribution without access to tools/debugfs or su_src.
+$pipeline=Join-Path $Shots 'pipeline'
+[void][IO.Directory]::CreateDirectory($pipeline)
+$cmdBytes=[IO.File]::ReadAllBytes($Cmd)
+foreach($tag in @('ENGINE','MAGISK')){
+    $source=Get-BsrEmbeddedText $cmdBytes $tag
+    Assert-BsrScript $source $tag
+    if($tag -eq 'MAGISK' -and $SimulateLostPopulateReply){
+        # Exercise a real guest-side replay: execute the first population script
+        # completely, discard ONLY its reply, then let the normal retry recover.
+        # This option changes the extracted test copy, never the distribution.
+        $anchor='(?m)^    \$script:LastAdbExitCode = \$result.ExitCode\r?\n    \$result.Output\r?$'
+        if([regex]::Matches($source,$anchor).Count -ne 1){throw 'Cannot install the lost-reply test hook in the extracted ADB helper.'}
+        $replacement=@'
+    $script:LastAdbExitCode = $result.ExitCode
+    if(-not $script:LostPopulateReply -and $a[-1] -match 'sh /data/local/tmp/bsr_pop.sh' -and $result.Output -match '(?m)^BSR_DATA_OK\r?$'){
+        $script:LostPopulateReply=$true
+        Write-Host 'BSR_TEST_LOST_POPULATE_REPLY'
+        return ''
+    }
+    $result.Output
+'@
+        $source=[regex]::Replace($source,$anchor,[Text.RegularExpressions.MatchEvaluator]{param($match) $replacement})
+        Assert-BsrScript $source 'lost-reply test copy'
+    }
+    [IO.File]::WriteAllText((Join-Path $pipeline ($tag+'.ps1')),$source,(New-Object Text.UTF8Encoding($true)))
+}
+if(-not $Engine){$Engine=Join-Path $pipeline 'ENGINE.ps1'}
+$Magisk=Join-Path $pipeline 'MAGISK.ps1'
 $PKG = 'io.github.huskydg.magisk'   # the bundled Kitsune Mask package (NOT com.topjohnwu.magisk)
 
 foreach ($f in @($Cmd, $Engine, $Magisk)) { if (-not (Test-Path -LiteralPath $f)) { throw "missing: $f" } }
@@ -62,20 +94,27 @@ function Info($m) { Write-Host "  [..] $m" -ForegroundColor DarkGray }
 function Step($m) { Write-Host "`n=== $m ===" -ForegroundColor Cyan }
 
 # isolate HD-Adb on its own server port (immune to a different-version system adb on 5037)
-if (-not $env:ANDROID_ADB_SERVER_PORT) { $env:ANDROID_ADB_SERVER_PORT = '15037' }
-function Adb([string[]]$a) { $o = $ErrorActionPreference; $ErrorActionPreference = 'Continue'; try { (& $Adb @a 2>&1 | Out-String) } finally { $ErrorActionPreference = $o } }
-function Run-PsFile([string[]]$a) { $o = $ErrorActionPreference; $ErrorActionPreference = 'Continue'; try { & powershell.exe -NoProfile -ExecutionPolicy Bypass -File @a 2>&1 | Out-String } finally { $ErrorActionPreference = $o } }
+function Adb([string[]]$a) {
+    $result=Invoke-BsrNative $Adb $a 60
+    $script:LastAdbExitCode=$result.ExitCode
+    $result.Output
+}
+function Run-PsFile([string[]]$a) {
+    $result=Invoke-BsrNative 'powershell.exe' (@('-NoProfile','-ExecutionPolicy','Bypass','-File')+$a) 1800
+    $script:LASTEXITCODE=$result.ExitCode
+    $result.Output
+}
 function Output-Lines([string]$text){ @($text -split "`r?`n" | ForEach-Object {$_.Trim()} | Where-Object {$_}) }
 function Adb-State([string]$target){
     $lines=Output-Lines (Adb @('-s',$target,'get-state'))
     @($lines | Where-Object {$_ -match '^(device|offline|unauthorized|unknown)$'} | Select-Object -Last 1)[0]
 }
 function Is-BootComplete([string]$text){ (Output-Lines $text) -contains '1' }
-function Is-TransportError([string]$text){ $text -match "device '.*' not found|device .* not found|no devices/emulators found|device offline|error: closed" }
+function Is-TransportError([string]$text){ $text -match "device '.*' not found|device .* not found|no devices/emulators found|device offline|error: closed|protocol fault|connection reset|broken pipe|cannot connect to daemon" }
 
 # Resolve every host path through the same marker-validated engine used by the shipped launcher.
 $base = $Instance -replace '_\d+$', ''
-$resolveArgs = @($Engine, '-Action', 'Resolve', '-Base', $base)
+$resolveArgs = @($Engine, '-Action', 'Resolve', '-SelfPath', $Cmd, '-Base', $base, '-Instance', $Instance)
 if($DataDir){$resolveArgs += @('-DataDir',$DataDir)}
 if($InstallDir){$resolveArgs += @('-InstallDir',$InstallDir)}
 $res = Run-PsFile $resolveArgs
@@ -88,30 +127,16 @@ if (-not $InstallDir -or -not $DataDir -or -not $conf -or -not $vhd) { throw "va
 if (-not $Adb) { $Adb = Join-Path $InstallDir 'HD-Adb.exe' }
 if (-not $Player) { $Player = Join-Path $InstallDir 'HD-Player.exe' }
 foreach ($f in @($Adb,$Player,$conf,$vhd)) { if (-not (Test-Path -LiteralPath $f)) { throw "missing resolved BlueStacks file: $f" } }
+$env:ANDROID_ADB_SERVER_PORT=Select-BsrAdbServerPort (Get-BsrAdbServerPortState $Adb)
 function Get-ExactInstanceProcesses {
-    # Recent BlueStacks builds hide HD-Player's WMI CommandLine/ExecutablePath. Player.log is stored
-    # under the marker-validated DataDir and prefixes every exact-instance line with the host PID,
-    # so use its newest line and then require that PID to still be an HD-Player process.
     $playerLog=Join-Path $DataDir 'Logs\Player.log'
-    if(-not(Test-Path -LiteralPath $playerLog)){return @()}
-    try{
-        $text=(Get-Content -LiteralPath $playerLog -Tail 6000 -ErrorAction Stop) -join "`n"
-        $rx='(?m)^\S+\s+\S+\s+(\d+)\s+\d+\s+\S+\s+'+[regex]::Escape($Instance)+'\s+\['
-        $hits=[regex]::Matches($text,$rx)
-        if(-not $hits.Count){return @()}
-        $hostPid=[int]$hits[$hits.Count-1].Groups[1].Value
-        $proc=Get-Process -Id $hostPid -ErrorAction SilentlyContinue
-        if($proc -and $proc.Name -eq 'HD-Player'){
-            return @([pscustomobject]@{ProcessId=$hostPid})
-        }
-    }catch{}
-    @()
+    Get-BsrInstanceProcesses $Instance $playerLog | ForEach-Object {[pscustomobject]@{ProcessId=$_.Id}}
 }
 function Get-ExactInstanceAdbPorts {
     $ids=@(Get-ExactInstanceProcesses | Select-Object -ExpandProperty ProcessId)
     if(-not $ids){return @()}
     @(
-        Get-NetTCPConnection -State Listen -ErrorAction SilentlyContinue |
+        Get-BsrTcpListeners |
         Where-Object {$_.LocalPort -ge 5550 -and $_.LocalPort -le 5900 -and $ids -contains $_.OwningProcess} |
         Select-Object -ExpandProperty LocalPort -Unique
     )
@@ -130,7 +155,7 @@ if (-not (Test-Path -LiteralPath $vhd)) { throw "master Root.vhd not found: $vhd
 
 # Wait for boot, trying the conf port AND any live-bound port in the BlueStacks band; pins $serial.
 function Wait-Boot([int]$sec) {
-    Adb @('kill-server') | Out-Null
+    Stop-BsrAdbServer $Adb
     Start-Sleep 1
     Adb @('start-server') | Out-Null
     $sw = [Diagnostics.Stopwatch]::StartNew()
@@ -138,11 +163,8 @@ function Wait-Boot([int]$sec) {
         $exactIds=@(Get-ExactInstanceProcesses | Select-Object -ExpandProperty ProcessId)
         $livePorts=@(Get-ExactInstanceAdbPorts)
         if(-not $exactIds){Start-Sleep 2;continue}
-        $cands = @($livePorts) + @($adbPort)
+        $cands = @($livePorts)
         foreach ($p in ($cands | Select-Object -Unique)) {
-            $listener=@(Get-NetTCPConnection -State Listen -LocalPort ([int]$p) -ErrorAction SilentlyContinue |
-                        Select-Object -First 1)
-            if($listener -and $exactIds -notcontains $listener[0].OwningProcess){continue}
             $s = "127.0.0.1:$p"
             Adb @('connect', $s) | Out-Null
             $state=Adb-State $s
@@ -154,7 +176,7 @@ function Wait-Boot([int]$sec) {
                 $state=Adb-State $s
             }
             if($state -eq 'device'){
-                $boot=Adb @('-s',$s,'shell','getprop','sys.boot_completed')
+                $boot=Adb @('-s',$s,'exec-out','getprop','sys.boot_completed')
                 if(Is-BootComplete $boot){$script:serial=$s;Start-Sleep 3;return $true}
             }
         }
@@ -186,14 +208,16 @@ function Restart-ExactInstance {
 function Shell-Retry([string]$command,[int]$tries=5){
     $last=''
     for($i=0;$i -lt $tries;$i++){
-        $last=Adb @('-s',$script:serial,'shell',$command)
-        if(-not(Is-TransportError $last)){return $last}
+        $last=Adb @('-s',$script:serial,'exec-out',($command+"`necho BSR_SHELL_DONE"))
+        if(-not(Is-TransportError $last) -and $last -match '(?m)^BSR_SHELL_DONE\r?$'){
+            return ($last -replace '(?m)^BSR_SHELL_DONE\r?\n?','').TrimEnd("`r","`n")
+        }
         Adb @('disconnect',$script:serial)|Out-Null
         Start-Sleep 1
         Adb @('connect',$script:serial)|Out-Null
         Start-Sleep 2
     }
-    $last
+    throw "ADB shell did not complete after $tries attempts: $last"
 }
 function Shot([string]$name) {
     $launch=Shell-Retry "monkey -p $PKG -c android.intent.category.LAUNCHER 1"
@@ -206,26 +230,45 @@ function Shot([string]$name) {
     $psi.FileName=$Adb; $psi.Arguments='-s '+$script:serial+' exec-out screencap -p'
     $psi.UseShellExecute=$false; $psi.CreateNoWindow=$true
     $psi.RedirectStandardOutput=$true; $psi.RedirectStandardError=$true
-    $process=[Diagnostics.Process]::Start($psi)
-    $file=[IO.File]::Create($png)
-    try {
-        $copy=$process.StandardOutput.BaseStream.CopyToAsync($file)
-        $errors=$process.StandardError.ReadToEndAsync()
-        if(-not $process.WaitForExit(15000)){$process.Kill();throw 'ADB screenshot timed out.'}
-        $null=$copy.GetAwaiter().GetResult(); $errorText=$errors.GetAwaiter().GetResult()
-        if($process.ExitCode -ne 0){throw "ADB screenshot failed: $errorText"}
-    } finally {$file.Dispose();$process.Dispose()}
-    $bytes=[IO.File]::ReadAllBytes($png)
-    if($bytes.Length -lt 8 -or [BitConverter]::ToString($bytes,0,8) -ne '89-50-4E-47-0D-0A-1A-0A'){throw "Invalid PNG screenshot: $png"}
-    Info "shot -> $png"
+    $failure=''
+    for($attempt=0;$attempt -lt 4;$attempt++){
+        $process=[Diagnostics.Process]::Start($psi)
+        $file=[IO.File]::Create($png)
+        try {
+            $copy=$process.StandardOutput.BaseStream.CopyToAsync($file)
+            $errors=$process.StandardError.ReadToEndAsync()
+            if(-not $process.WaitForExit(15000)){$process.Kill();throw 'ADB screenshot timed out.'}
+            $null=$copy.GetAwaiter().GetResult(); $errorText=$errors.GetAwaiter().GetResult()
+            if($process.ExitCode -ne 0){throw "ADB screenshot failed: $errorText"}
+            $failure=''
+        }catch{$failure=$_.Exception.Message}
+        finally {$file.Dispose();$process.Dispose()}
+        $bytes=[IO.File]::ReadAllBytes($png)
+        if(-not $failure -and $bytes.Length -ge 8 -and [BitConverter]::ToString($bytes,0,8) -eq '89-50-4E-47-0D-0A-1A-0A'){
+            Info "shot -> $png";return
+        }
+        Adb @('disconnect',$script:serial)|Out-Null
+        Start-Sleep 1
+        Adb @('connect',$script:serial)|Out-Null
+    }
+    throw "Could not capture a valid PNG screenshot after four attempts: $failure"
 }
 
 try {
 # ---------------------------------------------------------------- REVERT (Magisk Undo)
 if ($Revert) {
     Step "REVERT '$Instance' (Magisk Undo)"
-    Run-PsFile @($Magisk, '-Action', 'Undo', '-Instance', $Instance, '-SelfCmd', $Cmd, '-Vhd', $vhd, '-Conf', $conf, '-Install', $InstallDir) | Write-Host
-    Write-Host "`nReverted ($Instance). The shared master + HD-Player patch are left intact unless you passed -Full to Undo." -ForegroundColor Green
+    Run-PsFile @($Magisk, '-Action', 'Undo', '-Instance', $Instance, '-SelfCmd', $Cmd, '-Engine', $Engine, '-Vhd', $vhd, '-Conf', $conf, '-Install', $InstallDir) | Write-Host
+    if($LASTEXITCODE){throw "Undo exited $LASTEXITCODE"}
+    Start-BsrPlayer $Player $Instance | Out-Null
+    if(-not (Wait-Boot $BootTimeout)){throw 'Unrooted instance failed to reboot.'}
+    $unroot=Shell-Retry 'id; su -c id; echo BSR_UNROOT_CHECK'
+    if($unroot -notmatch '(?m)^BSR_UNROOT_CHECK\s*$' -or $unroot -match 'uid=0' -or $unroot -notmatch 'uid=2000'){
+        throw "Unroot verification failed: $unroot"
+    }
+    $package=Shell-Retry ("pm path $PKG; echo BSR_PACKAGE_CHECK")
+    if($package -match 'package:' -or $package -notmatch '(?m)^BSR_PACKAGE_CHECK\s*$'){throw "Manager uninstall verification failed: $package"}
+    Ok 'unroot survives a cold boot; shell has no root and Magisk manager is absent'
     exit 0
 }
 
@@ -237,7 +280,11 @@ if(-not $VerifyOnly){
     $autoOut = Run-PsFile $autoArgs
     $autoRc = $LASTEXITCODE
     Write-Host $autoOut
-    if ($autoRc -eq 0) { Ok "pipeline exited 0" } else { No "pipeline exit code = $autoRc" }
+    if ($autoRc -eq 0) { Ok "pipeline exited 0" } else { throw "Pipeline exited $autoRc. Inspect its failure before continuing live checks." }
+    if($SimulateLostPopulateReply){
+        if($autoOut -match 'BSR_TEST_LOST_POPULATE_REPLY'){Ok 'population recovers after executing successfully and losing its reply'}
+        else{No 'lost population reply was not exercised'}
+    }
     if ($autoOut -match 'VERIFY PASS') { Ok "pipeline reached VERIFY PASS (Magisk sole root, no competing su, no bsr_su traces)" } else { No "pipeline did NOT print VERIFY PASS" }
     if ($autoOut -match 'competing su\s*:\s*none') { Ok "pipeline reported NO competing su" }
     elseif ($autoOut -match 'competing su\s*:\s*\S') { No "pipeline reported a COMPETING su (Abnormal-State regression)" }
@@ -252,7 +299,7 @@ if(-not $VerifyOnly){
 
 # ---------------------------------------------------------------- independent adb re-check
 Step "2) independent verification over adb"
-if (-not (Wait-Boot $BootTimeout)) { No "instance not reachable" }
+if (-not (Wait-Boot $BootTimeout)) { throw "Exact instance '$Instance' is not reachable." }
 $id = (Shell-Retry 'su -c id').Trim()
 if ($id -match 'uid=0') { Ok "su -c id => $id" } else { No "uid=0 not returned ($id)" }
 $binsu = (Shell-Retry 'readlink /system/bin/su').Trim()
@@ -274,9 +321,37 @@ for($cycle=1;$cycle -le $RebootCycles;$cycle++){
     if ($id2 -match 'uid=0') { Ok "root PERSISTS after cold-boot cycle $cycle (uid=0)" } else { No "root lost after cold-boot cycle $cycle ($id2)" }
     $xbin2 = (Shell-Retry 'su -c "ls -l /system/xbin/su 2>&1"').Trim()
     if ($xbin2 -match 'No such file|not found') { Ok "still NO competing /system/xbin/su after cold-boot cycle $cycle" } else { No "competing su reappeared: $xbin2" }
-    $trace=(Shell-Retry "su -c `"find /system /data/adb /data/downloads -type f -size 4968c 2>/dev/null | while read f; do [ \`"`$(sha256sum `$f|cut -d' ' -f1)\`" = '7eb6380ee26ce0b68d9f3f23ac04f50e0dfdd49359ef17d1a4978be1795913dd' ] && echo TRACE:`$f; done`"").Trim()
-    if(-not $trace){Ok "no bootstrap-su hash trace after cold-boot cycle $cycle"}else{No "bootstrap-su trace after cold-boot cycle $cycle`: $trace"}
+    $scan='BB=/data/adb/magisk/busybox; [ -x "$BB" ] || exit 1; set -- /system /data/adb; [ ! -d /data/downloads ] || set -- "$@" /data/downloads; files=$("$BB" find "$@" -type f -size 4968c) || exit 1; printf "%s\n" "$files" | while IFS= read -r f; do [ -n "$f" ] || continue; h=$("$BB" sha256sum "$f") || exit 1; case "$h" in 7eb6380ee26ce0b68d9f3f23ac04f50e0dfdd49359ef17d1a4978be1795913dd*) echo "TRACE:$f";; esac; done || exit 1; echo BSR_SCAN_DONE'
+    $trace=(Shell-Retry ("su -c '"+$scan+"'")).Trim()
+    if($trace -match '(?m)^BSR_SCAN_DONE\s*$' -and $trace -notmatch 'TRACE:'){Ok "no bootstrap-su hash trace after cold-boot cycle $cycle"}else{No "bootstrap-su scan failed after cold-boot cycle $cycle`: $trace"}
     Shot "magisk_e2e_after_cold_boot_$cycle.png"
+}
+
+if(-not $VerifyOnly -or $CheckFailurePaths){
+    Step '4) verification must reject a known bootstrap hash, then recover after cleanup'
+    $probeName='bsr_validation_'+[guid]::NewGuid().ToString('N')
+    $localProbe=Join-Path $pipeline $probeName
+    $guestUpload='/data/local/tmp/'+$probeName
+    $guestProbe='/data/adb/'+$probeName
+    [IO.File]::WriteAllBytes($localProbe,(Expand-BsrGzip ([Convert]::FromBase64String((Get-BsrEmbeddedText $cmdBytes 'BSRSU')))))
+    $verifyArgs=@($Magisk,'-Action','Verify','-Instance',$Instance,'-SelfCmd',$Cmd,'-Engine',$Engine,'-Vhd',$vhd,'-Conf',$conf,'-Install',$InstallDir)
+    try{
+        Adb @('-s',$script:serial,'push',$localProbe,$guestUpload) | Out-Null
+        $placed=Shell-Retry ("su -c 'cp $guestUpload $guestProbe && chmod 600 $guestProbe && echo BSR_PROBE_READY'")
+        if($placed -notmatch 'BSR_PROBE_READY'){throw "Could not stage the non-executable verification fixture: $placed"}
+        $negative=Run-PsFile $verifyArgs
+        if($LASTEXITCODE -ne 0 -and $negative -match 'VERIFY FAIL' -and $negative.Contains('TRACE:'+$guestProbe)){
+            Ok 'real verification detects the bootstrap hash and exits nonzero'
+        }else{No "verification accepted or failed to inspect the known bootstrap hash: $negative"}
+    }finally{
+        if(-not(Wait-Boot $BootTimeout)){throw 'Cannot reconnect to remove the verification fixture.'}
+        $removed=Shell-Retry ("su -c 'rm -f $guestProbe $guestUpload; test ! -e $guestProbe && echo BSR_PROBE_REMOVED'")
+        if($removed -notmatch 'BSR_PROBE_REMOVED'){throw "Could not confirm verification fixture cleanup: $removed"}
+        Remove-Item -LiteralPath $localProbe -Force -ErrorAction SilentlyContinue
+    }
+    $positive=Run-PsFile $verifyArgs
+    if($LASTEXITCODE -eq 0 -and $positive -match 'VERIFY PASS'){Ok 'real verification passes again after removing the fixture'}
+    else{No "verification did not recover after cleanup: $positive"}
 }
 
 Write-Host "`n================ LIVE E2E SUMMARY ================" -ForegroundColor Cyan
@@ -286,5 +361,5 @@ exit ([int]($fail -gt 0))
 } finally {
     # Our private ADB server can inherit the caller's redirected log handle.
     # Release it on both success and failure so CI/terminal capture can finish.
-    Adb @('kill-server') | Out-Null
+    try { Stop-BsrAdbServer $Adb } catch { Write-Warning $_.Exception.Message }
 }

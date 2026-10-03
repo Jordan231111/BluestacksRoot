@@ -1,73 +1,44 @@
-<#
-  Check-Embedded-Sync.ps1 -- CI guard for the single-file build.
-
-  blueStackRoot.cmd carries the engine and the Magisk orchestrator embedded between marker lines.
-  They are authored in tools\bsr_engine.ps1 / tools\bsr_magisk.ps1 and spliced in by tools\reembed.ps1.
-  If someone edits a tools\*.ps1 without re-running reembed, the .cmd silently ships stale logic.
-
-  This test extracts the embedded blocks exactly like the .cmd does at run time and compares them to
-  the tools\ sources (newline-normalised).  Exit code 1 on any drift, 0 when in sync.
-
-  Usage:  powershell -NoProfile -ExecutionPolicy Bypass -File tests\Check-Embedded-Sync.ps1
-#>
-$ErrorActionPreference = 'Stop'
-$here = if ($PSScriptRoot) { $PSScriptRoot } elseif ($PSCommandPath) { Split-Path -Parent $PSCommandPath } else { (Get-Location).Path }
-$repo = Split-Path -Parent $here
-$cmd  = Join-Path $repo 'blueStackRoot.cmd'
-if (-not (Test-Path -LiteralPath $cmd)) { throw "blueStackRoot.cmd not found: $cmd" }
-$t = [IO.File]::ReadAllText($cmd)
-
-function Norm([string]$s) { ($s -replace "`r`n", "`n").TrimEnd("`n", " ", "`t") }
-function Extract([string]$tag) {
-    $b = '__BSR_' + $tag + '_' + 'BEGIN__'; $e = '__BSR_' + $tag + '_' + 'END__'
-    $i = $t.IndexOf($b); $j = $t.IndexOf($e)
-    if ($i -lt 0 -or $j -le $i) { throw "embedded block $tag not found in blueStackRoot.cmd" }
-    $i = $t.IndexOf([char]10, $i) + 1
-    return $t.Substring($i, $j - $i)
+# Validate everything needed by the self-contained .cmd on Windows PowerShell 5.1.
+$ErrorActionPreference='Stop'
+$repo=Split-Path -Parent $PSScriptRoot
+. (Join-Path $repo 'tools\bsr_build.ps1')
+$bytes=[IO.File]::ReadAllBytes((Join-Path $repo 'blueStackRoot.cmd'))
+$fail=0
+function Check($ok,$name){
+    if($ok){Write-Host "[PASS] $name" -ForegroundColor Green}
+    else{$script:fail++;Write-Host "[FAIL] $name" -ForegroundColor Red}
 }
-
-$fail = 0
-foreach ($p in @(@('ENGINE', 'tools\bsr_engine.ps1'), @('MAGISK', 'tools\bsr_magisk.ps1'), @('HOST', 'tools\bsr_host.ps1'))) {
-    $src = Join-Path $repo $p[1]
-    if (-not (Test-Path -LiteralPath $src)) { Write-Host "  [FAIL] source missing: $($p[1])" -ForegroundColor Red; $fail++; continue }
-    $emb = Norm (Extract $p[0])
-    $on  = Norm ([IO.File]::ReadAllText($src))
-    if ($emb -eq $on) {
-        Write-Host ("  [PASS] {0,-7} embedded == {1} ({2} chars)" -f $p[0], $p[1], $emb.Length) -ForegroundColor Green
-    } else {
-        Write-Host ("  [FAIL] {0,-7} embedded != {1} (embedded {2}, source {3} chars) -- run tools\reembed.ps1" -f $p[0], $p[1], $emb.Length, $on.Length) -ForegroundColor Red
-        $fail++
-    }
+function Norm([string]$text){($text -replace "`r`n","`n").TrimEnd("`n")}
+foreach($pair in @(@('ENGINE','bsr_engine.ps1'),@('MAGISK','bsr_magisk.ps1'),@('HOST','bsr_host.ps1'),@('LAUNCHER','bsr_launcher.ps1'))){
+    try{
+        $embedded=Get-BsrEmbeddedText $bytes $pair[0]
+        Assert-BsrScript $embedded $pair[0]
+        $source=[IO.File]::ReadAllText((Join-Path $repo ('tools\'+$pair[1])))
+        Check ((Norm $embedded) -ceq (Norm $source)) "$($pair[0]) parses and matches its source"
+    }catch{Check $false "$($pair[0]): $_"}
 }
-$mainText = $t
-$t = [IO.File]::ReadAllText((Join-Path $repo 'debug.cmd'))
-if ((Norm (Extract 'HOST')) -cne (Norm ([IO.File]::ReadAllText((Join-Path $repo 'tools\bsr_host.ps1'))))) {
-    Write-Host '  [FAIL] diagnostic HOST helpers differ from source'; $fail++
-} else { Write-Host '  [PASS] diagnostic HOST helpers match source' -ForegroundColor Green }
-$t = $mainText
-
-# --- embedded Magisk APK: decode the base64 blob and verify its SHA-256 (guards against APK drift;
-#     the APK is re-embedded by tools\reembed-apk.ps1, which round-trips this same hash). ---
-# Custom Kitsune v31 build (denylist-table patch) from Jordan231111/KitsuneMagisk@25fa2159f. See README / CHANGELOG.
-$ApkSha256 = 'fac319d2de262fcfff1684e13e1a5c61c486d2a773a7a8ffcfdbfe6f763a7fd4'
-try {
-    $apkB64 = (Extract 'APK') -replace '[^A-Za-z0-9+/=]', ''
-    $apkBytes = [Convert]::FromBase64String($apkB64)
-    $apkSha = (([System.Security.Cryptography.SHA256]::Create().ComputeHash($apkBytes) | ForEach-Object { $_.ToString('x2') }) -join '')
-    if ($apkSha -ceq $ApkSha256) {
-        Write-Host ("  [PASS] {0,-7} embedded APK sha256 == {1} ({2:N0} bytes)" -f 'APK', $ApkSha256, $apkBytes.Length) -ForegroundColor Green
-    }
-    else {
-        Write-Host ("  [FAIL] {0,-7} embedded APK sha256 {1} != expected -- re-run tools\reembed-apk.ps1" -f 'APK', $apkSha) -ForegroundColor Red
-        $fail++
-    }
+$diagnostic=[IO.File]::ReadAllBytes((Join-Path $repo 'debug.cmd'))
+Check ((Norm (Get-BsrEmbeddedText $diagnostic 'HOST')) -ceq (Norm ([IO.File]::ReadAllText((Join-Path $repo 'tools\bsr_host.ps1'))))) 'diagnostic HOST matches its source'
+$debugText=[Text.Encoding]::UTF8.GetString($diagnostic)
+Assert-BsrScript ($debugText.Substring($debugText.IndexOf('#__BSR'+'_DEBUG_PS__'))) 'diagnostic'
+# Independent pins catch corruption in every payload, including blocks unchanged by a source rebuild.
+$hashes=[ordered]@{
+    APK='fac319d2de262fcfff1684e13e1a5c61c486d2a773a7a8ffcfdbfe6f763a7fd4'
+    DFS='008b6006e766d2591c8c7db7bf6d6a0a4b9cd6116b9a8e2737151828eb577632'
+    BSRSU='c4901ed7deea2599753042201a3b79a0d265170ad3b6793535daf8801ad95974'
+    SU='143f50a2a5abaf8dff979996e72f6b911262d5fc962b70a86b764e376528b9c1'
 }
-catch {
-    Write-Host ("  [FAIL] {0,-7} could not decode embedded APK: {1}" -f 'APK', $_.Exception.Message) -ForegroundColor Red
-    $fail++
+foreach($tag in $hashes.Keys){
+    try{
+        $payload=[Convert]::FromBase64String((Get-BsrEmbeddedText $bytes $tag))
+        Check ((Get-BsrBytesHash $payload) -ceq $hashes[$tag]) "$tag payload SHA-256 matches"
+        if($tag -eq 'BSRSU'){
+            Check ((Get-BsrBytesHash (Expand-BsrGzip $payload)) -ceq (Get-BsrFileHash (Join-Path $repo 'tools\su_src\bsr_su'))) 'bootstrap payload matches the checked-in binary'
+        }
+    }catch{Check $false "$tag payload: $_"}
 }
-
-Write-Host ""
-if ($fail) { Write-Host "RESULT: embedded blocks OUT OF SYNC ($fail) -- re-run tools\reembed.ps1 / reembed-apk.ps1 and commit blueStackRoot.cmd" -ForegroundColor Red; exit 1 }
-Write-Host "RESULT: embedded blocks in sync with tools\ sources" -ForegroundColor Green
-exit 0
+$headerEnd=(Get-BsrBlockBounds $bytes 'ENGINE').Begin
+$header=[Text.Encoding]::UTF8.GetString($bytes,0,$headerEnd)
+Check ($header -match 'DisableDelayedExpansion' -and $header -match 'exit /b %BSR_RC%' -and $header -notmatch '(?<!\r)\n' -and @($header -split "`r`n" | Where-Object {$_.Length -gt 8191}).Count -eq 0) 'batch bootstrap uses safe expansion, valid line endings and propagates the exit code'
+Write-Host "RESULT: $fail embedded build failures"
+exit ([int]($fail -gt 0))

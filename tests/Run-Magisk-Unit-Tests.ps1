@@ -199,8 +199,7 @@ try {
             @{ Name='15037 other'; State=@{15037='other'}; Expected='15038' },
             @{ Name='two others'; State=@{15037='other';15038='other'}; Expected='15039' },
             @{ Name='ours reused'; State=@{15037='ours'}; Expected='15037' },
-            @{ Name='free before ours wins'; State=@{15037='other';15039='ours'}; Expected='15038' },
-            @{ Name='all occupied fallback'; State=@{}; Expected='15037'; Fill=$true }
+            @{ Name='free before ours wins'; State=@{15037='other';15039='ours'}; Expected='15038' }
         )
         foreach ($case in $serverCases) {
             $state = $case.State
@@ -208,11 +207,19 @@ try {
             $script:AdbServerPortProbe = { $state }.GetNewClosure()
             Eq "adb-server: $($case.Name)" $case.Expected (Resolve-AdbServerPort)
         }
+        $script:AdbServerPortProbe = { $full=@{}; foreach($p in 15037..15057){$full[$p]='other'}; $full }
+        $blocked=$false
+        try { Resolve-AdbServerPort | Out-Null } catch { $blocked=$_.Exception.Message -match 'occupied' }
+        Ok 'adb-server: full band fails without taking a foreign port' $blocked
         $script:AdbServerPortProbe = { @{} }
         $env:ANDROID_ADB_SERVER_PORT = '5037'
         Eq 'adb-server: inherited 5037 ignored' '15037' (Resolve-AdbServerPort)
         $env:ANDROID_ADB_SERVER_PORT = '15040'
         Eq 'adb-server: private override honoured' '15040' (Resolve-AdbServerPort)
+        $script:AdbServerPortProbe = { @{15040='other'} }
+        Eq 'adb-server: occupied override is not reused' '15037' (Resolve-AdbServerPort)
+        $env:ANDROID_ADB_SERVER_PORT = '5555'
+        Eq 'adb-server: guest port override is ignored' '15037' (Resolve-AdbServerPort)
     } finally {
         $script:AdbServerPortProbe = $null
         Remove-Item Env:\ANDROID_ADB_SERVER_PORT -ErrorAction SilentlyContinue
@@ -244,6 +251,8 @@ try {
         @('no devices', 'error: no devices/emulators found', $false),
         @('offline', 'error: device offline', $false),
         @('closed', 'error: closed', $false),
+        @('reset', 'error: protocol fault (could not read status): Connection reset by peer', $false),
+        @('broken pipe', 'error: broken pipe', $false),
         @('daemon text ok', '* daemon started successfully *', $true)
     )
     foreach ($c in $adbCases) { Ok "adbok: $($c[0])" ((AdbOk $c[1]) -eq $c[2]) }
@@ -280,6 +289,9 @@ try {
         @('clean magisk links', "/system/bin/su|link|./magisk`n/sbin/su|link|/sbin/.magisk/busybox/magisk", ''),
         @('xbin file', "/system/bin/su|link|./magisk`n/system/xbin/su|file|", '/system/xbin/su'),
         @('bad symlink', "/system/xbin/su|link|/data/local/tmp/su", '/system/xbin/su'),
+        @('magisk in unrelated directory', '/system/bin/su|link|/data/magisk-backup/su', '/system/bin/su'),
+        @('magisk filename suffix', '/system/bin/su|link|./magisk.old', '/system/bin/su'),
+        @('architecture executables', "/system/bin/su|link|/sbin/magisk64`n/sbin/su|link|magisk32", ''),
         @('two real files', "/system/xbin/su|file|`n/vendor/bin/su|file|", '/system/xbin/su,/vendor/bin/su'),
         @('malformed ignored', "garbage`n|||`n/system/bin/su|link|./magisk", ''),
         @('empty', '', '')

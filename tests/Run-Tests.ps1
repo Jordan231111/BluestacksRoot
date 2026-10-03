@@ -38,8 +38,9 @@ function Redact-UserPath($value) {
 }
 Write-Host "engine: $(Redact-UserPath $Engine)" -ForegroundColor DarkGray
 Write-Host "cmd:    $(Redact-UserPath $Cmd)" -ForegroundColor DarkGray
-$work = Join-Path $env:TEMP ("bsr_tests_" + $PID)
-if (Test-Path $work) { Remove-Item $work -Recurse -Force }
+. (Join-Path $PSScriptRoot 'Test-Support.ps1')
+. (Join-Path $repo 'tools\bsr_host.ps1')
+$work = Join-Path $env:TEMP ('bsr_tests_' + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $work -Force | Out-Null
 
 $script:pass = 0; $script:fail = 0; $script:skip = 0
@@ -53,10 +54,8 @@ function Run-Engine([string[]]$engArgs) {
     # invoke the engine in a child powershell, capture output + exit code.
     # child stderr (2>&1) must not throw in the parent, so relax EAP locally.
     $allArgs = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', $Engine) + $engArgs
-    $old = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
-    try { $out = & powershell.exe @allArgs 2>&1 | Out-String }
-    finally { $ErrorActionPreference = $old }
-    return [pscustomobject]@{ Code = $LASTEXITCODE; Out = $out }
+    $result=Invoke-BsrNative 'powershell.exe' $allArgs 120
+    return [pscustomobject]@{ Code = $result.ExitCode; Out = $result.Output }
 }
 
 # ---- byte helpers ----
@@ -127,9 +126,25 @@ $r2 = Run-Engine @('-Action', 'Patch', '-Exe', $pe)
 Check ($r2.Code -eq 0 -and $r2.Out -match 'Already patched|Nothing to') "re-patch is idempotent"
 
 # 3) restore from backup
+$dryRestore=Run-Engine @('-Action','Patch','-Exe',$pe,'-Restore','-DryRun')
+Check ($dryRestore.Code -eq 0 -and (Read-PE $pe)[0x227] -eq 0x90) 'restore dry-run preserves the patched executable'
 $r3 = Run-Engine @('-Action', 'Patch', '-Exe', $pe, '-Restore')
 $bb = Read-PE $pe
 Check ($r3.Code -eq 0 -and $bb[0x227] -eq 0x74 -and $bb[0x228] -eq 0x10) "restore reverts to original bytes"
+
+foreach($badCase in @('signature','optional','section','overflow')){
+    $bad=New-FakePE 1
+    switch($badCase){
+        signature {$bad[0x82]=1}
+        optional {Set-U16 $bad 0x94 65535}
+        section {Set-U32 $bad 0x19C 0xFFFFFF00}
+        overflow {Set-U32 $bad 0x3C 0x7FFFFFFF}
+    }
+    $badPath=Write-PE $bad ('bad-'+$badCase+'.exe')
+    $result=Run-Engine @('-Action','Patch','-Exe',$badPath)
+    $after=[IO.File]::ReadAllBytes($badPath)
+    Check ($result.Code -ne 0 -and [Convert]::ToBase64String($after) -ceq [Convert]::ToBase64String($bad) -and -not(Test-Path -LiteralPath ($badPath+'.bak'))) "malformed PE $badCase fails without modifying the file or creating a backup"
+}
 
 # 4) already-patched input is detected
 $pe4 = Write-PE (New-FakePE 1 -PreNopFirst) 'hd4.exe'
@@ -295,9 +310,9 @@ function Debugfs-Stat([string]$exe, [string]$img, [string]$path) {
     try { return (& $exe -R "stat $path" $imgF 2>&1 | Out-String) } finally { $ErrorActionPreference = $old }
 }
 function New-Ext4([string]$img, [int]$mb) {
-    & powershell.exe -NoProfile -Command "`$f=[IO.File]::Open('$img','Create'); `$f.SetLength(${mb}MB); `$f.Close()" | Out-Null
-    $old = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
-    try { & $Mke2fs -F -t ext4 -q $img 2>&1 | Out-Null } finally { $ErrorActionPreference = $old }   # DEFAULT features incl metadata_csum
+    $file=[IO.File]::Open($img,'Create');try{$file.SetLength([long]$mb*1MB)}finally{$file.Dispose()}
+    $result=Invoke-BsrNative $Mke2fs @('-F','-t','ext4','-q',$img)
+    if($result.ExitCode){throw $result.Output}
 }
 
 if ($Debugfs -and $Mke2fs -and (Test-Path $Debugfs) -and (Test-Path $Mke2fs) -and (Test-Path $Cmd) -and $hasBlob) {
@@ -315,8 +330,17 @@ if ($Debugfs -and $Mke2fs -and (Test-Path $Debugfs) -and (Test-Path $Mke2fs) -an
     $stat2 = Debugfs-Stat $Debugfs $img '/android/system/xbin/su'
     Check ($rr.Code -eq 0 -and $stat2 -match 'File not found') "su removed from ext4"
 
+    $special=Join-Path $work ("O'Brien [disk] & ! "+[char]0xe9)
+    [void][IO.Directory]::CreateDirectory($special)
+    $specialImg=Join-Path $special 'fs.img';[IO.File]::Copy($img,$specialImg)
+    $savedTemp=$env:TEMP
+    try{
+        $env:TEMP=$special
+        $unicode=Run-Engine @('-Action','TestExt4','-Img',$specialImg,'-SelfPath',$Cmd,'-Debugfs',$Debugfs)
+        Check ($unicode.Code -eq 0) "ext4 injection handles special characters in both staging and image paths ($($unicode.Out | Select-Object -Last 1))"
+    }finally{$env:TEMP=$savedTemp}
+
     # install again with NO -Debugfs => engine must extract the EMBEDDED debugfs from the .cmd
-    powershell.exe -NoProfile -Command "Remove-Item -Recurse -Force (Join-Path `$env:TEMP 'bsr_work\debugfs') -EA SilentlyContinue" | Out-Null
     New-Ext4 $img 96
     $re = Run-Engine @('-Action', 'TestExt4', '-Img', $img, '-SelfPath', $Cmd)
     Check ($re.Code -eq 0 -and $re.Out -match 'embedded debugfs') "engine extracts EMBEDDED debugfs from the .cmd and installs su"
@@ -327,5 +351,5 @@ else { Sk "ext4/debugfs test (need tools\debugfs\debugfs.exe + mke2fs + built cm
 Write-Host "`n================ SUMMARY ================" -ForegroundColor Cyan
 $sumColor = if ($script:fail) { 'Red' } else { 'Green' }
 Write-Host ("  PASS={0}  FAIL={1}  SKIP={2}" -f $script:pass, $script:fail, $script:skip) -ForegroundColor $sumColor
-Remove-Item $work -Recurse -Force -ErrorAction SilentlyContinue
+Remove-BsrTestDirectory $work
 exit ([int]($script:fail -gt 0))

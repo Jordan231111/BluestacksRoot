@@ -53,8 +53,8 @@ if (-not $RealExe) {
     if ($install) { $RealExe = Join-Path $install 'HD-Player.exe' }
 }
 
-$work = Join-Path $env:TEMP ("bsr_patcheq_" + $PID)
-if (Test-Path $work) { Remove-Item $work -Recurse -Force }
+. (Join-Path $PSScriptRoot 'Test-Support.ps1')
+$work = Join-Path $env:TEMP ('bsr_patcheq_' + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $work -Force | Out-Null
 
 $script:pass = 0; $script:fail = 0; $script:skip = 0
@@ -344,7 +344,7 @@ try {
     }
 }
 finally {
-    Remove-Item $work -Recurse -Force -ErrorAction SilentlyContinue
+    Remove-BsrTestDirectory $work
 }
 
 Write-Host "`n================ SUMMARY ================" -ForegroundColor Cyan

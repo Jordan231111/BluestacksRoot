@@ -261,9 +261,9 @@ live mount layout, failure evidence, and working installation sequence.
 | Magisk databin (extracted from APK) | `tools/magisk_databin/` |
 | Magisk APK (manager + all binaries) | `Working Example & Fix/MagiskMyStableBuild.apk` — **custom Kitsune v31** (`denylist`-table patch; see README / CHANGELOG v10) |
 | Engine (patch, conf, ext4, Root/Unroot) | `tools/bsr_engine.ps1` (embedded in `blueStackRoot.cmd`) |
-| Offline su inject (bootstrap) | `tests/rootvhd-hook.ps1` |
-| Offline bsr_su remove + stock bindmount restore | `tests/remove-bsr-su.ps1` |
-| Factory‑inventory investigation | `tests/investigate-factory-root.ps1` |
+| Historical offline su injection probe | `archive/dev-probes/rootvhd-hook.ps1` |
+| Historical bootstrap cleanup probe | `archive/dev-probes/remove-bsr-su.ps1` |
+| Historical factory inventory probe | `archive/dev-probes/investigate-factory-root.ps1` |
 | HD‑Player patch site | file `0xB46E8` / va `0x1400B52E6` (`74 5B → 90 90`) |
 | Backups | `Root.vhd.bsrbak` (pristine, pre‑all), `Root.vhd.magiskgood` (Magisk‑good), `Rvc64.bstk.bsrbak` |
 | Magisk log | `/cache/magisk.log` |

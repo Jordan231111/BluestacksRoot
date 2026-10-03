@@ -34,9 +34,13 @@ jobs:
 
       # The .cmd ships the engine + orchestrator embedded (must match tools\*.ps1) and the Magisk APK
       # (must match its known SHA-256); make sure none of them have drifted.
-      - name: Embedded build in sync with tools/ (engine, orchestrator, host helpers, APK)
+      - name: Embedded scripts, launcher and binary payload integrity
         shell: cmd
         run: powershell -NoProfile -ExecutionPolicy Bypass -File tests\Check-Embedded-Sync.ps1
+
+      - name: Reproducible build and standalone launcher
+        shell: cmd
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File tests\Run-Distribution-Tests.ps1
 
       # Core engine: integrity patch, .bstk disk-mode, conf root flags, su round-trip, bootstrap.
       # (Invoked via powershell.exe -File exactly as blueStackRoot.cmd does, i.e. Windows PowerShell 5.1.)
@@ -65,6 +69,10 @@ jobs:
       - name: Windows launch and disk format regression tests
         shell: cmd
         run: powershell -NoProfile -ExecutionPolicy Bypass -File tests\Run-Host-Tests.ps1
+
+      - name: Failure handling, transactions, process arguments and instance isolation
+        shell: cmd
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File tests\Run-Safety-Tests.ps1
 
       - name: Diagnostic privacy and failure handling
         shell: cmd

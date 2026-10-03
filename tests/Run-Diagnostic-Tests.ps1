@@ -53,6 +53,7 @@ try {
 
   & {
     function Get-CimInstance { @() }
+    $PlayerLog=Join-Path $work 'Player.log';[IO.File]::WriteAllText($PlayerLog,'fixture')
     $script:launchedPid=$null
     $script:fakeStart=(Get-Date)
     function Get-Content { '2020-01-01 10:00:00.000-0400 123 456 PLR Rvc64 [Ready] stale' }

@@ -54,6 +54,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+[Console]::OutputEncoding = New-Object Text.UTF8Encoding($false)
 Set-StrictMode -Version 2
 
 # Allow the .cmd to pass path-like inputs via environment variables (avoids batch quoting pain).
@@ -78,24 +79,6 @@ if (-not $NoBackup -and $env:BSR_NOBACKUP -eq '1') { $NoBackup = $true }
 if (-not $NoLaunch -and $env:BSR_NOLAUNCH -eq '1') { $NoLaunch = $true }
 if (-not $Force -and $env:BSR_FORCE -eq '1') { $Force = $true }
 
-function Redact-UserPath($value) {
-    if ($null -eq $value) { return $value }
-    $s = [string]$value
-    $roots = @($env:USERPROFILE) | Where-Object { $_ }
-    foreach ($root in $roots) {
-        $root = $root.TrimEnd('\', '/')
-        if (-not $root) { continue }
-        $parent = Split-Path -Parent $root
-        if ($parent) {
-            $masked = Join-Path $parent 'xxxxx'
-            $s = $s -replace "(?i)$([regex]::Escape($root))", ($masked -replace '\$', '$$')
-            $s = $s -replace "(?i)$([regex]::Escape(($root -replace '\\', '/')))", (($masked -replace '\\', '/') -replace '\$', '$$')
-        }
-    }
-    $s = $s -replace '(?i)([A-Z]:[\\/]+Users[\\/]+)([^\\/]+)(?=$|[\\/])', '${1}xxxxx'
-    $s = $s -replace '(?i)(/Users/)([^/]+)(?=$|/)', '${1}xxxxx'
-    $s
-}
 function Say([string]$m, [string]$c = 'Gray') { Write-Host (Redact-UserPath $m) -ForegroundColor $c }
 
 # Read the (large) self/.cmd file at most once per process. Get-EmbeddedSu and
@@ -127,184 +110,6 @@ if ($SelfPath) {
 # product folder names. Product + uninstall registry records remain paired, and every selected location
 # is validated by BlueStacks-owned marker files before use. A running process/service, App Paths entry,
 # or PATH entry can rescue a missing/stale InstallDir.
-function Normalize-DiscoveryPath([string]$value) {
-    if ([string]::IsNullOrWhiteSpace($value)) { return $null }
-    $s = [Environment]::ExpandEnvironmentVariables($value.Trim())
-    if ($s -match '^\s*"([^"]+)"') { $s = $Matches[1] }
-    $s = $s.Trim().Trim('"').TrimEnd(' ', '\', '/')
-    if (-not $s) { return $null }
-    return $s
-}
-
-function Get-ExePathFromCommand([string]$value) {
-    if ([string]::IsNullOrWhiteSpace($value)) { return $null }
-    $s = [Environment]::ExpandEnvironmentVariables($value.Trim())
-    if ($s -match '^\s*"([^"]+?\.exe)"') { return $Matches[1] }
-    if ($s -match '^\s*(.+?\.exe)(?:\s|$)') { return $Matches[1].Trim('"') }
-    return $null
-}
-
-function Get-ObjectProperty($object, [string]$name) {
-    if (-not $object) { return $null }
-    $prop = $object.PSObject.Properties[$name]
-    if ($prop) { return $prop.Value }
-    return $null
-}
-
-function Get-RegBlueStacksRecords {
-    $records = New-Object System.Collections.Generic.List[object]
-    $seen = @{}
-    function Add-RegRecord($source, $p) {
-        if (-not $p) { return }
-        $install = Normalize-DiscoveryPath (Get-ObjectProperty $p 'InstallDir')
-        if (-not $install) { $install = Normalize-DiscoveryPath (Get-ObjectProperty $p 'InstallLocation') }
-        if (-not $install) {
-            $exe = Get-ExePathFromCommand (Get-ObjectProperty $p 'DisplayIcon')
-            if (-not $exe) { $exe = Get-ExePathFromCommand (Get-ObjectProperty $p 'UninstallString') }
-            if ($exe) { $install = Normalize-DiscoveryPath (Split-Path -Parent $exe) }
-        }
-        $data = Normalize-DiscoveryPath (Get-ObjectProperty $p 'DataDir')
-        $user = Normalize-DiscoveryPath (Get-ObjectProperty $p 'UserDefinedDir')
-        if (-not $install -and -not $data -and -not $user) { return }
-        $id = ("$install|$data|$user").ToLowerInvariant()
-        if ($seen.ContainsKey($id)) { return }
-        $seen[$id] = $true
-        [void]$records.Add([pscustomobject]@{
-            Source = "$source"; InstallDir = $install; DataDir = $data; UserDefinedDir = $user
-        })
-    }
-
-    foreach ($root in @('HKLM:\SOFTWARE', 'HKLM:\SOFTWARE\WOW6432Node',
-                        'HKCU:\SOFTWARE', 'HKCU:\SOFTWARE\WOW6432Node')) {
-        if (-not (Test-Path -LiteralPath $root)) { continue }
-        try {
-            foreach ($key in @(Get-ChildItem -LiteralPath $root -ErrorAction Stop |
-                               Where-Object { $_.PSChildName -match '(?i)(bluestacks|msi.*app.*player)' })) {
-                try { Add-RegRecord $key.PSPath (Get-ItemProperty -LiteralPath $key.PSPath -ErrorAction Stop) } catch { }
-            }
-        } catch { }
-    }
-    foreach ($root in @('HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall',
-                        'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall',
-                        'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall')) {
-        if (-not (Test-Path -LiteralPath $root)) { continue }
-        try {
-            foreach ($key in @(Get-ChildItem -LiteralPath $root -ErrorAction Stop)) {
-                try {
-                    $p = Get-ItemProperty -LiteralPath $key.PSPath -ErrorAction Stop
-                    if ($key.PSChildName -match '(?i)bluestacks|msi.*app.*player' -or
-                        (Get-ObjectProperty $p 'DisplayName') -match '(?i)bluestacks|msi.*app.*player') {
-                        Add-RegRecord $key.PSPath $p
-                    }
-                } catch { }
-            }
-        } catch { }
-    }
-    return @($records | ForEach-Object { $_ })
-}
-
-function Get-RegBlueStacks {
-    return @(Get-RegBlueStacksRecords | Select-Object -First 1)[0]
-}
-
-function Get-DataRootFromPath([string]$value) {
-    $p = Normalize-DiscoveryPath $value
-    if (-not $p -or -not (Test-Path -LiteralPath $p)) { return $null }
-    try {
-        if (-not (Get-Item -LiteralPath $p -ErrorAction Stop).PSIsContainer) {
-            if ((Split-Path -Leaf $p) -ieq 'bluestacks.conf') { $p = Split-Path -Parent $p }
-            else { return $null }
-        }
-    } catch { return $null }
-    for ($i = 0; $i -lt 5 -and $p; $i++) {
-        if (Test-Path -LiteralPath (Join-Path $p 'bluestacks.conf')) {
-            return (Resolve-Path -LiteralPath $p).Path.TrimEnd('\', '/')
-        }
-        $parent = Split-Path -Parent $p
-        if (-not $parent -or $parent -eq $p) { break }
-        $p = $parent
-    }
-    return $null
-}
-
-function Get-InstallRootFromPath([string]$value) {
-    $p = Normalize-DiscoveryPath $value
-    if (-not $p -or -not (Test-Path -LiteralPath $p)) { return $null }
-    try {
-        if (-not (Get-Item -LiteralPath $p -ErrorAction Stop).PSIsContainer) { $p = Split-Path -Parent $p }
-    } catch { return $null }
-    for ($i = 0; $i -lt 4 -and $p; $i++) {
-        if ((Test-Path -LiteralPath (Join-Path $p 'HD-Player.exe')) -and
-            (Test-Path -LiteralPath (Join-Path $p 'HD-Adb.exe'))) {
-            return (Resolve-Path -LiteralPath $p).Path.TrimEnd('\', '/')
-        }
-        $parent = Split-Path -Parent $p
-        if (-not $parent -or $parent -eq $p) { break }
-        $p = $parent
-    }
-    return $null
-}
-
-function Test-SamePath([string]$left, [string]$right) {
-    if (-not $left -or -not $right) { return $false }
-    try {
-        return ([IO.Path]::GetFullPath($left).TrimEnd('\', '/') -ieq
-                [IO.Path]::GetFullPath($right).TrimEnd('\', '/'))
-    } catch { return ($left.TrimEnd('\', '/') -ieq $right.TrimEnd('\', '/')) }
-}
-
-function Get-RecordDataRoot($record) {
-    if (-not $record) { return $null }
-    foreach ($p in @($record.DataDir, $record.UserDefinedDir)) {
-        $root = Get-DataRootFromPath $p
-        if ($root) { return $root }
-    }
-    return $null
-}
-
-function Get-RuntimeInstallRoots {
-    $out = New-Object System.Collections.Generic.List[string]
-    foreach ($name in @('HD-Player', 'HD-Adb')) {
-        try {
-            foreach ($proc in @(Get-Process -Name $name -ErrorAction SilentlyContinue)) {
-                try {
-                    $root = Get-InstallRootFromPath $proc.Path
-                    if ($root) { [void]$out.Add($root) }
-                } catch { }
-            }
-        } catch { }
-    }
-    try {
-        foreach ($svc in @(Get-CimInstance Win32_Service -ErrorAction Stop |
-                           Where-Object { $_.Name -match '(?i)bstk|bluestacks' -or
-                                          $_.DisplayName -match '(?i)bluestacks|msi.*app.*player' })) {
-            $root = Get-InstallRootFromPath (Get-ExePathFromCommand $svc.PathName)
-            if ($root) { [void]$out.Add($root) }
-        }
-    } catch { }
-    foreach ($root in @('HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths',
-                        'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths')) {
-        foreach ($exeName in @('HD-Player.exe', 'HD-Adb.exe')) {
-            $key = Join-Path $root $exeName
-            try {
-                $raw = (Get-Item -LiteralPath $key -ErrorAction Stop).GetValue('')
-                $found = Get-InstallRootFromPath $raw
-                if ($found) { [void]$out.Add($found) }
-            } catch { }
-        }
-    }
-    foreach ($exeName in @('HD-Player.exe', 'HD-Adb.exe')) {
-        try {
-            $cmd = Get-Command $exeName -ErrorAction SilentlyContinue
-            if ($cmd) {
-                $root = Get-InstallRootFromPath $cmd.Source
-                if ($root) { [void]$out.Add($root) }
-            }
-        } catch { }
-    }
-    return @($out | Select-Object -Unique)
-}
-
 function Resolve-InstallRoot([string]$preferred, [string]$custom, [string]$dataRoot) {
     $customInstall = Get-InstallRootFromPath $custom
     if ($customInstall) { return $customInstall }
@@ -334,7 +139,7 @@ function Resolve-InstallRoot([string]$preferred, [string]$custom, [string]$dataR
     throw "BlueStacks install folder was not found. Registry, uninstall records, running processes, services, App Paths, and PATH contained no folder with both HD-Player.exe and HD-Adb.exe. Use option 8 to select it."
 }
 
-# Expected SHA-256 of the decrypted su ELF (derivation §1).  Used as an integrity gate.
+# Expected SHA-256 of the decrypted su ELF (derivation Â§1).  Used as an integrity gate.
 $Script:SuSha256 = '185106357CFC0D1DB4B8EFB033DE863F437850437E0EF6B62630C05F291B4902'
 
 # ---------------------------------------------------------------------------
@@ -355,69 +160,49 @@ function Get-EmbeddedSu([string]$selfPath) {
     $i += $beg.Length
     $b64 = $text.Substring($i, $j - $i)
     # strip all whitespace (line wraps, CR/LF, the marker's own EOL)
-    $b64 = ($b64 -replace '[^A-Za-z0-9+/=]', '')
+    $b64 = ($b64 -replace '\s', '')
     if ($b64.Length -lt 64) { throw "su payload is empty -- run tools/embed-su.ps1 to populate it." }
     $gz = [Convert]::FromBase64String($b64)
-    # gunzip via .NET GZipStream (matches the .NET GZipStream used to compress)
-    $in = New-Object System.IO.MemoryStream(, $gz)
-    $z = New-Object System.IO.Compression.GZipStream($in, [System.IO.Compression.CompressionMode]::Decompress)
-    $out = New-Object System.IO.MemoryStream
-    $buf = New-Object byte[] 65536
-    while (($n = $z.Read($buf, 0, $buf.Length)) -gt 0) { $out.Write($buf, 0, $n) }
-    $z.Close(); $in.Close()
-    $bytes = $out.ToArray(); $out.Close()
+    $bytes = Expand-BsrGzip $gz
     # integrity gate
     $sha = (Get-Sha256Hex $bytes)
     if ($sha -ne $Script:SuSha256) {
         throw "Embedded su FAILED integrity check.`n  expected $($Script:SuSha256)`n  got      $sha"
     }
-    return $bytes
+    return ,$bytes
 }
 
 function Get-Sha256Hex([byte[]]$bytes) {
-    $h = [System.Security.Cryptography.SHA256]::Create()
-    # [BitConverter]::ToString yields uppercase hex with '-' separators; strip them. Identical
-    # output to the per-byte ToString('X2') join, without the 32-element pipeline allocation.
-    try { return [BitConverter]::ToString($h.ComputeHash($bytes)).Replace('-', '') }
-    finally { $h.Dispose() }
+    return (Get-BsrBytesHash $bytes).ToUpperInvariant()
 }
 
 # ---------------------------------------------------------------------------
 # Embedded debugfs bundle (offline fallback) -- a base64'd .zip of the Cygwin
 # debugfs.exe + its 10 DLLs, carried inside the .cmd between __BSR_DFS_* lines.
-# Extracted once to %TEMP%\bsr_work\debugfs\ and reused.  Returns debugfs.exe
+# Extracted to a private directory for this invocation. Returns debugfs.exe
 # path, or $null if no bundle is embedded.
 # ---------------------------------------------------------------------------
 function Expand-EmbeddedDebugfs([string]$selfPath) {
-    $destDir = Join-Path (Join-Path $env:TEMP 'bsr_work') 'debugfs'
-    $exe = Join-Path $destDir 'debugfs.exe'
-    if (Test-Path -LiteralPath $exe) { return $exe }   # already extracted this session
     if (-not $selfPath -or -not (Test-Path -LiteralPath $selfPath)) { return $null }
     $text = Get-SelfText $selfPath
     $beg = '__BSR_DFS_' + 'BEGIN__'; $end = '__BSR_DFS_' + 'END__'
     $i = $text.IndexOf($beg); $j = $text.IndexOf($end)
     if ($i -lt 0 -or $j -le $i) { return $null }   # no bundle embedded
     $i += $beg.Length
-    $b64 = ($text.Substring($i, $j - $i) -replace '[^A-Za-z0-9+/=]', '')
-    if ($b64.Length -lt 1024) { return $null }
-    if (-not (Test-Path -LiteralPath $destDir)) { New-Item -ItemType Directory -Path $destDir -Force | Out-Null }
-    $zipPath = Join-Path $destDir '_dfs.zip'
-    [System.IO.File]::WriteAllBytes($zipPath, [Convert]::FromBase64String($b64))
-    try { Add-Type -AssemblyName System.IO.Compression.FileSystem -ErrorAction SilentlyContinue } catch { }
-    $za = [System.IO.Compression.ZipFile]::OpenRead($zipPath)
-    try {
-        foreach ($e in $za.Entries) {
-            if (-not $e.Name) { continue }   # directory entry
-            $t = Join-Path $destDir $e.FullName
-            $d = Split-Path -Parent $t
-            if (-not (Test-Path -LiteralPath $d)) { New-Item -ItemType Directory -Path $d -Force | Out-Null }
-            [System.IO.Compression.ZipFileExtensions]::ExtractToFile($e, $t, $true)
-        }
+    $bytes = [Convert]::FromBase64String($text.Substring($i, $j - $i))
+    if ((Get-BsrBytesHash $bytes) -ne '008b6006e766d2591c8c7db7bf6d6a0a4b9cd6116b9a8e2737151828eb577632') {
+        throw 'Embedded debugfs bundle failed integrity verification. Re-download the complete .cmd.'
     }
-    finally { $za.Dispose() }
-    Remove-Item -LiteralPath $zipPath -Force -ErrorAction SilentlyContinue
-    if (Test-Path -LiteralPath $exe) { return $exe }
-    return $null
+    $destDir = Join-Path (Join-Path $env:TEMP 'bsr_work') ('engine_' + [guid]::NewGuid().ToString('N'))
+    [void][IO.Directory]::CreateDirectory($destDir)
+    [void]$Script:TempDirectories.Add($destDir)
+    $zipPath = Join-Path $destDir '_dfs.zip'
+    [IO.File]::WriteAllBytes($zipPath, $bytes)
+    Expand-BsrZip $zipPath $destDir
+    $exe = Join-Path $destDir 'debugfs.exe'
+    if (-not (Test-Path -LiteralPath $exe)) { throw 'debugfs.exe missing after embedded extraction.' }
+    $script:Debugfs = $exe
+    return $exe
 }
 
 # ===========================================================================
@@ -477,7 +262,8 @@ function Invoke-Patch {
 
     if ($Restore) {
         if (-not (Test-Path -LiteralPath $bak)) { Say "[!] No backup to restore: $bak" Red; return 1 }
-        Copy-Item -LiteralPath $bak -Destination $Exe -Force
+        if ($DryRun) { Say "[+] Dry run -- would restore $Exe from $bak. No file written." Yellow; return 0 }
+        Copy-BsrFileAtomically $bak $Exe -Replace
         Say "[+] Restored $Exe from $bak" Green
         return 0
     }
@@ -487,17 +273,23 @@ function Invoke-Patch {
     if ($b.Length -lt 0x200) { Say "[!] File too small for a PE." Red; return 1 }
 
     $e_lfanew = [BitConverter]::ToInt32($b, 0x3C)
-    if ($e_lfanew -le 0 -or $e_lfanew + 0x40 -ge $b.Length -or $b[$e_lfanew] -ne 0x50 -or $b[$e_lfanew + 1] -ne 0x45) {
+    if ($b[0] -ne 0x4D -or $b[1] -ne 0x5A -or $e_lfanew -le 0 -or
+        [long]$e_lfanew + 0x40 -ge $b.Length -or
+        [BitConverter]::ToUInt32($b,$e_lfanew) -ne 0x4550) {
         Say "[!] Invalid PE header." Red; return 1
     }
     $numSections = [BitConverter]::ToUInt16($b, $e_lfanew + 6)
     $sizeOptHdr = [BitConverter]::ToUInt16($b, $e_lfanew + 20)
     $optHdr = $e_lfanew + 24
+    $secTable = [long]$optHdr + $sizeOptHdr
+    if ($sizeOptHdr -lt 32 -or $numSections -eq 0 -or $secTable + [long]$numSections * 40 -gt $b.Length) {
+        Say '[!] Truncated PE optional header or section table.' Red; return 1
+    }
     $magic = [BitConverter]::ToUInt16($b, $optHdr)
     if ($magic -eq 0x20B) { $imageBase = [BitConverter]::ToUInt64($b, $optHdr + 24) }
-    else { $imageBase = [BitConverter]::ToUInt32($b, $optHdr + 28) }
+    elseif ($magic -eq 0x10B) { $imageBase = [BitConverter]::ToUInt32($b, $optHdr + 28) }
+    else { Say '[!] Unsupported PE optional header.' Red; return 1 }
 
-    $secTable = $optHdr + $sizeOptHdr
     $textRaw = $null; $textRawSize = $null; $textVA = $null
     $sections = @()
     for ($i = 0; $i -lt $numSections; $i++) {
@@ -506,6 +298,9 @@ function Invoke-Patch {
         $va = [BitConverter]::ToUInt32($b, $s + 12)
         $rs = [BitConverter]::ToUInt32($b, $s + 16)
         $pr = [BitConverter]::ToUInt32($b, $s + 20)
+        if ($rs -gt 0 -and ([long]$pr + $rs -gt $b.Length -or $pr -lt $secTable + [long]$numSections * 40)) {
+            Say "[!] Invalid PE section bounds: $name" Red; return 1
+        }
         $sections += [pscustomobject]@{ Name = $name; VA = $va; RawSize = $rs; RawPtr = $pr }
         if ($name -eq '.text') { $textVA = [int]$va; $textRaw = [int]$pr; $textRawSize = [int]$rs }
     }
@@ -588,7 +383,7 @@ function Invoke-Patch {
     if ($DryRun) { Say "[+] Dry run -- would NOP $($toApply.Count) site(s). No file written." Yellow; return 0 }
 
     if (-not $NoBackup) {
-        if (-not (Test-Path -LiteralPath $bak)) { Copy-Item -LiteralPath $Exe -Destination $bak -Force; Say "[*] Backup created: $bak" }
+        if (-not (Test-Path -LiteralPath $bak)) { Copy-BsrBackupOnce $Exe $bak; Say "[*] Backup created: $bak" }
         else { Say "[*] Backup already exists, skipping copy." }
     }
     foreach ($t in $toApply) {
@@ -633,26 +428,24 @@ or put debugfs.exe in tools\debugfs\ (see tools\debugfs\ in the repo).
 
 function Run-Debugfs([string]$debugfsExe, [string]$imgPath, [string[]]$cmds, [switch]$Write) {
     $script = New-TempFile 'bsr_dfs' '.txt'
-    Set-Content -LiteralPath $script -Value ($cmds -join "`n") -Encoding ascii -NoNewline
-    $args = @()
-    if ($Write) { $args += '-w' }
-    $args += @('-f', $script, $imgPath)
-    # debugfs prints its version banner (and many notices) to stderr on EVERY run.
-    # Under ErrorActionPreference=Stop those stderr lines become terminating errors,
-    # so drop to Continue for the native call and fold stderr into the captured text.
-    $old = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
-    try { $out = & $debugfsExe @args 2>&1 | Out-String }
-    finally { $ErrorActionPreference = $old }
-    Remove-Item -LiteralPath $script -Force -ErrorAction SilentlyContinue
-    return $out
+    try {
+        [IO.File]::WriteAllText($script, ($cmds -join "`n"), (New-Object Text.UTF8Encoding($false)))
+        $arguments = @('-f', $script, $imgPath)
+        if ($Write) { $arguments = @('-w') + $arguments }
+        $result = Invoke-BsrNative $debugfsExe $arguments 120
+        if ($result.ExitCode) { throw "debugfs failed ($($result.ExitCode)): $($result.Output)" }
+        return $result.Output
+    } finally { Remove-Item -LiteralPath $script -Force -ErrorAction SilentlyContinue }
+
 }
 
+$Script:TempDirectories = New-Object System.Collections.Generic.List[string]
 $Script:TempFiles = New-Object System.Collections.Generic.List[string]
 function New-TempFile([string]$prefix, [string]$ext) {
     $root = Join-Path $env:TEMP 'bsr_work'
     if (-not (Test-Path -LiteralPath $root)) { New-Item -ItemType Directory -Path $root -Force | Out-Null }
-    # no random (deterministic & resume-safe); caller ensures uniqueness by prefix
-    $f = Join-Path $root ($prefix + $ext)
+    # Separate staging files for concurrent invocations; never reuse a previous carve.
+    $f = Join-Path $root ($prefix + '_' + [guid]::NewGuid().ToString('N') + $ext)
     [void]$Script:TempFiles.Add($f)
     return $f
 }
@@ -667,8 +460,8 @@ function Edit-Ext4([string]$imgPath, [bool]$remove, [byte[]]$suBytes) {
     if ($remove) {
         Run-Debugfs $dfs $imgPath @('rm /android/system/xbin/su') -Write | Out-Null
         $stat = Run-Debugfs $dfs $imgPath @('stat /android/system/xbin/su')
-        # gone = stat no longer reports an inode for it
-        if ($stat -notmatch '(?im)Inode:\s*\d') { Say "[+] su removed from ext4." Green; return $true }
+        if ($stat -match '/android/system/xbin/su: File not found' -and
+            $stat -notmatch '(?im)Inode:\s*\d') { Say "[+] su removed from ext4." Green; return $true }
         Say "[!] su still present after removal:`n$stat" Red; return $false
     }
 
@@ -687,7 +480,7 @@ function Edit-Ext4([string]$imgPath, [bool]$remove, [byte[]]$suBytes) {
         'mkdir /android/system/xbin',
         'cd /android/system/xbin',
         'rm su',
-        "write $suD su",
+        "write $(ConvertTo-BsrDebugfsPath $suFile) su",
         'sif su mode 0106755',
         'sif su uid 0',
         'sif su gid 0',
@@ -697,13 +490,9 @@ function Edit-Ext4([string]$imgPath, [bool]$remove, [byte[]]$suBytes) {
     $stat = Run-Debugfs $dfs $imgPath @('stat /android/system/xbin/su')
     Remove-Item -LiteralPath $suFile -Force -ErrorAction SilentlyContinue
     Say "[*] verify:`n$stat"
-    if ($stat -notmatch '(?im)Inode:\s*\d') { Say "[!] su was not written into ext4." Red; return $false }
-    # debugfs prints the permission bits only, e.g. "Mode:  06755" (NOT the full i_mode).
-    # Parse the octal Mode and compare its low 12 bits to 0o6755 (= 0xDED): setuid+setgid+rwxr-xr-x.
-    $okMode = $false
-    $mm = [regex]::Match($stat, '(?im)Mode:\s*0*([0-7]{3,6})')
-    if ($mm.Success) { try { $okMode = (([Convert]::ToInt32($mm.Groups[1].Value, 8)) -band 0xFFF) -eq 0xDED } catch { } }
-    if (-not $okMode) { Say "[!] su present but mode is not 06755 (setuid/setgid). Not trusting this image." Red; return $false }
+    if (-not (Test-BsrDebugfsFile $stat '/android/system/xbin/su' $suBytes.Length 0xDED)) {
+        Say '[!] su length, mode or ownership does not match. Not trusting this image.' Red; return $false
+    }
     Say "[+] su installed: /android/system/xbin/su  mode 06755 (setuid root)  owner 0:0" Green
     return $true
 }
@@ -712,19 +501,7 @@ function Edit-Ext4([string]$imgPath, [bool]$remove, [byte[]]$suBytes) {
 #  ROOT / UNROOT  --  attach Root.vhd, locate ext4, carve, edit, write back
 # ===========================================================================
 function Read-DeviceBytes([string]$device, [long]$offset, [int]$count) {
-    $fs = [System.IO.File]::Open($device, 'Open', 'Read', 'ReadWrite')
-    try {
-        # raw-device reads must be sector-aligned: read the 512-byte sector and slice
-        $secBase = [long]([Math]::Floor($offset / 512) * 512)
-        $delta = [int]($offset - $secBase)
-        $need = [int]([Math]::Ceiling(($delta + $count) / 512.0) * 512)
-        $buf = New-Object byte[] $need
-        $fs.Position = $secBase
-        [void]$fs.Read($buf, 0, $need)
-        $res = New-Object byte[] $count
-        [Array]::Copy($buf, $delta, $res, 0, $count)
-        return $res
-    } finally { $fs.Close() }
+    return ,(Read-BsrDeviceBytes $device $offset $count)
 }
 
 function Copy-DeviceToFile([string]$device, [long]$start, [long]$length, [string]$outFile) {
@@ -733,39 +510,6 @@ function Copy-DeviceToFile([string]$device, [long]$start, [long]$length, [string
 
 function Copy-FileToDevice([string]$inFile, [string]$device, [long]$start, [long]$length=0) {
     Write-BsrDiskRegion $inFile $device $start $length
-}
-
-function Get-Ext4Target($diskNumber, $physical) {
-    # Returns @{ Device; Start; Length } for the ext4 region, by probing +0x438 == 0xEF53.
-    $parts = @(Get-Partition -DiskNumber $diskNumber -ErrorAction SilentlyContinue | Sort-Object Offset)
-    foreach ($p in $parts) {
-        $dev = "\\.\Harddisk$($diskNumber)Partition$($p.PartitionNumber)"
-        try {
-            $m = Read-DeviceBytes $dev 0x438 2
-            if ($m[0] -eq 0x53 -and $m[1] -eq 0xEF) {
-                return @{ Device = $dev; Start = [long]0; Length = [long]$p.Size; Offset = [long]$p.Offset }
-            }
-        }
-        catch { }  # partition device not openable -> skip
-        # fallback: probe on the physical drive at the partition's absolute offset
-        try {
-            $m = Read-DeviceBytes $physical ([long]$p.Offset + 0x438) 2
-            if ($m[0] -eq 0x53 -and $m[1] -eq 0xEF) {
-                return @{ Device = $physical; Start = [long]$p.Offset; Length = [long]$p.Size; Offset = [long]$p.Offset }
-            }
-        }
-        catch { }
-    }
-    # superfloppy: ext4 directly at disk offset 0
-    try {
-        $m = Read-DeviceBytes $physical 0x438 2
-        if ($m[0] -eq 0x53 -and $m[1] -eq 0xEF) {
-            $disk = Get-Disk -Number $diskNumber
-            return @{ Device = $physical; Start = [long]0; Length = [long]$disk.Size; Offset = [long]0 }
-        }
-    }
-    catch { }
-    return $null
 }
 
 function Invoke-VhdSu([bool]$remove) {
@@ -786,7 +530,7 @@ function Invoke-VhdSu([bool]$remove) {
                 $free = (Get-PSDrive -Name $drive.Name).Free
                 if ($free -gt ($sz * 1.1)) {
                     Say "[*] Backing up Root.vhd -> $vbak (one-time safety copy, $([math]::Round($sz/1GB,2)) GB)..."
-                    Copy-Item -LiteralPath $Vhd -Destination $vbak -Force
+                    Copy-BsrBackupOnce $Vhd $vbak
                     Say "[*] Backup done." Green
                 }
                 else { Say "[~] Not enough free space for a Root.vhd backup -- proceeding without one (NoRoot copy is your fallback)." Yellow }
@@ -839,19 +583,19 @@ function Invoke-VhdSu([bool]$remove) {
     finally {
         if ($attached) {
             try { Dismount-DiskImage -InputObject $mounted -ErrorAction Stop | Out-Null; Say "[*] Detached $Vhd." }
-            catch { Say "[!] WARNING: failed to detach $Vhd -- detach it manually (Disk Management) before launching BlueStacks." Red }
+            catch { throw "Failed to detach $Vhd -- detach it manually (Disk Management) before launching BlueStacks. $($_.Exception.Message)" }
         }
     }
 }
 
 # ===========================================================================
-#  .bstk disk mode  --  faithful global regex_replace (derivation §4)
+#  .bstk disk mode  --  faithful global regex_replace (derivation Â§4)
 # ===========================================================================
 function Backup-Once([string]$path) {
     $bak = "$path.bak"
     if (-not (Test-Path -LiteralPath $bak)) {
         try { attrib -R $path 2>$null | Out-Null } catch { }
-        Copy-Item -LiteralPath $path -Destination $bak -Force
+        Copy-BsrBackupOnce $path $bak
         Say "[*] Backup: $bak"
     }
 }
@@ -870,13 +614,13 @@ function Invoke-Bstk([bool]$toReadonly) {
     else { $new = $raw -replace 'type="Readonly"', 'type="Normal"' }   # R/W (case-insensitive: also matches ReadOnly)
     if ($new -eq $raw) { Say "[~] .bstk disk mode already set; no change." Yellow; return 0 }
     try { attrib -R $Bstk 2>$null | Out-Null } catch { }
-    [System.IO.File]::WriteAllText($Bstk, $new, (New-Object System.Text.UTF8Encoding($false)))
+    Write-BsrTextFile $Bstk $new
     if ($toReadonly) { Say "[+] Disk reverted to Readonly." Green } else { Say "[+] Disk set to R/W." Green }
     return 0
 }
 
 # ===========================================================================
-#  bluestacks.conf root flags  (hybrid §6a -- works with Magisk + adb)
+#  bluestacks.conf root flags  (hybrid Â§6a -- works with Magisk + adb)
 # ===========================================================================
 # Modify an EXISTING key only.  Returns $true if found+set, $false if absent.
 # We deliberately do NOT add missing keys: BlueStacks 5.22.x validates every conf
@@ -899,27 +643,13 @@ function Invoke-Conf([bool]$enable) {
     if (-not (Test-Path -LiteralPath $Conf)) { throw "bluestacks.conf not found: $Conf" }
     Backup-Once $Conf
     $val = if ($enable) { '1' } else { '0' }
-    # CRITICAL: bluestacks.conf must stay UTF-8 *without* a BOM and keep its original
-    # line endings.  PowerShell 5.1 'Set-Content -Encoding utf8' writes a BOM, which
-    # makes BlueStacks fail with "Failed to read configuration file" -- so read raw,
-    # edit lines, and write with UTF8Encoding($false) preserving the EOL style.
-    $raw = [System.IO.File]::ReadAllText($Conf)
-    $eol = if ($raw -match "`r`n") { "`r`n" } else { "`n" }
-    $endsNl = $raw.EndsWith("`n")
-    $lines = New-Object System.Collections.Generic.List[string]
-    foreach ($l in ($raw -split "`r`n|`n")) { $lines.Add($l) }
-    if ($lines.Count -gt 0 -and $lines[$lines.Count - 1] -eq '') { $lines.RemoveAt($lines.Count - 1) }
-    # Only valid, already-present keys (see Set-ConfKey).  Root = per-instance
-    # enable_root_access + the global rooting feature; adb = the GLOBAL
-    # bst.enable_adb_access (there is NO valid per-instance enable_adb_access key).
-    $miss = New-Object System.Collections.Generic.List[string]
-    if (-not (Set-ConfKey $lines "bst.instance.$Instance.enable_root_access" $val)) { $miss.Add("bst.instance.$Instance.enable_root_access") }
-    if (-not (Set-ConfKey $lines 'bst.feature.rooting' $val)) { $miss.Add('bst.feature.rooting') }
-    if (-not (Set-ConfKey $lines 'bst.enable_adb_access' $val)) { $miss.Add('bst.enable_adb_access') }
-    if ($miss.Count -gt 0) { Say "[~] conf key(s) absent, left as-is (NOT added, would brick startup): $($miss -join ', ')" Yellow }
     try { attrib -R $Conf 2>$null | Out-Null } catch { }
-    $outText = ($lines -join $eol); if ($endsNl) { $outText += $eol }
-    [System.IO.File]::WriteAllText($Conf, $outText, (New-Object System.Text.UTF8Encoding($false)))
+    $values = [ordered]@{}
+    $values["bst.instance.$Instance.enable_root_access"] = $val
+    $values['bst.feature.rooting'] = $val
+    $values['bst.enable_adb_access'] = $val
+    $missing = @(Set-BsrConfValues $Conf $values)
+    if ($missing.Count) { Say "[~] conf keys absent, left as-is: $($missing -join ', ')" Yellow }
     Say "[+] bluestacks.conf updated for '$Instance' (root flags = `"$val`", UTF-8 no BOM)." Green
     return 0
 }
@@ -945,10 +675,10 @@ function Invoke-VhdSelfTest {
         Say ("[*] region: device={0} start=0x{1:X} len={2}" -f $tgt.Device, $tgt.Start, $tgt.Length)
         $img1 = New-TempFile 'st1' '.img'; $img2 = New-TempFile 'st2' '.img'
         Copy-DeviceToFile $tgt.Device $tgt.Start $tgt.Length $img1
-        $h1 = Get-Sha256Hex ([System.IO.File]::ReadAllBytes($img1))
+        $h1 = Get-BsrFileHash $img1
         Copy-FileToDevice $img1 $tgt.Device $tgt.Start $tgt.Length
         Copy-DeviceToFile $tgt.Device $tgt.Start $tgt.Length $img2
-        $h2 = Get-Sha256Hex ([System.IO.File]::ReadAllBytes($img2))
+        $h2 = Get-BsrFileHash $img2
         Remove-Item $img1, $img2 -Force -EA SilentlyContinue
         if ($h1 -eq $h2) { Say "[+] carve/write-back is byte-identical (sha256 $($h1.Substring(0,16))...)." Green; return 0 }
         Say "[!] MISMATCH after write-back: $h1 vs $h2" Red; return 1
@@ -999,12 +729,14 @@ function Invoke-Resolve {
     if (-not $Base) { throw "Resolve requires -Base (or BSR_BASE)." }
     $DataDir = Get-BaseDir $DataDir $UserDef $CustomPath $InstallDir
     $resolvedInstall = Resolve-InstallRoot $InstallDir $CustomPath $DataDir
+    $requestedInstance = $Instance
     $instance = $null
     $rx = '^' + [regex]::Escape($Base) + '(_\d+)?$'
 
     # 1) candidates from MimMetaData.json
     $cands = @()
-    $mim = Join-Path $DataDir 'UserData\MimMetaData.json'
+    $mim = Join-Path $DataDir 'Engine\UserData\MimMetaData.json'
+    if (-not (Test-Path -LiteralPath $mim)) { $mim = Join-Path $DataDir 'UserData\MimMetaData.json' }
     if (Test-Path -LiteralPath $mim) {
         try {
             $m = Select-String -LiteralPath $mim -Pattern '"InstanceName"\s*:\s*"([^"]+)"' -AllMatches
@@ -1017,7 +749,7 @@ function Invoke-Resolve {
     if (Test-Path -LiteralPath $log) {
         try {
             $tail = Get-Content -LiteralPath $log -Tail 6000 -ErrorAction SilentlyContinue
-            $hit = $tail | Select-String -Pattern ([regex]::Escape($Base) + '(_\d+)?') -AllMatches |
+            $hit = $tail | Select-String -Pattern ('(?<![A-Za-z0-9_])' + [regex]::Escape($Base) + '(_\d+)?(?![A-Za-z0-9_])') -AllMatches |
                 ForEach-Object { $_.Matches } | ForEach-Object { $_.Value } |
                 Where-Object { $_ -match $rx } | Select-Object -Last 1
             if ($hit) { $instance = $hit }
@@ -1038,6 +770,10 @@ function Invoke-Resolve {
         if (Test-Path -LiteralPath (Join-Path $DataDir "Engine\$cand\$cand.bstk")) { $chosen = $cand; break }
     }
     if (-not $chosen) { $chosen = if ($instance) { $instance } elseif ($cands.Count -ge 1) { $cands[-1] } else { $Base } }
+    if ($requestedInstance) {
+        if ($requestedInstance -notmatch $rx) { throw "Instance '$requestedInstance' does not belong to '$Base'." }
+        $chosen = $requestedInstance
+    }
     $instance = $chosen
 
     # master = instance with a trailing _<n> stripped (clones share the master's Root.vhd)
@@ -1119,36 +855,17 @@ $Script:AdbExe = $null
 $Script:Serial = $null
 
 function AdbRaw([string[]]$a) {
-    $old = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
-    try { return (& $Script:AdbExe @a 2>&1 | Out-String) } finally { $ErrorActionPreference = $old }
+    $result = Invoke-BsrNative $Script:AdbExe $a 30
+    $script:LastAdbExitCode = $result.ExitCode
+    return $result.Output
 }
 function AdbS([string[]]$a) { return AdbRaw (@('-s', $Script:Serial) + $a) }
 function AdbShell([string]$cmd) { return AdbS @('shell', $cmd) }
 
 # Map listening ports in our private band to 'ours' (a reusable HD-Adb.exe server) or 'other' (a non-adb
 # app, or a foreign-version adb we must not fight). Absent = free. (Mirrors tools\bsr_magisk.ps1.)
-function Get-AdbServerPortState {
-    $state = @{}
-    try {
-        foreach ($c in (Get-NetTCPConnection -State Listen -ErrorAction Stop)) {
-            $p = [int]$c.LocalPort; if ($p -lt 15037 -or $p -gt 15057) { continue }
-            $path = $null; try { $path = (Get-Process -Id $c.OwningProcess -ErrorAction SilentlyContinue).Path } catch { }
-            $state[$p] = if ($path -and ((Split-Path -Leaf $path) -ieq 'HD-Adb.exe')) { 'ours' } else { 'other' }
-        }
-    } catch {
-        try { foreach ($ln in (netstat -ano -p tcp 2>$null)) { if ($ln -match 'LISTENING' -and $ln -match ':(\d{4,5})\b') { $p = [int]$Matches[1]; if ($p -ge 15037 -and $p -le 15057 -and -not $state.ContainsKey($p)) { $state[$p] = 'other' } } } } catch { }
-    }
-    return $state
-}
-# Pick a private adb-server port that is FREE (or already hosts our own HD-Adb server), so we never
-# collide with something already using 15037 before this run. Private-band env overrides win; 5037
-# is ignored because it is the shared adb default that causes version-conflict churn.
-function Resolve-AdbServerPort {
-    if ($env:ANDROID_ADB_SERVER_PORT -and $env:ANDROID_ADB_SERVER_PORT -ne '5037') { return $env:ANDROID_ADB_SERVER_PORT }
-    $state = Get-AdbServerPortState
-    foreach ($p in 15037..15057) { $s = $state[$p]; if (-not $s -or $s -eq 'ours') { return "$p" } }
-    return '15037'
-}
+function Get-AdbServerPortState { Get-BsrAdbServerPortState $Script:AdbExe }
+function Resolve-AdbServerPort { Select-BsrAdbServerPort (Get-AdbServerPortState) }
 
 # Connect to the instance's adb endpoint and wait until Android finishes booting.
 function Connect-WaitBoot([int]$timeoutSec) {
@@ -1157,22 +874,21 @@ function Connect-WaitBoot([int]$timeoutSec) {
     # Isolate HD-Adb on its own server port so a different-version system adb (e.g. Android SDK
     # platform-tools) on the default 5037 can't kill our server mid-run (the version-mismatch churn
     # that makes getprop/shell calls fail and a booted instance look "not adb-reachable").
-    if ((-not $env:ANDROID_ADB_SERVER_PORT) -or $env:ANDROID_ADB_SERVER_PORT -eq '5037') { $env:ANDROID_ADB_SERVER_PORT = (Resolve-AdbServerPort) }
+    $env:ANDROID_ADB_SERVER_PORT = Resolve-AdbServerPort
     AdbRaw @('start-server') | Out-Null
     $sw = [System.Diagnostics.Stopwatch]::StartNew()
     $connected = $false
     while ($sw.Elapsed.TotalSeconds -lt $timeoutSec) {
         $c = AdbRaw @('connect', $Script:Serial)
         if ($c -match '(?i)connected to') { $connected = $true }
-        if (-not $connected) {
-            # maybe it registered as emulator-XXXX instead
-            $dev = AdbRaw @('devices')
-            $m = [regex]::Match($dev, '(?im)^(emulator-\d+|127\.0\.0\.1:\d+)\s+device\s*$')
-            if ($m.Success) { $Script:Serial = $m.Groups[1].Value; $connected = $true }
-        }
+        # A different online device is never evidence that the requested instance booted.
+        $log = if ($Conf) { Join-Path (Split-Path -Parent $Conf) 'Logs\Player.log' } else { $null }
+        $ids = @(Get-BsrInstanceProcesses $Instance $log | Select-Object -ExpandProperty Id)
+        $owned = @(Get-BsrTcpListeners | Where-Object { $_.LocalPort -eq [int]$port -and $ids -contains $_.OwningProcess })
+        $connected = $connected -and $owned.Count -gt 0
         if ($connected) {
             $b = (AdbShell 'getprop sys.boot_completed').Trim()
-            if ($b -match '1') {
+            if ($b -eq '1') {
                 # give late services (su daemon) a moment
                 Start-Sleep -Seconds 3
                 return $true
@@ -1181,13 +897,6 @@ function Connect-WaitBoot([int]$timeoutSec) {
         Start-Sleep -Seconds 3
     }
     return $false
-}
-
-function Test-HdPlayerInstance([string]$cmdLine, [string]$name) {
-    if ([string]::IsNullOrWhiteSpace($cmdLine) -or [string]::IsNullOrWhiteSpace($name)) { return $false }
-    $escaped = [regex]::Escape($name)
-    $rx = "(?i)(^|\s)--instance(?:\s+|=)(`"$escaped`"|$escaped)(?=\s|$)"
-    return ($cmdLine -match $rx)
 }
 
 function Get-HdPlayerInstanceCount([string]$name) {
@@ -1354,4 +1063,16 @@ try {
 } catch {
     Say "[!] $($_.Exception.Message)" Red
     exit 1
+} finally {
+    foreach ($directory in $Script:TempDirectories) {
+        $parent=[IO.Path]::GetFullPath((Join-Path $env:TEMP 'bsr_work')).TrimEnd('\')+'\'
+        $resolved=[IO.Path]::GetFullPath($directory)
+        if ($resolved.StartsWith($parent,[StringComparison]::OrdinalIgnoreCase) -and
+            [IO.Path]::GetFileName($resolved) -match '^engine_[a-f0-9]{32}$') {
+            Remove-Item -LiteralPath $resolved -Recurse -Force -ErrorAction SilentlyContinue
+        }
+    }
+    foreach ($temporary in $Script:TempFiles) {
+        Remove-Item -LiteralPath $temporary -Force -ErrorAction SilentlyContinue
+    }
 }

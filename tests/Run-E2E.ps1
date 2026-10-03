@@ -26,6 +26,8 @@ param(
 $ErrorActionPreference = 'Stop'
 $here = if ($PSScriptRoot) { $PSScriptRoot } else { Split-Path -Parent $PSCommandPath }
 $repo = Split-Path -Parent $here
+. (Join-Path $here 'Test-Support.ps1')
+. (Join-Path $repo 'tools\bsr_host.ps1')
 if (-not $Engine) { $Engine = Join-Path $repo 'tools\bsr_engine.ps1' }
 if (-not $Cmd) { $Cmd = Join-Path $repo 'blueStackRoot.cmd' }
 if (-not $Debugfs) { $d = Join-Path $repo 'tools\debugfs\debugfs.exe'; if (Test-Path $d) { $Debugfs = $d } }
@@ -50,7 +52,7 @@ function RunEng([string[]]$a) {
 $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)
 if (-not $isAdmin) { Sk "E2E needs Administrator (VHD attach). Re-run elevated."; Write-Host "PASS=$pass FAIL=$fail SKIP=$skip"; exit 0 }
 
-$work = Join-Path $env:TEMP ("bsr_e2e_" + $PID)
+$work = Join-Path $env:TEMP ('bsr_e2e_' + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $work -Force | Out-Null
 $vhd = Join-Path $work 'throwaway.vhd'
 
@@ -62,8 +64,7 @@ function Diskpart([string[]]$lines) {
     return $o
 }
 function Read-DevBytes([string]$dev, [long]$off, [int]$n) {
-    $fs = [IO.File]::Open($dev, 'Open', 'Read', 'ReadWrite')
-    try { $base = [long]([Math]::Floor($off / 512) * 512); $d = [int]($off - $base); $need = [int]([Math]::Ceiling(($d + $n) / 512.0) * 512); $b = New-Object byte[] $need; $fs.Position = $base; [void]$fs.Read($b, 0, $need); $r = New-Object byte[] $n; [Array]::Copy($b, $d, $r, 0, $n); return $r } finally { $fs.Close() }
+    Read-BsrDeviceBytes $dev $off $n
 }
 function Write-DevBytes([string]$dev, [long]$off, [byte[]]$data) {
     $fs = [IO.File]::Open($dev, 'Open', 'ReadWrite', 'ReadWrite')
@@ -103,12 +104,9 @@ try {
             $part = Get-Partition -DiskNumber $dn | Sort-Object Offset | Select-Object -First 1
             $pdev = "\\.\Harddisk$($dn)Partition$($part.PartitionNumber)"
             $img = Join-Path $work 'fs.img'
-            $fs = [IO.File]::Open($pdev, 'Open', 'Read', 'ReadWrite'); $buf = New-Object byte[] $part.Size; [void]$fs.Read($buf, 0, $buf.Length); $fs.Close()
-            [IO.File]::WriteAllBytes($img, $buf)
+            Copy-BsrDiskRegion $pdev 0 $part.Size $img
             NativeQuiet { & $Mke2fs -F -t ext4 -q $img } | Out-Null   # engine Root creates the /android/system/xbin tree itself
-            $in = [IO.File]::OpenRead($img); $fw = [IO.File]::Open($pdev, 'Open', 'ReadWrite', 'ReadWrite'); $b2 = New-Object byte[] (4MB)
-            while (($k = $in.Read($b2, 0, $b2.Length)) -gt 0) { if ($k % 512) { $k += 512 - ($k % 512) }; $fw.Write($b2, 0, $k) }
-            $in.Close(); $fw.Flush(); $fw.Close()
+            Write-BsrDiskRegion $img $pdev 0 $part.Size
         }
         finally { Dismount-DiskImage -ImagePath $vhd | Out-Null }
 
@@ -122,8 +120,7 @@ try {
             $part = Get-Partition -DiskNumber $dn | Sort-Object Offset | Select-Object -First 1
             $pdev = "\\.\Harddisk$($dn)Partition$($part.PartitionNumber)"
             $img = Join-Path $work 'fs2.img'
-            $fs = [IO.File]::Open($pdev, 'Open', 'Read', 'ReadWrite'); $buf = New-Object byte[] $part.Size; [void]$fs.Read($buf, 0, $buf.Length); $fs.Close()
-            [IO.File]::WriteAllBytes($img, $buf)
+            Copy-BsrDiskRegion $pdev 0 $part.Size $img
         }
         finally { Dismount-DiskImage -ImagePath $vhd | Out-Null }
         $stat = NativeQuiet { & $Debugfs -R "stat /android/system/xbin/su" ($img -replace '\\', '/') }
@@ -137,7 +134,7 @@ try {
 finally {
     # make sure nothing stays attached, then delete the throwaway VHD
     try { Dismount-DiskImage -ImagePath $vhd -EA SilentlyContinue | Out-Null } catch {}
-    Remove-Item $work -Recurse -Force -EA SilentlyContinue
+    Remove-BsrTestDirectory $work
 }
 
 Write-Host "`n================ E2E SUMMARY ================" -ForegroundColor Cyan

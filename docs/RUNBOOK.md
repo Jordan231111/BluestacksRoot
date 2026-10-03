@@ -9,7 +9,10 @@ shows **Installed** with no warning, emulator root is OFF, and there is **zero t
 > (Android 13)**. Substitute the instance name (and its own `Root.vhd`/adb port) throughout.
 
 Everything here is built from steps proven on this machine; the one offline step (writing Magisk's
-`/system` files into Root.vhd) is unit‑tested byte‑for‑byte (`tests/test-magiskprep-offline.ps1`, PASS).
+`/system` files into Root.vhd) was originally checked byte-for-byte with
+`archive/dev-probes/test-magiskprep-offline.ps1`. Current validation uses
+`tests/Run-Live-E2E.ps1` against disposable instances and `tests/Run-E2E.ps1`
+against scratch disks; the archived probes are historical references.
 
 ---
 

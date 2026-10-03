@@ -4,3 +4,8 @@
 # MCP tool cache + local E2E run logs (not part of the release)
 .playwright-mcp/
 e2e-*.log
+
+# Machine-specific launcher settings and generated live-test evidence
+/bluestacksconfig.txt
+/tests/live-shots/
+/bsr_debug_*.log
