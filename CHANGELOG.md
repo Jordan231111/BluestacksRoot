@@ -5,6 +5,16 @@ Player — from one file, fully automatically. Releases are grouped by the BlueS
 
 ---
 
+## v21 — Production hardening and cleanup · 2026-10-03
+
+- Consolidate shared helpers and harden the launcher for custom paths, punctuation and Unicode.
+- Fix incomplete ADB replies and retries; tighten instance targeting, verification, undo and private-server cleanup.
+- Make backups, restores and configuration writes atomic; validate payloads and disk edits before accepting success.
+- Reuse staged APK files, clean temporary work and avoid unchanged configuration writes. Recovery backups remain one-time.
+- Validated with 530 automated checks and six disposable Android 9/11/13 instances on BlueStacks 5.22.265.1013. Still one `.cmd`; bundled binaries unchanged.
+
+---
+
 ## v20 — Disk compatibility and better diagnostics · 2026-09-28
 
 - Detect the actual VHD/VHDX format and check read-only mounting before changing the player or root settings.

@@ -11,7 +11,7 @@
 **Root BlueStacks 5 / MSI App Player with real Magisk — from one file, with no traces left behind.**
 **Run `blueStackRoot.cmd` as administrator, pick your Android version, and you're rooted.**
 **A Magisk Delta (Kitsune v31) build is now bundled inside the `.cmd` itself** — no separate Magisk
-download, no other files, nothing to install. Tested on BlueStacks 5.22.265.1013 (Android 11 and 13).
+download, no other files, nothing to install. Tested on BlueStacks 5.22.265.1013 (Android 9, 11 and 13).
 
 ---
 
@@ -19,7 +19,7 @@ download, no other files, nothing to install. Tested on BlueStacks 5.22.265.1013
 
 Works on the 64-bit BlueStacks instances — **Android 9, 11, and 13**.
 
-**⬇️ [Download `blueStackRoot.cmd`](https://github.com/Jordan231111/BluestacksRoot/releases/download/v20/blueStackRoot.cmd)** — one file (~20 MB) with the **real Magisk APK embedded inside** — nothing else to download. *(All versions: [Releases page](https://github.com/Jordan231111/BluestacksRoot/releases).)*
+**⬇️ [Download `blueStackRoot.cmd`](https://github.com/Jordan231111/BluestacksRoot/releases/download/v21/blueStackRoot.cmd)** — one file (~20 MB) with the **real Magisk APK embedded inside** — nothing else to download. *(All versions: [Releases page](https://github.com/Jordan231111/BluestacksRoot/releases).)*
 
 1. **First, open the exact instance you want to root** — launch it from the Multi-Instance Manager and let
    it boot once. The tool roots the instance of your chosen Android version that you **opened most
@@ -214,7 +214,7 @@ Windows + BlueStacks 5 (nxt) or MSI App Player, run as Administrator. **Nothing 
 If Windows reports **Access is denied** when starting `HD-Player.exe`, that is a host launch
 failure before Android or ADB. If it reports **virtual disk support provider not found**, that is
 a Windows disk-mount failure. Neither message, by itself, proves antivirus interference.
-Run [v20 `debug.cmd`](https://github.com/Jordan231111/BluestacksRoot/releases/download/v20/debug.cmd) and attach its Desktop log. It records disk-mount results, Windows error codes, player signatures,
+Run [v21 `debug.cmd`](https://github.com/Jordan231111/BluestacksRoot/releases/download/v21/debug.cmd) and attach its Desktop log. It records disk-mount results, Windows error codes, player signatures,
 permissions, and related policy events. User-directory names are masked; technical details remain. It restarts only the selected instance; close other instances if you need the read-only disk probe. See the
 [investigation of issues #31 and #32](docs/ISSUES_31_32.md) for the evidence and limits of the fixes.
 
@@ -225,14 +225,13 @@ one-file Magisk flow (Android 9 / 11 / 13).
 <sub>Earlier junction-based method (legacy BlueStacks ≤ 5.21.x): [older video](https://youtu.be/LOhKGxuhLrU).</sub>
 
 ## 🧰 For developers (build & tests)
-The `.cmd` embeds `tools/bsr_engine.ps1` + `tools/bsr_magisk.ps1` + `tools/bsr_host.ps1` + `tools/debugfs/` + `tools/su_src/bsr_su`
+The `.cmd` embeds `tools/bsr_launcher.ps1` + `tools/bsr_engine.ps1` + `tools/bsr_magisk.ps1` + `tools/bsr_host.ps1` + `tools/debugfs/` + `tools/su_src/bsr_su`
 + the Magisk APK between marker lines. To update them, edit the `tools/*.ps1` and run `tools/reembed.ps1`
-(re-splices the engine, orchestrator, and shared host helpers, including `debug.cmd`); swap the bundled Magisk with `tools/reembed-apk.ps1 -Apk <new.apk>`
+(re-splices the launcher, engine, orchestrator, and shared host helpers, including `debug.cmd`); swap the bundled Magisk with `tools/reembed-apk.ps1 -Apk <new.apk>`
 (byte-level splice + SHA-256 round-trip verify), then refresh the reference set with
-`tools/extract-databin.ps1 -Apk <new.apk>`. Proven dev/test scripts live in [`tests/`](tests) (e.g.
-`test-magiskprep-offline.ps1` byte-verifies the offline `/system` write; `gate-magisk.ps1`,
-`remove-bsr-su.ps1`; `Check-Embedded-Sync.ps1` asserts the embedded scripts and APK match their
-sources). Retired
+`tools/extract-databin.ps1 -Apk <new.apk>`. Maintained tests live in [`tests/`](tests):
+`Run-Tests.ps1` covers engine/ext4 integration, `Run-Live-E2E.ps1` tests an explicitly selected disposable instance,
+and `Check-Embedded-Sync.ps1` checks embedded sources and payloads. Retired probes and
 approaches (junctions, the integrity-bypass scripts, etc.) are kept for reference in
 [`archive/`](archive).
 
