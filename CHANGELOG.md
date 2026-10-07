@@ -5,6 +5,15 @@ Player — from one file, fully automatically. Releases are grouped by the BlueS
 
 ---
 
+## v22 — Locale fix, responsive menu and clearer diagnostics · 2026-10-07
+
+- Fix the reproduced Turkish-locale path discovery failure ([#36](https://github.com/Jordan231111/BluestacksRoot/issues/36)).
+- Fit the menu to narrow and short console windows while respecting the selected font and display scaling.
+- Add `debug.cmd --files-only`, isolated payload checks, cloud/temp-file evidence, detailed errors and reliable failure summaries.
+- Preserve error text hidden by path redaction in [#38](https://github.com/Jordan231111/BluestacksRoot/issues/38). Its underlying file failure remains unconfirmed; OneDrive is not an established cause. [Investigation](docs/ISSUES_36_38.md).
+
+---
+
 ## v21 — Production hardening and cleanup · 2026-10-03
 
 - Consolidate shared helpers and harden the launcher for custom paths, punctuation and Unicode.

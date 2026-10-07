@@ -19,7 +19,7 @@ download, no other files, nothing to install. Tested on BlueStacks 5.22.265.1013
 
 Works on the 64-bit BlueStacks instances — **Android 9, 11, and 13**.
 
-**⬇️ [Download `blueStackRoot.cmd`](https://github.com/Jordan231111/BluestacksRoot/releases/download/v21/blueStackRoot.cmd)** — one file (~20 MB) with the **real Magisk APK embedded inside** — nothing else to download. *(All versions: [Releases page](https://github.com/Jordan231111/BluestacksRoot/releases).)*
+**⬇️ [Download `blueStackRoot.cmd`](https://github.com/Jordan231111/BluestacksRoot/releases/download/v22/blueStackRoot.cmd)** — one file (~20 MB) with the **real Magisk APK embedded inside** — nothing else to download. *(All versions: [Releases page](https://github.com/Jordan231111/BluestacksRoot/releases).)*
 
 1. **First, open the exact instance you want to root** — launch it from the Multi-Instance Manager and let
    it boot once. The tool roots the instance of your chosen Android version that you **opened most
@@ -214,9 +214,19 @@ Windows + BlueStacks 5 (nxt) or MSI App Player, run as Administrator. **Nothing 
 If Windows reports **Access is denied** when starting `HD-Player.exe`, that is a host launch
 failure before Android or ADB. If it reports **virtual disk support provider not found**, that is
 a Windows disk-mount failure. Neither message, by itself, proves antivirus interference.
-Run [v21 `debug.cmd`](https://github.com/Jordan231111/BluestacksRoot/releases/download/v21/debug.cmd) and attach its Desktop log. It records disk-mount results, Windows error codes, player signatures,
-permissions, and related policy events. User-directory names are masked; technical details remain. It restarts only the selected instance; close other instances if you need the read-only disk probe. See the
-[investigation of issues #31 and #32](docs/ISSUES_31_32.md) for the evidence and limits of the fixes.
+Download [v22 `debug.cmd`](https://github.com/Jordan231111/BluestacksRoot/releases/download/v22/debug.cmd)
+beside `blueStackRoot.cmd`. For an error before rooting starts, run `debug.cmd --files-only` in Command
+Prompt: it checks the rooter, temporary-file access, cloud-file attributes and actual embedded payload
+extraction, without restarting BlueStacks or requesting administrator access. To inspect a rooter in
+another folder, use `debug.cmd --files-only "C:\path\to\blueStackRoot.cmd"`.
+
+For emulator, launch or disk errors, run `debug.cmd Pie64` (or your instance's internal name). This
+restarts only that instance and records disk-mount results, Windows errors, player signatures,
+permissions, policy events and ADB replies. Close other instances if you need the read-only disk probe.
+Logs normally go to `%LOCALAPPDATA%\BlueStacksRoot\Logs`; the final **Full log** line gives the location
+if a fallback was needed. Attach that log to your issue. User-directory names are masked while error
+details remain. See the investigations of [#31/#32](docs/ISSUES_31_32.md) and
+[#36/#38](docs/ISSUES_36_38.md) for findings and test limits.
 
 ## 🎥 Video tutorial
 ▶ **[Watch the walkthrough on YouTube](https://www.youtube.com/watch?v=BfxGGTDiESg)** — the current
@@ -231,7 +241,9 @@ The `.cmd` embeds `tools/bsr_launcher.ps1` + `tools/bsr_engine.ps1` + `tools/bsr
 (byte-level splice + SHA-256 round-trip verify), then refresh the reference set with
 `tools/extract-databin.ps1 -Apk <new.apk>`. Maintained tests live in [`tests/`](tests):
 `Run-Tests.ps1` covers engine/ext4 integration, `Run-Live-E2E.ps1` tests an explicitly selected disposable instance,
-and `Check-Embedded-Sync.ps1` checks embedded sources and payloads. Retired probes and
+and `Check-Embedded-Sync.ps1` checks embedded sources and payloads. `Run-Launcher-Tests.ps1` checks
+locale and menu layout, `Run-Console-Tests.ps1` checks real Windows console buffers at different font
+sizes, and `Run-Preflight-Tests.ps1` covers diagnostic file, temp and extraction failures. Retired probes and
 approaches (junctions, the integrity-bypass scripts, etc.) are kept for reference in
 [`archive/`](archive).
 

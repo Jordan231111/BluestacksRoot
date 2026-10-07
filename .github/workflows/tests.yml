@@ -42,6 +42,15 @@ jobs:
         shell: cmd
         run: powershell -NoProfile -ExecutionPolicy Bypass -File tests\Run-Distribution-Tests.ps1
 
+      # A fresh 5.1 process per culture avoids reusing cached regexes from en-US.
+      - name: Launcher locale and console size regressions
+        shell: powershell
+        run: |
+          foreach ($culture in @('en-US', 'tr-TR', 'az-Latn-AZ')) {
+            powershell -NoProfile -ExecutionPolicy Bypass -File tests\Run-Launcher-Tests.ps1 -Culture $culture
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+
       # Core engine: integrity patch, .bstk disk-mode, conf root flags, su round-trip, bootstrap.
       # (Invoked via powershell.exe -File exactly as blueStackRoot.cmd does, i.e. Windows PowerShell 5.1.)
       - name: Engine unit / integration tests
@@ -77,3 +86,7 @@ jobs:
       - name: Diagnostic privacy and failure handling
         shell: cmd
         run: powershell -NoProfile -ExecutionPolicy Bypass -File tests\Run-Diagnostic-Tests.ps1
+
+      - name: Diagnostic file, cloud-state, temp and embedded-payload probes
+        shell: cmd
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File tests\Run-Preflight-Tests.ps1

@@ -32,7 +32,8 @@ function Quote-BsrNativeArgument([AllowEmptyString()][string]$Value) {
 }
 
 function Invoke-BsrNative([string]$FilePath, [string[]]$Arguments,
-                          [ValidateRange(1,3600)][int]$TimeoutSec=30) {
+                          [ValidateRange(1,3600)][int]$TimeoutSec=30,
+                          [switch]$ReturnOnTimeout) {
     $process = $null
     try {
         $info = New-Object Diagnostics.ProcessStartInfo
@@ -47,15 +48,19 @@ function Invoke-BsrNative([string]$FilePath, [string[]]$Arguments,
         $process = [Diagnostics.Process]::Start($info)
         $stdout = $process.StandardOutput.ReadToEndAsync()
         $stderr = $process.StandardError.ReadToEndAsync()
-        if (-not $process.WaitForExit($TimeoutSec * 1000)) {
+        $timedOut = -not $process.WaitForExit($TimeoutSec * 1000)
+        if ($timedOut) {
             $process.Kill()
-            throw "Native command timed out after ${TimeoutSec}s: $([IO.Path]::GetFileName($FilePath)) $($Arguments -join ' ')"
+            if (-not $ReturnOnTimeout) {
+                throw "Native command timed out after ${TimeoutSec}s: $([IO.Path]::GetFileName($FilePath)) $($Arguments -join ' ')"
+            }
         }
         if (-not $stdout.Wait(2000) -or -not $stderr.Wait(2000)) {
             throw "Native output pipe did not close: $FilePath"
         }
         [pscustomobject]@{
-            ExitCode = $process.ExitCode
+            ExitCode = if($timedOut){-1}else{$process.ExitCode}
+            TimedOut = $timedOut
             Output = ($stdout.Result + [Environment]::NewLine + $stderr.Result).Trim()
         }
     } finally { if ($process) { $process.Dispose() } }
@@ -500,7 +505,10 @@ function Redact-UserPath($value) {
             $s = $s -replace ("(?i)$([regex]::Escape(($root -replace '\\', '/')))"+$boundary), (($masked -replace '\\', '/') -replace '\$', '$$')
         }
     }
-    $s = $s -replace '(?i)([A-Z]:[\\/]+(?:Users|Documents and Settings)[\\/]+)(?!xxxxx\b)([^\\/\r\n"<>]+)', '${1}xxxxx'
+    # A provider error can end its path at the profile itself. Preserve the
+    # following explanation instead of treating it as part of the username
+    # (issue #38: "C:\Users\xxxxx" used to swallow the entire error suffix).
+    $s = [regex]::Replace($s, '([A-Z]:[\\/]+(?:Users|Documents and Settings)[\\/]+)(?!xxxxx\b)([^\\/\r\n"<>]+?)(?=[\\/\r\n"<>]|$| does not exist\b)', '${1}xxxxx', 'IgnoreCase,CultureInvariant')
     $s = $s -replace '(?i)(/Users/)([^/]+)(?=$|/)', '${1}xxxxx'
     $s
 }

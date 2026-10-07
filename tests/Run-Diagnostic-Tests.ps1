@@ -7,7 +7,7 @@ $body=$text.Substring($text.IndexOf('#__BSR'+'_DEBUG_PS__'))
 $tokens=$null;$parseErrors=$null
 $ast=[Management.Automation.Language.Parser]::ParseInput($body,[ref]$tokens,[ref]$parseErrors)
 if($parseErrors){throw ($parseErrors.Message -join '; ')}
-foreach($name in @('Redact','Compact','Log-Failure','Quote-NativeArgument','Adb','State','Probe-RootDisk','Test-CmdLine','Get-ExactPlayers','Get-BsrDiagnosticTargetPort','Get-DiagnosticHash','Test-DiagnosticPlayerLine')){
+foreach($name in @('Redact','Compact','Log-Failure','Set-DiagnosticCheck','Quote-NativeArgument','Adb','State','Probe-RootDisk','Test-CmdLine','Get-ExactPlayers','Get-BsrDiagnosticTargetPort','Get-DiagnosticHash','Test-DiagnosticPlayerLine')){
   $function=$ast.FindAll({param($node) $node -is [Management.Automation.Language.FunctionDefinitionAst] -and $node.Name -eq $name},$true)[0]
   if(-not $function){throw "Missing diagnostic function: $name"}
   . ([scriptblock]::Create($function.Extent.Text))
@@ -15,6 +15,8 @@ foreach($name in @('Redact','Compact','Log-Failure','Quote-NativeArgument','Adb'
 $pass=0;$fail=0
 function Check($ok,$name){if($ok){$script:pass++;Write-Host "[PASS] $name"}else{$script:fail++;Write-Host "[FAIL] $name"}}
 $script:lines=New-Object System.Collections.Generic.List[string]
+$script:DiagnosticChecks=[ordered]@{};$script:DiagnosticFailures=0
+$script:CaptureGuestErrors=$false;$script:GuestAdbFailures=0
 function Log($message,$color){$script:lines.Add((Redact $message))}
 function Section($name){Log $name}
 $work=Join-Path ([IO.Path]::GetTempPath()) ('bsr_diag_test_'+[guid]::NewGuid().ToString('N'))
@@ -29,6 +31,11 @@ try {
   $evidence='D:\Games\BlueStacks\Root.vhd Win32=5 HRESULT=0xC03A0014 S-1-5-32-544 127.0.0.1:5556 HD-Player.exe'
   Check ((Redact $evidence) -ceq $evidence) 'preserve technical paths, codes, SID, endpoint and executable'
   Check ((Redact 'D:\Profiles\Jane Examples\different') -eq 'D:\Profiles\Jane Examples\different') 'profile matching respects directory boundary'
+  $suffix=' does not exist, or has been filtered by the -Include or -Exclude parameter.'
+  Check ((Redact ('An object at the specified path C:\Users\Unknown Person'+$suffix)) -ceq ('An object at the specified path C:\Users\xxxxx'+$suffix)) 'issue #38: preserve the error after an unquoted profile-root path'
+  Check ((Redact ('An object at the specified path C:\Users\Unknown Person\AppData\Local\Temp\bsr_su'+$suffix)) -ceq ('An object at the specified path C:\Users\xxxxx\AppData\Local\Temp\bsr_su'+$suffix)) 'issue #38: preserve the full failing payload path and error'
+  Check ((Redact 'Cannot find path "C:\Users\Unknown Person" because it does not exist.') -ceq 'Cannot find path "C:\Users\xxxxx" because it does not exist.') 'quoted profile-root diagnostics keep their explanation'
+  Check ((Redact ('C:\Users\xxxxx'+$suffix)) -ceq ('C:\Users\xxxxx'+$suffix)) 'redacting an error twice preserves the masked path and explanation'
   Check ((Compact 'D:\Profiles\Jane Example\Downloads\long-file-name.cmd' 27) -notmatch 'Jane') 'redact before truncating output'
   $env:USERPROFILE=$originalProfile
 
@@ -39,6 +46,7 @@ try {
   try {throw (New-Object ComponentModel.Win32Exception(5,'Denied C:\Users\Secret Person\HD-Player.exe'))} catch {Log-Failure 'launch' $_}
   $errorText=$script:lines -join "`n"
   Check ($errorText -match 'Win32=5' -and $errorText -match 'HRESULT=0x' -and $errorText -notmatch 'Secret Person') 'error report preserves native codes and masks profile names'
+  Check ($errorText -match 'source:' -and $errorText -match 'stack:' -and $errorText -match 'position:') 'error report includes command location and call stack'
   $script:lines.Clear()
   try {throw (New-Object IO.IOException('provider missing',[Convert]::ToInt32('C03A0014',16)))} catch {Log-Failure 'mount' $_}
   Check (($script:lines -join "`n") -match 'HRESULT=0xC03A0014') 'retain virtual disk provider HRESULT exactly'
@@ -83,10 +91,12 @@ try {
     Check ((Probe-RootDisk $disk) -and $script:mounted -eq 1 -and $script:detached -eq 1) 'probe attaches read-only with explicit format and detaches'
     $script:inspectFails=$true
     Check ((Probe-RootDisk $disk) -and $script:detached -eq 2) 'inspection failure still releases our attachment'
+    Check ($script:DiagnosticChecks['Disk attach'] -like 'FAIL*') 'failed disk inspection remains a failure in the final summary'
     $script:inspectFails=$false;$script:detachFails=$true
     Check (-not (Probe-RootDisk $disk)) 'detach failure blocks subsequent player launch'
     $script:detachFails=$false;$script:alreadyAttached=$true;$before=$script:detached
     Check ((Probe-RootDisk $disk) -and $script:detached -eq $before) 'existing attachment is never detached'
+    Check ($script:DiagnosticChecks['Disk attach'] -like 'SKIP*') 'skipped attachment is not summarized as a successful test'
     $script:alreadyAttached=$false;$script:running=$true;$before=$script:mounted
     Check ((Probe-RootDisk $disk) -and $script:mounted -eq $before) 'another running player prevents shared-master mount probe'
     $script:running=$false;$script:attachFails=$true;$before=$script:detached
@@ -94,12 +104,21 @@ try {
   }
 
   $AdbExe=Join-Path $work 'probe.exe'
-  Add-Type -TypeDefinition 'using System; class DiagProbe { static void Main(string[] a) { if(a.Length>0 && a[0]=="hang") {System.Threading.Thread.Sleep(20000);return;} Console.WriteLine(String.Join("|",a)); Console.Error.WriteLine("stderr detail"); } }' -OutputAssembly $AdbExe -OutputType ConsoleApplication
+  Add-Type -TypeDefinition 'using System; class DiagProbe { static void Main(string[] a) { if(a.Length>0 && a[0]=="hang") {Console.WriteLine("last operation before timeout");Console.Out.Flush();System.Threading.Thread.Sleep(20000);return;} Console.WriteLine(String.Join("|",a)); Console.Error.WriteLine("stderr detail"); } }' -OutputAssembly $AdbExe -OutputType ConsoleApplication
   $argsToEcho=@('space argument','literal"quote','C:\Users\Jane Example\folder\')
   $output=Adb $argsToEcho
   Check ($output.Contains(($argsToEcho -join '|')) -and $output.Contains('stderr detail')) 'native argument quoting and stderr capture round-trip'
   $sw=[Diagnostics.Stopwatch]::StartNew();$output=Adb @('hang')
   Check ($output -match 'timed out' -and $sw.Elapsed.TotalSeconds -lt 12) 'hung ADB process is terminated within the command timeout'
+  $timed=Invoke-BsrNative $AdbExe @('hang') 1 -ReturnOnTimeout
+  Check ($timed.TimedOut -and $timed.ExitCode -ne 0 -and $timed.Output -match 'last operation before timeout') 'diagnostic timeout preserves partial output and a failing status'
+  & {
+    function Invoke-BsrNative {[pscustomobject]@{ExitCode=1;Output='error: closed'}}
+    $script:CaptureGuestErrors=$true;$script:GuestAdbFailures=0
+    [void](Adb @('shell','id'))
+    Check ($script:GuestAdbFailures -eq 1) 'failed guest replies are counted independently of initial ADB readiness'
+    $script:CaptureGuestErrors=$false
+  }
   & {
     function Adb { "device`r`nstderr noise" }
     Check ((State '127.0.0.1:5555') -eq 'device') 'ADB state parser ignores stderr noise'

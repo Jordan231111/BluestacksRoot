@@ -1,22 +1,26 @@
 @echo off
 setlocal EnableExtensions DisableDelayedExpansion
-title BlueStacksRoot ADB Diagnostic
+title BlueStacksRoot Diagnostic
 set "SELF=%~f0"
 set "BSR_DEBUG_INSTANCE=%~1"
+set "BSR_DEBUG_ROOTER=%~2"
 set "BSR_DEBUG_HOME=%~dp0"
 rem Restarts the selected instance only. Disk probes are read-only.
-rem Usage: debug.cmd [instance]
-powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "$ErrorActionPreference='Stop'; if($env:BSR_DEBUG_INSTANCE -and $env:BSR_DEBUG_INSTANCE -notmatch '^[A-Za-z0-9_]+$'){throw 'Invalid instance name.'}; $admin=([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator); if(-not $admin){if($env:BSR_DEBUG_INSTANCE){Start-Process -FilePath $env:SELF -ArgumentList $env:BSR_DEBUG_INSTANCE -Verb RunAs -ErrorAction Stop}else{Start-Process -FilePath $env:SELF -Verb RunAs -ErrorAction Stop};exit 3010}; $t=[IO.File]::ReadAllText($env:SELF); $i=$t.IndexOf('#__BSR'+'_DEBUG_PS__'); if($i -lt 0){throw 'Diagnostic marker missing.'}; & ([scriptblock]::Create($t.Substring($i))) -Instance $env:BSR_DEBUG_INSTANCE"
+rem Usage: debug.cmd [instance] [path-to-blueStackRoot.cmd]
+rem        debug.cmd --files-only [path-to-blueStackRoot.cmd] (no restart or elevation)
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "$ErrorActionPreference='Stop'; $filesOnly=$env:BSR_DEBUG_INSTANCE -eq '--files-only'; if($env:BSR_DEBUG_INSTANCE -and -not $filesOnly -and $env:BSR_DEBUG_INSTANCE -cnotmatch '^[A-Za-z0-9_]+$'){throw 'Invalid instance name.'}; $admin=([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator); if(-not $admin -and -not $filesOnly){$a='';if($env:BSR_DEBUG_INSTANCE){$a=$env:BSR_DEBUG_INSTANCE};if($env:BSR_DEBUG_ROOTER){$a+=' '+[char]34+$env:BSR_DEBUG_ROOTER+[char]34};if($a){Start-Process -FilePath $env:SELF -ArgumentList $a -Verb RunAs -ErrorAction Stop}else{Start-Process -FilePath $env:SELF -Verb RunAs -ErrorAction Stop};exit 3010}; $t=[IO.File]::ReadAllText($env:SELF); $i=$t.IndexOf('#__BSR'+'_DEBUG_PS__'); if($i -lt 0){throw 'Diagnostic marker missing.'}; & ([scriptblock]::Create($t.Substring($i))) -Instance $env:BSR_DEBUG_INSTANCE -FilesOnly:$filesOnly -RooterPath $env:BSR_DEBUG_ROOTER"
 set "BSR_DEBUG_RC=%errorlevel%"
 if "%BSR_DEBUG_RC%"=="3010" exit /b 0
 echo.
-echo Done. Attach the bsr_debug_*.log on your Desktop to GitHub.
+echo Done. Use the Full log path printed above when reporting the problem.
 pause
 endlocal & exit /b %BSR_DEBUG_RC%
 
 #__BSR_DEBUG_PS__
-param([string]$Instance)
-$ErrorActionPreference = 'Continue'
+param([string]$Instance, [switch]$FilesOnly, [string]$RooterPath, [string]$LogDirectory,
+      [ValidateSet('','File','Temp','Payload')][string]$ProbeMode='', [string]$ProbePath, [string]$ProbeScratch)
+$ErrorActionPreference = 'Stop'
+$ProgressPreference = 'SilentlyContinue'
 [Console]::OutputEncoding = New-Object Text.UTF8Encoding($false)
 
 $hostText = [IO.File]::ReadAllText($env:SELF)
@@ -28,20 +32,54 @@ $hostStart = $hostText.IndexOf([char]10, $hostStart) + 1
 
 # ----------------------------- logging / redaction -----------------------------
 function Redact($v){ Redact-UserPath $v }
-$ts      = Get-Date -Format 'yyyyMMdd_HHmmss'
-$Desktop = [Environment]::GetFolderPath('Desktop'); if(-not $Desktop){ $Desktop = $env:USERPROFILE }
-$LogFile = Join-Path $Desktop "bsr_debug_$ts.log"
+$script:DiagnosticFailures=0
+$script:DiagnosticChecks=[ordered]@{}
+$script:LogWriteFailed=$false
+$script:CaptureGuestErrors=$false;$script:GuestAdbFailures=0
+function New-DiagnosticLog([string[]]$Directories){
+  $name='bsr_debug_'+(Get-Date -Format 'yyyyMMdd_HHmmss_fff')+'_'+$PID+'.log'
+  foreach($directory in $Directories){
+    if(-not $directory){continue}
+    try{
+      [void][IO.Directory]::CreateDirectory($directory)
+      $path=Join-Path $directory $name
+      [IO.File]::WriteAllText($path,'',(New-Object Text.UTF8Encoding($true)))
+      return $path
+    }catch{Write-Host (Redact "Log destination unavailable: $directory; $($_.Exception.Message)") -ForegroundColor Yellow}
+  }
+  throw 'No diagnostic log destination is writable.'
+}
+$LogFile=''
+if(-not $ProbeMode){
+  $local=[Environment]::GetFolderPath('LocalApplicationData')
+  $directories=@($(if($local){Join-Path $local 'BlueStacksRoot\Logs'}),$env:TEMP,[Environment]::GetFolderPath('Desktop'))
+  if($LogDirectory){$directories=@($LogDirectory)}
+  $LogFile=New-DiagnosticLog $directories
+}
 function Log($m,$c='Gray'){
   $line = ('{0:HH:mm:ss.fff}  {1}' -f (Get-Date), (Redact $m))
-  try { Write-Host $line -ForegroundColor $c } catch { Write-Host $line }
-  try { Add-Content -LiteralPath $LogFile -Value $line -Encoding utf8 -ErrorAction Stop } catch { Write-Host '[!] Could not write the diagnostic log. Check the Desktop folder permissions.' -ForegroundColor Red }
+  if($ProbeMode){[Console]::WriteLine($line)}else{try { Write-Host $line -ForegroundColor $c } catch { Write-Host $line }}
+  if($LogFile){
+    try { [IO.File]::AppendAllText($LogFile,$line+[Environment]::NewLine,(New-Object Text.UTF8Encoding($false))) }
+    catch {
+      if(-not $script:LogWriteFailed){Write-Host (Redact "[!] Log write failed: $LogFile; $($_.Exception.Message). Remaining output is also shown in this console.") -ForegroundColor Red}
+      $script:LogWriteFailed=$true
+    }
+  }
 }
 function Section($t){ Log ''; Log ('==================== ' + $t + ' ====================') Cyan }
 function Compact($s,[int]$max=100){ if($null -eq $s){ return '' }; $x = (((Redact $s) -replace "`r?`n",' | ').Trim()); if($x.Length -gt $max){ $x.Substring(0,$max-3)+'...' } else { $x } }
 
 function Log-Failure($stage,$failure){
+  $script:DiagnosticFailures++
   Log "[!] $stage" Yellow
   Log "category=$($failure.CategoryInfo.Category); id=$($failure.FullyQualifiedErrorId)"
+  if($null -ne $failure.TargetObject){Log "target: $(Compact ([string]$failure.TargetObject) 1500)"}
+  if($failure.InvocationInfo){
+    Log "source: $($failure.InvocationInfo.ScriptName):$($failure.InvocationInfo.ScriptLineNumber); command=$($failure.InvocationInfo.MyCommand.Name)"
+    if($failure.InvocationInfo.PositionMessage){Log "position: $(Compact $failure.InvocationInfo.PositionMessage 2000)"}
+  }
+  if($failure.ScriptStackTrace){Log "stack: $(Compact $failure.ScriptStackTrace 2500)"}
   $e=$failure.Exception
   for($i=0;$e -and $i -lt 6;$i++){
     $hr=[BitConverter]::ToUInt32([BitConverter]::GetBytes([int]$e.HResult),0)
@@ -50,6 +88,18 @@ function Log-Failure($stage,$failure){
     $e=$e.InnerException
   }
   if($failure.ErrorDetails){Log "details: $($failure.ErrorDetails.Message)"}
+}
+
+function Set-DiagnosticCheck($name,$status,$detail){
+  $script:DiagnosticChecks[$name]="$status - $detail"
+  Log "[$status] $name : $detail"
+}
+function Report-DiagnosticSummary {
+  Section 'DIAGNOSTIC SUMMARY'
+  foreach($name in $script:DiagnosticChecks.Keys){Log "$name : $($script:DiagnosticChecks[$name])"}
+  Log "Captured errors=$script:DiagnosticFailures; logWriteFailed=$script:LogWriteFailed"
+  Log 'ADB readiness only describes the emulator connection. It does not verify rooter payload preparation or a completed root installation.'
+  Log "Full log: $LogFile" Cyan
 }
 
 function Report-PolicyEvents {
@@ -66,6 +116,209 @@ function Report-PolicyEvents {
 }
 
 function Get-DiagnosticHash([string]$path){ Get-BsrFileHash $path }
+
+function Get-DiagnosticPathFlags([long]$Attributes){
+  # Values from WinNT.h; .NET Framework does not name all Cloud Files flags.
+  # 0x40000 is EA for GetFileAttributes (RECALL_ON_OPEN only in enumeration).
+  [pscustomobject]@{
+    ReparsePoint=[bool]($Attributes -band 0x400)
+    Offline=[bool]($Attributes -band 0x1000)
+    Pinned=[bool]($Attributes -band 0x80000)
+    Unpinned=[bool]($Attributes -band 0x100000)
+    RecallOnDataAccess=[bool]($Attributes -band 0x400000)
+  }
+}
+function Get-DiagnosticSyncRoot([string]$Path){
+  if(-not $Path){return ''}
+  $full=[IO.Path]::GetFullPath($Path).TrimEnd('\','/')
+  foreach($name in @('OneDrive','OneDriveConsumer','OneDriveCommercial')){
+    $root=[Environment]::GetEnvironmentVariable($name)
+    if(-not $root){continue}
+    $root=[IO.Path]::GetFullPath($root).TrimEnd('\','/')
+    if($full.Equals($root,[StringComparison]::OrdinalIgnoreCase) -or $full.StartsWith($root+'\',[StringComparison]::OrdinalIgnoreCase)){return $name}
+  }
+  return ''
+}
+function Report-DiagnosticPath([string]$label,[string]$path){
+  if(-not $path){Log "$label : not set";return}
+  Log "$label : $path; chars=$($path.Length); OneDriveRoot=$(Get-DiagnosticSyncRoot $path); shortNameComponent=$([bool]($path -match '~[0-9]'))"
+  try{
+    $attributes=[IO.File]::GetAttributes($path)
+    $flags=Get-DiagnosticPathFlags ([long]$attributes)
+    Log ("attributes=0x{0:X8} ({1}); reparse={2}; offline={3}; pinned={4}; unpinned={5}; recallOnDataAccess={6}" -f [long]$attributes,$attributes,$flags.ReparsePoint,$flags.Offline,$flags.Pinned,$flags.Unpinned,$flags.RecallOnDataAccess)
+    if(-not ($attributes -band [IO.FileAttributes]::Directory)){
+      $file=New-Object IO.FileInfo $path
+      Log "bytes=$($file.Length); modifiedUtc=$($file.LastWriteTimeUtc.ToString('o'))"
+    }
+    if($flags.Offline -or $flags.RecallOnDataAccess){Log 'Content may require retrieval from a storage provider. The read probe below tests availability; no pin or sync settings are changed.'}
+  }catch{Log-Failure "$label metadata" $_}
+}
+function Get-DiagnosticBlock([string]$text,[string]$name){
+  $begin='__BSR_'+$name+'_BEGIN__';$end='__BSR_'+$name+'_END__'
+  $starts=[regex]::Matches($text,'(?m)^'+[regex]::Escape($begin)+'\r?$')
+  $ends=[regex]::Matches($text,'(?m)^'+[regex]::Escape($end)+'\r?$')
+  if($starts.Count -ne 1 -or $ends.Count -ne 1 -or $ends[0].Index -le $starts[0].Index){throw "Missing, duplicate or incomplete $name block."}
+  $start=$text.IndexOf([char]10,$starts[0].Index)+1
+  $text.Substring($start,$ends[0].Index-$start)
+}
+function Remove-DiagnosticScratch([string]$path,[string]$parent){
+  $full=[IO.Path]::GetFullPath($path)
+  $root=[IO.Path]::GetFullPath($parent).TrimEnd('\','/')+'\'
+  if(-not $full.StartsWith($root,[StringComparison]::OrdinalIgnoreCase) -or [IO.Path]::GetFileName($full) -cnotmatch '^bsr_diag_probe_[a-f0-9]{32}$'){throw "Unsafe diagnostic cleanup path: $full"}
+  if([IO.Directory]::Exists($full)){Remove-Item -LiteralPath $full -Recurse -Force -ErrorAction Stop}
+}
+function Invoke-DiagnosticTempProbe([string]$root,[string]$scratch=''){
+  Report-DiagnosticPath 'Temp root' $root
+  if(-not $root -or -not [IO.Directory]::Exists($root)){throw 'The configured temporary directory is absent or inaccessible.'}
+  if(-not $scratch){$scratch=Join-Path $root ('bsr_diag_probe_'+[guid]::NewGuid().ToString('N'))}
+  $step='create directory'
+  try{
+    New-Item -Path $scratch -ItemType Directory -Force -ErrorAction Stop | Out-Null
+    $path=Join-Path $scratch 'probe [1].bin'
+    $step='write';[IO.File]::WriteAllBytes($path,[byte[]](1,2,3,4))
+    $step='provider lookup';$file=Get-Item -LiteralPath $path -ErrorAction Stop
+    if($file.Length -ne 4){throw 'Temporary file size changed after writing.'}
+    $step='read';$bytes=[IO.File]::ReadAllBytes($path)
+    if([BitConverter]::ToString($bytes) -cne '01-02-03-04'){throw 'Temporary file content changed after writing.'}
+    $step='rename';$renamed=Join-Path $scratch 'renamed.bin';[IO.File]::Move($path,$renamed)
+    $step='delete';Remove-Item -LiteralPath $renamed -Force -ErrorAction Stop
+    Log 'TEMP create/write/provider lookup/read/rename/delete: PASS'
+    $step='PowerShell script launch';$scriptPath=Join-Path $scratch 'script [1].ps1'
+    [IO.File]::WriteAllText($scriptPath,"[Console]::WriteLine('BSR_TEMP_SCRIPT_OK')",(New-Object Text.UTF8Encoding($true)))
+    $result=Invoke-BsrNative 'powershell.exe' @('-NoProfile','-ExecutionPolicy','Bypass','-File',$scriptPath) 10
+    if($result.ExitCode -ne 0 -or $result.Output.Trim() -cne 'BSR_TEMP_SCRIPT_OK'){throw "Temporary PowerShell script failed (exit=$($result.ExitCode)): $($result.Output)"}
+    Log 'TEMP PowerShell -File launch: PASS'
+  }catch{Log-Failure "TEMP $step (scratch=$scratch)" $_;throw}
+  finally{Remove-DiagnosticScratch $scratch $root}
+}
+function Invoke-DiagnosticPayloadProbe([string]$path,[string]$scratch=''){
+  Report-DiagnosticPath 'Rooter before read' $path
+  # Bound both memory and the total child process lifetime. A cloud provider can
+  # stall reads; the parent retains metadata already printed before the timeout.
+  $file=New-Object IO.FileInfo $path
+  if($file.Length -gt 128MB){throw 'Rooter exceeds the 128 MB diagnostic read limit.'}
+  $bytes=[IO.File]::ReadAllBytes($path)
+  Log "Rooter read: PASS; bytes=$($bytes.Length); SHA256=$(Get-BsrBytesHash $bytes)"
+  $text=[Text.Encoding]::UTF8.GetString($bytes)
+  $magiskAst=$null
+  foreach($name in @('ENGINE','MAGISK','HOST','LAUNCHER')){
+    if($name -eq 'LAUNCHER' -and -not [regex]::IsMatch($text,'(?m)^__BSR_LAUNCHER_BEGIN__\r?$')){Log 'LAUNCHER block absent (older batch-menu build); continuing payload checks.';continue}
+    $code=Get-DiagnosticBlock $text $name
+    $tokens=$null;$errors=$null
+    $parsed=[Management.Automation.Language.Parser]::ParseInput($code,[ref]$tokens,[ref]$errors)
+    if($errors){throw "$name script parse error: $($errors[0].Message) at line $($errors[0].Extent.StartLineNumber)"}
+    Log "$name script: parses; SHA256=$(Get-BsrBytesHash ([Text.Encoding]::UTF8.GetBytes($code)))"
+    if($name -eq 'MAGISK'){$magiskAst=$parsed}
+  }
+  # Import only the payload functions, never the orchestrator's top-level code,
+  # dispatcher, player/disk functions or Defender exclusions. This also exercises
+  # older rooters' extraction code, instead of silently testing the latest code.
+  $functions=@('Get-SelfText','Extract-Block','Get-AvHint','Fail-Damaged','Assert-Extracted','Get-BlockBytes','Ensure-MagiskApk','Ensure-BsrSu','Ensure-Debugfs')
+  foreach($name in $functions){
+    $nodes=@($magiskAst.FindAll({param($n) $n -is [Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -ceq $name},$false))
+    if($nodes.Count -ne 1){throw "Cannot isolate payload probe: expected one $name function in this rooter."}
+    Log "Payload source: MAGISK/$name, block line $($nodes[0].Extent.StartLineNumber)"
+    . ([scriptblock]::Create($nodes[0].Extent.Text))
+  }
+  $shaNode=@($magiskAst.FindAll({param($n) $n -is [Management.Automation.Language.AssignmentStatementAst] -and $n.Left -is [Management.Automation.Language.VariableExpressionAst] -and $n.Left.VariablePath.UserPath -ceq 'BSR_SU_SHA'},$false))
+  if($shaNode.Count -ne 1){throw 'Cannot isolate payload probe: bootstrap hash declaration is missing or ambiguous.'}
+  $shaLiteral=@($shaNode[0].Right.FindAll({param($n) $n -is [Management.Automation.Language.StringConstantExpressionAst]},$true))
+  if($shaLiteral.Count -ne 1 -or $shaNode[0].Right.Extent.Text.Trim() -cne $shaLiteral[0].Extent.Text){throw 'Bootstrap hash must be a literal string for an isolated probe.'}
+  $BSR_SU_SHA=$shaLiteral[0].Value
+  if($BSR_SU_SHA -cnotmatch '^[a-f0-9]{64}$'){throw 'Invalid bootstrap hash declaration.'}
+  $root=$env:TEMP
+  if(-not $root -or -not [IO.Directory]::Exists($root)){throw 'The rooter TEMP directory is absent or inaccessible.'}
+  if(-not $scratch){$scratch=Join-Path $root ('bsr_diag_probe_'+[guid]::NewGuid().ToString('N'))}
+  [void][IO.Directory]::CreateDirectory($scratch)
+  $oldTemp=$env:TEMP;$oldTmp=$env:TMP
+  try{
+    $env:TEMP=$scratch;$env:TMP=$scratch
+    $SelfCmd=$path;$Here=$scratch
+    $script:WorkDir=Join-Path $scratch 'bsr_work\session'
+    $script:MagiskApk=$null;$script:BsrSu=$null;$script:Debugfs=$null
+    $script:SelfCmdTextCache=@{};$script:SelfCmdTextCache[$path]=$text;$script:SelfReadCount=0
+    function Say($m,$c='Gray'){Log $m $c}
+    Log "Isolated extraction under $scratch. Existing rooter caches and BlueStacks files are untouched."
+    Log 'Scope: embedded payloads. External APK overrides and existing cache contents are not validated by this probe.'
+    foreach($name in @('Ensure-MagiskApk','Ensure-BsrSu','Ensure-Debugfs')){
+      $timer=[Diagnostics.Stopwatch]::StartNew()
+      Log "BEGIN $name"
+      try{
+        & $name
+        if($name -eq 'Ensure-Debugfs'){
+          $tool=Invoke-BsrNative $script:Debugfs @('-V') 10
+          if($tool.ExitCode){throw "debugfs executable/DLL check failed (exit=$($tool.ExitCode)): $($tool.Output)"}
+          Log "debugfs executable/DLL check: $($tool.Output)"
+        }
+        Log "PASS $name; elapsedMs=$($timer.ElapsedMilliseconds)"
+      }
+      catch{Log-Failure "Payload preparation: $name" $_}
+    }
+    if($script:DiagnosticFailures -eq 0){
+      foreach($payload in @($script:MagiskApk,$script:BsrSu,$script:Debugfs)){
+        Log "prepared file=$payload; bytes=$((Get-Item -LiteralPath $payload -Force).Length); SHA256=$(Get-DiagnosticHash $payload)"
+      }
+    }
+  }finally{
+    $env:TEMP=$oldTemp;$env:TMP=$oldTmp
+    Remove-DiagnosticScratch $scratch $root
+  }
+}
+function Invoke-DiagnosticWorker([string]$mode,[string]$path,[int]$TimeoutSec=45){
+  # Values stay PowerShell single-quoted data inside an encoded command. Neither
+  # cmd.exe nor native command-line splitting interprets the paths as code.
+  function Literal([string]$s){"'"+$s.Replace("'","''")+"'"}
+  $scratch='';$root=''
+  if($mode -in @('Temp','Payload')){
+    $root=if($mode -eq 'Temp'){$path}else{$env:TEMP}
+    if($root){$scratch=Join-Path $root ('bsr_diag_probe_'+[guid]::NewGuid().ToString('N'))}
+  }
+  $command='$ErrorActionPreference=''Stop''; $ProgressPreference=''SilentlyContinue''; try { $env:SELF='+(Literal $env:SELF)+'; $t=[IO.File]::ReadAllText($env:SELF); $i=$t.IndexOf(''#__BSR''+''_DEBUG_PS__''); & ([scriptblock]::Create($t.Substring($i))) -ProbeMode '+(Literal $mode)+' -ProbePath '+(Literal $path)
+  if($scratch){$command+=' -ProbeScratch '+(Literal $scratch)}
+  $command+=' } catch { [Console]::Error.WriteLine(''Worker bootstrap failed: ''+$_.Exception.ToString()); exit 1 }'
+  $encoded=[Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($command))
+  try{
+    $result=Invoke-BsrNative 'powershell.exe' @('-NoProfile','-OutputFormat','Text','-EncodedCommand',$encoded) $TimeoutSec -ReturnOnTimeout
+    foreach($line in ($result.Output -split '\r?\n')){if($line){Log $line}}
+    if($result.TimedOut){Log "[!] $mode probe timed out after ${TimeoutSec}s for $path. Partial output above identifies the last operation reached." Yellow}
+  }finally{
+    # The worker's finally cannot run after a timeout kills it. The parent knows
+    # its exact scratch path and removes only that directory, never old caches.
+    if($scratch){Remove-DiagnosticScratch $scratch $root}
+  }
+  $result.ExitCode
+}
+function Report-FileContext([string]$rooter){
+  Section 'SCRIPT, CLOUD STORAGE AND TEMP PATHS'
+  Log "diagnostic=$env:SELF; rooter=$rooter; workingDirectory=$((Get-Location).Path)"
+  Log "culture=$([Globalization.CultureInfo]::CurrentCulture.Name); uiCulture=$([Globalization.CultureInfo]::CurrentUICulture.Name); languageMode=$($ExecutionContext.SessionState.LanguageMode); process64bit=$([Environment]::Is64BitProcess)"
+  Log "Legacy resolver regex accepts BSR_INSTALL=$([bool]('BSR_INSTALL=test' -match '^(BSR_[A-Z]+)=(.*)$')); case-sensitive=$([bool]('BSR_INSTALL=test' -cmatch '^(BSR_[A-Z]+)=(.*)$'))"
+  Log "Desktop=$([Environment]::GetFolderPath('Desktop')); LocalAppData=$([Environment]::GetFolderPath('LocalApplicationData'))"
+  foreach($name in @('TEMP','TMP','USERPROFILE','OneDrive','OneDriveConsumer','OneDriveCommercial')){Log "$name=$([Environment]::GetEnvironmentVariable($name))"}
+  Log 'A OneDrive directory name or reparse point alone does not establish an I/O failure. This log location is independent of the rooter location.'
+  $probes=@(@('Diagnostic file','File',$env:SELF),@('Temporary directory','Temp',$env:TEMP))
+  $launcherTemp=[IO.Path]::GetTempPath()
+  if(-not (Test-SamePath $launcherTemp $env:TEMP)){$probes+=,@('Launcher temporary directory','Temp',$launcherTemp)}
+  $probes+=,@('Rooter payloads','Payload',$rooter)
+  foreach($probe in $probes){
+    try{
+      $code=Invoke-DiagnosticWorker $probe[1] $probe[2]
+      if($code -eq 0){Set-DiagnosticCheck $probe[0] 'PASS' 'probe completed'}
+      else{$script:DiagnosticFailures++;Set-DiagnosticCheck $probe[0] 'FAIL' "probe exited $code; see the operation and exception above"}
+    }catch{Log-Failure $probe[0] $_;Set-DiagnosticCheck $probe[0] 'FAIL' 'probe could not complete'}
+  }
+}
+
+if($ProbeMode){
+  try{
+    switch($ProbeMode){
+      'File' {Report-DiagnosticPath 'Diagnostic file' $ProbePath;Log "SHA256=$(Get-DiagnosticHash $ProbePath)"}
+      'Temp' {Invoke-DiagnosticTempProbe $ProbePath $ProbeScratch}
+      'Payload' {Invoke-DiagnosticPayloadProbe $ProbePath $ProbeScratch}
+    }
+  }catch{Log-Failure "$ProbeMode probe" $_}
+  exit ([int]($script:DiagnosticFailures -gt 0))
+}
 
 function Report-HostDetails {
   Section 'WINDOWS CONTEXT'
@@ -112,30 +365,39 @@ function Report-HostDetails {
 
 function Probe-RootDisk([string]$path){
   Section 'READ-ONLY DISK PROBE'
-  if(-not(Test-Path -LiteralPath $path)){Log "Root image not found: $path" Yellow;return $true}
-  if(@(Get-Process -Name HD-Player -EA SilentlyContinue).Count){Log 'Attach probe skipped: a BlueStacks player is running and may share this master. Close the other instances and rerun for mount evidence.' Yellow;return $true}
+  if(-not(Test-Path -LiteralPath $path)){$script:DiagnosticFailures++;Set-DiagnosticCheck 'Disk attach' 'FAIL' "Root image not found: $path";return $true}
+  if(@(Get-Process -Name HD-Player -EA SilentlyContinue).Count){Set-DiagnosticCheck 'Disk attach' 'SKIP' 'a running player may share this master; close it for mount evidence';return $true}
   $mounted=$null;$detached=$true
   try{
     $format=Get-BsrDiskFormat $path
     Log "probe path=$path; detected=$format; extension=$([IO.Path]::GetExtension($path)); access=ReadOnly"
-    if($format -notin @('VHD','VHDX')){Log 'Unsupported or incomplete image; no attach attempted.' Yellow;return $true}
+    if($format -notin @('VHD','VHDX')){$script:DiagnosticFailures++;Set-DiagnosticCheck 'Disk attach' 'FAIL' 'unsupported or incomplete image; no attach attempted';return $true}
     $existing=Get-DiskImage -ImagePath $path -StorageType $format -EA Stop
-    if($existing.Attached){Log 'Image already attached; leaving the existing attachment alone.' Yellow;return $true}
+    if($existing.Attached){Set-DiagnosticCheck 'Disk attach' 'SKIP' 'image already attached; existing attachment left alone';return $true}
     $mounted=Mount-DiskImage -ImagePath $path -StorageType $format -Access ReadOnly -NoDriveLetter -PassThru -EA Stop
     $disk=$mounted | Get-Disk -EA Stop
     Log "attach succeeded: disk=$($disk.Number); bytes=$($disk.Size); style=$($disk.PartitionStyle); logicalSector=$($disk.LogicalSectorSize); physicalSector=$($disk.PhysicalSectorSize); readOnly=$($disk.IsReadOnly); offline=$($disk.IsOffline)"
     foreach($part in @(Get-Partition -DiskNumber $disk.Number -EA Stop)){Log "partition=$($part.PartitionNumber); offset=$($part.Offset); bytes=$($part.Size); type=$($part.Type)"}
-  }catch{Log-Failure 'Disk attach/inspection failed (no disk writes attempted)' $_}
+    Set-DiagnosticCheck 'Disk attach' 'PASS' 'read-only attach and partition inspection completed'
+  }catch{Log-Failure 'Disk attach/inspection failed (no disk writes attempted)' $_;Set-DiagnosticCheck 'Disk attach' 'FAIL' 'see the native disk error above'}
   finally{
-    if($mounted){try{Dismount-DiskImage -InputObject $mounted -EA Stop | Out-Null;Log 'Our read-only attachment was detached.'}catch{$detached=$false;Log-Failure 'Detach failed; player launch will be skipped' $_}}
+    if($mounted){try{Dismount-DiskImage -InputObject $mounted -EA Stop | Out-Null;Log 'Our read-only attachment was detached.'}catch{$detached=$false;Log-Failure 'Detach failed; player launch will be skipped' $_;Set-DiagnosticCheck 'Disk attach' 'FAIL' 'could not detach our read-only attachment'}}
   }
   return $detached
 }
 
-Log "BlueStacksRoot v20 diagnostic" Green
+Log "BlueStacksRoot diagnostic 2026-10-07 (files, payloads, host and ADB)" Green
 Log 'Privacy: user-directory names are masked. Technical paths, ACLs, Windows errors and related event details are kept. Review the log before posting; it is never uploaded automatically.'
 Log "log file : $(Redact $LogFile)"
 Log "OS       : $([Environment]::OSVersion.VersionString)   PowerShell $($PSVersionTable.PSVersion)"
+
+try {
+if(-not $RooterPath){$RooterPath=Join-Path (Split-Path -Parent $env:SELF) 'blueStackRoot.cmd'}
+Report-FileContext $RooterPath
+if($FilesOnly){
+  Set-DiagnosticCheck 'BlueStacks / ADB' 'SKIP' 'files-only mode; no player restart, disk attach or root changes'
+  return
+}
 
 # ----------------------------- validated layout discovery -----------------------------
 function Prop($o,$n){ Get-ObjectProperty $o $n }
@@ -148,21 +410,21 @@ function Same($a,$b){ Test-SamePath $a $b }
 function RecordData($r){ Get-RecordDataRoot $r }
 
 $custom=$null;$customFile=if($env:BSR_DEBUG_HOME){Join-Path $env:BSR_DEBUG_HOME 'bluestacksconfig.txt'}else{$null}
-if($customFile-and(Test-Path -LiteralPath $customFile)){try{$custom=([IO.File]::ReadAllText($customFile)).Trim()}catch{}}
+if($customFile-and(Test-Path -LiteralPath $customFile)){try{$custom=([IO.File]::ReadAllText($customFile)).Trim()}catch{Log-Failure 'Saved custom path read' $_;return}}
 $records=@(Records);$customData=DataAt $custom;$customInstall=InstallAt $custom
-if($custom-and-not$customData-and-not$customInstall){Log "[!] Saved custom path is not a valid install or data folder: $(Redact $custom)" Red;return}
+if($custom-and-not$customData-and-not$customInstall){throw "Saved custom path is not a valid install or data folder: $custom"}
 $DataRoot=$customData
 if(-not$DataRoot-and$customInstall){foreach($r in $records){$ri=InstallAt $r.InstallDir;if($ri-and(Same $ri $customInstall)){$DataRoot=RecordData $r;if($DataRoot){break}}}}
 if(-not$DataRoot){foreach($r in $records){$DataRoot=RecordData $r;if($DataRoot){break}}}
-if(-not$DataRoot){Log '[!] No validated BlueStacks data folder was found in the registry; use option 8 in blueStackRoot.cmd first.' Red;return}
+if(-not$DataRoot){throw 'No validated BlueStacks data folder was found in the registry; use option 8 in blueStackRoot.cmd first.'}
 $Install=$customInstall
 if(-not$Install){foreach($r in $records){$rd=RecordData $r;$ri=InstallAt $r.InstallDir;if($ri-and$rd-and(Same $rd $DataRoot)){$Install=$ri;break}}}
 if(-not$Install){
   $candidates=@((@(Get-RuntimeInstallRoots)+@($records | ForEach-Object {InstallAt $_.InstallDir})) | Where-Object {$_} | Select-Object -Unique)
-  if($candidates.Count -gt 1){Log 'Several installations were found with no match to the selected data folder. Set the intended install folder with option 8.' Red;return}
+  if($candidates.Count -gt 1){throw 'Several installations were found with no match to the selected data folder. Set the intended install folder with option 8.'}
   if($candidates.Count -eq 1){$Install=$candidates[0]}
 }
-if(-not$Install){Log '[!] No validated BlueStacks install folder was found; use option 8 in blueStackRoot.cmd first.' Red;return}
+if(-not$Install){throw 'No validated BlueStacks install folder was found; use option 8 in blueStackRoot.cmd first.'}
 $Conf      = Join-Path $DataRoot 'bluestacks.conf'
 $PlayerLog = Join-Path $DataRoot 'Logs\Player.log'
 $Player    = Join-Path $Install 'HD-Player.exe'
@@ -172,9 +434,12 @@ function Quote-NativeArgument([string]$value){ Quote-BsrNativeArgument $value }
 function Adb([string[]]$a){
   try{
     $result=Invoke-BsrNative $AdbExe $a 8
-    if($result.ExitCode){Log "ADB exit=$($result.ExitCode); command=$($a -join ' '); $(Compact $result.Output 800)" DarkYellow}
+    if($result.ExitCode){
+      Log "ADB exit=$($result.ExitCode); command=$($a -join ' '); $(Compact $result.Output 800)" DarkYellow
+      if($script:CaptureGuestErrors){$script:GuestAdbFailures++}
+    }
     $result.Output
-  }catch{Log-Failure 'ADB invocation failed' $_;"ERR: $($_.Exception.Message)"}
+  }catch{if($script:CaptureGuestErrors){$script:GuestAdbFailures++};Log-Failure 'ADB invocation failed' $_;"ERR: $($_.Exception.Message)"}
 }
 function State($serial){
   $o=Adb @('-s',$serial,'get-state')
@@ -184,26 +449,26 @@ function State($serial){
 
 # ----------------------------- instance selection -----------------------------
 function Get-ConfInstances {
-  if(-not (Test-Path $Conf)){ return @() }
-  try{ $ct=[IO.File]::ReadAllText($Conf) }catch{ return @() }
+  if(-not (Test-Path -LiteralPath $Conf)){ return @() }
+  try{ $ct=[IO.File]::ReadAllText($Conf) }catch{Log-Failure 'Instance configuration read' $_;return @()}
   @([regex]::Matches($ct,'(?im)^\s*bst\.instance\.([A-Za-z0-9_]+)\.adb_port\s*=') | ForEach-Object { $_.Groups[1].Value } | Select-Object -Unique)
 }
 $allInst = Get-ConfInstances
 if([string]::IsNullOrWhiteSpace($Instance)){
   $eng = Join-Path $DataRoot 'Engine'; $pick = $null
-  if(Test-Path $eng){
-    $pick = Get-ChildItem $eng -Directory -EA SilentlyContinue | Where-Object { $allInst -contains $_.Name } |
+  if(Test-Path -LiteralPath $eng){
+    $pick = Get-ChildItem -LiteralPath $eng -Directory -EA Stop | Where-Object { $allInst -contains $_.Name } |
             Sort-Object LastWriteTime -Descending | Select-Object -First 1 -ExpandProperty Name
   }
   if(-not $pick -and $allInst.Count -ge 1){ $pick = $allInst[0] }
   if(-not $pick){ $pick = 'Rvc64' }
   $Instance = $pick
 }
-if($Instance -notmatch '^[A-Za-z0-9_]+$' -or $allInst -notcontains $Instance){Log 'Selected instance is not a registered BlueStacks instance. Check its internal name in bluestacks.conf.' Red;return}
+if($Instance -cnotmatch '^[A-Za-z0-9_]+$' -or $allInst -notcontains $Instance){throw 'Selected instance is not a registered BlueStacks instance. Check its internal name in bluestacks.conf.'}
 
 function Get-ConfPort($name,$key){
-  if(-not (Test-Path $Conf)){ return $null }
-  try{ $ct=[IO.File]::ReadAllText($Conf) }catch{ return $null }
+  if(-not (Test-Path -LiteralPath $Conf)){ return $null }
+  try{ $ct=[IO.File]::ReadAllText($Conf) }catch{Log-Failure 'ADB port configuration read' $_;return $null}
   $m=[regex]::Match($ct,'(?im)^\s*bst\.instance\.'+[regex]::Escape($name)+'\.'+[regex]::Escape($key)+'\s*=\s*"?(\d+)"?')
   if($m.Success){ $m.Groups[1].Value } else { $null }
 }
@@ -247,9 +512,13 @@ function Probe-Player($name){
 }
 
 $script:logOffset = 0
-function Snapshot-Log { if(Test-Path $PlayerLog){ try{ $script:logOffset = (Get-Item $PlayerLog).Length }catch{ $script:logOffset = 0 } } else { $script:logOffset = 0 } }
+function Snapshot-Log {
+  $script:PlayerLogReadFailureLogged=$false
+  $script:logOffset=0
+  if(Test-Path -LiteralPath $PlayerLog){try{$script:logOffset=(Get-Item -LiteralPath $PlayerLog -Force).Length}catch{Log-Failure 'Player.log initial inspection' $_}}
+}
 function Read-NewLog($name){
-  if(-not (Test-Path $PlayerLog)){ return @() }
+  if(-not (Test-Path -LiteralPath $PlayerLog)){ return @() }
   try{
     $fs=[IO.File]::Open($PlayerLog,'Open','Read','ReadWrite')
     try{
@@ -261,7 +530,7 @@ function Read-NewLog($name){
       $script:logOffset = $fs.Position
     } finally { $fs.Close() }
     @($txt -split "`r?`n" | Where-Object { $_ -match (' ' + [regex]::Escape($name) + ' \[') })
-  }catch{ @() }
+  }catch{if(-not $script:PlayerLogReadFailureLogged){Log-Failure 'Player.log read' $_;$script:PlayerLogReadFailureLogged=$true};@()}
 }
 function Phase-Of($line){ $m=[regex]::Match($line, [regex]::Escape($Instance)+'\s+\[([A-Za-z]+)\]'); if($m.Success){ $m.Groups[1].Value } }
 function Test-DiagnosticPlayerLine([string]$line){
@@ -272,18 +541,18 @@ function Test-DiagnosticPlayerLine([string]$line){
 
 # ----------------------------- report environment -----------------------------
 Section 'ENVIRONMENT'
-Log "Install   : $(Redact $Install)   exists=$([bool](Test-Path $Install))"
+Log "Install   : $(Redact $Install)   exists=$([bool](Test-Path -LiteralPath $Install))"
 Log "DataRoot  : $(Redact $DataRoot)"
-Log "Conf      : $(Redact $Conf)   exists=$([bool](Test-Path $Conf))"
-Log "Player.log: $(Redact $PlayerLog)   exists=$([bool](Test-Path $PlayerLog))"
-Log "HD-Player : exists=$([bool](Test-Path $Player))"
+Log "Conf      : $(Redact $Conf)   exists=$([bool](Test-Path -LiteralPath $Conf))"
+Log "Player.log: $(Redact $PlayerLog)   exists=$([bool](Test-Path -LiteralPath $PlayerLog))"
+Log "HD-Player : exists=$([bool](Test-Path -LiteralPath $Player))"
 Get-BsrPlayerDiagnostics $Player | ForEach-Object { Log $_ }
 Report-HostDetails
 foreach($disk in @(Get-ChildItem -LiteralPath (Join-Path $DataRoot 'Engine') -Filter Root.vhd -Recurse -File -EA SilentlyContinue)){
   try { Log "disk: $($disk.FullName); format=$(Get-BsrDiskFormat $disk.FullName); bytes=$($disk.Length); attributes=$($disk.Attributes)" } catch { Log "disk inspection: $($_.Exception.Message)" Yellow }
 }
-Log "HD-Adb    : exists=$([bool](Test-Path $AdbExe))   version=[$(Compact (Adb @('version')))]"
-if(-not (Test-Path $Player) -or -not (Test-Path $AdbExe)){ Log '[!] HD-Player.exe or HD-Adb.exe not found -- cannot continue.' Red; return }
+Log "HD-Adb    : exists=$([bool](Test-Path -LiteralPath $AdbExe))   version=[$(Compact (Adb @('version')))]"
+if(-not (Test-Path -LiteralPath $Player) -or -not (Test-Path -LiteralPath $AdbExe)){throw 'HD-Player.exe or HD-Adb.exe not found -- cannot continue.'}
 
 Section 'CONF PORTS'
 Log "instances in conf : $($allInst -join ', ')"
@@ -297,7 +566,7 @@ $serverBand = Get-BandListeners 15037 15057
 $serverPort = $null
 $used = @{}; foreach($b in $serverBand){ $used[[int]$b.Port] = $true }
 foreach($p in 15037..15057){ if(-not $used.ContainsKey($p)){ $serverPort = "$p"; break } }
-if(-not $serverPort){Log 'No free private ADB server port in 15037-15057; other ADB servers were left alone.' Red;return}
+if(-not $serverPort){throw 'No free private ADB server port in 15037-15057; other ADB servers were left alone.'}
 $oldAdbServerPort=$env:ANDROID_ADB_SERVER_PORT
 $env:ANDROID_ADB_SERVER_PORT = $serverPort
 Log "ADB server port   : $serverPort   (current 15037-15057 listeners: $(Fmt-Band $serverBand))"
@@ -401,7 +670,7 @@ while(-not $done){
         Log "      boot_completed after heal -> $(Compact $bc2 14)"
         if(($bc2 -split "`r?`n" | ForEach-Object { $_.Trim() }) -contains '1'){
           $diagSerial=$cand
-          $verdict = "SUCCESS via HEAL: $cand online+boot_completed=1 at ${el}s -- disconnect+connect WAS required (this is the fix)"; $done=$true; break
+          $verdict = "SUCCESS via reconnect: $cand online+boot_completed=1 at ${el}s. Connection recovered during this diagnostic; this does not explain an earlier payload failure."; $done=$true; break
         }
       }
     }
@@ -425,6 +694,7 @@ while(-not $done){
 
 Section 'ROOT + SELINUX DIAGNOSTICS'
 if($diagSerial){
+  $script:GuestAdbFailures=0;$script:CaptureGuestErrors=$true
   try{
     $confLines = [IO.File]::ReadAllLines($Conf) | Where-Object {
       $_ -match ('^bst\.instance\.'+[regex]::Escape($Instance)+'\.enable_root_access=') -or
@@ -446,15 +716,22 @@ if($diagSerial){
   if($bootstrapId-match'uid=0'){
     Log "guest bsr kernel log  : $(Compact (Adb @('-s',$diagSerial,'shell','/system/etc/bsr_su -c "dmesg | grep -i bsr | tail -20"')) 500)"
   }
+  $script:CaptureGuestErrors=$false
+  if($script:GuestAdbFailures){
+    $script:DiagnosticFailures++
+    Set-DiagnosticCheck 'Guest evidence' 'INCOMPLETE' "$script:GuestAdbFailures commands failed after initial ADB readiness; do not infer root state from missing replies"
+  }else{Set-DiagnosticCheck 'Guest evidence' 'PASS' 'guest commands returned; see their individual results for root state'}
 }else{
+  Set-DiagnosticCheck 'Guest evidence' 'SKIP' 'ADB was never ready'
   Log 'Guest was never adb-ready, so root/SELinux guest probes were skipped.' Yellow
 }
 
 Section 'TARGET PLAYER.LOG STARTUP/DISK EVIDENCE (up to 40 lines)'
 foreach($line in $recentPlayerLines){Log (Compact $line 1200)}
 Report-PolicyEvents
-Section 'VERDICT'
+Section 'ADB VERDICT'
 Log $verdict $(if($verdict -match '^SUCCESS'){'Green'}else{'Red'})
+if($verdict -match '^SUCCESS'){Set-DiagnosticCheck 'ADB readiness' 'PASS' $verdict}else{$script:DiagnosticFailures++;Set-DiagnosticCheck 'ADB readiness' 'FAIL' $verdict}
 Log ("timeline: PlayerLog[Ready]=$readyAt s | firstAdbOnline=$firstOnlineAt s | healWorked=$healWorkedAt s | sawProcess=$sawProc | primaryPort=$PrimaryPort")
 Log ''
 Log '------------------------------------------------------------------'
@@ -463,6 +740,12 @@ Log 'Attach that .log file to the GitHub issue. (Instance left running for inspe
 } finally {
   try { Stop-BsrAdbServer $AdbExe } catch { Log ("ADB cleanup: " + $_.Exception.Message) Yellow }
   $env:ANDROID_ADB_SERVER_PORT=$oldAdbServerPort
+}
+} catch {
+  Log-Failure 'Diagnostic stopped' $_
+} finally {
+  Report-DiagnosticSummary
+  if($script:DiagnosticFailures -gt 0 -or $script:LogWriteFailed){exit 1}
 }
 
 <#
@@ -501,7 +784,8 @@ function Quote-BsrNativeArgument([AllowEmptyString()][string]$Value) {
 }
 
 function Invoke-BsrNative([string]$FilePath, [string[]]$Arguments,
-                          [ValidateRange(1,3600)][int]$TimeoutSec=30) {
+                          [ValidateRange(1,3600)][int]$TimeoutSec=30,
+                          [switch]$ReturnOnTimeout) {
     $process = $null
     try {
         $info = New-Object Diagnostics.ProcessStartInfo
@@ -516,15 +800,19 @@ function Invoke-BsrNative([string]$FilePath, [string[]]$Arguments,
         $process = [Diagnostics.Process]::Start($info)
         $stdout = $process.StandardOutput.ReadToEndAsync()
         $stderr = $process.StandardError.ReadToEndAsync()
-        if (-not $process.WaitForExit($TimeoutSec * 1000)) {
+        $timedOut = -not $process.WaitForExit($TimeoutSec * 1000)
+        if ($timedOut) {
             $process.Kill()
-            throw "Native command timed out after ${TimeoutSec}s: $([IO.Path]::GetFileName($FilePath)) $($Arguments -join ' ')"
+            if (-not $ReturnOnTimeout) {
+                throw "Native command timed out after ${TimeoutSec}s: $([IO.Path]::GetFileName($FilePath)) $($Arguments -join ' ')"
+            }
         }
         if (-not $stdout.Wait(2000) -or -not $stderr.Wait(2000)) {
             throw "Native output pipe did not close: $FilePath"
         }
         [pscustomobject]@{
-            ExitCode = $process.ExitCode
+            ExitCode = if($timedOut){-1}else{$process.ExitCode}
+            TimedOut = $timedOut
             Output = ($stdout.Result + [Environment]::NewLine + $stderr.Result).Trim()
         }
     } finally { if ($process) { $process.Dispose() } }
@@ -969,7 +1257,10 @@ function Redact-UserPath($value) {
             $s = $s -replace ("(?i)$([regex]::Escape(($root -replace '\\', '/')))"+$boundary), (($masked -replace '\\', '/') -replace '\$', '$$')
         }
     }
-    $s = $s -replace '(?i)([A-Z]:[\\/]+(?:Users|Documents and Settings)[\\/]+)(?!xxxxx\b)([^\\/\r\n"<>]+)', '${1}xxxxx'
+    # A provider error can end its path at the profile itself. Preserve the
+    # following explanation instead of treating it as part of the username
+    # (issue #38: "C:\Users\xxxxx" used to swallow the entire error suffix).
+    $s = [regex]::Replace($s, '([A-Z]:[\\/]+(?:Users|Documents and Settings)[\\/]+)(?!xxxxx\b)([^\\/\r\n"<>]+?)(?=[\\/\r\n"<>]|$| does not exist\b)', '${1}xxxxx', 'IgnoreCase,CultureInvariant')
     $s = $s -replace '(?i)(/Users/)([^/]+)(?=$|/)', '${1}xxxxx'
     $s
 }

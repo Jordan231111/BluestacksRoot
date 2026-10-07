@@ -157,32 +157,31 @@ function Assert-BlueStacksHostTools{
 # removes part of the file (or a download is cut short) FromBase64String / GZipStream throw an opaque
 # .NET error. Get-BlockBytes validates structure first and, on any problem, throws a message that tells
 # the user what to actually do instead of surfacing a raw exception.
-# Name the antivirus actually installed (root/SecurityCenter2) so the guidance can be vendor-specific.
-# Only Defender can be excluded from code; for anything else the user must add the exclusion by hand, so
-# telling them WHICH product is running is the honest, useful help. Best-effort: empty string on any error.
+# Report registered security products as context, not as proof of interference.
+# Best-effort: an unavailable registration query does not hide the original error.
 function Get-AvHint {
     try {
         $av = @(Get-CimInstance -Namespace 'root/SecurityCenter2' -ClassName AntiVirusProduct -ErrorAction Stop |
                 ForEach-Object { $_.displayName } | Where-Object { $_ } | Select-Object -Unique)
-        if($av.Count){ return " Antivirus detected: $($av -join ', '). Windows Defender exclusions are added for you; any THIRD-PARTY antivirus you must exclude yourself -- add this folder and %TEMP%\bsr_work to its exclusions." }
+        if($av.Count){ return " Registered antivirus: $($av -join ', '). Registration alone does not establish that a file was quarantined." }
     } catch {}
     return ''
 }
 function Fail-Damaged($what){
-    throw ("embedded $what payload is damaged or incomplete -- antivirus most likely removed part of this " +
-           "file, or the download was interrupted." + (Get-AvHint) + " Fix: add a folder exclusion for this " +
-           "directory, then RE-DOWNLOAD blueStackRoot.cmd from the GitHub Releases page into the SAME folder " +
-           "and run it again.")
+    throw ("embedded $what payload is damaged or incomplete (format or integrity check failed). " +
+           "Run debug.cmd --files-only beside this rooter to record its hash and the exact failing check. " +
+           "Re-download the complete blueStackRoot.cmd from GitHub Releases if this copy is damaged." + (Get-AvHint))
 }
-# After a payload is written to %TEMP%\bsr_work, confirm AV didn't quarantine/alter it in the moment between
-# write and use (real Magisk APK / setuid su are prime targets even with a path exclusion, if the verdict is
-# cloud/behavioural rather than path-based).
+# Check availability and size between writing and using a payload. Disappearance
+# alone cannot distinguish quarantine, permissions, cleanup or storage problems.
 function Assert-Extracted($path,$expectedLen,$what){
     if(-not (Test-Path -LiteralPath $path)){
-        throw ("the extracted $what was deleted right after it was written -- antivirus quarantined it." + (Get-AvHint) + " Add the exclusions above and run again.")
+        throw ("the extracted $what is missing or inaccessible after writing: $path. " +
+               "Run debug.cmd --files-only to check temporary-file access and payload extraction." + (Get-AvHint))
     }
     if($expectedLen -and ((Get-Item -LiteralPath $path).Length -ne $expectedLen)){
-        throw ("the extracted $what changed size after it was written -- antivirus altered/quarantined it." + (Get-AvHint) + " Add the exclusions above and run again.")
+        throw ("the extracted $what changed size after writing: $path (expected $expectedLen bytes). " +
+               "Run debug.cmd --files-only to capture the file and extraction evidence." + (Get-AvHint))
     }
 }
 function Get-BlockBytes($tok){
@@ -778,7 +777,16 @@ function Boot-And-Wait([int]$timeoutSec=300){
 # ====================================================================
 function Do-Prep {
     Assert-BlueStacksHostTools
-    Ensure-MagiskApk; Ensure-BsrSu; Ensure-Debugfs
+    $payload='Magisk APK'
+    try {
+        Ensure-MagiskApk
+        $payload='bootstrap su'; Ensure-BsrSu
+        $payload='debugfs'; Ensure-Debugfs
+    } catch {
+        # Keep enough context to distinguish extraction failures from disk or
+        # player failures, even when the native message contains a private path.
+        throw "Could not prepare $payload [$($_.FullyQualifiedErrorId)]: $($_.Exception.Message)"
+    }
     Say '==== PREP (offline) ====' Cyan
     Kill-BlueStacks
 

@@ -65,7 +65,9 @@ function Resolve-LauncherPaths([string]$Base) {
     if ($result.ExitCode) { throw $result.Output }
     $paths = @{}
     foreach ($line in ($result.Output -split '\r?\n')) {
-        if ($line -match '^(BSR_[A-Z]+)=(.*)$') { $paths[$Matches[1]]=$Matches[2] }
+        # The engine emits uppercase ASCII keys. IgnoreCase regexes use the
+        # current culture in Windows PowerShell 5.1 (Turkish I drops INSTALL).
+        if ($line -cmatch '^(BSR_[A-Z]+)=(.*)$') { $paths[$Matches[1]]=$Matches[2] }
     }
     foreach ($key in @('BSR_BSTK','BSR_CONF','BSR_VHD','BSR_INSTALL')) {
         if (-not $paths[$key] -or -not (Test-Path -LiteralPath $paths[$key])) {
@@ -89,41 +91,73 @@ function Add-LauncherExclusions([string]$DataRoot) {
     } catch { } # Defender can be absent or centrally managed.
 }
 
-function Show-LauncherMenu {
-    try { Clear-Host; $width=[Console]::WindowWidth } catch { $width=80 }
-    if ($width -lt 30) { $width=80 }
-    $boxWidth=[Math]::Min(82,[Math]::Max(44,$width-2))
-    $pad=' '*[Math]::Max(0,[int](($width-$boxWidth)/2))
+function Show-LauncherMenu([int]$Width=0, [int]$Height=0) {
+    try { Clear-Host } catch { }
+    # Console cells already reflect the host's font size / Windows DPI. Read
+    # the visible viewport on every redraw; never force a window or font size.
+    if ($Width -le 0) { try { $Width=[Console]::WindowWidth } catch { } }
+    if ($Height -le 0) { try { $Height=[Console]::WindowHeight } catch { } }
+    if ($Width -le 0) { $Width=80 }
+    if ($Height -le 0) { $Height=25 }
+    $boxWidth=[Math]::Min(82,[Math]::Max(1,$Width-2))
+    $pad=' '*[Math]::Max(0,[int][Math]::Floor(($Width-$boxWidth-1)/2))
+    $indent=' '*[Math]::Min(2,[Math]::Max(0,$boxWidth-1))
+    $contentWidth=[Math]::Max(1,$boxWidth-$indent.Length)
+    $columns=$Width -ge 62
+    $compact=($columns -and $Height -lt 24) -or (-not $columns -and $Height -lt 30)
     function Rule { Write-Host ($pad+([string][char]0x2500)*$boxWidth) -ForegroundColor DarkCyan }
     function Cut($value) {
         if (-not $value) { return '(not detected)' }
         $value=Redact-UserPath $value
-        $limit=$boxWidth-12
+        $limit=[Math]::Max(4,$contentWidth-10)
         if ($value.Length -gt $limit) { return '...'+$value.Substring($value.Length-($limit-3)) }
         return $value
     }
-    function Row($left,$right='') {
-        if ($width -ge 62 -and $right) { Write-Host ($pad+'  '+$left.PadRight(28)+$right) -ForegroundColor Gray }
-        else { Write-Host ($pad+'  '+$left) -ForegroundColor Gray; if($right){Write-Host ($pad+'  '+$right) -ForegroundColor Gray} }
+    function Row([string]$left,[string]$right='', [string]$color='Gray') {
+        if ($columns -and $right) { $left=$left.PadRight(28)+$right; $right='' }
+        foreach ($text in @($left,$right)) {
+            if (-not $text) { continue }
+            while ($text.Length -gt $contentWidth) {
+                $end=$text.LastIndexOf(' ',$contentWidth)
+                if ($end -le 0) { $end=$contentWidth }
+                Write-Host ($pad+$indent+$text.Substring(0,$end).TrimEnd()) -ForegroundColor $color
+                $text=$text.Substring($end).TrimStart()
+            }
+            if ($text) { Write-Host ($pad+$indent+$text) -ForegroundColor $color }
+        }
     }
-    Write-Host ''
-    Write-Host ($pad+'  >> blueStackRoot <<') -ForegroundColor Cyan
-    Write-Host ($pad+'  Made with '+[char]0x2665+' by Nyxane') -ForegroundColor DarkGray
+    if (-not $compact) { Write-Host '' }
+    Row '>> blueStackRoot <<' '' Cyan
+    if (-not $compact) { Row ('Made with '+[char]0x2665+' by Nyxane') '' DarkGray }
     Rule
-    Row ('DataDir : '+(Cut $script:dataDir))
-    Row ('Install : '+(Cut $script:installDir))
-    Row 'Root    : Magisk Delta (Kitsune) - automated'
-    Rule
-    Row 'ROOT (apply)' 'UNROOT (undo)'
-    Row '1  Android 9  Pie64' '4  Android 9  Pie64'
-    Row '2  Android 11 Rvc64' '5  Android 11 Rvc64'
-    Row '3  Android 13 Tiramisu64' '6  Android 13 Tiramisu64'
+    if (-not $compact -or $Height -ge 20) {
+        Row ('DataDir : '+(Cut $script:dataDir))
+        Row ('Install : '+(Cut $script:installDir))
+    }
+    if (-not $compact) { Row 'Root    : Magisk Delta (Kitsune) - automated'; Rule }
+    if ($columns) {
+        Row 'ROOT (apply)' 'UNROOT (undo)'
+        Row '1  Android 9  Pie64' '4  Android 9  Pie64'
+        Row '2  Android 11 Rvc64' '5  Android 11 Rvc64'
+        Row '3  Android 13 Tiramisu64' '6  Android 13 Tiramisu64'
+    } else {
+        Row 'ROOT (apply)'
+        Row '1  Android 9  Pie64'
+        Row '2  Android 11 Rvc64'
+        Row '3  Android 13 Tiramisu64'
+        Row 'UNROOT (undo)'
+        Row '4  Android 9  Pie64'
+        Row '5  Android 11 Rvc64'
+        Row '6  Android 13 Tiramisu64'
+    }
     Row '7  Full host scrub (pick version)'
-    Rule
+    if (-not $compact) { Rule }
     Row '8  Set custom path' '0  Exit'
     Rule
-    Row 'Every version installs Magisk as the final root; undo removes it.'
-    Write-Host ''
+    if (-not $compact) {
+        Row 'Every version installs Magisk as the final root; undo removes it.'
+        Write-Host ''
+    }
 }
 
 function Invoke-LauncherAction([string]$Base, [switch]$Undo, [switch]$Full) {

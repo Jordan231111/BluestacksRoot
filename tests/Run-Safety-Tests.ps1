@@ -71,6 +71,30 @@ try {
     Check (-not(Test-Path -LiteralPath $extract) -and -not(Test-Path -LiteralPath (Join-Path $work 'escape.txt'))) 'invalid archive writes nothing outside or inside the destination'
     Reject {Expand-BsrMagiskApk $zipPath (Join-Path $work 'magisk')} 'missing expected member' 'incomplete APK fails before creating staging files'
 
+    # Issue #38 stops between the embedded APK message and PREP. Exercise all
+    # three embedded payloads with a profile-shaped path containing punctuation,
+    # spaces and Unicode, without reaching player shutdown or disk attachment.
+    & {
+        $savedWork=$script:WorkDir
+        $savedApk=$script:MagiskApk;$savedSu=$script:BsrSu;$savedDfs=$script:Debugfs
+        try {
+            $script:WorkDir=Join-Path $work ("Users\Test [1] & O'Brien ! "+[char]0xe9+'\AppData\Local\Temp\bsr_work\session')
+            $SelfCmd=Join-Path $repo 'blueStackRoot.cmd'
+            $Here=Join-Path $work 'standalone'
+            $script:MagiskApk=$null;$script:BsrSu=$null;$script:Debugfs=$null
+            function Assert-BlueStacksHostTools {}
+            function Kill-BlueStacks {throw 'fixture reached end of payload preparation'}
+            Reject {Do-Prep} 'fixture reached end of payload preparation' 'standalone embedded APK, bootstrap su and debugfs all prepare from a complex temp path'
+            Check ((Get-BsrFileHash $script:MagiskApk) -ceq 'fac319d2de262fcfff1684e13e1a5c61c486d2a773a7a8ffcfdbfe6f763a7fd4' -and (Get-BsrFileHash $script:BsrSu) -ceq $BSR_SU_SHA -and (Test-Path -LiteralPath $script:Debugfs)) 'prepared payloads retain their expected content'
+            function Ensure-BsrSu {Get-Item -LiteralPath (Join-Path $work 'missing-bootstrap') -ErrorAction Stop | Out-Null}
+            $message='';try {Do-Prep} catch {$message=Redact-UserPath $_.Exception.Message}
+            Check ($message -match 'Could not prepare bootstrap su' -and $message -match 'PathNotFound,Microsoft.PowerShell.Commands.GetItemCommand' -and $message -match 'missing-bootstrap') 'preparation failures identify the payload, PowerShell error ID and failing file'
+        } finally {
+            $script:WorkDir=$savedWork
+            $script:MagiskApk=$savedApk;$script:BsrSu=$savedSu;$script:Debugfs=$savedDfs
+        }
+    }
+
     & {
         $SelfCmd=Join-Path $repo 'blueStackRoot.cmd'
         function Boot-And-Wait {throw 'fixture reached boot'}
