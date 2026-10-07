@@ -46,8 +46,9 @@ results do not reproduce the reporter's failure or rule out a problem specific t
 
 ### Evidence the new diagnostic collects
 
-Run the new `debug.cmd --files-only` beside the **affected copy** of `blueStackRoot.cmd`, or pass that
-copy as the second argument. This runs without elevation or a player restart. The log contains:
+Place the current `debug.cmd` beside the **affected copy** of `blueStackRoot.cmd`, double-click it and
+accept the Windows administrator prompt. No options are required: the normal run automatically
+collects the new file/payload checks and the existing Windows, disk and ADB checks. The log contains:
 
 - Rooter/diagnostic paths and hashes, culture, configured OneDrive roots, raw file attributes and
   offline/recall flags, captured before reading payloads. Flag meanings follow
@@ -61,8 +62,9 @@ copy as the second argument. This runs without elevation or a player restart. Th
   exit code and final summary.
 
 Logs prefer `%LOCALAPPDATA%\BlueStacksRoot\Logs`, with a printed fallback location if necessary.
-They are not automatically uploaded. Use the normal `debug.cmd <instance>` mode if runtime evidence
-is also needed; that mode restarts the selected instance.
+They are not automatically uploaded. The normal run automatically selects and restarts one instance
+to collect runtime evidence. Advanced users can optionally limit a run with `--files-only`; it is not
+needed to collect file or payload evidence.
 
 ## Console layout and display scaling
 

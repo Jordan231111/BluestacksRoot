@@ -5,9 +5,10 @@ set "SELF=%~f0"
 set "BSR_DEBUG_INSTANCE=%~1"
 set "BSR_DEBUG_ROOTER=%~2"
 set "BSR_DEBUG_HOME=%~dp0"
-rem Restarts the selected instance only. Disk probes are read-only.
-rem Usage: debug.cmd [instance] [path-to-blueStackRoot.cmd]
-rem        debug.cmd --files-only [path-to-blueStackRoot.cmd] (no restart or elevation)
+rem Double-click beside blueStackRoot.cmd for the complete diagnostic report.
+rem No arguments needed. Restarts the automatically selected instance; disk probes are read-only.
+rem Optional advanced usage: debug.cmd [instance] [path-to-blueStackRoot.cmd]
+rem Optional limited check: debug.cmd --files-only [path-to-blueStackRoot.cmd] (no restart or elevation)
 powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "$ErrorActionPreference='Stop'; $filesOnly=$env:BSR_DEBUG_INSTANCE -eq '--files-only'; if($env:BSR_DEBUG_INSTANCE -and -not $filesOnly -and $env:BSR_DEBUG_INSTANCE -cnotmatch '^[A-Za-z0-9_]+$'){throw 'Invalid instance name.'}; $admin=([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator); if(-not $admin -and -not $filesOnly){$a='';if($env:BSR_DEBUG_INSTANCE){$a=$env:BSR_DEBUG_INSTANCE};if($env:BSR_DEBUG_ROOTER){$a+=' '+[char]34+$env:BSR_DEBUG_ROOTER+[char]34};if($a){Start-Process -FilePath $env:SELF -ArgumentList $a -Verb RunAs -ErrorAction Stop}else{Start-Process -FilePath $env:SELF -Verb RunAs -ErrorAction Stop};exit 3010}; $t=[IO.File]::ReadAllText($env:SELF); $i=$t.IndexOf('#__BSR'+'_DEBUG_PS__'); if($i -lt 0){throw 'Diagnostic marker missing.'}; & ([scriptblock]::Create($t.Substring($i))) -Instance $env:BSR_DEBUG_INSTANCE -FilesOnly:$filesOnly -RooterPath $env:BSR_DEBUG_ROOTER"
 set "BSR_DEBUG_RC=%errorlevel%"
 if "%BSR_DEBUG_RC%"=="3010" exit /b 0
@@ -390,6 +391,7 @@ Log "BlueStacksRoot diagnostic 2026-10-07 (files, payloads, host and ADB)" Green
 Log 'Privacy: user-directory names are masked. Technical paths, ACLs, Windows errors and related event details are kept. Review the log before posting; it is never uploaded automatically.'
 Log "log file : $(Redact $LogFile)"
 Log "OS       : $([Environment]::OSVersion.VersionString)   PowerShell $($PSVersionTable.PSVersion)"
+if(-not $FilesOnly){Log 'Full diagnostic: automatically checking files, payloads, Windows, disks and the emulator connection. No command-line options are needed.' Cyan}
 
 try {
 if(-not $RooterPath){$RooterPath=Join-Path (Split-Path -Parent $env:SELF) 'blueStackRoot.cmd'}

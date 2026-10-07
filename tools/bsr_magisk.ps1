@@ -169,7 +169,7 @@ function Get-AvHint {
 }
 function Fail-Damaged($what){
     throw ("embedded $what payload is damaged or incomplete (format or integrity check failed). " +
-           "Run debug.cmd --files-only beside this rooter to record its hash and the exact failing check. " +
+           "Place debug.cmd beside this rooter and double-click it to collect a complete diagnostic report. " +
            "Re-download the complete blueStackRoot.cmd from GitHub Releases if this copy is damaged." + (Get-AvHint))
 }
 # Check availability and size between writing and using a payload. Disappearance
@@ -177,11 +177,11 @@ function Fail-Damaged($what){
 function Assert-Extracted($path,$expectedLen,$what){
     if(-not (Test-Path -LiteralPath $path)){
         throw ("the extracted $what is missing or inaccessible after writing: $path. " +
-               "Run debug.cmd --files-only to check temporary-file access and payload extraction." + (Get-AvHint))
+               "Place debug.cmd beside this rooter and double-click it to check temporary-file access and payload extraction." + (Get-AvHint))
     }
     if($expectedLen -and ((Get-Item -LiteralPath $path).Length -ne $expectedLen)){
         throw ("the extracted $what changed size after writing: $path (expected $expectedLen bytes). " +
-               "Run debug.cmd --files-only to capture the file and extraction evidence." + (Get-AvHint))
+               "Place debug.cmd beside this rooter and double-click it to capture the file and extraction evidence." + (Get-AvHint))
     }
 }
 function Get-BlockBytes($tok){

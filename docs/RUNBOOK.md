@@ -157,7 +157,7 @@ device after completion: **only Magisk's**. No DiskRW, no engine‑su, no daemon
 | Symptom | Cause | Fix |
 |---|---|---|
 | `BlueStacks path is missing: BSR_INSTALL=` on Turkish Windows | Culture-sensitive parsing dropped the uppercase resolver key | **Fixed in v22:** update `blueStackRoot.cmd`; verified in Windows PowerShell 5.1 with Turkish and Azerbaijani cultures |
-| `An object at the specified path C:\Users\xxxxx` after APK preparation | Older redaction could hide the rest of this error; the underlying file failure is not established | Use v22 `debug.cmd --files-only` beside the affected rooter and attach the log. A OneDrive Desktop log path alone does not establish the rooter's location or a cloud-storage failure; see [#36/#38 investigation](ISSUES_36_38.md) |
+| `An object at the specified path C:\Users\xxxxx` after APK preparation | Older redaction could hide the rest of this error; the underlying file failure is not established | Put the current `debug.cmd` beside the affected rooter, double-click it and attach the log. A OneDrive Desktop log path alone does not establish the rooter's location or a cloud-storage failure; see [#36/#38 investigation](ISSUES_36_38.md) |
 | `Windows could not start HD-Player` / `Access is denied` | Windows rejected the player process before Android started; the message alone does not establish an antivirus cause | Use current `debug.cmd`; it records the native error, signature, ACL, and recent policy events. Repair the specific host permission/policy problem shown by that evidence |
 | `virtual disk support provider ... not found` | Windows could not attach the disk image | Update: the tool now selects VHD/VHDX from file content and checks attach support before changing root flags or the executable. If it still fails, inspect the new format/error details and repair the affected image or Windows storage components; see [#31/#32 investigation](ISSUES_31_32.md) |
 | `bootstrap su not root` during **Data** | Old builds tried only `/system/xbin/su`; the xbin mount can be absent, late, or already mounted without the bootstrap bind | **Fixed after v18:** update and retry. Prep supplies direct + native-xbin + bind-mounted paths and Data accepts only a path that proves `uid=0`. If all fail, attach the new `debug.cmd` log, which now records the exact conf/property/file/mount state |
@@ -168,17 +168,25 @@ device after completion: **only Magisk's**. No DiskRW, no engine‑su, no daemon
 | Instance won't boot after edits | HD‑Player patch missing | restore `HD-Player.exe.bak`, re‑apply patch, retry |
 | `instance '<x>' did not boot / become adb‑reachable within N s` — **but the instance is up** (Home visible, Magisk installed) | a **system `adb` of a different version** (e.g. Android SDK platform‑tools **v1.0.41**) keeps killing BlueStacks' **HD‑Adb v1.0.36** server on the shared port 5037 — *"adb server version doesn't match this client; killing…"* — so `getprop` calls fail | **fixed in v11**: the tool pins HD‑Adb to its own server port (`ANDROID_ADB_SERVER_PORT=15037`) so the two never collide, and also tries the **live‑bound** adb port, not just `bluestacks.conf`. Update the tool. (Diagnose: compare `adb version` on `PATH` vs `"…\BlueStacks_nxt\HD-Adb.exe" version`.) |
 
-`debug.cmd --files-only` checks the rooter and temporary storage, then prepares its embedded APK, su and
-debugfs in a disposable directory. It does not restart BlueStacks, attach disks or require elevation.
-It tests embedded payloads, not external APK overrides or existing rooter cache contents. An optional
-second argument selects the rooter: `debug.cmd --files-only "C:\path\to\blueStackRoot.cmd"`.
-
-For runtime problems, `debug.cmd Pie64` (substitute your instance name) also restarts that instance,
-probes its master disk read-only when no player is running, and collects Windows and guest evidence.
-It does not edit guest/root files directly. Both modes save a redacted `bsr_debug_*.log`, normally in
+**Double-click `debug.cmd` beside the affected `blueStackRoot.cmd` and accept the Windows administrator
+prompt. No arguments are required.** The default run checks the rooter and temporary storage, prepares
+embedded APK/su/debugfs in a disposable directory, and collects Windows, disk and ADB evidence. It
+automatically selects and restarts one instance, and probes its master disk read-only when no player
+is running. It tests embedded payloads, not external APK overrides or existing rooter cache contents.
+It does not edit guest/root files directly. It saves a redacted `bsr_debug_*.log`, normally in
 `%LOCALAPPDATA%\BlueStacksRoot\Logs`; use the final **Full log** path if that directory was unavailable.
 Use the updated diagnostic after reproducing the error. A successful ADB reconnect confirms only the
 connection, not successful rooting or file preparation.
+
+<details>
+<summary>Optional advanced diagnostic controls</summary>
+
+The default double-click run includes all checks. `debug.cmd --files-only` deliberately limits the
+report to files and payloads, without elevation or a player restart. `debug.cmd Pie64` explicitly picks
+an instance instead of using automatic selection. Either accepts a second argument containing the
+rooter's path if it is in another folder. These controls are not needed for a complete report.
+
+</details>
 
 ---
 

@@ -90,3 +90,7 @@ jobs:
       - name: Diagnostic file, cloud-state, temp and embedded-payload probes
         shell: cmd
         run: powershell -NoProfile -ExecutionPolicy Bypass -File tests\Run-Preflight-Tests.ps1
+
+      - name: Complete diagnostic report with no arguments
+        shell: cmd
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File tests\Run-Diagnostic-Default-Tests.ps1

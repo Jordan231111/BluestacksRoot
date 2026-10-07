@@ -5,6 +5,13 @@ Player — from one file, fully automatically. Releases are grouped by the BlueS
 
 ---
 
+## v22.1 — Double-click diagnostic guidance · 2026-10-07
+
+- Make all troubleshooting instructions and payload errors point to double-clicking `debug.cmd`; the complete report runs automatically with no options.
+- Add regression coverage for the full default workflow, including continued runtime checks after a payload failure.
+
+---
+
 ## v22 — Locale fix, responsive menu and clearer diagnostics · 2026-10-07
 
 - Fix the reproduced Turkish-locale path discovery failure ([#36](https://github.com/Jordan231111/BluestacksRoot/issues/36)).
